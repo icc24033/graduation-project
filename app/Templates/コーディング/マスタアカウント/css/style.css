@@ -20,7 +20,7 @@ section{
     display: block;
     padding: 10px 10px 10px 0;
     font-size: 30px;
-    margin: 140px 239px 0 10px ;
+    margin: 140px 0 0 10px ;
 }
 
 .background{
@@ -30,8 +30,9 @@ section{
     flex-wrap:wrap;
     background-color: #CFD5DF;
     padding: 55px 70px;
-    border-radius: 30px;
-    width: 800px;
+    border-radius:30px;
+    width: 60%;
+    max-width: 800px;
 }
 
 .card{
@@ -41,6 +42,7 @@ section{
     width: 212px;
     height: 134px;
     box-shadow: 0 4px 4px 0 #999;
+    position: relative;
 }
 
 .card a{
