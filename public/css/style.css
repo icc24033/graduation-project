@@ -1,311 +1,298 @@
-@charset "utf-8";
-/*  基本リセットとレイアウト */
-@import url(common.css);
-body {
-    font-family: 'Noto Sans JP', sans-serif;
+/* 基本リセット */
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #FFFFFF; /* ページ全体の背景は白 */
 }
 
-/* 全体を囲むコンテナ (画像に見られる薄い紫色の枠と影) */
-#page-wrapper {
-    /* 最大幅を維持しつつ、モバイルフレンドリーにする */
-    max-width: 1440px; 
-    width: calc(100% - 40px); 
-    min-height: 98vh;
-    margin: 1vh auto;
-    border: 1px solid #DED7F9; /* 画像から推測される薄い紫のボーダー */
-    border-radius: 20px;
-    overflow: hidden; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    background-color: #FFFFFF;
+body {
+    font-family: 'Noto Sans JP', sans-serif; /* 日本語フォントを優先 */
+    /* 背景色は画像全体が持つ薄い青に合わせて調整 */
+    background-color: #f0f5ff; 
 }
 
-/* ヘッダー */
-.header {
-    background-color: #C0DEFF; /* 明るい青 */
-    padding: 20px;
-    text-align: center;
-    font-size: 30px;
-    font-weight: bold;
-    color: #222222;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
-/* ヘッダーのユーザーアイコン (画像通り右上に配置) */
-.header i {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.2em;
+ul {
+    list-style: none;
 }
 
-/* アプリケーションコンテナ (Flexレイアウト) */
+/* --- レイアウトのコンテナ --- */
 .app-container {
     display: flex;
-    min-height: calc(98vh - 70px); /* ヘッダーの高さを考慮 */
-    background-color: #F3F8FF; /* 画像の背景色: 薄い青 */
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* サイドバー (左側のナビゲーション) */
-.sidebar {
-    width: 300px;
-    max-width: 30%; /* 小画面での対応 */
-    background-color: #F3F8FF;
-    border-right: 1px solid #CFD5DF;
-    padding-top: 20px;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    overflow-y: auto;
+/* --- ヘッダー --- */
+.app-header {
+    background-color: #C0DEFF;
+    color: #222;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-.sidebar-header {
-    color: #222222;
-    font-size: 1.2em;
-    padding: 0 20px 20px 20px;
+.app-header h1 {
+    font-size: 20px;
     font-weight: bold;
-    border-bottom: 1px solid #CFD5DF; 
-    margin-bottom: 15px;
 }
 
-/* メニューグループ */
-.menu-group {
-    margin-bottom: 20px;
-}
-
-/* メニューアイテム共通 */
-.menu-item {
-    padding: 10px 20px;
-    color: #222222;
+.user-icon {
+    font-size: 24px;
+    color: #222;
     cursor: pointer;
+}
+
+/* --- メインコンテンツとサイドバーのレイアウト --- */
+.main-content {
+    display: flex;
+    flex-grow: 1; 
+}
+
+/* --- サイドバー (ナビゲーション) --- */
+.sidebar {
+    width: 250px; /* 画像に合わせて幅を少し狭く */
+    background-color: #fff; /* 背景を白に設定 */
+    padding-top: 0; /* padding-topを調整 */
+    border-right: 1px solid #e0e0e0;
+    flex-shrink: 0; 
+    position: relative; 
+}
+
+.sidebar ul {
+    padding: 0;
+}
+
+.nav-item {
+    position: relative; 
+    border-bottom: 1px solid #f0f0f0; /* 各項目の下線（画像に合わせた細い線） */
+}
+
+/* 最後の項目の下線は削除 */
+.nav-item:last-of-type {
+    border-bottom: none;
+}
+
+.nav-item a, .dropdown-toggle {
+    display: block;
+    width: 100%;
+    padding: 12px 20px; /* 画像に合わせてパディングを調整 */
+    text-align: left;
+    font-size: 14px;
+    color: #222;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.1s;
     position: relative;
-    transition: background-color 0.15s, border-left 0.15s, padding-left 0.15s;
+    font-weight: 400; /* フォントの太さを標準に */
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* サイドバーのホバーエフェクト */
-.menu-item:hover {
-    background-color: #CFD5DF;
-    border-radius: 10px 0 0 10px; 
-    border-left: 5px solid #C0DEFF; 
-    padding-left: 15px; 
+.nav-item a:hover, .dropdown-toggle:hover:not(.is-active) {
+    background-color: #e6f0ff; /* ホバー時の背景色を薄い青に */
 }
 
-/* アクティブな親メニュー項目 (ドロップダウンヘッダー) */
-.menu-item.active-menu {
+/* グループラベルのスタイル（「編集」など） */
+.is-group-label {
+    color: #888;
+    font-size: 12px;
+    padding: 20px 20px 5px; /* 上部にパディングを追加して区切りを強調 */
+    pointer-events: none; 
+    border-bottom: none; 
+}
+
+/* 現在の値の表示（年度、コース） */
+.dropdown-toggle .current-value {
     font-weight: bold;
-    background-color: #FFFFFF; /* 白背景 */
-    border-left: 5px solid #C0DEFF; 
-    padding-left: 15px;
-    border-radius: 10px 0 0 10px; 
+    color: #C0DEFF; /* 青色で強調 */
+    margin-left: 10px;
 }
 
-/* アクティブなサブメニュー項目 (例: アカウントの追加) */
-.menu-item.active-sub {
+/* --- アクティブなナビゲーション項目 --- */
+
+/* 年度の項目とドロップダウン開閉ボタンのスタイル */
+.nav-item:nth-child(1) .dropdown-toggle,
+/* コースの項目とドロップダウン開閉ボタンのスタイル */
+.nav-item:nth-child(2) .dropdown-toggle {
+    background-color: #e6f0ff; /* 画像のアクティブな背景色 */
     font-weight: bold;
-    background-color: #F3F8FF; /* 親と同じ背景色に戻す */
-    border-left: 5px solid #C0DEFF; 
-    padding-left: 15px;
-    border-radius: 10px 0 0 10px; 
-}
-
-/* 選択された年度/コースの表示（画像のデザインに合わせて調整） */
-.menu-item.current-selection {
-     padding-left: 20px;
-     font-weight: normal; /* 太字ではない */
-     background-color: transparent;
-     border-left: none; /* ボーダーなし */
-     color: #555555; /* やや薄い文字色 */
-     justify-content: flex-start; /* 左寄せ */
-}
-
-/* サブメニューのインデント */
-.menu-item.sub-menu {
-    padding-left: 40px; /* インデント */
-    justify-content: flex-start;
-}
-.menu-item.sub-menu:hover {
-    padding-left: 35px; /* インデントを考慮したホバー時のパディング調整 */
-}
-.menu-item.sub-menu.active-sub {
-    padding-left: 35px; /* インデントを考慮したアクティブ時のパディング調整 */
+    color: #222;
+    border-left: 5px solid #C0DEFF; /* 左側の青い線 */
+    padding-left: 15px; /* 青い線があるので左のパディングを調整 (20px - 5px) */
 }
 
 
-/* ドロップダウンメニューのコンテナ */
+/* --- ドロップダウンメニューのスタイル --- */
 .dropdown-menu {
     position: absolute;
-    top: 10px; 
-    left: calc(100% + 15px); /* サイドバーの右側に表示 */
-    width: 170px;
-    background-color: #FFFFFF;
-    border: 1px solid #CFD5DF;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    padding: 5px 0;
-    border-radius: 8px;
-    overflow: hidden;
+    /* サイドバーの右端からドロップダウンが始まるように配置 */
+    left: 250px; 
+    top: 0; 
+    width: 180px; /* 画像に合わせた幅 */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    display: none; 
+    border-radius: 5px;
+    overflow: hidden; /* 角丸を適用 */
 }
 
-.dropdown-item {
-    padding: 8px 15px;
-    color: #222222;
-    white-space: nowrap;
+/* コースのドロップダウンは実装していないため、年次のドロップダウンのみに適用 */
+.nav-item:first-child .dropdown-menu {
+    border-left: none;
 }
 
-.dropdown-item:hover {
-    background-color: #F3F8FF; /* ホバー色を薄い青に */
+.dropdown-menu.is-open {
+    display: block; 
 }
 
-/* JavaScriptで非表示を制御するためのクラス */
-.dropdown-menu.hidden {
-    display: none !important;
+.dropdown-menu li a {
+    padding: 10px 15px;
+    font-weight: 400;
+    justify-content: flex-start; /* テキストを左寄せに */
+    border-bottom: 1px solid #f0f0f0; /* ドロップダウン内の項目の下線 */
 }
 
+.dropdown-menu li:last-child a {
+    border-bottom: none;
+}
 
-/* メインコンテンツエリア */
-.main-content {
+.dropdown-menu li a:hover {
+    background-color: #f0f0f0;
+}
+
+/* --- ダウンロードボタン --- */
+.download-button {
+    position: absolute;
+    bottom: 20px; 
+    left: 20px; /* 左寄せに変更 */
+    display: flex;
+    align-items: center;
+    padding: 8px 15px; /* パディングを調整 */
+    background-color: #F8FF99; /* 明るい黄色 */
+    color: #222;
+    border: none; /* 画像に合わせて線をなくす */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+}
+
+.download-button:hover {
+    background-color: #F8FF99;
+}
+
+.download-button .material-symbols-outlined {
+    margin-right: 5px; /* アイコンとテキストの間隔を調整 */
+    font-size: 18px;
+}
+
+/* --- メインのリストエリア --- */
+.content-area {
     flex-grow: 1;
-    padding: 30px; 
-    display: flex; /* flexに変更 */
-    flex-direction: column; /* 縦方向に配置 */
-    align-items: center; /* 中央揃え */
-    overflow-y: auto;
+    padding: 30px 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
 }
 
-/* テーブルコンテナ */
-.table-container {
-    max-width: 700px;
+.account-table-container {
     width: 100%;
-    background-color: #FFFFFF;
-    padding: 50px; 
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
-    margin: 20px 0;
+    max-width: 800px;
+    margin-bottom: 30px;
+    border: 1px solid #ddd; /* テーブル全体に外枠を追加 */
+    border-radius: 5px;
+    overflow: hidden; /* 角丸のために必要 */
 }
 
-.students-table {
-    width: 100%;
-    min-width: 650px; /* テーブルの最小幅を確保 */
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.students-table th {
-    background-color: #C0DEFF; /* 強調青 */
-    color: #222222;
-    padding: 10px;
-    border: 1px solid #CFD5DF;
+/* テーブルヘッダー */
+.table-header {
+    display: flex;
+    background-color: #C0DEFF; 
+    padding: 10px 0;
     font-weight: bold;
-    white-space: nowrap;
+    color: #333;
+    text-align: center;
+    font-size: 14px;
 }
 
-/* テーブルヘッダーの左上・右上の丸み */
-.students-table thead tr:first-child th:first-child { border-radius: 4px 0 0 0; }
-.students-table thead tr:first-child th:last-child { border-radius: 0 4px 0 0; }
-
-.students-table td {
-    padding: 0; 
-    border: 1px solid #CFD5DF;
-    background-color: #FFFFFF; 
+/* テーブルの行 */
+.table-row {
+    display: flex;
+    background-color: #fff;
+    border-bottom: 1px solid #eee; /* 行間の線を細く薄く */
+    align-items: center;
+    padding: 5px 0;
 }
 
-/* 奇数行の背景をサイドバーと同じ薄い青に (画像通り) */
-.students-table tr:nth-child(odd) td {
-    background-color: #F3F8FF;
+.table-row:last-of-type {
+    border-bottom: none;
+}
+
+/* カラムの幅設定 */
+.column-check {
+    width: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.column-student-id {
+    width: 30%;
+}
+
+.column-name {
+    width: 35%;
+}
+
+.column-course {
+    width: 30%;
 }
 
 /* 入力フィールドのスタイル */
-.students-table input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-    border: none; /* セルのボーダーを利用するため入力欄自身のボーダーはなし */
-    padding: 8px 10px;
-    border-radius: 0; 
-    font-size: 0.95em;
-    outline: none;
-    background-color: transparent; /* 背景透過でストライプが見えるように */
+.table-row input[type="text"] {
+    width: calc(100% - 15px); /* パディングを考慮して調整 */
+    padding: 6px 8px; /* パディングを調整 */
+    margin: 4px 7px;
+    border: 1px solid #e0e0e0; /* 枠線を薄く */
+    border-radius: 3px;
+    font-size: 13px;
+    color: #222; 
 }
 
-/* チェックボックスのセル */
-.students-table td:first-child {
-    text-align: center;
-    padding: 8px 0;
-}
-
-.students-table input[type="checkbox"] {
-    margin: 0;
-    transform: scale(1.2); 
-    accent-color: #C0DEFF; /* チェックボックスの色を青に */
+/* チェックボックス */
+.column-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #999;
 }
 
 /* 追加ボタン */
-.add-button-container {
-    text-align: center;
-    margin-top: 30px;
-}
-
 .add-button {
-    background-color: #EEFF00; /* 鮮やかな黄色 */
-    color: #333;
-    padding: 10px 40px;
+    background-color: #F8FF99; 
+    color: #222;
+    padding: 10px 30px; /* パディングを調整 */
     border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
+    border-radius: 5px; /* 角丸を標準的に */
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* シャドウを控えめに */
+    transition: background-color 0.2s;
 }
 
 .add-button:hover {
-    background-color: #EEDD00; /* ホバーで少し暗い黄色に */
-    transform: translateY(-1px);
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 250px;
-        max-width: 35%;
-    }
-    .table-container {
-        padding: 20px;
-        margin: 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    .app-container {
-        flex-direction: column; /* モバイルで縦積み */
-    }
-    .sidebar {
-        width: 100%;
-        max-width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #CFD5DF;
-        padding-bottom: 10px;
-    }
-    .menu-item.active-menu, .menu-item.active-sub {
-        border-radius: 0;
-    }
-    .dropdown-menu {
-        left: 10px; 
-        top: calc(100% + 5px);
-        width: calc(100% - 20px);
-    }
-    .main-content {
-        padding: 10px;
-    }
-    .students-table {
-        min-width: 500px; /* モバイルでも最低限の幅を維持 */
-    }
+    background-color: #F8FF99; 
 }
