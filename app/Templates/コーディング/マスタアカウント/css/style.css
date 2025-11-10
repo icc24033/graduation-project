@@ -1,0 +1,125 @@
+.header{
+    height: 100px;
+    width: 2000px;
+    background-color:#C0DEFF;
+}
+
+section{
+    display: flex;  
+}
+/* 機能（アイコン） */
+.title_icon{
+    width: 35px;
+    height: 35px;
+    margin: 150px 0 0 470px ;
+    padding: 5px 0 5px 5px;
+}
+
+/* 機能（テキスト） */
+.title_name{
+    display: block;
+    padding: 10px 10px 10px 0;
+    font-size: 30px;
+    margin: 140px 239px 0 10px ;
+}
+
+.background{
+    display: flex;
+    gap: 50px 60px;
+    margin: 20px 300px 40px 520px;
+    flex-wrap:wrap;
+    background-color: #CFD5DF;
+    padding: 55px 70px;
+    border-radius: 30px;
+    width: 800px;
+}
+
+.card{
+    background-color: rgb(255, 255, 255);
+    border-radius: 16%;
+    text-align: center;
+    width: 212px;
+    height: 134px;
+    box-shadow: 0 4px 4px 0 #999;
+}
+
+.card a{
+    display: block;
+}
+
+/* 時間割り作成 */
+.card_icon_calendar-plus{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E0F7FA;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* アカウント編集 */
+.card_icon_user-round{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #F3E8FF;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 権限付与 */
+.card_icon_shield-check{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #F7FEE7;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 通知事項編集 */
+.card_icon_bell-dot{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E0F2F1;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 授業詳細編集 */
+.card_icon_clipboard-list{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E6FFEE;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 時間割り閲覧 */
+.card_icon_calendar-clock{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #EEF2FF;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 送信先設定 */
+.card_icon_mails{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #FFE4E4;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+
+.card_main{
+    padding: 3px 10px 6px 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.card_sub{
+    padding: 3px 10px 6px 10px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
