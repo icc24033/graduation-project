@@ -5,34 +5,37 @@
 }
 
 section{
-    display: flex;  
+    display: flex;
+    height: 140px;
 }
+
 /* 機能（アイコン） */
 .title_icon{
     width: 35px;
     height: 35px;
-    margin: 150px 0 0 470px ;
-    padding: 5px 0 5px 5px;
+    padding: 15px 0 5px 5px;
+    margin: 60px 0 0 15%;
 }
 
 /* 機能（テキスト） */
 .title_name{
     display: block;
-    padding: 10px 10px 10px 0;
+    padding: 10px 10px;
     font-size: 30px;
-    margin: 140px 0 0 10px ;
+    margin: 60px 0 ;
 }
 
 .background{
     display: flex;
     gap: 50px 60px;
-    margin: 20px 300px 40px 520px;
+    margin: 0 auto;
     flex-wrap:wrap;
     background-color: #CFD5DF;
     padding: 55px 70px;
     border-radius:30px;
     width: 60%;
     max-width: 800px;
+    min-width: 500px;
 }
 
 .card{
@@ -42,7 +45,6 @@ section{
     width: 212px;
     height: 134px;
     box-shadow: 0 4px 4px 0 #999;
-    position: relative;
 }
 
 .card a{
