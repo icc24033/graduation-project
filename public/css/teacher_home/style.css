@@ -1,34 +1,67 @@
-.header{
-    height: 100px;
-    background-color:#C0DEFF;
+/* ウィンドサイズ最大～ */
+.tool{
+    display: flex;
+    justify-content: center;
+    height: 140px;
+    position: relative;
+    top: 60px;
+    margin-right: 50%;
+    
+}
+@media (max-width:1700px){
+    .tool{
+        display: flex;
+        justify-content: center;
+        height: 140px;
+        position: relative;
+        top: 60px;
+        margin-right: 60%;
+    }
+}
+@media (max-width:1400px){
+    .tool{
+        display: flex;
+        justify-content: center;
+        height: 140px;
+        position: relative;
+        top: 60px;
+        margin-right: 70%;
+    }
+}
+.message_history{
+    display: flex;
+    height: 140px;
+    justify-content: center;
+    position: relative;
+    margin-right: 50%;
+    top: 60px;
 }
 
-section{
-    display: flex;  
-}
 /* 機能（アイコン） */
 .title_icon{
     width: 35px;
     height: 35px;
-    margin: 150px 0 0 239px ;
-    padding: 5px 0 5px 5px;
+    padding: 15px 0 5px 5px;
 }
 
-/* 機能 */
+/* 機能（テキスト） */
 .title_name{
+    display: block;
+    padding:10px;
     font-size: 30px;
-    margin: 150px 239px 0 10px ;
 }
 
 .background{
     display: flex;
     gap: 50px 60px;
-    margin: 20px 300px 40px 300px;
+    margin: 0 auto;
     flex-wrap:wrap;
     background-color: #CFD5DF;
     padding: 55px 70px;
-    border-radius: 30px;
-    width: 800px;
+    border-radius:30px;
+    width: 60%;
+    max-width: 800px;
+    min-width: 500px;
 }
 
 .card{
@@ -42,6 +75,9 @@ section{
 
 .card a{
     display: block;
+}
+.card:hover{
+    background-color: #c2c2c2;
 }
 
 /* 時間割り作成 */
@@ -120,3 +156,47 @@ section{
     font-weight: 500;
 }
 
+
+/* 各送信先 */
+.list-item {
+    display: flex; 
+    align-items: flex-start; 
+    padding: 15px 10px;
+    border-bottom: 1px solid #dcdfe4; 
+}
+
+/* .list-item:last-child {
+    border-bottom: none; 
+} */
+
+.profile-image {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 50%; 
+    background-color: #ffffff; 
+    margin-right: 15px;
+}
+
+.content {
+    flex-grow: 1; 
+    margin-right: 15px;
+}
+
+.name {
+    font-weight: bold; 
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.text {
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.date {
+    font-size: 0.8%;
+    align-self: flex-start; 
+    white-space: nowrap; 
+    margin-top: 40px; 
+}
