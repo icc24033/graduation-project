@@ -1,0 +1,16 @@
+header{
+    height: 100px;
+    width: 100%;
+    background-color:#C0DEFF;
+}
+
+.header{
+    width: 60px;
+    height: 60px;
+    min-width: 50px;
+    border-radius: 50%; 
+    background-color: #ffffff; 
+    margin: auto 95%;
+    position: relative;
+    top: 25%;
+}
