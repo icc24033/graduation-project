@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>生徒アカウント作成編集 アカウントの追加</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/style.css"> 
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body id="student_delete">
+    <div class="app-container">
+        <header class="app-header">
+            <h1>生徒アカウント作成編集</h1>
+            <img class="user_icon" src="images/user_icon.png"alt="ユーザーアイコン">
+        </header>
+
+        <main class="main-content">
+            <nav class="sidebar">
+                <ul>
+                    <li class="nav-item is-group-label">年度</li> 
+                    <li class="nav-item has-dropdown">
+                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
+                            <span class="current-value">2025年度</span>
+                        </button>
+                        <ul class="dropdown-menu" id="yearDropdownMenu">
+                            <li><a href="#" data-year="2026">2026年度</a></li>
+                            <li><a href="#" data-year="2025">2025年度</a></li>
+                            <li><a href="#" data-year="2024">2024年度</a></li>
+                            <li><a href="#" data-year="2023">2023年度</a></li>
+                        </ul>
+                    </li>
+            
+                    <li class="nav-item is-group-label">コース</li> 
+                    <li class="nav-item has-dropdown">
+                        <button class="dropdown-toggle" id="courseDropdownToggle" aria-expanded="false">
+                            <span class="current-value">システムデザインコース</span>
+                        </button>
+                        <ul class="dropdown-menu" id="courseDropdownMenu">
+                            <li><a href="#" data-course="system-design">システムデザインコース</a></li>
+                            <li><a href="#" data-course="web-creator">Webクリエイタコース</a></li>
+                            <li><a href="#" data-course="multimedia-oa">マルチメディアOAコース</a></li>
+                            <li><a href="#" data-course="applied-info">応用情報コース</a></li>
+                            <li><a href="#" data-course="basic-info">基本情報コース</a></li>
+                            <li><a href="#" data-course="it-passport">ITパスポートコース</a></li>
+                            <li><a href="#" data-course="1-1">1年1組</a></li>
+                            <li><a href="#" data-course="1-2">1年2組</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item is-group-label">アカウント作成・編集</li>
+                    <li class="nav-item"><a href="student_addition.html">アカウントの追加</a></li>
+                    <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
+                    <li class="nav-item"><a href="student_edit_course.html">コースの編集</a></li>
+                </ul>
+                
+                <button class="download-button">
+                    <img class="download_icon" src="images/download_icon.png"alt="ダウンロードアイコン">名簿ダウンロード
+                </button>
+            </nav>
+
+            <div class="content-area">
+                <div class="account-table-container">
+                    <div class="table-header">
+                        <div class="column-check"><input type="checkbox" id="selectAllCheckbox"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-name">氏名</div>
+                        <div class="column-course">コース</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20001" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20001"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20002" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20002"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20003" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20003"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20004" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20004"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20005" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20005"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20006" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20006"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20007" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20007"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20008" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20008"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20009" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20009"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20010" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20010"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20011" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20011"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20012" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20012"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20013" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20013"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20014" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20014"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20015" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20015"></div> 
+                        <div class="column-name"><input type="text" value="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-button" id="deleteActionButton">削除</button>
+                <button class="complete-button">完了</button>
+                <div class="modal-overlay" id="deleteModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>アカウント削除確認</h2>
+                        </div>
+                        <div class="modal-body">
+                            <p>以下の0件のアカウントを削除してもよろしいですか？</p>
+                            <div class="delete-list-container">
+                                <div id="selectedStudentList"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
+                            <button class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
