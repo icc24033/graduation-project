@@ -1,0 +1,120 @@
+body {
+    background-color: #F3F8FF; 
+    font-family: 'Noto Sans JP', 'Meiryo', sans-serif; 
+    color: #222;
+    margin: 0;
+    padding: 0;
+    /* bodyが縦方向にも中央揃えになるように調整 */
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    max-width: 1100px;
+    width: 100%;
+    text-align: center; /* コンテンツ全体のテキストを中央寄せ */
+}
+
+/* アプリケーション名 */
+.app-name {
+    font-size: 48px;
+    font-weight: 700;
+    margin-top: 50px;
+    margin-bottom: 70px;
+}
+
+/* キャッチフレーズ */
+.tagline {
+    font-size: 100px;
+    font-weight: 700; 
+    line-height: 1.2; /* 行間を調整して見やすく */
+    margin-bottom: 70px;
+}
+
+/* 始めるボタン */
+.start-button {
+    background-color: #222; 
+    color: #fff;
+    width: 300px;
+    border: none;
+    padding: 10px 20px;
+    font-size: 35px;
+    font-weight: 700;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.4s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+    margin-bottom: 90px; /* 次のセクションとの間に余白を追加 */
+}
+
+.start-button:hover {
+    background-color: #CFD5DF; 
+    color: #222;
+}
+
+/* 特徴のタイトル */
+.feature-title {
+    max-width: 890px;
+    font-size: 50px; 
+    font-weight: 700;
+    margin: 0 auto 20px auto; /* 修正: 左右のマージンを auto にして中央揃え */
+}
+
+/* 特徴の説明文 */
+.feature-text {
+    max-width: 890px;
+    font-size: 35px;
+    color: #666;
+    font-weight: 700;
+    text-align: left; 
+    line-height: 1.2; /* 行間を調整して見やすく */
+    margin: 0 auto; /* 左右のマージンを auto にして中央揃え */
+    padding: 0 20px; /* 画面端に近すぎないように左右にパディングを追加 */
+}
+
+/* --- モバイル対応 (画面幅 599px 以下) --- */
+@media (max-width: 599px) {
+    
+    .container {
+        /* スマートフォンでは左右の余白を少し広げる */
+        padding: 0 20px; 
+    }
+    
+    .app-name {
+        /* アプリ名のサイズを縮小 */
+        font-size: 30px;
+        margin-top: 30px;
+        margin-bottom: 70px;
+    }
+
+    .tagline {
+        /* キャッチフレーズのサイズを大幅に縮小 */
+        font-size: 50px; 
+        line-height: 1.4;
+        margin-bottom: 50px;
+    }
+
+    .start-button {
+        /* ボタンのサイズを調整 */
+        width: 100%; /* 親要素の幅いっぱいに広げる */
+        max-width: 250px; /* 広がりすぎないように最大幅を設定 */
+        font-size: 35px; 
+        padding: 10px 20px;
+        border-radius: 20px;
+        margin-bottom: 80px;
+    }
+
+    .feature-title {
+        /* 特徴のタイトルを縮小 */
+        font-size: 30px;
+        margin-bottom: 50px;
+    }
+
+    .feature-text {
+        /* 説明文を縮小 */
+        font-size: 20px;
+        line-height: 1.2;
+        padding: 0; /* モバイルでは container のパディングを使うためリセット */
+        text-align: center; /* モバイルでは中央揃えの方が読みやすい */
+    }
+}
