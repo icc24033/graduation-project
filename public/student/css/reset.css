@@ -1,0 +1,41 @@
+/* 基本リセット */
+* {
+    /* すべての要素にborder-boxを適用 */
+    box-sizing: border-box; 
+    /* デフォルトのマージンとパディングを削除 */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* 日本語フォントを優先し、フォントファミリーを設定 */
+    font-family: 'Noto Sans', sans-serif; 
+    /* 背景色白を設定 */
+    background-color: #FFF; 
+}
+
+a {
+    /* リンクの下線を削除 */
+    text-decoration: none;
+    /* リンクの文字色を親要素から継承 */
+    color: inherit;
+}
+
+ul, ol {
+    /* リストマーカーを削除 */
+    list-style: none;
+}
+
+html, body,
+h1, h2, h3, h4, h5, h6,
+p, div, span,
+ul, ol, li, dl, dt, dd,
+table, tr, th, td,
+a, img, strong, small,
+header, footer, main, nav, section, article {
+    margin: 0;
+    border: 0;
+    font-size: 16px;
+    font-weight: 400;
+    color: #222;
+}
