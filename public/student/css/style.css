@@ -196,24 +196,6 @@
     border-bottom-left-radius: 10px;
 }
 
-/* --- ダウンロードボタン --- */
-.download-button {
-    position: absolute;
-    bottom: 50px;
-    left: 35px; 
-    display: flex;
-    text-align: center;
-    align-items: center;
-    padding: 10px 20px; 
-    background-color: #F8FF99; /* アクセントカラー */
-    border: none; /* 画像に合わせて線をなくす */
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.5s;
-}
-
 .download-button:hover {
     background-color: #CFD5DF;/* ホバー色グレー */
 }
@@ -545,22 +527,48 @@
 /* サイドバー内のファイルアップロードフォームの調整 */
 /* ---------------------------------- */
 
-.sidebar .download-form {
-    /* サイドバーの一番下に固定したい場合は以下を検討 */
-    /* position: sticky; */
-    /* bottom: 0; */
-    /* padding: 10px 0; */
-    /* background-color: white; /* 背景色でメニューと区切る */
+
+
+/* --- ダウンロードボタン --- */
+/*
+.download-button {
+    position: absolute;
+    bottom: 50px;
+    left: 35px; 
+    display: flex;
+    text-align: center;
+    align-items: center;
+    padding: 10px 20px; 
+    background-color: #F8FF99; /* アクセントカラー */
+    /*border: none; /* 画像に合わせて線をなくす *//*
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
+}
+*/
+
+
+.sidebar .download-form {/* 絶対位置指定を使用し、サイドバーの下に固定する */
+    position: absolute;
+    bottom: 20px; /* サイドバーの下端から20px上に配置 */
+    left: 0;
     
-    /* 単にメニューの下に配置する場合の基本スタイル */
-    margin-top: 20px; /* メニュー項目との間に間隔を空ける */
-    padding: 0 10px; /* サイドバーのパディングに合わせて調整 */
+    /* サイドバーの幅全体に広げる */
+    width: 100%; 
+    box-sizing: border-box; /* paddingを含めて幅100%にする */
+
+    /* 既存のスタイルを調整 */
+    margin-top: 0; 
+    padding: 0 10px; 
     text-align: center;
 }
 
 /* カスタムボタンのスタイル設定 (前回からの変更点) */
 .custom-file-upload-button {
     /* 必須のスタイルを再確認 */
+    /* width: 100%; が .sidebar .download-form の幅に合わせて適用されます */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -581,7 +589,7 @@
     font-weight: bold;
     transition: background-color 0.3s;
 }
-
+/*
 .custom-file-upload-button:hover {
     background-color: #1976D2;
 }
@@ -590,7 +598,7 @@
     margin-right: 8px;
     font-size: 20px;
 }
-
+*/
 /* ファイル入力要素を完全に非表示にするためのCSS (再掲) */
 .visually-hidden {
     position: absolute;
@@ -603,7 +611,7 @@
     border: 0;
 }
 
-
+/**/
 
 
 /* --- 追加人数入力モーダル固有のスタイル --- */
