@@ -55,9 +55,16 @@
                     <li class="nav-item"><a href="student_edit_course.html">コースの編集</a></li>
                 </ul>
                 
-                <button class="download-button">
-                    <img class="download_icon" src="images/download_icon.png"alt="ダウンロードアイコン">名簿ダウンロード
-                </button>
+                <!-- -->
+                <form action="..\app\student_addition.php" method="post" enctype="multipart/form-data" class="download-button">
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden">
+                        <label for="csvFile" class="custom-file-upload-button">
+                            <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
+                        </label>
+                    </div>
+                </form>
+                
             </nav>
             <div class="content-area">
                 <div class="account-table-container">
