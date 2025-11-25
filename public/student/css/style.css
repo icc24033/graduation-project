@@ -537,6 +537,75 @@
     background-color: #CFD5DF;
 }
 
+
+/*お試しCSS*/
+
+
+/* ---------------------------------- */
+/* サイドバー内のファイルアップロードフォームの調整 */
+/* ---------------------------------- */
+
+.sidebar .download-form {
+    /* サイドバーの一番下に固定したい場合は以下を検討 */
+    /* position: sticky; */
+    /* bottom: 0; */
+    /* padding: 10px 0; */
+    /* background-color: white; /* 背景色でメニューと区切る */
+    
+    /* 単にメニューの下に配置する場合の基本スタイル */
+    margin-top: 20px; /* メニュー項目との間に間隔を空ける */
+    padding: 0 10px; /* サイドバーのパディングに合わせて調整 */
+    text-align: center;
+}
+
+/* カスタムボタンのスタイル設定 (前回からの変更点) */
+.custom-file-upload-button {
+    /* 必須のスタイルを再確認 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* ボタンのサイズと余白をサイドバーに合わせる */
+    width: 100%; /* サイドバーの幅全体を使う */
+    box-sizing: border-box; /* paddingとborderをwidthに含める */
+    padding: 10px 15px;
+    margin: 0 auto; /* 中央寄せ */
+    
+    /* ボタンの見た目 */
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.custom-file-upload-button:hover {
+    background-color: #1976D2;
+}
+
+.custom-file-upload-button .material-symbols-outlined {
+    margin-right: 8px;
+    font-size: 20px;
+}
+
+/* ファイル入力要素を完全に非表示にするためのCSS (再掲) */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+
+
+
 /* --- 追加人数入力モーダル固有のスタイル --- */
 #studentCountInput {
     width: 100px;
@@ -691,4 +760,18 @@
         font-size: 20px; 
         padding: 15px 20px;
     }
+
+
+    /* ファイル入力要素を完全に非表示にするためのCSS */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
 }
