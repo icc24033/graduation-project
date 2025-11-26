@@ -589,16 +589,7 @@
     font-weight: bold;
     transition: background-color 0.3s;
 }
-/*
-.custom-file-upload-button:hover {
-    background-color: #1976D2;
-}
 
-.custom-file-upload-button .material-symbols-outlined {
-    margin-right: 8px;
-    font-size: 20px;
-}
-*/
 /* ファイル入力要素を完全に非表示にするためのCSS (再掲) */
 .visually-hidden {
     position: absolute;
