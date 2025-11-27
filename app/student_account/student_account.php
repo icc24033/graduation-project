@@ -1,5 +1,4 @@
 <?php
-echo "aaa";
 //セッション開始
 session_start();
 
@@ -31,14 +30,8 @@ $_SESSION['student_account'] = [
     'course_sql' => $course_sql
 ];
 
-//試しにSQLクエリ実行
-$stmt = new PDO($dsn, $user_name, $user_pass, $options);
-$stmt = $stmt->query($course_sql);
-var_dump($stmt->fetchAll());
-echo "aaa";
-
 // ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../public/student/student_addition.php");
+header("Location: ../../public/student/student_addition.php");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>
