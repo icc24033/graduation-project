@@ -88,7 +88,7 @@ catch (PDOException $e) {
                                 <?php foreach ($course as $row): ?>
                                     <li>
                                         <!-- data-courseには course_id の値を、表示名には course_name の値を指定 -->
-                                        <a href="#" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
+                                        <a href="../../app/student_account/csv_edit.php" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
                                             <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>
@@ -107,7 +107,7 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="student_edit_course.html">コースの編集</a></li>
                 </ul>
                 
-                <form action="..\..\app\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
+                <form action="..\..\app\student_account\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="autoSubmitForm()">
                         <label for="csvFile" class="custom-file-upload-button">
