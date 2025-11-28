@@ -109,7 +109,7 @@ catch (PDOException $e) {
                 
                 <form action="..\..\app\student_account\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
-                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="autoSubmitForm()">
+                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="this.form.submit();">
                         <label for="csvFile" class="custom-file-upload-button">
                             <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
                         </label>
