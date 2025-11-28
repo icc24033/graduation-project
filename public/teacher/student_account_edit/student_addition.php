@@ -9,7 +9,7 @@ $status = $_SESSION['student_account'] ?? null;
 ////unset($_SESSION['student_account']);
 
 // ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-$current_course_name = 'コースを選択してください';
+$current_course_id = ( $status['course_id'] - 1 ); // コースIDは1からなので、配列インデックス用に-1する
 $course = []; // コースデータを格納する配列を初期化
 
 try {
@@ -29,7 +29,7 @@ try {
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[0]['course_name'];
+        $current_course_name = $course[$current_course_id]['course_name'];
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -41,7 +41,6 @@ catch (PDOException $e) {
     // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
     // throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
-
 ?>
 
 <!DOCTYPE html>

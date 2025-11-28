@@ -17,14 +17,12 @@ $message = "コースIDは受信されませんでした。";
 
 // 2. デコードが成功し、かつ 'course_id' が存在するかチェック
 if (is_array($decoded_data) && isset($decoded_data['course_id'])) {
+    //コースIDを取得
     $received_course_id = $decoded_data['course_id'];
-    $message = "コースID「{$received_course_id}」を正常に受信しました。";
-    
-    // 取得したコースIDをセッションに一時的に保存し、リダイレクト後のページで確認できるようにする (デバッグ用)
-    $_SESSION['last_received_course_id'] = $received_course_id;
+    //$message = "コースID「{$received_course_id}」を正常に受信しました。";
 } else {
     // データ受信に失敗した場合
-    $_SESSION['last_received_course_id'] = '受信失敗';
+    $received_course_id = 1; // デフォルト値を設定（例: 1）
 }
 
 
@@ -55,7 +53,8 @@ $_SESSION['student_account'] = [
     'database_user_name' => $user_name,
     'database_user_pass' => $user_pass,
     'database_options' => $options,
-    'course_sql' => $course_sql
+    'course_sql' => $course_sql,
+    'course_id' => $received_course_id
 ];
 
 // ★ student_addition.php にリダイレクトして処理を終了
