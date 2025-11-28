@@ -1,0 +1,27 @@
+/* 基本リセット */
+* {
+    /* すべての要素にborder-boxを適用 */
+    box-sizing: border-box; 
+    /* デフォルトのマージンとパディングを削除 */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* 日本語フォントを優先し、フォントファミリーを設定 */
+    font-family: 'Noto Sans', sans-serif; 
+    /* 背景色白を設定 */
+    background-color: #FFF; 
+}
+
+a {
+    /* リンクの下線を削除 */
+    text-decoration: none;
+    /* リンクの文字色を親要素から継承 */
+    color: inherit;
+}
+
+ul, ol {
+    /* リストマーカーを削除 */
+    list-style: none;
+}
