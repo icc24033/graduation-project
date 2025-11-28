@@ -1,0 +1,163 @@
+/* ====================================
+   基本設定とレイアウト（省略）
+   ==================================== */
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Yu Gothic', 'Meiryo', sans-serif;
+    color: #333;
+    line-height: 1.5;
+    padding-bottom: 70px; 
+    overflow-x: hidden; 
+}
+
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #333;
+    z-index: -1;
+}
+
+.schedule-page {
+    background-color: #f0f2f5;
+    border-radius: 25px; 
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    margin: 50px 20px 0 20px; 
+    padding: 10px 15px 30px 15px;
+    max-width: 450px; 
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.card-header, .schedule-info-bar, .lecture-card {
+    /* デザインのための共通スタイル */
+}
+
+/* 授業カード内のレイアウト設定 */
+.lecture-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+.lecture-main-info {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+.lecture-title-area {
+    flex-basis: 35%; 
+    border-right: 1px solid #eee;
+    padding-right: 15px;
+    text-align: right; 
+}
+.lecture-subject {
+    font-size: 2em; 
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+.lecture-time-area {
+    flex-basis: 65%;
+    padding-left: 15px;
+}
+/* ====================================
+   ドロップダウンボタンと開閉制御のスタイル
+   ==================================== */
+
+.dropdown-block {
+    margin-bottom: 8px; 
+}
+
+.dropdown-toggle {
+    /* ボタンの共通スタイル */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: #555c6e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 0.95em;
+    cursor: pointer;
+}
+
+.dropdown-toggle .fas {
+    /* 矢印アイコンの回転設定 */
+    font-size: 0.8em;
+    transition: transform 0.2s;
+}
+
+/* 💡 ドロップダウンコンテンツ (初期状態：非表示) */
+.dropdown-content {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin-top: 5px; 
+    
+    /* 非表示の肝：高さ0に設定し、コンテンツを隠す */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+    padding: 0 15px; 
+    
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* 💡 JavaScriptで付与される active クラス (表示状態) */
+.dropdown-content.active {
+    /* 高さを十分な値に設定し、コンテンツを展開 */
+    max-height: 300px; 
+    padding: 10px 15px;
+    transition: max-height 0.4s ease-in, padding 0.4s ease-in;
+}
+
+/* 開いているボタンのアイコンを回転 */
+.dropdown-toggle.active .fas {
+    transform: rotate(90deg); 
+}
+
+/* コンテンツ内の要素調整 */
+.dropdown-content ul {
+    list-style: disc;
+    margin-left: 20px;
+    padding-bottom: 5px;
+}
+.dropdown-content p {
+    margin: 5px 0;
+}
+/* style.css (末尾に追加) */
+
+/* ====================================
+   チェックボックスリストのスタイル
+   ==================================== */
+   .checkbox-list label {
+    display: block; /* 縦に並べる */
+    font-size: 0.9em;
+    padding: 5px 0;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.checkbox-list label:last-child {
+    border-bottom: none; /* 最後の下線は削除 */
+}
+
+.checkbox-list input[type="checkbox"] {
+    margin-right: 10px;
+    /* チェックボックスの見た目を調整したい場合はここを修正 */
+    transform: scale(1.1);
+}
