@@ -148,6 +148,41 @@ document.addEventListener('DOMContentLoaded', () => {
     setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
 
 
+    // ----------------------------------------------------------------------
+    // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
+    // ----------------------------------------------------------------------
+
+    const fetchStudentListByCourseId = (courseId) => {
+        if (!courseId) {
+            console.error('コースIDが未定義です。');
+            return;
+        }
+
+        // サーバーサイドの処理ファイル（このファイルがDBから生徒リストを取得してJSONで返すことを想定）
+        const url = '../../../app/teacher/student_account_edit_backend/student_account.php'; 
+    
+        // 送信するデータ
+        const data = {
+            course_id: courseId
+        };
+
+        fetch(url, {
+            method: 'POST',
+            //送信データはJSON形式
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // JSON文字列に変換してコースIDを送信
+            body: JSON.stringify(data)
+        })
+        .catch(error => {
+            console.error('生徒リストの取得に失敗:', error);
+            showCustomAlert('生徒リストの更新中にエラーが発生しました。詳細はコンソールを確認してください。');
+        });
+    };
+
+
+
     // --- 2. メニュー項目の選択処理 ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
@@ -157,6 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
+
+                // ★ ここで data-course 属性の値 (コースID) を取得します ★
+                const selectedCourseId = e.target.getAttribute('data-course');
+
+                
+
 
                 // A. サイドバーのドロップダウンだった場合 
                 if (currentOpenToggle) {

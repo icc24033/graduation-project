@@ -2,6 +2,34 @@
 //セッション開始
 session_start();
 
+
+
+// ----------------------------------------------------
+// 【重要】JavaScriptから送信されたコースIDを取得する処理
+// ----------------------------------------------------
+
+// 1. HTTPリクエストのボディから生のJSONデータを取得
+$json_data = file_get_contents('php://input');
+$decoded_data = json_decode($json_data, true); // true を指定して連想配列に変換
+
+$received_course_id = null;
+$message = "コースIDは受信されませんでした。";
+
+// 2. デコードが成功し、かつ 'course_id' が存在するかチェック
+if (is_array($decoded_data) && isset($decoded_data['course_id'])) {
+    $received_course_id = $decoded_data['course_id'];
+    $message = "コースID「{$received_course_id}」を正常に受信しました。";
+    
+    // 取得したコースIDをセッションに一時的に保存し、リダイレクト後のページで確認できるようにする (デバッグ用)
+    $_SESSION['last_received_course_id'] = $received_course_id;
+} else {
+    // データ受信に失敗した場合
+    $_SESSION['last_received_course_id'] = '受信失敗';
+}
+
+
+
+
 //データベース接続情報
 $host = 'localhost';
 $db_name = 'icc_smart_campus';
@@ -31,7 +59,7 @@ $_SESSION['student_account'] = [
 ];
 
 // ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../public/student/student_addition.php");
+header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>
