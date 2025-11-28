@@ -1,0 +1,267 @@
+
+/* === 全体レイアウト === */
+body {
+    /* モバイル画面の中央寄せと最大幅の設定 */
+    max-width: 400px; 
+    margin: 0 auto;
+    
+    /* Flexboxで要素を縦方向に並べ、フッターを画面下部に固定 */
+    display: flex; 
+    flex-direction: column;
+    min-height: 100vh;
+    
+    /* bodyの背景色を白に設定 */
+    background-color: #ffffff; 
+    
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 0 10px; /* 画面端のわずかな余白 */
+}
+
+.main-content {
+    /* メインコンテンツが余白を占有 */
+    flex-grow: 1; 
+    width: 100%;
+    margin: 0;
+    padding: 0 0 20px 0;
+    box-sizing: border-box;
+    /* mainの背景色を#F3F8FFに設定 */
+    background-color: #F3F8FF;
+}
+
+
+/* === ヘッダー === */
+.page-header {
+    width: 100%;
+    margin: 0;
+    padding: 10px 0;
+    height: 87px;
+    display: flex;
+    justify-content: space-between; /* 左右に要素を配置 */
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.page-header p {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px; 
+    margin-left: 10px; /* 左端からの余白調整 */
+}
+
+/* ユーザーアイコンのスタイル (アイコン全体) */
+.user-icon {
+    /* アイコン全体を円形にし、白背景に */
+    width: 50px; 
+    height: 50px;
+    background-color: #ffffff; /* アイコンの背景色は白 */
+    border-radius: 50%; 
+    
+    padding: 0;
+    box-sizing: border-box; 
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; 
+    align-items: center;
+    overflow: hidden; 
+    margin-top: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 立体感のための影 */
+    margin-right: 10px; /* 右端からの余白調整 */
+}
+
+/* 頭の部分 (青色の円) */
+.i_head {
+    width: 30%; 
+    height: 30%; 
+    border-radius: 50%;
+    background-color: #C0DEFF; /* 頭の色を青に */
+    margin-bottom: 3px; 
+}
+
+/* 体の部分 (青色の半円) */
+.i_body {
+    width: 50%; 
+    height: 35%; 
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: #C0DEFF; /* 体の色を青に */
+}
+
+/* === 時間割ヘッダー（時間割と日付） === */
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    /* 修正: timetable-infoにパディングを移動するため削除 */
+    padding: 0; 
+}
+
+/* 修正/追加: Auto Layout (Flexbox, Padding, Gap) を適用 */
+.timetable-info {
+    display: flex;
+    align-items: center;
+    /* Auto Layout: Padding 24px を適用 (上下左右) */
+    padding: 24px;
+    /* Auto Layout: アイコンと文字の間隔 (gap) 10px を適用 */
+    gap: 10px; 
+    
+    /* Auto Layout の背景と角丸 */
+    background-color: #ffffff;
+    border-radius: 12px;
+}
+
+.icon-timetable {
+    width: 24px;
+    height: 24px;
+    /* 修正: gap: 10px を使用するため、margin-rightを削除 */
+    margin-right: 0; 
+}
+
+.timetable-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.date {
+    font-size: 14px;
+    /* .timetable-info の上パディングに位置を合わせる */
+    padding-top: 24px; 
+    margin-right: 10px; /* bodyのpaddingに合わせる */
+}
+
+/* === 時間割カードリスト === */
+.schedule-list {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); 
+    overflow: hidden;
+    margin: 0 10px; /* 左右に余白を追加 */
+}
+
+/* 各授業のカード */
+.class-card {
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+.class-card:last-child {
+    border-bottom: none;
+}
+
+.class-info {
+    display: flex; /* 授業名（左）と時限・ボタン（右）を横並びにする */
+}
+
+/* 授業名、教室（左側） */
+.subject-details {
+    width: 35%; 
+    padding-left: 15px;
+    padding-right: 15px; /* 縦線とのスペース */
+    position: relative;
+}
+
+.subject-details::after {
+    /* 縦の区切り線 */
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background-color: #e0e0e0; 
+}
+
+.subject-name {
+    /* 修正: フォントサイズを大きく */
+    font-size: 28px; 
+    font-weight: 700;
+    line-height: 1.1; /* 行間を狭くして2行表示をコンパクトにする */
+    
+    /* 修正: 教室名との間に余白を追加 */
+    margin-bottom: 10px; 
+}
+
+.room-name {
+    font-size: 12px;
+    font-weight: 400;
+    color: #666666;
+}
+
+/* 時限とボタン（右側） */
+.period-details {
+    width: 65%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.period-time {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ボタンの共通スタイル */
+.class-button {
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #495666; 
+    border-radius: 16px;
+    color: #ffffff; 
+    font-size: 14px;
+    font-weight: 500;
+    width: fit-content;
+    min-width: 150px;
+    text-decoration: none;
+}
+
+/* ボタンの右端の矢印を擬似要素で作成 */
+.class-button::after {
+    content: '▶'; 
+    color: #ffffff;
+    font-size: 10px;
+    margin-left: 10px;
+}
+
+
+/* === フッター === */
+.page-footer {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 10px 0;
+    border-top: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    position: sticky; 
+    bottom: 0;
+    z-index: 10;
+}
+
+.f-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-around; 
+    align-items: center;
+}
+
+.f-list li {
+    position: relative;
+    padding: 5px;
+}
+
+.footer-icon {
+    width: 28px;
+    height: 28px;
+    display: block;
+}
