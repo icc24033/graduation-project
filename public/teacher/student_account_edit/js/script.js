@@ -166,19 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
             course_id: courseId
         };
 
-        fetch(url, {
-            method: 'POST',
-            //送信データはJSON形式
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            // JSON文字列に変換してコースIDを送信
-            body: JSON.stringify(data)
-        })
-        .catch(error => {
-            console.error('生徒リストの取得に失敗:', error);
-            showCustomAlert('生徒リストの更新中にエラーが発生しました。詳細はコンソールを確認してください。');
-        });
+        // コースIDをURLパラメータとして付与
+        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}`;
+
     };
 
 
@@ -192,28 +182,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
-
-                // ★ ここで data-course 属性の値 (コースID) を取得します ★
                 const selectedCourseId = e.target.getAttribute('data-course');
-
-                
-
+            
+                let shouldRedirect = false; // ページ遷移フラグ
 
                 // A. サイドバーのドロップダウンだった場合 
                 if (currentOpenToggle) {
                     const currentValueSpan = currentOpenToggle.querySelector('.current-value');
                     if (currentValueSpan) {
-                        currentValueSpan.textContent = selectedValue;
+                        currentValueSpan.textContent = selectedValue; // 選択された値を表示に反映
                     }
+                
+                    // コースドロップダウンで、かつコースIDが取得できた場合
+                    if (currentOpenToggle.id === 'courseDropdownToggle' && selectedCourseId) {
+                        shouldRedirect = true; // リダイレクトが必要
+                    } 
                 } 
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
                     currentTableInput.textContent = selectedValue;
-                    // data属性も更新
+                    // data属性も更新 (テーブル行のデータ送信時に使用)
                     currentTableInput.setAttribute('data-selected-course', selectedValue);
+                    currentTableInput.setAttribute('data-selected-course-id', selectedCourseId); // IDもセット
                 }
-                
-                closeAllDropdowns(); 
+            
+                closeAllDropdowns(); // ドロップダウンを閉じる
+
+                // 最後にリダイレクト（ページ全体を再読み込み）を実行
+                if (shouldRedirect) {
+                    fetchStudentListByCourseId(selectedCourseId);
+                }
             });
         });
     });
