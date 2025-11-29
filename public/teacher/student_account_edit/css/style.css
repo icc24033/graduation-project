@@ -209,18 +209,29 @@
 .content-area {
     flex-grow: 1;
     padding: 30px 50px 50px 50px; 
+    /* 【追加】ここから */
     display: flex;
     flex-direction: column;
+    /* 【追加】ここまで */
     align-items: center; 
 }
 
-.account-table-container {
+.account-table-container { /* 204行目あたり */
     width: 100%;
     max-width: 800px;
     margin-bottom: 30px;
     border: 1px solid #CFD5DF;
     border-radius: 5px;
-    height: 700px; /* テーブルが表示される最大高さを設定 */
+    
+    /* 削除/コメントアウト */
+    /* height: 700px; */ 
+    
+    /* 【追加】ここから */
+    flex-grow: 1;
+    min-height: 150px; 
+    max-height: calc(100vh - 350px); 
+    /* 【追加】ここまで */
+
     overflow-y: auto; /* 縦方向のスクロールを有効にする */
     position: relative; /* stickyの基準にするため */
 }
