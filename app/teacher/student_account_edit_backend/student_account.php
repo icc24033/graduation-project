@@ -2,23 +2,18 @@
 //セッション開始
 session_start();
 
-
-
 // ----------------------------------------------------
 // 【重要】JavaScriptから送信されたコースIDを取得する処理
 // ----------------------------------------------------
 
-// 1. HTTPリクエストのボディから生のJSONデータを取得
-$json_data = file_get_contents('php://input');
-$decoded_data = json_decode($json_data, true); // true を指定して連想配列に変換
 
 $received_course_id = null;
 $message = "コースIDは受信されませんでした。";
 
 // 2. デコードが成功し、かつ 'course_id' が存在するかチェック
-if (is_array($decoded_data) && isset($decoded_data['course_id'])) {
+if (isset($_GET['course_id'])) {
     //コースIDを取得
-    $received_course_id = $decoded_data['course_id'];
+    $received_course_id = $_GET['course_id'];
     //$message = "コースID「{$received_course_id}」を正常に受信しました。";
 } else {
     // データ受信に失敗した場合
@@ -45,6 +40,8 @@ $options = [
 
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
+//テストstudentに格納されている学生情報の取得
+$student_sql = ("SELECT * FROM test_student WHERE course_id = ?;");
 
 $_SESSION['student_account'] = [
     'success' => true,
@@ -54,7 +51,8 @@ $_SESSION['student_account'] = [
     'database_user_pass' => $user_pass,
     'database_options' => $options,
     'course_sql' => $course_sql,
-    'course_id' => $received_course_id
+    'course_id' => $received_course_id,
+    'student_sql' => $student_sql
 ];
 
 // ★ student_addition.php にリダイレクトして処理を終了
