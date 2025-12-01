@@ -1,31 +1,6 @@
-<<<<<<< HEAD
-// ----------------------------------------------------------------------
-// グローバル関数: ファイル選択時にフォームを自動送信する
-// この関数はHTMLの onchange="autoSubmitForm()" から直接呼び出されます。
-// ----------------------------------------------------------------------
-function autoSubmitForm() {
-    // ID 'uploadForm' を持つフォーム要素を取得
-    const form = document.getElementById('uploadForm');
-    
-    if (form) {
-        // デバッグ用ログ: このログが出れば関数は実行されています
-        console.log('--- autoSubmitForm 関数が実行されました。フォームを送信します。---');
-        
-        // フォームをプログラムで送信
-        form.submit();
-    } else {
-        console.error('エラー: ID "uploadForm" を持つフォームが見つかりません。自動送信失敗。');
-    }
-}
-
-
-// ----------------------------------------------------------------------
-// ページのDOMが完全に読み込まれた後に実行されるメインロジック
-=======
 
 // ----------------------------------------------------------------------
 // ページのHTMLが完全に読み込まれた後に実行されるメインロジック
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
 // ----------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -173,8 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
 
 
-<<<<<<< HEAD
-=======
     // ----------------------------------------------------------------------
     // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
     // ----------------------------------------------------------------------
@@ -200,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
     // --- 2. メニュー項目の選択処理 ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
@@ -210,21 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
-<<<<<<< HEAD
-=======
                 const selectedCourseId = e.target.getAttribute('data-course');
             
                 let shouldRedirect = false; // ページ遷移フラグ
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
 
                 // A. サイドバーのドロップダウンだった場合 
                 if (currentOpenToggle) {
                     const currentValueSpan = currentOpenToggle.querySelector('.current-value');
                     if (currentValueSpan) {
-<<<<<<< HEAD
-                        currentValueSpan.textContent = selectedValue;
-                    }
-=======
                         currentValueSpan.textContent = selectedValue; // 選択された値を表示に反映
                     }
                 
@@ -232,18 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentOpenToggle.id === 'courseDropdownToggle' && selectedCourseId) {
                         shouldRedirect = true; // リダイレクトが必要
                     } 
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
                 } 
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
                     currentTableInput.textContent = selectedValue;
-<<<<<<< HEAD
-                    // data属性も更新
-                    currentTableInput.setAttribute('data-selected-course', selectedValue);
-                }
-                
-                closeAllDropdowns(); 
-=======
                     // data属性も更新 (テーブル行のデータ送信時に使用)
                     currentTableInput.setAttribute('data-selected-course', selectedValue);
                     currentTableInput.setAttribute('data-selected-course-id', selectedCourseId); // IDもセット
@@ -255,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (shouldRedirect) {
                     fetchStudentListByCourseId(selectedCourseId);
                 }
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
             });
         });
     });
@@ -544,8 +500,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     } // end student_addition.html 固有の処理
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9

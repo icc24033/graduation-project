@@ -9,12 +9,25 @@ $status = $_SESSION['student_account'] ?? null;
 ////unset($_SESSION['student_account']);
 
 // ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-<<<<<<< HEAD
-$current_course_name = 'コースを選択してください';
-=======
 $current_course_id = ( $status['course_id'] - 1 ); // コースIDは1からなので、配列インデックス用に-1する
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
 $course = []; // コースデータを格納する配列を初期化
+
+// 現在の年度の取得
+$current_year = date('Y');
+// $current_year の下2桁を取得
+$current_year = (int)(substr($current_year, -2));
+
+// 現在の月を取得
+$current_month = date('n');
+
+// 学年度の配列を作成
+if ($current_month < 4) {
+    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+}
+else {
+    $school_year = [ $current_year, $current_year - 1 ];
+}
+
 
 try {
     //データベース接続
@@ -30,12 +43,6 @@ try {
     $stmt_course = $pdo->query($status['course_sql']);
     $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
 
-<<<<<<< HEAD
-    // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
-    if (!empty($course)) {
-        // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[0]['course_name'];
-=======
     // 　テストstudentに格納されている学生情報の取得
     $stmt_test_student = $pdo->prepare($status['student_sql']);
     $stmt_test_student->execute([$status['course_id']]);
@@ -44,7 +51,6 @@ try {
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
         $current_course_name = $course[$current_course_id]['course_name'];
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -83,13 +89,16 @@ catch (PDOException $e) {
                     <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
-                            <span class="current-value">2025年度</span>
+                            <span class="current-value">20<?php echo $school_year[0]?>年度</span>
                         </button>
                         <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <li><a href="#" data-year="2026">2026年度</a></li>
-                            <li><a href="#" data-year="2025">2025年度</a></li>
-                            <li><a href="#" data-year="2024">2024年度</a></li>
-                            <li><a href="#" data-year="2023">2023年度</a></li>
+                            <?php foreach ($school_year as $year): ?>
+                                <li>
+                                    <a href="#" data-year="<?php echo htmlspecialchars($year); ?>">
+                                        20<?php echo htmlspecialchars($year); ?>年度
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
             
@@ -103,11 +112,7 @@ catch (PDOException $e) {
                                 <?php foreach ($course as $row): ?>
                                     <li>
                                         <!-- data-courseには course_id の値を、表示名には course_name の値を指定 -->
-<<<<<<< HEAD
-                                        <a href="../../app/student_account/csv_edit.php" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
-=======
                                         <a href="#" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
                                             <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>
@@ -126,15 +131,9 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="student_edit_course.html">コースの編集</a></li>
                 </ul>
                 
-<<<<<<< HEAD
-                <form action="..\..\app\student_account\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="autoSubmitForm()">
-=======
                 <form action="..\..\..\app\teacher\student_account_edit_backend\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="this.form.submit();">
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
                         <label for="csvFile" class="custom-file-upload-button">
                             <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
                         </label>
@@ -149,128 +148,6 @@ catch (PDOException $e) {
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
-<<<<<<< HEAD
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20001" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20001"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20002" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20002"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20003" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20003"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20004" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20004"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20005" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20005"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20006" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20006"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20007" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20007"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20008" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20008"></div> 
-                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20009" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20009"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20010" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20010"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20011" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20011"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20012" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20012"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20013" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20013"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20014" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20014"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20015" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20015"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-=======
                     
                     <?php 
                     // $stmt_test_studentが有効な場合のみループ
@@ -290,7 +167,7 @@ catch (PDOException $e) {
                                 <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
                             </div>
                             <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu"><?php echo htmlspecialchars($student_row['course_name']);?></span>
                             </div>
                         </div>
 
@@ -308,8 +185,8 @@ catch (PDOException $e) {
                             </div>
                     <?php 
                         endif;
-                    else: 
                         // DB接続エラーなどで$stmt_test_studentがnullの場合
+                    else:
                     ?>
                         <div class="table-row">
                             <div class="column-check"></div> 
@@ -319,7 +196,6 @@ catch (PDOException $e) {
                         </div>
                     <?php endif; ?>
 
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
                 </div>
                 <div class="button-group">
                     <button class="add-button">追加</button>
@@ -348,8 +224,4 @@ catch (PDOException $e) {
 
     <script src="js/script.js"></script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
