@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_email'])) {
     header('Location: ../login/login.html');
     exit();
 }
-$user_picture = $_SESSION['user_picture'] ?? 'assets/default_avatar.png';
+$user_picture = $_SESSION['user_picture'] ?? 'images/default_avatar.png';
 
 
 // セッションから画像URLを取得
@@ -28,11 +28,11 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_avatar.png'; // デ
         <link rel="stylesheet" type="text/css" href="css/common.css">
     </head>
     <body>
-        <header>
-            <a href="">
-                <p class="header"></p>
-            </a>
-    </header>
+        <header> 
+            <div class="user-avatar">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+            </div>
+        </header>
 
         <div class="main">
             <!-- 機能 -->
