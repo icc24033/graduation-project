@@ -179,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedValue = e.target.textContent;
                 const selectedCourseId = e.target.getAttribute('data-course');
             
+                // 最終的にリダイレクトに使用する変数
+                let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course-id') : null;
+                let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
                 let shouldRedirect = false; // ページ遷移フラグ
 
                 // A. サイドバーのドロップダウンだった場合 
@@ -205,7 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 最後にリダイレクト（ページ全体を再読み込み）を実行
                 if (shouldRedirect) {
-                    fetchStudentListByCourseId(selectedCourseId);
+                    // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
+                    redirectToStudentAccountPage(finalCourseId, finalYear);
                 }
             });
         });
