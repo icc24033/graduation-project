@@ -22,8 +22,8 @@ if (isset($_GET['course_id'])) {
 
     $received_current_year = date("Y"); 
     
-    // $current_year の下2桁を取得
-    $current_year = (int)(substr($current_year, -2));
+    // $received_current_year の下2桁を取得
+    $received_current_year = substr($received_current_year, -2);
 }
 
 

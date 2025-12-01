@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
     const dropdownMenus = document.querySelectorAll('.dropdown-menu');
     const tableCourseInputs = document.querySelectorAll('.course-display[data-dropdown-for]'); 
+
+    // ★ 修正: トグルボタンの要素をここで定義
+    const courseToggle = document.getElementById('courseDropdownToggle');
+    const yearToggle = document.getElementById('yearDropdownToggle');
+
     
     let currentOpenToggle = null;
     let currentOpenMenu = null;
@@ -174,12 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                //e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
             
-                // 最終的にリダイレクトに使用する変数
-                let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course-id') : null;
+                // ★ 修正: トグルボタンから現在の値を取得
+                // ※ トグルボタンのdata属性をHTML/PHP側で設定していることが前提
+                let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
                 let shouldRedirect = false; // ページ遷移フラグ
 
@@ -192,30 +198,40 @@ document.addEventListener('DOMContentLoaded', () => {
             
                     // 1. コースドロップダウンが選択された場合
                     if (currentOpenToggle.id === 'courseDropdownToggle') {
-                        const selectedCourseId = e.target.getAttribute('data-course');
+                        const selectedCourseId = e.target.getAttribute('data-current-course');
+                        const selectedYear = e.target.getAttribute('data-current-year');
                         if (selectedCourseId) {
                             finalCourseId = selectedCourseId;
-                            courseToggle.setAttribute('data-current-course-id', selectedCourseId); // 新しい値をボタンに保存
+                            finalYear = selectedYear;
+                            currentOpenToggle.setAttribute('data-current-course', selectedCourseId); // 新しい値をボタンに保存
+                            // ★ 修正: courseToggle ではなく currentOpenToggle を使用
                             shouldRedirect = true; 
                         }
                     } 
                     // 2. 年度ドロップダウンが選択された場合
                     else if (currentOpenToggle.id === 'yearDropdownToggle') {
-                        const selectedYear = e.target.getAttribute('data-year');
+                        const selectedYear = e.target.getAttribute('data-current-year');
+                        const selectedCourseId = e.target.getAttribute('data-current-course');
                         if (selectedYear) {
                             finalYear = selectedYear;
-                            yearToggle.setAttribute('data-current-year', selectedYear); // 新しい値をボタンに保存
+                            finalCourseId = selectedCourseId;
+                            currentOpenToggle.setAttribute('data-current-year', selectedYear); // 新しい値をボタンに保存
+                            // ★ 修正: yearToggle ではなく currentOpenToggle を使用
                             shouldRedirect = true; 
                         }
                     }
-                } 
+                }
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
-                    const selectedCourseId = e.target.getAttribute('data-course');
+                    const selectedCourseId = e.target.getAttribute('data-current-course');
                     currentTableInput.textContent = selectedValue;
                     // data属性を更新 (テーブル行のデータ送信時に使用)
                     currentTableInput.setAttribute('data-selected-course', selectedValue);
-                    currentTableInput.setAttribute('data-selected-course-id', selectedCourseId); // IDもセット
+
+                    const hiddenInput = currentTableInput.closest('.column-course').querySelector('.input-course-hidden');
+                    if (hiddenInput && selectedCourseId) {
+                        hiddenInput.value = selectedCourseId; 
+                    }
                 }
             
                 closeAllDropdowns(); // ドロップダウンを閉じる
