@@ -110,7 +110,7 @@ catch (PDOException $e) {
                             <?php if (!empty($course)): ?>
                                 <?php foreach ($course as $row): ?>
                                     <li>
-                                        <!-- data-courseには course_id の値を、表示名には course_name の値を指定 -->
+                                        <!-- data-course には course_id の値を、表示名には course_name の値を指定 -->
                                         <a href="#" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
                                             <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>

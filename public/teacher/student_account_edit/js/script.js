@@ -152,25 +152,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
     // ----------------------------------------------------------------------
 
-    const fetchStudentListByCourseId = (courseId) => {
-        if (!courseId) {
-            console.error('コースIDが未定義です。');
+    // ユーティリティ: 非同期通信でコースIDと年度をPHPに送信し、生徒リストを更新する
+    // (ここではリダイレクト処理として実装)
+    const redirectToStudentAccountPage = (courseId, year) => {
+        if (!courseId || !year) {
+            console.error('コースIDまたは年度が未定義です。');
             return;
         }
 
-        // サーバーサイドの処理ファイル（このファイルがDBから生徒リストを取得してJSONで返すことを想定）
+        // サーバーサイドの処理ファイル
         const url = '../../../app/teacher/student_account_edit_backend/student_account.php'; 
     
-        // 送信するデータ
-        const data = {
-            course_id: courseId
-        };
-
-        // コースIDをURLパラメータとして付与
-        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}`;
-
+        // コースIDと年度をURLパラメータとして付与してリダイレクト
+        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&year=${encodeURIComponent(year)}`;
     };
-
 
 
     // --- 2. メニュー項目の選択処理 ---
