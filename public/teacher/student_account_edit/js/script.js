@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ----------------------------------------------------------------------
 // グローバル関数: ファイル選択時にフォームを自動送信する
 // この関数はHTMLの onchange="autoSubmitForm()" から直接呼び出されます。
@@ -20,6 +21,11 @@ function autoSubmitForm() {
 
 // ----------------------------------------------------------------------
 // ページのDOMが完全に読み込まれた後に実行されるメインロジック
+=======
+
+// ----------------------------------------------------------------------
+// ページのHTMLが完全に読み込まれた後に実行されるメインロジック
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
 // ----------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -167,6 +173,34 @@ document.addEventListener('DOMContentLoaded', () => {
     setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
 
 
+<<<<<<< HEAD
+=======
+    // ----------------------------------------------------------------------
+    // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
+    // ----------------------------------------------------------------------
+
+    const fetchStudentListByCourseId = (courseId) => {
+        if (!courseId) {
+            console.error('コースIDが未定義です。');
+            return;
+        }
+
+        // サーバーサイドの処理ファイル（このファイルがDBから生徒リストを取得してJSONで返すことを想定）
+        const url = '../../../app/teacher/student_account_edit_backend/student_account.php'; 
+    
+        // 送信するデータ
+        const data = {
+            course_id: courseId
+        };
+
+        // コースIDをURLパラメータとして付与
+        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}`;
+
+    };
+
+
+
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
     // --- 2. メニュー項目の選択処理 ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
@@ -176,22 +210,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
+<<<<<<< HEAD
+=======
+                const selectedCourseId = e.target.getAttribute('data-course');
+            
+                let shouldRedirect = false; // ページ遷移フラグ
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
 
                 // A. サイドバーのドロップダウンだった場合 
                 if (currentOpenToggle) {
                     const currentValueSpan = currentOpenToggle.querySelector('.current-value');
                     if (currentValueSpan) {
+<<<<<<< HEAD
                         currentValueSpan.textContent = selectedValue;
                     }
+=======
+                        currentValueSpan.textContent = selectedValue; // 選択された値を表示に反映
+                    }
+                
+                    // コースドロップダウンで、かつコースIDが取得できた場合
+                    if (currentOpenToggle.id === 'courseDropdownToggle' && selectedCourseId) {
+                        shouldRedirect = true; // リダイレクトが必要
+                    } 
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
                 } 
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
                     currentTableInput.textContent = selectedValue;
+<<<<<<< HEAD
                     // data属性も更新
                     currentTableInput.setAttribute('data-selected-course', selectedValue);
                 }
                 
                 closeAllDropdowns(); 
+=======
+                    // data属性も更新 (テーブル行のデータ送信時に使用)
+                    currentTableInput.setAttribute('data-selected-course', selectedValue);
+                    currentTableInput.setAttribute('data-selected-course-id', selectedCourseId); // IDもセット
+                }
+            
+                closeAllDropdowns(); // ドロップダウンを閉じる
+
+                // 最後にリダイレクト（ページ全体を再読み込み）を実行
+                if (shouldRedirect) {
+                    fetchStudentListByCourseId(selectedCourseId);
+                }
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
             });
         });
     });
@@ -480,4 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     } // end student_addition.html 固有の処理
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
