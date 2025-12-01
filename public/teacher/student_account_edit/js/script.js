@@ -177,29 +177,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
-                const selectedCourseId = e.target.getAttribute('data-course');
             
                 // 最終的にリダイレクトに使用する変数
                 let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course-id') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
                 let shouldRedirect = false; // ページ遷移フラグ
 
-                // A. サイドバーのドロップダウンだった場合 
+                // A. サイドバーのドロップダウンだった場合 (sidebarのトグルボタンがクリックされて開いたメニュー)
                 if (currentOpenToggle) {
                     const currentValueSpan = currentOpenToggle.querySelector('.current-value');
                     if (currentValueSpan) {
                         currentValueSpan.textContent = selectedValue; // 選択された値を表示に反映
                     }
-                
-                    // コースドロップダウンで、かつコースIDが取得できた場合
-                    if (currentOpenToggle.id === 'courseDropdownToggle' && selectedCourseId) {
-                        shouldRedirect = true; // リダイレクトが必要
+            
+                    // 1. コースドロップダウンが選択された場合
+                    if (currentOpenToggle.id === 'courseDropdownToggle') {
+                        const selectedCourseId = e.target.getAttribute('data-course');
+                        if (selectedCourseId) {
+                            finalCourseId = selectedCourseId;
+                            courseToggle.setAttribute('data-current-course-id', selectedCourseId); // 新しい値をボタンに保存
+                            shouldRedirect = true; 
+                        }
                     } 
+                    // 2. 年度ドロップダウンが選択された場合
+                    else if (currentOpenToggle.id === 'yearDropdownToggle') {
+                        const selectedYear = e.target.getAttribute('data-year');
+                        if (selectedYear) {
+                            finalYear = selectedYear;
+                            yearToggle.setAttribute('data-current-year', selectedYear); // 新しい値をボタンに保存
+                            shouldRedirect = true; 
+                        }
+                    }
                 } 
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
+                    const selectedCourseId = e.target.getAttribute('data-course');
                     currentTableInput.textContent = selectedValue;
-                    // data属性も更新 (テーブル行のデータ送信時に使用)
+                    // data属性を更新 (テーブル行のデータ送信時に使用)
                     currentTableInput.setAttribute('data-selected-course', selectedValue);
                     currentTableInput.setAttribute('data-selected-course-id', selectedCourseId); // IDもセット
                 }
