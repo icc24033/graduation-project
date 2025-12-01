@@ -12,6 +12,23 @@ $status = $_SESSION['student_account'] ?? null;
 $current_course_id = ( $status['course_id'] - 1 ); // コースIDは1からなので、配列インデックス用に-1する
 $course = []; // コースデータを格納する配列を初期化
 
+// 現在の年度の取得
+$current_year = date('Y');
+// $current_year の下2桁を取得
+$current_year = (int)(substr($current_year, -2));
+
+// 現在の月を取得
+$current_month = date('n');
+
+// 学年度の配列を作成
+if ($current_month < 4) {
+    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+}
+else {
+    $school_year = [ $current_year, $current_year - 1 ];
+}
+
+
 try {
     //データベース接続
     $pdo = 
@@ -72,13 +89,16 @@ catch (PDOException $e) {
                     <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
-                            <span class="current-value">2025年度</span>
+                            <span class="current-value">20<?php echo $school_year[0]?>年度</span>
                         </button>
                         <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <li><a href="#" data-year="2026">2026年度</a></li>
-                            <li><a href="#" data-year="2025">2025年度</a></li>
-                            <li><a href="#" data-year="2024">2024年度</a></li>
-                            <li><a href="#" data-year="2023">2023年度</a></li>
+                            <?php foreach ($school_year as $year): ?>
+                                <li>
+                                    <a href="#" data-year="<?php echo htmlspecialchars($year); ?>">
+                                        20<?php echo htmlspecialchars($year); ?>年度
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
             
@@ -147,7 +167,7 @@ catch (PDOException $e) {
                                 <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
                             </div>
                             <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu"><?php echo htmlspecialchars($student_row['course_name']);?></span>
                             </div>
                         </div>
 
@@ -165,8 +185,8 @@ catch (PDOException $e) {
                             </div>
                     <?php 
                         endif;
-                    else: 
                         // DB接続エラーなどで$stmt_test_studentがnullの場合
+                    else:
                     ?>
                         <div class="table-row">
                             <div class="column-check"></div> 
