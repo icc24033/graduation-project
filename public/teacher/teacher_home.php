@@ -28,13 +28,11 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_avatar.png'; // デ
         <link rel="stylesheet" type="text/css" href="css/common.css">
     </head>
     <body>
-        <header class="header">
-            <h1 class="header-title">ホーム</h1>
-            
-            <div class="user-avatar">
-                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
-            </div>
-        </header>
+        <header>
+            <a href="">
+                <p class="header"></p>
+            </a>
+    </header>
 
         <div class="main">
             <!-- 機能 -->
