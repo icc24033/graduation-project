@@ -7,11 +7,8 @@ if (!isset($_SESSION['user_email'])) {
     header('Location: ../login/login.html');
     exit();
 }
-$user_picture = $_SESSION['user_picture'] ?? 'images/default_avatar.png';
-
-
 // セッションから画像URLを取得
-$user_picture = $_SESSION['user_picture'] ?? 'assets/default_avatar.png'; // デフォルト画像を準備しておくのが安全
+$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備しておくのが安全
 ?>
 
 <!DOCTYPE html>
