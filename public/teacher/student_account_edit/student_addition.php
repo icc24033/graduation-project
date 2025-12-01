@@ -91,7 +91,7 @@ catch (PDOException $e) {
                         <ul class="dropdown-menu" id="yearDropdownMenu">
                             <?php foreach ($school_year as $year): ?>
                                 <li>
-                                    <a href="#" data-current-year="<?php echo htmlspecialchars($year); ?>">
+                                    <a href="#" data-current-year="<?php echo htmlspecialchars($year);?>" data-current-course="<?php echo htmlspecialchars($current_course_id); ?>">
                                         20<?php echo htmlspecialchars($year); ?>年度
                                     </a>
                                 </li>
