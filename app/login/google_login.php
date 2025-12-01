@@ -30,7 +30,8 @@ define('CLIENT_ID', $config['client_id']);
 define('CLIENT_SECRET', $config['client_secret']); // シークレット分離
 define('REDIRECT_URI', $config['redirect_uri']);
 define('ICC_DOMAIN', $config['icc_domain']); 
-define('HOME_URL', $config['home_url']); 
+define('HOME_URL', $config['home_url']);
+
 
 // 取得したい情報のスコープ（メールアドレスと基本プロフィール）
 $scope = 'email profile';
@@ -139,8 +140,9 @@ if (isset($_GET['code'])) {
 
         if ($emailDomain === ICC_DOMAIN) {
             // 認証成功: セッションに情報を保存
-            $_SESSION['user_email'] = $userEmail;
+            $_SESSION['user_email'] = $userEmail; // アカウントのアドレスを獲得
             $_SESSION['logged_in'] = true;
+            $_SESSION['user_picture'] = $userInfo['picture'] ?? null; // アカウントのアイコン画像を獲得
             
             // ホーム画面に遷移
             header('Location: ' . HOME_URL);
