@@ -62,7 +62,6 @@ catch (PDOException $e) {
     // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
     // throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
-
 ?>
 
 <!DOCTYPE html>
