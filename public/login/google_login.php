@@ -14,7 +14,7 @@ error_reporting(E_ALL);
 
 // public/login/ から見て、親の親 (/2025/sotsuken/graduation-project/) にある config/secrets.php を読み込む
 // $config 変数に secrets.php の配列が格納される
-$config_path = __DIR__ . '/../../config/secrets.php'; 
+$config_path = __DIR__ . '/../../config/secrets_local.php'; 
 
 // ファイルが存在するか確認し、存在しない場合はエラーで停止
 if (!file_exists($config_path)) {
