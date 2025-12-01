@@ -80,7 +80,7 @@ function send_curl_request(string $url, ?array $data, ?string $accessToken, stri
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // ホスト名の検証を有効化
     
     // プロジェクト内の cacert.pem ファイルのフルパスを指定
-    $cafile_path = __DIR__ . '/../cacert.pem'; // __DIR__ は現在のファイルのディレクトリを示します
+    $cafile_path = __DIR__ . '/../config/cacert.pem'; // __DIR__ は現在のファイルのディレクトリを示します
     curl_setopt($ch, CURLOPT_CAINFO, $cafile_path);
 
     $response = curl_exec($ch); // リクエストの実行
