@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = '../../../app/teacher/student_account_edit_backend/student_account.php'; 
     
         // コースIDと年度をURLパラメータとして付与してリダイレクト
-        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&year=${encodeURIComponent(year)}`;
+        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
     };
 
 

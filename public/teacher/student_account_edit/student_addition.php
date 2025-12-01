@@ -13,9 +13,7 @@ $current_course_id = ( $status['course_id'] - 1 ); // コースIDは1からな�
 $course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
-$current_year = date('Y');
-// $current_year の下2桁を取得
-$current_year = (int)(substr($current_year, -2));
+$current_year = $status['current_year'];
 
 // 現在の月を取得
 $current_month = date('n');
