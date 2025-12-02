@@ -29,7 +29,7 @@ if (!isset($_SESSION['user_email'])) {
 }
 
 // セッションから画像URLを取得
-$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備
+$user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // デフォルト画像を準備
 ?>
 
 <!DOCTYPE html>
