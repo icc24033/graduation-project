@@ -131,17 +131,8 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course.php">コースの編集</a></li>
                 </ul>
-                
-                <form action="..\..\..\app\teacher\student_account_edit_backend\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="this.form.submit();">
-                        <label for="csvFile" class="custom-file-upload-button">
-                            <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
-                        </label>
-                    </div>
-                </form>
-                
             </nav>
+            
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
@@ -165,7 +156,6 @@ catch (PDOException $e) {
                     ?>
                         <div class="table-row">
                             <div class="column-check">
-                                <input type="checkbox" class="checkbox" data-student-id="<?php echo htmlspecialchars($student_row['student_id']);?>" data-student-name="<?php echo htmlspecialchars($student_row['student_name']);?>">
                             </div>
                             <div class="column-student-id">
                                 <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
