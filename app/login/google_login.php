@@ -1,10 +1,23 @@
 <?php
+// 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
 
-$session_save_path = __DIR__ . '/../../sessions'; // セッション保存ディレクトリのパス
-if (!is_dir($session_save_path)) {
-    mkdir($session_save_path, 0755, true); // ディレクトリが存在しない場合は作成
-}
-session_save_path($session_save_path); // セッション保存パスを設定
+// 7日間SSOを維持するための設定 (session_start() より前) ★★★
+$session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
+
+// 0.1. サーバー側GCの有効期限を設定
+ini_set('session.gc_maxlifetime', $session_duration);
+
+// 0.2. クライアント側（ブラウザ）のCookie有効期限を設定
+// 'lifetime' に $session_duration を設定することで、7日間はログイン状態を保持する
+// secure => true: 本番環境で HTTPS でのみCookieを送信
+// httponly => true: JavaScriptからのアクセスを禁止
+session_set_cookie_params([
+    'lifetime' => $session_duration,
+    'path' => '/',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', // HTTPSならtrue
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 
 // login.htmlで"始める"ボタンが押されたときにこのファイルが呼び出される
 // GoogleOAuth2.0によるログイン処理を行う
@@ -146,6 +159,7 @@ if (isset($_GET['code'])) {
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
+            
             session_regenerate_id(true); // true を指定することで古いセッションファイルを破棄
 
             // 認証成功: セッションに情報を保存
