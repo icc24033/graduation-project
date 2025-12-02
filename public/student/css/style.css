@@ -1,42 +1,36 @@
-
 /* === 全体レイアウト === */
 body {
     /* モバイル画面の中央寄せと最大幅の設定 */
     max-width: 400px; 
     margin: 0 auto;
-    
     /* Flexboxで要素を縦方向に並べ、フッターを画面下部に固定 */
     display: flex; 
     flex-direction: column;
     min-height: 100vh;
-    
     /* bodyの背景色を白に設定 */
     background-color: #ffffff; 
-    
     font-family: 'Noto Sans JP', sans-serif;
-    padding: 0 10px; /* 画面端のわずかな余白 */
+    padding: 0; 
 }
 
 .main-content {
     /* メインコンテンツが余白を占有 */
     flex-grow: 1; 
     width: 100%;
-    margin: 0;
-    padding: 0 0 20px 0;
+    margin: 26px 0 0 0;
     box-sizing: border-box;
-    /* mainの背景色を#F3F8FFに設定 */
     background-color: #F3F8FF;
+    border-radius: 20px;
 }
-
 
 /* === ヘッダー === */
 .page-header {
     width: 100%;
     margin: 0;
-    padding: 10px 0;
+    padding: 10px 24px;
     height: 87px;
     display: flex;
-    justify-content: space-between; /* 左右に要素を配置 */
+    justify-content: space-between; 
     align-items: center;
     box-sizing: border-box;
 }
@@ -44,80 +38,70 @@ body {
 .page-header p {
     font-size: 16px;
     font-weight: 500;
-    margin-top: 20px; 
-    margin-left: 10px; /* 左端からの余白調整 */
+    margin-top: 20px;
+    margin-left: 0; 
 }
 
 /* ユーザーアイコンのスタイル (アイコン全体) */
 .user-icon {
-    /* アイコン全体を円形にし、白背景に */
     width: 50px; 
     height: 50px;
-    background-color: #ffffff; /* アイコンの背景色は白 */
+    background-color: #ffffff; 
     border-radius: 50%; 
-    
     padding: 0;
     box-sizing: border-box; 
-    
     display: flex;
     flex-direction: column;
     justify-content: flex-end; 
     align-items: center;
     overflow: hidden; 
     margin-top: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 立体感のための影 */
-    margin-right: 10px; /* 右端からの余白調整 */
+    margin-right: 0; 
 }
 
 /* 頭の部分 (青色の円) */
 .i_head {
-    width: 30%; 
-    height: 30%; 
+    width: 20px; 
+    height: 20px; 
     border-radius: 50%;
-    background-color: #C0DEFF; /* 頭の色を青に */
-    margin-bottom: 3px; 
+    background-color: #C0DEFF; 
 }
 
 /* 体の部分 (青色の半円) */
 .i_body {
-    width: 50%; 
-    height: 35%; 
+    width: 30px; 
+    height: 20px; 
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    background-color: #C0DEFF; /* 体の色を青に */
+    background-color: #C0DEFF; 
 }
 
 /* === 時間割ヘッダー（時間割と日付） === */
 .schedule-header {
-    display: flex;
-    justify-content: space-between;
+    display: flex; 
+    justify-content: space-between; 
     align-items: center;
-    margin-bottom: 10px;
-    /* 修正: timetable-infoにパディングを移動するため削除 */
-    padding: 0; 
+    margin-bottom: 20px;
+    padding: 0 24px;
 }
 
-/* 修正/追加: Auto Layout (Flexbox, Padding, Gap) を適用 */
+/* Auto Layout (Flexbox, Padding, Gap) を適用 */
 .timetable-info {
     display: flex;
     align-items: center;
-    /* Auto Layout: Padding 24px を適用 (上下左右) */
-    padding: 24px;
-    /* Auto Layout: アイコンと文字の間隔 (gap) 10px を適用 */
+    padding: 24px 0 0 0;
     gap: 10px; 
-    
-    /* Auto Layout の背景と角丸 */
-    background-color: #ffffff;
-    border-radius: 12px;
+    background-color: #F3F8FF;
+    border-radius: 20px;
 }
 
-.icon-timetable {
+.i-timetable {
     width: 24px;
     height: 24px;
-    /* 修正: gap: 10px を使用するため、margin-rightを削除 */
     margin-right: 0; 
+    filter: invert(15%) sepia(20%) saturate(600%) hue-rotate(180deg) brightness(80%) contrast(90%);
 }
 
 .timetable-text {
@@ -126,40 +110,40 @@ body {
 }
 
 .date {
-    font-size: 14px;
-    /* .timetable-info の上パディングに位置を合わせる */
-    padding-top: 24px; 
-    margin-right: 10px; /* bodyのpaddingに合わせる */
+    font-size: 13px;
+    margin: 24px 0 0 0;
+    letter-spacing: 8%;
 }
 
 /* === 時間割カードリスト === */
 .schedule-list {
-    background-color: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); 
     overflow: hidden;
-    margin: 0 10px; /* 左右に余白を追加 */
+    margin: 0; 
+    background-color: #F3F8FF;
+    padding: 0 24px;
 }
 
 /* 各授業のカード */
-.class-card {
-    padding: 15px 0;
-    border-bottom: 1px solid #e0e0e0; 
+.card {
+    padding: 30px 0; 
+    border-bottom: 1px solid #222222; 
+    position: static; 
+    z-index: 1; 
 }
 
-.class-card:last-child {
+.card:last-child {
     border-bottom: none;
 }
 
-.class-info {
-    display: flex; /* 授業名（左）と時限・ボタン（右）を横並びにする */
+.info {
+    display: flex; 
 }
 
 /* 授業名、教室（左側） */
 .subject-details {
+    margin: 0 25px 7px 0;
     width: 35%; 
-    padding-left: 15px;
-    padding-right: 15px; /* 縦線とのスペース */
     position: relative;
 }
 
@@ -171,69 +155,322 @@ body {
     right: 0;
     width: 1px;
     height: 100%;
-    background-color: #e0e0e0; 
+    background-color: #222222; 
 }
 
-.subject-name {
-    /* 修正: フォントサイズを大きく */
-    font-size: 28px; 
-    font-weight: 700;
-    line-height: 1.1; /* 行間を狭くして2行表示をコンパクトにする */
-    
-    /* 修正: 教室名との間に余白を追加 */
-    margin-bottom: 10px; 
+.subject {
+    font-size: 32px; 
+    font-weight: 400;
+    line-height: 1.1; 
+    margin-bottom: 20px; 
+    text-align: center;
 }
 
 .room-name {
-    font-size: 12px;
     font-weight: 400;
-    color: #666666;
+    color: #222222;
+    text-align: center;
+    font-size: 13px;
 }
 
 /* 時限とボタン（右側） */
 .period-details {
     width: 65%;
     padding-left: 15px;
-    padding-right: 15px;
+    padding-right: 0;
+    /* Flexコンテナにし、中身を左から配置するように変更 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
 }
 
 .period-time {
-    font-size: 14px;
-    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    margin-bottom: 0; 
+    /* テキストを左寄せに */
+    text-align: left; 
+    font-size: 12px; 
+    color: #222222; 
+    /* 親要素の幅に合わせて全体幅を取る */
+    width: 100%; 
+    font-weight: 500;
 }
 
 .button-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    margin-top: 20px; 
+    gap: 15px; 
+    position: static; 
+    /* ボタンをコンテナの左端に揃える */
+    align-items: flex-start; 
 }
 
 /* ボタンの共通スタイル */
-.class-button {
+.button {
     display: flex; 
     align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 24px;
     background-color: #495666; 
     border-radius: 16px;
     color: #ffffff; 
+    font-weight: 500;
+    width: 180px; /* 幅を180pxに固定 */
+    text-decoration: none;
+    margin: 0;
+    font-size: 14px; 
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+    z-index: 2; 
+    /* アニメーションのための設定 */
+    transition: background-color 0.3s, color 0.3s, border-radius 0.3s, box-shadow 0.3s;
+}
+
+/* 授業詳細ボタンの配置（元々のスタイル） */
+.detail-toggle {
+    justify-content: space-between; /* テキストとアイコンを両端に寄せる */
+}
+
+/* 持ってくるものボタンの配置 (アイコンを右に寄せる) */
+.item-toggle {
+    justify-content: space-between; /* テキストとアイコンを両端に寄せる */
+    gap: 0; 
+}
+
+
+.button-icon {
+    width: 12px; 
+    height: 12px; 
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+    transition: transform 0.3s ease;
+}
+
+
+/* --- ドロップダウン（共通）のスタイル --- */
+
+/* ドロップダウンラッパー (ボタンとリストをまとめるコンテナ) */
+.dropdown-wrapper {
+    margin-bottom: 0; 
+    width: 180px; /* ラッパーの幅も180pxに統一 */
+}
+
+/* 展開中のドロップダウンボタンの見た目（共通） */
+.dropdown-wrapper.active .dropdown-toggle {
+    background-color: #C0DEFF; 
+    color: #222222; 
+    border-bottom-left-radius: 0; 
+    border-bottom-right-radius: 0; 
+    border-bottom: 1px solid #C0DEFF; 
+    box-shadow: none;
+}
+
+/* 展開中のドロップダウンボタンのアイコンの色を黒に変える */
+.dropdown-wrapper.active .dropdown-toggle img.button-icon {
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%); 
+    transform: none; 
+}
+
+
+/* --- ドロップダウンコンテンツの共通スタイル（アニメーションの肝となる部分） --- */
+.dropdown-content {
+    /* 高さアニメーションの土台 */
+    max-height: 0; 
+    overflow: hidden; 
+    padding: 0; 
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; 
+
+    background-color: #ffffff; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    border-top: none; 
+    box-sizing: border-box; 
+    z-index: 1; 
+    margin-top: -10px; 
+    width: 180px; /* 幅を180pxに固定 */
+    border-radius: 0 0 16px 16px;
+}
+
+/* 【修正済み】リスト展開時 (max-heightを十分な高さに設定) */
+.dropdown-content.show {
+    max-height: 500px; 
+    /* paddingは各ドロップダウンの展開時スタイルで定義する */
+}
+
+
+/* ★★★ 授業詳細ドロップダウンの調整 (.detail-content) ★★★ */
+
+.detail-dropdown-wrapper {
+    width: 180px; 
+    margin-right: auto;
+    position: static; 
+}
+
+/* 授業詳細ボタンがアクティブな時、ボタンの幅を180pxに固定 */
+.detail-dropdown-wrapper.active .dropdown-toggle {
+    justify-content: flex-start; 
+    padding-left: 20px; 
+    padding-right: 20px; 
+    
+    /* 幅は180pxに固定 */
+    width: 180px; 
+    margin-right: 0; 
+    margin-left: 0;
+    
+    background-color: #C0DEFF; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    border-radius: 16px 16px 0 0; 
+    border-bottom: none; 
+}
+
+/* 授業詳細コンテンツの展開時のスタイル */
+.detail-content {
+    /* 幅は180pxに固定 */
+    width: 180px;
+    max-width: none;
+    
+    margin-left: 0; 
+    margin-right: 0; 
+    
+    margin-top: 0; 
+    margin-bottom: 0;
+    border-radius: 0 0 16px 16px; 
+    
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    background-color: #F3F8FF; 
+}
+
+/* 授業詳細コンテンツが開いた時のパディング設定 */
+.detail-content.show {
+    padding: 20px; 
+}
+
+/* 授業詳細内の個別のボックス (課題, 授業詳細) */
+.detail-box {
+    background-color: #ffffff; 
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.detail-title {
     font-size: 14px;
     font-weight: 500;
-    width: fit-content;
-    min-width: 150px;
-    text-decoration: none;
+    color: #495666;
+    margin-bottom: 5px;
 }
 
-/* ボタンの右端の矢印を擬似要素で作成 */
-.class-button::after {
-    content: '▶'; 
-    color: #ffffff;
-    font-size: 10px;
-    margin-left: 10px;
+.detail-text {
+    font-size: 14px;
+    color: #222222;
+    line-height: 1.5;
 }
 
 
-/* === フッター === */
+/* ★★★ 持ってくるものドロップダウンの調整 (.item-content) ★★★ */
+
+.item-dropdown-wrapper {
+    width: 180px; 
+    margin-right: 0;
+    position: static;
+}
+
+/* 持ってくるものボタンがアクティブな時 */
+.item-dropdown-wrapper.active .dropdown-toggle {
+    /* 幅は180pxに固定 */
+    width: 180px; 
+    margin-left: 0; 
+    margin-right: 0; 
+    
+    background-color: #C0DEFF; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    border-radius: 16px 16px 0 0; 
+    border-bottom: none; 
+}
+
+/* 持ち物リストのコンテンツのスタイル */
+.item-content {
+    margin-left: 0; 
+    margin-right: 0; 
+    
+    width: 180px; 
+    
+    margin-top: 0; 
+    background-color: #ffffff; 
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 持ち物リストが開いた時のパディング設定 */
+.item-content.show {
+    padding: 15px 24px 20px 24px; 
+}
+
+
+/* --- 以下、リスト項目やフッターのスタイル (変更なし) --- */
+
+/* リスト（ul）のスタイル */
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* リスト項目（li）のスタイル */
+.item-list li {
+    font-size: 14px;
+    color: #222222;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* チェックボックスのスタイル */
+.item-list input[type="checkbox"] {
+    appearance: none; 
+    width: 18px;
+    height: 18px;
+    border: 2px solid #495666;
+    border-radius: 4px;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+}
+
+/* 1. チェックが入った時のチェックボックスの見た目 */
+.item-list input[type="checkbox"]:checked {
+    background-color: #495666; 
+    border-color: #495666;
+}
+
+/* チェックマーク */
+.item-list input[type="checkbox"]:checked::before {
+    content: '✓';
+    color: #ffffff; 
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    line-height: 1;
+}
+
+/* 2. チェックが入った時のラベルに打ち消し線と色変更を適用 */
+.item-list input[type="checkbox"]:checked + label {
+    text-decoration: line-through; 
+    color: #a0a0a0; 
+}
+
+/* チェックボックスのラベルスタイル */
+.item-list label {
+    margin-left: 8px;
+    font-weight: 400;
+}
+
+/* ★★★ フッターのスタイル ★★★ */
 .page-footer {
     width: 100%;
     max-width: 400px;
@@ -260,8 +497,14 @@ body {
     padding: 5px;
 }
 
-.footer-icon {
+/* aタグのスタイル */
+.f-list li a {
+    display: block;
+}
+
+.f-icon {
     width: 28px;
     height: 28px;
     display: block;
+    filter: none;
 }
