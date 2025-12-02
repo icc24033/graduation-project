@@ -1,4 +1,24 @@
 <?php
+// 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
+
+// 7日間SSOを維持するための設定 (session_start() より前) ★★★
+$session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
+
+// 0.1. サーバー側GCの有効期限を設定
+ini_set('session.gc_maxlifetime', $session_duration);
+
+// 0.2. クライアント側（ブラウザ）のCookie有効期限を設定
+// 'lifetime' に $session_duration を設定することで、7日間はログイン状態を保持する
+// secure => true: 本番環境で HTTPS でのみCookieを送信
+// httponly => true: JavaScriptからのアクセスを禁止
+session_set_cookie_params([
+    'lifetime' => $session_duration,
+    'path' => '/',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', // HTTPSならtrue
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 // セッションを開始
 session_start();
 
@@ -7,8 +27,9 @@ if (!isset($_SESSION['user_email'])) {
     header('Location: ../login/login.html');
     exit();
 }
+
 // セッションから画像URLを取得
-$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備しておくのが安全
+$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +55,7 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デ�
         <div class="main">
             <!-- 機能 -->
             <section class="tool">
-                <img class="title_icon" src="images/icon_tool.png" alt="機能アイコン">
+                <img class="title_icon" src="./images/icon_tool.png" alt="機能アイコン">
                 <p class="title_name">機能</p>
             </section>
             <div class="background">
@@ -102,57 +123,6 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デ�
                         <p class="card_sub">期間を設定して<br>時間割を作成します。</p>
                     </a>
                 </div>
-            </div>
-            <!-- メッセージ履歴 -->
-            <section class="message_history">
-                <img class="title_icon" src="images/icon_mail.png" alt="機能アイコン">
-                <p class="title_name">メッセージ履歴</p>
-            </section>
-            <div class="background">
-                <a href="">
-                    <div class="list-item">
-                        
-                        <div class="profile-image"></div>
-                        <div class="content">
-                            <div class="name">送信先</div>
-                            <div class="text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト</div>
-                        </div>
-                        <div class="date">○月○日</div>
-                    </div>
-                </a>
-                <a href="">
-                    <div class="list-item">
-                        
-                        <div class="profile-image"></div>
-                        <div class="content">
-                            <div class="name">送信先</div>
-                            <div class="text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト</div>
-                        </div>
-                        <div class="date">○月○日</div>
-                    </div>
-                </a>
-                <a href="">
-                    <div class="list-item">
-                        
-                        <div class="profile-image"></div>
-                        <div class="content">
-                            <div class="name">送信先</div>
-                            <div class="text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト</div>
-                        </div>
-                        <div class="date">○月○日</div>
-                    </div>
-                </a>
-                <a href="">
-                    <div class="list-item">
-                        
-                        <div class="profile-image"></div>
-                        <div class="content">
-                            <div class="name">送信先</div>
-                            <div class="text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト</div>
-                        </div>
-                        <div class="date">○月○日</div>
-                    </div>
-                </a>
             </div>
         </div>
     </body>
