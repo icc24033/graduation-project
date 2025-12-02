@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // サーバーサイドの処理ファイル
-        const url = '../../../app/teacher/student_account_edit_backend/student_account.php'; 
+        const url = '../../../app/teacher/student_account_edit_backend/student_course.php'; 
     
         // コースIDと年度をURLパラメータとして付与してリダイレクト
         window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
