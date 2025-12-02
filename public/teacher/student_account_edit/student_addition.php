@@ -84,46 +84,6 @@ catch (PDOException $e) {
         <main class="main-content">
             <nav class="sidebar">
                 <ul>
-                    <li class="nav-item is-group-label">年度</li> 
-                    <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                            <span class="current-value">20<?php echo $status['current_year']?>年度</span>
-                        </button>
-                        <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <?php foreach ($school_year as $year): ?>
-                                <li>
-                                    <a href="#" data-current-year="<?php echo htmlspecialchars($year);?>" data-current-course="<?php echo htmlspecialchars($current_course_id); ?>">
-                                        20<?php echo htmlspecialchars($year); ?>年度
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item is-group-label">コース</li> 
-                    <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" 
-                                id="courseDropdownToggle" 
-                                aria-expanded="false" 
-                                data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
-                                data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                            <span class="current-value"><?php echo htmlspecialchars($current_course_name); ?></span>
-                        </button>
-                        <ul class="dropdown-menu" id="courseDropdownMenu">
-                            <?php if (!empty($course)): ?>
-                                <?php foreach ($course as $row): ?>
-                                    <li>
-                                        <a href="#" data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                                            <?php echo htmlspecialchars($row['course_name']); ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                                <!-- ---------------------------------------------------------------------------------- -->
-                            <?php else: ?>
-                                <li><a href="#">コース情報が見つかりません</a></li>
-                            <?php endif; ?>
-                        </ul>
-                    </li>
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item is-active"><a href="student_addition.php">アカウントの作成</a></li>
@@ -150,58 +110,14 @@ catch (PDOException $e) {
                         <div class="column-course">コース</div>
                     </div>
                     
-                    <?php 
-                    // $stmt_test_studentが有効な場合のみループ
-                    if ($stmt_test_student): 
-                        $has_students = false; // データが存在したかどうかのフラグ
-
-                        while ($student_row = $stmt_test_student->fetch()): 
-        
-                            // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
-                            $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
-
-                            if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
-                            $has_students = true;
-                    ?>
-                        <div class="table-row">
-                            <div class="column-check">
-                            </div>
-                            <div class="column-student-id">
-                                <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
-                            </div>
-                            <div class="column-name">
-                                <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
-                            </div>
-                            <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu"><?php echo htmlspecialchars($student_row['course_name']);?></span>
-                            </div>
+                    <div class="table-row">
+                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20001" data-student-name="氏名"></div> 
+                        <div class="column-student-id"><input type="text" value="20001"></div> 
+                        <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
+                        <div class="column-course">
+                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
                         </div>
-
-                    <?php 
-                            endif; // if ($student_year_prefix === $current_year_short) 終了
-                        endwhile; // whileループ終了
-                        
-                        // ループ後にデータがなかった場合のエラー表示
-                        if (!$has_students):
-                    ?>
-                            <div class="table-row">
-                                <div class="column-check"></div> 
-                                <div class="column-student-id"></div> 
-                                <div class="column-name">学生情報が見つかりません。</div> 
-                                <div class="column-course"></div>
-                            </div>
-                    <?php 
-                        endif;
-                        // DB接続エラーなどで$stmt_test_studentがnullの場合
-                    else:
-                    ?>
-                        <div class="table-row">
-                            <div class="column-check"></div> 
-                            <div class="column-student-id"></div> 
-                            <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
-                            <div class="column-course"></div>
-                        </div>
-                    <?php endif; ?>
+                    </div>
 
                 </div>
                 <div class="button-group">
