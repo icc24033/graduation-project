@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
+
 // login.htmlで"始める"ボタンが押されたときにこのファイルが呼び出される
 // GoogleOAuth2.0によるログイン処理を行う
 
@@ -139,6 +142,9 @@ if (isset($_GET['code'])) {
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
+
+            session_regenerate_id(true); // true を指定することで古いセッションファイルを破棄
+
             // 認証成功: セッションに情報を保存
             $_SESSION['user_email'] = $userEmail; // アカウントのアドレスを獲得
             $_SESSION['logged_in'] = true;
