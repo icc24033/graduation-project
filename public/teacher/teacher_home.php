@@ -1,4 +1,11 @@
 <?php
+
+$session_save_path = __DIR__ . '/../../sessions'; // セッション保存ディレクトリのパス
+if (!is_dir($session_save_path)) {
+    mkdir($session_save_path, 0755, true); // ディレクトリが存在しない場合は作成
+}
+session_save_path($session_save_path); // セッション保存パスを設定
+
 // セッションを開始
 session_start();
 
