@@ -16,32 +16,3 @@ header{
     position: relative;
     top: 25%;
 }
-
-/* ==================================== */
-/* Googleアカウントアイコンのスタイル */
-/* ==================================== */
-
-/* ユーザーアバターのコンテナ (teacher_home.phpで追加したdiv要素) */
-.user-avatar {
-    /* ヘッダーの右上に絶対配置 */
-    position: absolute; 
-    right: 20px;            /* 右端からの距離 */
-    top: 50%;               /* ヘッダーの垂直中央 */
-    transform: translateY(-50%); /* 上下中央に微調整 */
-    
-    width: 60px;            /* アイコンのサイズ */
-    height: 60px;           /* アイコンのサイズ */
-    
-    border-radius: 50%;     /* 丸くする */
-    overflow: hidden;       /* 画像が枠からはみ出さないように */
-    border: 2px solid #fff; /* アイコンを際立たせるための枠線 */
-    z-index: 1001;          /* ヘッダーの上 (z-index: 1000) に表示 */
-    cursor: pointer;        /* クリック可能であることを示す */
-}
-
-/* アバター画像自体 */
-.avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 画像の縦横比を維持しつつコンテナを埋める */
-}
