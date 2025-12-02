@@ -195,11 +195,14 @@ catch (PDOException $e) {
                     <?php endif; ?>
 
                 </div>
-                <div class="button-group">
-                    <button class="add-button">追加</button>
-                    <button class="add-button">追加人数入力</button>
-                </div>
-                <button class="complete-button">完了</button>
+                <?php 
+                    // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
+                    if ($has_students): 
+                ?>
+                    <button class="complete-button">完了</button>
+                <?php 
+                endif; 
+                ?>
             </div>
         </main>
     </div>
