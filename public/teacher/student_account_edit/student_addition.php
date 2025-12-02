@@ -126,10 +126,10 @@ catch (PDOException $e) {
                     </li>
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_account.php">アカウントの作成</a></li>
+                    <li class="nav-item is-active"><a href="student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
-                    <li class="nav-item"><a href="student_edit_course.html">コースの編集</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course.php">コースの編集</a></li>
                 </ul>
                 
                 <form action="..\..\..\app\teacher\student_account_edit_backend\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
@@ -145,7 +145,7 @@ catch (PDOException $e) {
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"><input type="checkbox" id="selectAllCheckbox"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
@@ -165,7 +165,6 @@ catch (PDOException $e) {
                     ?>
                         <div class="table-row">
                             <div class="column-check">
-                                <input type="checkbox" class="checkbox" data-student-id="<?php echo htmlspecialchars($student_row['student_id']);?>" data-student-name="<?php echo htmlspecialchars($student_row['student_name']);?>">
                             </div>
                             <div class="column-student-id">
                                 <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
