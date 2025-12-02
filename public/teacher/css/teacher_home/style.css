@@ -1,4 +1,7 @@
-/* ウィンドサイズ最大～ */
+/* ～ウィンドサイズ最大～ */
+body{
+    background-color: #f9f9f9;
+}
 .tool{
     display: flex;
     justify-content: center;
@@ -6,7 +9,6 @@
     position: relative;
     top: 100px;
     margin-right: 50%;
-    
 }
 @media (max-width:1700px){
     .tool{
@@ -53,11 +55,9 @@
 
 .background{
     display: flex;
-    gap: 50px 60px;
+    gap: 25px 25px;
     margin: 0 auto;
     flex-wrap:wrap;
-    background-color: #CFD5DF;
-    padding: 55px 70px;
     border-radius:30px;
     width: 60%;
     max-width: 800px;
@@ -66,11 +66,11 @@
 
 .card{
     background-color: rgb(255, 255, 255);
-    border-radius: 16%;
+    border-radius: 20px;
     text-align: center;
-    width: 212px;
-    height: 134px;
-    box-shadow: 0 4px 4px 0 #999;
+    width: 240px;
+    height: 220px;
+    border: solid 1px #e5e5e5;
 }
 
 .card a{
