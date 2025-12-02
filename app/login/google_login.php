@@ -1,4 +1,11 @@
 <?php
+
+$session_save_path = __DIR__ . '/../../sessions'; // セッション保存ディレクトリのパス
+if (!is_dir($session_save_path)) {
+    mkdir($session_save_path, 0700, true); // ディレクトリが存在しない場合は作成
+}
+session_save_path($session_save_path); // セッション保存パスを設定
+
 // login.htmlで"始める"ボタンが押されたときにこのファイルが呼び出される
 // GoogleOAuth2.0によるログイン処理を行う
 
@@ -139,6 +146,8 @@ if (isset($_GET['code'])) {
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
+            session_regenerate_id(true); // true を指定することで古いセッションファイルを破棄
+
             // 認証成功: セッションに情報を保存
             $_SESSION['user_email'] = $userEmail; // アカウントのアドレスを獲得
             $_SESSION['logged_in'] = true;

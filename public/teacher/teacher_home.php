@@ -1,3 +1,17 @@
+<?php
+// セッションを開始
+session_start();
+
+// ログインしていない場合は強制的にログイン画面へリダイレクト
+if (!isset($_SESSION['user_email'])) {
+    header('Location: ../login/login.html');
+    exit();
+}
+
+// セッションから画像URLを取得
+$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -12,16 +26,16 @@
         <link rel="stylesheet" type="text/css" href="css/common.css">
     </head>
     <body>
-        <header>
-            <a href="">
-                <p class="header"></p>
-            </a>
-    </header>
+        <header> 
+            <div class="user-avatar">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+            </div>
+        </header>
 
         <div class="main">
             <!-- 機能 -->
             <section class="tool">
-                <img class="title_icon" src="../マスタアカウント/images/icon_tool.png" alt="機能アイコン">
+                <img class="title_icon" src="./images/icon_tool.png" alt="機能アイコン">
                 <p class="title_name">機能</p>
             </section>
             <div class="background">
