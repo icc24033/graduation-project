@@ -41,9 +41,9 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // ãƒ‡ãƒ
         <meta name="keywords" content="">
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="robots" content="nofollow,noindex">
-        <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
         <link rel="stylesheet" type="text/css" href="css/reset.css">
         <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
     </head>
     <body>
         <header> 
