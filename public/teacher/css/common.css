@@ -4,8 +4,17 @@ header{
     position: fixed;
     z-index: 1000;
     background-color:#C0DEFF;
-}
 
+    /* ★追加: Flexboxで子要素を配置 */
+    display: flex;
+    /* ★追加: 子要素を右端に寄せる */
+    justify-content: flex-end; 
+    /* ★追加: 縦方向の中央揃え */
+    align-items: center; 
+    /* ★追加: 右側に余白 */
+    padding-right: 20px;
+}
+/*
 .header{
     width: 60px;
     height: 60px;
@@ -16,6 +25,7 @@ header{
     position: relative;
     top: 25%;
 }
+*/
   
 /* ==================================== */
 /* Googleアカウントアイコンのスタイル */
@@ -24,10 +34,16 @@ header{
 /* ユーザーアバターのコンテナ (teacher_home.phpで追加したdiv要素) */
 .user-avatar {
     /* ヘッダーの右上に絶対配置 */
+
+    /* ★変更: absolute/top/right/transform を削除 */
+    /* position: relative; は user_menu.css で定義されているため、ここでは不要 */
+    
+    /*
     position: absolute; 
-    right: 20px;            /* 右端からの距離 */
-    top: 50%;               /* ヘッダーの垂直中央 */
-    transform: translateY(-50%); /* 上下中央に微調整 */
+    right: 20px;            
+    top: 50%;               
+    transform: translateY(-50%);
+    */
     
     width: 60px;            /* アイコンのサイズ */
     height: 60px;           /* アイコンのサイズ */
