@@ -9,13 +9,11 @@ $status = $_SESSION['student_account'] ?? null;
 ////unset($_SESSION['student_account']);
 
 // ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-$current_course_id = ( $status['course_id'] - 1 ); // コースIDは1からなので、配列インデックス用に-1する
+$current_course_id = $status['course_id']; // コースIDは1からなので、配列インデックス用に-1する
 $course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
-$current_year = date('Y');
-// $current_year の下2桁を取得
-$current_year = (int)(substr($current_year, -2));
+$current_year = $status['current_year'];
 
 // 現在の月を取得
 $current_month = date('n');
@@ -50,7 +48,7 @@ try {
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$current_course_id]['course_name'];
+        $current_course_name = $course[$status['course_id'] - 1]['course_name'];
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -87,13 +85,13 @@ catch (PDOException $e) {
                 <ul>
                     <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
+                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($current_year[0]); ?>">
                             <span class="current-value">20<?php echo $school_year[0]?>年度</span>
                         </button>
                         <ul class="dropdown-menu" id="yearDropdownMenu">
                             <?php foreach ($school_year as $year): ?>
                                 <li>
-                                    <a href="#" data-year="<?php echo htmlspecialchars($year); ?>">
+                                    <a href="#" data-current-year="<?php echo htmlspecialchars($year);?>" data-current-course="<?php echo htmlspecialchars($current_course_id); ?>">
                                         20<?php echo htmlspecialchars($year); ?>年度
                                     </a>
                                 </li>
@@ -103,15 +101,18 @@ catch (PDOException $e) {
             
                     <li class="nav-item is-group-label">コース</li> 
                     <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="courseDropdownToggle" aria-expanded="false">
+                        <button class="dropdown-toggle" 
+                                id="courseDropdownToggle" 
+                                aria-expanded="false" 
+                                data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
+                                data-current-year="<?php echo htmlspecialchars($current_year); ?>">
                             <span class="current-value"><?php echo htmlspecialchars($current_course_name); ?></span>
                         </button>
                         <ul class="dropdown-menu" id="courseDropdownMenu">
                             <?php if (!empty($course)): ?>
                                 <?php foreach ($course as $row): ?>
                                     <li>
-                                        <!-- data-course には course_id の値を、表示名には course_name の値を指定 -->
-                                        <a href="#" data-course="<?php echo htmlspecialchars($row['course_id']); ?>">
+                                        <a href="#" data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" data-current-year="<?php echo htmlspecialchars($current_year); ?>">
                                             <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>

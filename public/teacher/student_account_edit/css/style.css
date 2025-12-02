@@ -209,14 +209,6 @@
 .content-area {
     flex-grow: 1;
     padding: 30px 50px 50px 50px; 
-<<<<<<< HEAD
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-}
-
-.account-table-container {
-=======
     /* 【追加】ここから */
     display: flex;
     flex-direction: column;
@@ -225,15 +217,11 @@
 }
 
 .account-table-container { /* 204行目あたり */
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
     width: 100%;
     max-width: 800px;
     margin-bottom: 30px;
     border: 1px solid #CFD5DF;
     border-radius: 5px;
-<<<<<<< HEAD
-    height: 700px; /* テーブルが表示される最大高さを設定 */
-=======
     
     /* 削除/コメントアウト */
     /* height: 700px; */ 
@@ -244,7 +232,6 @@
     max-height: calc(100vh - 350px); 
     /* 【追加】ここまで */
 
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9
     overflow-y: auto; /* 縦方向のスクロールを有効にする */
     position: relative; /* stickyの基準にするため */
 }
@@ -797,8 +784,4 @@
     border: 0;
 }
 
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 95c2c804f5453548743bfe04df8beff7e12da0c9

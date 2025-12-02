@@ -10,17 +10,21 @@ session_start();
 $received_course_id = null;
 $message = "コースIDは受信されませんでした。";
 
-// 2. デコードが成功し、かつ 'course_id' が存在するかチェック
-if (isset($_GET['course_id'])) {
-    //コースIDを取得
+// 2. デコードが成功し、かつ 'course_id' と'current_year'が存在するかチェック
+if (isset($_GET['course_id']) && isset($_GET['current_year'])) {
+    // コースIDを取得
     $received_course_id = $_GET['course_id'];
-    //$message = "コースID「{$received_course_id}」を正常に受信しました。";
+    // 年度の取得
+    $received_current_year = $_GET['current_year'];
 } else {
     // データ受信に失敗した場合
     $received_course_id = 1; // デフォルト値を設定（例: 1）
+
+    $received_current_year = date("Y"); 
+    
+    // $received_current_year の下2桁を取得
+    $received_current_year = substr($received_current_year, -2);
 }
-
-
 
 
 //データベース接続情報
@@ -52,7 +56,8 @@ $_SESSION['student_account'] = [
     'database_options' => $options,
     'course_sql' => $course_sql,
     'course_id' => $received_course_id,
-    'student_sql' => $student_sql
+    'student_sql' => $student_sql,
+    'current_year' => $received_current_year
 ];
 
 // ★ student_addition.php にリダイレクトして処理を終了
