@@ -172,8 +172,14 @@ if (isset($_GET['code'])) {
                     // データベース接続を閉じる
                     $pdo = null;
                     
-                    // ホーム画面に遷移
-                    header('Location: ' . HOME_URL);
+                    // HTTPヘッダーでキャッシュを無効化
+                    // ブラウザの履歴に戻ってもページが再読み込みされない。
+                    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                    header("Pragma: no-cache");
+                    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+
+                    // 履歴操作用の redirect.php にリダイレクト
+                    header('Location: redirect.php'); 
                     exit();
                 }
             }
@@ -182,25 +188,12 @@ if (isset($_GET['code'])) {
                 // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
                 error_log("DB Connection Error: " . $e->getMessage()); 
                 sleep(2); // 遅延処理
-                
-                // ★★★ ここを一時的に置き換えます ★★★
-                die("DB接続エラー詳細: " . $e->getMessage()); 
-                // ★★★ 元のコード: die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
+                die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
 
-                // データベース接続を閉じる (この行はここに残して問題ありません)
+                // データベース接続を閉じる
                 $pdo = null;
             }
-            // catch (PDOException $e) {
-            //     // データベース接続またはクエリ実行エラー
-            //     // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
-            //     error_log("DB Connection Error: " . $e->getMessage()); 
-            //     sleep(2); // 遅延処理
-            //     die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
-
-            //     // データベース接続を閉じる
-            //     $pdo = null;
-            // }
-            // 照合失敗：ループを抜けてエラーメッセージ表示へ
+            //照合失敗：ループを抜けてエラーメッセージ表示へ
             catch (Exception $e) {
                 // その他のエラー処理
                 error_log("General Error: " . $e->getMessage());
