@@ -33,6 +33,11 @@ define('CLIENT_SECRET', $config['client_secret']); // シークレット分離
 define('REDIRECT_URI', $config['redirect_uri']);
 define('ICC_DOMAIN', $config['icc_domain']); 
 define('HOME_URL', $config['home_url']);
+// データベース接続情報
+define('DB_HOST', $config['db_host']);   // 'db_host' の値 'localhost' を DB_HOST に代入
+define('DB_NAME', $config['db_name']);   // 'db_name' の値 'icc_smart_campus' を DB_NAME に代入
+define('DB_USER', $config['db_user']);   // 'db_user' の値 'root' を DB_USER に代入
+define('DB_PASS', $config['db_pass']);   // 'db_pass' の値 'root' を DB_PASS に代入
 
 
 // 取得したい情報のスコープ（メールアドレスと基本プロフィール）
