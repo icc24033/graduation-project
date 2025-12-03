@@ -1,4 +1,7 @@
 <?php
+
+// require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
+
 // セッション開始
 session_start();
 
