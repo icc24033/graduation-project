@@ -132,12 +132,12 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
-                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course.php">コースの編集</a></li>
+                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course_edit.php">コースの編集</a></li>
                 </ul>
             </nav>
             
             <div class="content-area">
-                    <form action="..\..\..\app\teacher\student_account_edit_backend\student_course.php" method="post">
+                <form action="..\..\..\app\teacher\student_account_edit_backend\student_course_edit.php" method="post">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
