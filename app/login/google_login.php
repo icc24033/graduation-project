@@ -117,6 +117,19 @@ function send_curl_request(string $url, ?array $data, ?string $accessToken, stri
     return $result; // デコードされたレスポンスを返す
 }
 
+/** 
+*ログインエラー時の共通処理
+*遅延処理を行い、login_error.htmlへリダイレクト
+**
+* @return void
+*/
+function handle_login_error(): void
+{
+    sleep(3); // 遅延処理
+    header('Location: login_error.html');
+    exit(); // リダイレクト後は必ず exit()
+}
+
 // -------------------------------------------------------------------------
 //【A. コールバック処理：認可コードを受け取った後の処理】
 // -------------------------------------------------------------------------
@@ -142,7 +155,7 @@ if (isset($_GET['code'])) {
     // 3.3. ICCアカウントかどうかのドメイン制限チェック (セキュリティチェック)
     $userEmail = $userInfo['email'] ?? null;
 
-    if ($userEmail) {
+    if ($userEmail) { // メールアドレスが取得できた場合
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
@@ -182,33 +195,40 @@ if (isset($_GET['code'])) {
                     header('Location: redirect.php'); 
                     exit();
                 }
+                else {
+                    // 照合失敗：メールアドレスがテーブルに存在しない場合
+                    $pdo = null; // データベース接続を閉じる
+                    // 共通のエラー処理関数を呼び出す
+                    handle_login_error();
+                }
             }
             catch (PDOException $e) {
                 // データベース接続またはクエリ実行エラー
                 // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
-                error_log("DB Connection Error: " . $e->getMessage()); 
-                sleep(2); // 遅延処理
-                die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
-
-                // データベース接続を閉じる
                 $pdo = null;
+                error_log("DB Connection Error: " . $e->getMessage());
+                // 共通のエラー処理関数を呼び出す
+                handle_login_error();
             }
             //照合失敗：ループを抜けてエラーメッセージ表示へ
             catch (Exception $e) {
                 // その他のエラー処理
                 error_log("General Error: " . $e->getMessage());
-                sleep(2); // 遅延処理
-                die("2:認証に失敗しました。アプリケーションのエラーが発生しました。");
-            // データベース接続を閉じる
-            $pdo = null;
+                $pdo = null;
+                handle_login_error();
             }
         }
-        sleep(3); // 失敗時に3秒待機
         // ドメイン不一致またはメールアドレスが取得できなかった場合
-        die("3:認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
+        // 共通のエラー処理関数を呼び出す
+        else {
+            handle_login_error();
+        }
     }
-    sleep(3); // 失敗時に3秒待機
-    die("4:認証に失敗しました。メールアドレスが取得できませんでした。");
+    else {
+        // メールアドレスが取得できなかった場合
+        // 共通のエラー処理関数を呼び出す
+        handle_login_error();
+    }
 }
 
 // -------------------------------------------------------------------------
