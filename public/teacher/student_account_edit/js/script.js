@@ -239,10 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
                     redirectToStudentAccountPage(finalCourseId, finalYear);
                 }
-                else if (shouldRedirectCenter) {
-                    // student_course.phpに値を送信せずにリダイレクト
-                    window.location.href = `../../../app/teacher/student_account_edit_backend/student_course.php`;
-                }
             });
         });
     });
