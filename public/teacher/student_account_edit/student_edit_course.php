@@ -1,4 +1,7 @@
 <?php
+
+// require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
+
 // セッション開始
 session_start();
 
@@ -129,80 +132,91 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
-                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course.php">コースの編集</a></li>
+                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course_edit.php">コースの編集</a></li>
                 </ul>
             </nav>
             
             <div class="content-area">
-                <div class="account-table-container">
-                    <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
-                        <div class="column-name">氏名</div>
-                        <div class="column-course">コース</div>
-                    </div>
-                    
-                    <?php 
-                    // $stmt_test_studentが有効な場合のみループ
-                    if ($stmt_test_student): 
-                        $has_students = false; // データが存在したかどうかのフラグ
-
-                        while ($student_row = $stmt_test_student->fetch()): 
-        
-                            // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
-                            $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
-
-                            if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
-                            $has_students = true;
-                    ?>
-                        <div class="table-row">
-                            <div class="column-check">
-                            </div>
-                            <div class="column-student-id">
-                                <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
-                            </div>
-                            <div class="column-name">
-                                <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
-                            </div>
-                            <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu"><?php echo htmlspecialchars($student_row['course_name']);?></span>
-                            </div>
+                <form action="..\..\..\app\teacher\student_account_edit_backend\student_course_edit.php" method="post">
+                    <div class="account-table-container">
+                        <div class="table-header">
+                            <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                            <div class="column-name">氏名</div>
+                            <div class="column-course">コース</div>
                         </div>
-
-                    <?php 
-                            endif; // if ($student_year_prefix === $current_year_short) 終了
-                        endwhile; // whileループ終了
                         
-                        // ループ後にデータがなかった場合のエラー表示
-                        if (!$has_students):
-                    ?>
+                        <?php 
+                        // $stmt_test_studentが有効な場合のみループ
+                        if ($stmt_test_student): 
+                            $has_students = false; // データが存在したかどうかのフラグ
+
+                            while ($student_row = $stmt_test_student->fetch()): 
+            
+                                // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
+                                $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
+
+                                if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
+                                $has_students = true;
+                        ?>
+                            <div class="table-row">
+                                <div class="column-check">
+                                </div>
+                                <div class="column-student-id">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
+                                </div>
+                                <div class="column-name">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
+                                </div>
+                                <div class="column-course">
+                                    <span class="course-display" 
+                                        data-course-name-display 
+                                        data-dropdown-for="courseDropdownMenu"
+                                        data-selected-course="<?php echo htmlspecialchars($student_row['course_id']); ?>">
+                                        <?php echo htmlspecialchars($student_row['course_name']);?>
+                                    </span>
+                                <input type="hidden" 
+                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>][course_id]" 
+                                    value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
+                                    class="course-hidden-input">
+                                </div>
+                            </div>
+
+                        <?php 
+                                endif; // if ($student_year_prefix === $current_year_short) 終了
+                            endwhile; // whileループ終了
+                            
+                            // ループ後にデータがなかった場合のエラー表示
+                            if (!$has_students):
+                        ?>
+                                <div class="table-row">
+                                    <div class="column-check"></div> 
+                                    <div class="column-student-id"></div> 
+                                    <div class="column-name">学生情報が見つかりません。</div> 
+                                    <div class="column-course"></div>
+                                </div>
+                        <?php 
+                            endif;
+                            // DB接続エラーなどで$stmt_test_studentがnullの場合
+                        else:
+                        ?>
                             <div class="table-row">
                                 <div class="column-check"></div> 
                                 <div class="column-student-id"></div> 
-                                <div class="column-name">学生情報が見つかりません。</div> 
+                                <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
                                 <div class="column-course"></div>
                             </div>
-                    <?php 
-                        endif;
-                        // DB接続エラーなどで$stmt_test_studentがnullの場合
-                    else:
-                    ?>
-                        <div class="table-row">
-                            <div class="column-check"></div> 
-                            <div class="column-student-id"></div> 
-                            <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
-                            <div class="column-course"></div>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
 
-                </div>
-                <?php 
-                    // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
-                    if ($has_students): 
-                ?>
-                    <button class="complete-button">完了</button>
-                <?php 
-                endif; 
-                ?>
+                    </div>
+                    <?php 
+                        // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
+                        if ($has_students): 
+                    ?>
+                        <button class="complete-button" type="submit">完了</button>
+                    <?php 
+                    endif; 
+                    ?>
+                </form>
             </div>
         </main>
     </div>

@@ -15,8 +15,7 @@ error_reporting(E_ALL);
 // 2. 機密情報の読み込み
 // ----------------------------------------------------
 
-// public/login/ から見て、親の親 (/2025/sotsuken/graduation-project/) にある config/secrets.php を読み込む
-// $config 変数に secrets.php の配列が格納される
+// $config 変数に secrets_local.php の配列が格納される
 $config_path = __DIR__ . '/../../config/secrets_local.php'; 
 
 // ファイルが存在するか確認し、存在しない場合はエラーで停止
@@ -34,6 +33,11 @@ define('CLIENT_SECRET', $config['client_secret']); // シークレット分離
 define('REDIRECT_URI', $config['redirect_uri']);
 define('ICC_DOMAIN', $config['icc_domain']); 
 define('HOME_URL', $config['home_url']);
+// データベース接続情報
+define('DB_HOST', $config['db_host']);   // 'db_host' の値 'localhost' を DB_HOST に代入
+define('DB_NAME', $config['db_name']);   // 'db_name' の値 'icc_smart_campus' を DB_NAME に代入
+define('DB_USER', $config['db_user']);   // 'db_user' の値 'root' を DB_USER に代入
+define('DB_PASS', $config['db_pass']);   // 'db_pass' の値 'root' を DB_PASS に代入
 
 
 // 取得したい情報のスコープ（メールアドレスと基本プロフィール）
@@ -142,22 +146,63 @@ if (isset($_GET['code'])) {
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
+           try {
+                // PDOを使って安全に接続
+                $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            session_regenerate_id(true); // true を指定することで古いセッションファイルを破棄
+                // login_tableからメールアドレスを検索
+                $sql = "SELECT COUNT(*) FROM login_table WHERE email = :email";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':email', $userEmail);
+                $stmt->execute();
+                
+                // 照合結果を取得
+                $user_exists = $stmt->fetchColumn(); 
 
-            // 認証成功: セッションに情報を保存
-            $_SESSION['user_email'] = $userEmail; // アカウントのアドレスを獲得
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user_picture'] = $userInfo['picture'] ?? null; // アカウントのアイコン画像を獲得
-            
-            // ホーム画面に遷移
-            header('Location: ' . HOME_URL);
-            exit();
+                if ($user_exists > 0) {
+                    // 照合成功：ログイン続行
+                    session_regenerate_id(true); 
+
+                    // 認証成功: セッションに情報を保存
+                    $_SESSION['user_email'] = $userEmail; 
+                    $_SESSION['logged_in'] = true;
+                    $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
+
+                    // データベース接続を閉じる
+                    $pdo = null;
+                    
+                    // ホーム画面に遷移
+                    header('Location: ' . HOME_URL);
+                    exit();
+                }
+            }
+            catch (PDOException $e) {
+                // データベース接続またはクエリ実行エラー
+                // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
+                error_log("DB Connection Error: " . $e->getMessage()); 
+                sleep(2); // 遅延処理
+                die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
+
+                // データベース接続を閉じる
+                $pdo = null;
+            }
+            // 照合失敗：ループを抜けてエラーメッセージ表示へ
+            catch (Exception $e) {
+                // その他のエラー処理
+                error_log("General Error: " . $e->getMessage());
+                sleep(2); // 遅延処理
+                die("2:認証に失敗しました。アプリケーションのエラーが発生しました。");
+            // データベース接続を閉じる
+            $pdo = null;
+            }
         }
+        sleep(3); // 失敗時に3秒待機
+        // ドメイン不一致またはメールアドレスが取得できなかった場合
+        die("3:認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
     }
-
-    // ドメイン不一致またはメールアドレスが取得できなかった場合
-    die("認証に失敗しました。ICCのGoogleアカウント（@" . ICC_DOMAIN . "）でのみログイン可能です。");
+    sleep(3); // 失敗時に3秒待機
+    die("4:認証に失敗しました。メールアドレスが取得できませんでした。");
 }
 
 // -------------------------------------------------------------------------

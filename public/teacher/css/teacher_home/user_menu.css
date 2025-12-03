@@ -1,0 +1,68 @@
+/*仮作成のポップアップ*/
+
+/* ユーザーアイコンのコンテナ（teacher_home.phpの既存スタイルに依存） */
+.user-avatar {
+    /* クリック可能であることを示すためにカーソルを変更 */
+    cursor: pointer;
+    /* ポップアップを相対的に配置するための設定 */
+    position: relative; 
+    z-index: 1000; /* 他の要素より手前に表示 */
+}
+
+/* ログアウトメニューのポップアップ */
+.user-menu-popup {
+    /* 初期状態では非表示 */
+    display: none; 
+    /* ポジションを絶対配置にし、アイコンを基準に表示 */
+    position: absolute;
+    top: 60px; /* アイコンの下に表示するためのオフセット。必要に応じて調整 */
+    
+    /* ★変更: アイコンの右端に合わせる */
+    right: 0px; 
+    
+    /* スタイル */
+    width: 280px; /* ポップアップの幅 */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 影を付けてポップアップ感 */
+    padding: 10px 0;
+    z-index: 100;
+}
+
+/* JavaScriptで表示・非表示を切り替えるためのクラス */
+.user-menu-popup.is-visible {
+    display: block;
+}
+
+/* ログアウトボタンのスタイル */
+.logout-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #f5f5f5; /* ホバー時の背景色 */
+}
+
+/* アイコン（Chromeからログアウトの左側の鍵アイコンを模す） */
+.logout-button .icon-key {
+    /* アイコンの代わりにシンプルな視覚要素を使用するか、フォントアイコン/画像を使用 */
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 15px;
+    /* シンプルな鍵のアイコンの代わりとして、ここでは四角を使用 */
+    /* 実際にはFont Awesomeなどのアイコンフォントを使うとより画像に近くなります */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'); /* ユーザーのようなアイコン */
+    background-size: cover;
+    opacity: 0.6;
+}
+
+/* ポップアップを画像に近づけるための追加スタイル（省略可） */
+/* ボタンが一つだけなので、画像のようなリスト構造は不要と判断し、シンプルなボタンとして実装しています。 */

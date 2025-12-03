@@ -1,7 +1,7 @@
 <?php
 // 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
 
-// 7日間SSOを維持するための設定 (session_start() より前) ★★★
+// 7日間SSOを維持するための設定
 $session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
 
 // 0.1. サーバー側GCの有効期限を設定
@@ -29,9 +29,8 @@ if (!isset($_SESSION['user_email'])) {
 }
 
 // セッションから画像URLを取得
-$user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デフォルト画像を準備
+$user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // デフォルト画像を準備
 ?>
-
 <!DOCTYPE html>
 <html lang="ja">
     <head>
@@ -43,12 +42,23 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デ�
         <meta name="robots" content="nofollow,noindex">
         <link rel="stylesheet" type="text/css" href="css/reset.css">
         <link rel="stylesheet" type="text/css" href="css/common.css">
+<<<<<<< HEAD
         <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
+=======
+        <link rel="stylesheet" type="text/css" href="css/teacher_home/user_menu.css">
+>>>>>>> 251e0babe652978e2507ebdc17d88ca2ec63f53d
     </head>
     <body>
         <header> 
-            <div class="user-avatar">
+            <div class="user-avatar" id="userAvatar">
                 <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+            </div>
+            <!-- ユーザーメニューポップアップ (仮)-->
+            <div class="user-menu-popup" id="userMenuPopup">
+                <a href="../logout/logout.php" class="logout-button">
+                    <span class="icon-key"></span>
+                    ICCスマートキャンパスからログアウト
+                </a>
             </div>
         </header>
 
@@ -125,4 +135,28 @@ $user_picture = $_SESSION['user_picture'] ?? 'assets/default_icon.png'; // デ�
                 </div>
             </div>
         </div>
+        <!-- ここから仮置きのコード -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                // アイコンをクリックした時の処理
+                userAvatar.addEventListener('click', function(event) {
+                    // ポップアップの表示・非表示を切り替える
+                    userMenuPopup.classList.toggle('is-visible');
+                    // イベントの伝播を停止して、ドキュメント全体へのクリックイベントがすぐに実行されるのを防ぐ
+                    event.stopPropagation();
+                });
+
+                // ポップアップの外側をクリックした時に閉じる処理
+                document.addEventListener('click', function(event) {
+                    // クリックされた要素がアイコンでもポップアップ内でもない場合
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+        </script>
     </body>
+</html>

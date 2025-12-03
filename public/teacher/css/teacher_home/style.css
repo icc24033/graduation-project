@@ -164,3 +164,21 @@ body{
     font-size: 10px;
     font-weight: 500;
 }
+
+
+/* .user-avatar の定義を見直し */
+.user-avatar {
+    /* ... 既存のposition/top/right/transform設定 ... */
+    
+    width: 60px !important;    /* ★サイズがゼロでないか確認 */
+    height: 60px !important;   /* ★サイズがゼロでないか確認 */
+    
+    /* ... その他の設定 ... */
+}
+
+/* 画像自体も親要素のサイズに合わせる */
+.user-avatar .avatar-image {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+}

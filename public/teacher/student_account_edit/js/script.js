@@ -173,12 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    // --- 2. メニュー項目の選択処理 ---
+    // --- 2-1. サイドバーのメニュー項目選択処理 ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
         links.forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();
+                //e.preventDefault();
                 //e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
@@ -187,7 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // ※ トグルボタンのdata属性をHTML/PHP側で設定していることが前提
                 let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
-                let shouldRedirect = false; // ページ遷移フラグ
+                let shouldRedirectSide = false; // サイドバーが変更された場合にリダイレクトするフラグ
+                let shouldRedirectCenter = false; // テーブル内が変更された場合にリダイレクトするフラグ
+
 
                 // A. サイドバーのドロップダウンだった場合 (sidebarのトグルボタンがクリックされて開いたメニュー)
                 if (currentOpenToggle) {
@@ -203,9 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (selectedCourseId) {
                             finalCourseId = selectedCourseId;
                             finalYear = selectedYear;
-                            currentOpenToggle.setAttribute('data-current-course', selectedCourseId); // 新しい値をボタンに保存
                             // ★ 修正: courseToggle ではなく currentOpenToggle を使用
-                            shouldRedirect = true; 
+                            shouldRedirectSide = true; 
                         }
                     } 
                     // 2. 年度ドロップダウンが選択された場合
@@ -215,29 +216,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (selectedYear) {
                             finalYear = selectedYear;
                             finalCourseId = selectedCourseId;
-                            currentOpenToggle.setAttribute('data-current-year', selectedYear); // 新しい値をボタンに保存
                             // ★ 修正: yearToggle ではなく currentOpenToggle を使用
-                            shouldRedirect = true; 
+                            shouldRedirectSide = true; 
                         }
                     }
                 }
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
-                    const selectedCourseId = e.target.getAttribute('data-current-course');
+                    const studentSelectedCourseId = e.target.getAttribute('data-selected-course');
                     currentTableInput.textContent = selectedValue;
-                    // data属性を更新 (テーブル行のデータ送信時に使用)
-                    currentTableInput.setAttribute('data-selected-course', selectedValue);
 
-                    const hiddenInput = currentTableInput.closest('.column-course').querySelector('.input-course-hidden');
-                    if (hiddenInput && selectedCourseId) {
-                        hiddenInput.value = selectedCourseId; 
+                    if (studentSelectedCourseId) {
+                        const selectedCourseId = studentSelectedCourseId;
+                        shouldRedirectCenter = true;
                     }
                 }
             
                 closeAllDropdowns(); // ドロップダウンを閉じる
 
                 // 最後にリダイレクト（ページ全体を再読み込み）を実行
-                if (shouldRedirect) {
+                if (shouldRedirectSide) {
                     // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
                     redirectToStudentAccountPage(finalCourseId, finalYear);
                 }

@@ -2,7 +2,7 @@
 
 // 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
 
-// 7日間SSOを維持するための設定 (session_start() より前) ★★★
+// 7日間SSOを維持するための設定 (session_start() より前) 
 $session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
 
 // 0.1. サーバー側GCの有効期限を設定
@@ -20,4 +20,8 @@ session_set_cookie_params([
     'samesite' => 'Lax'
 ]);
 
-?>
+// // セッションの破棄
+//     session_unset();
+//     session_destroy();
+// // Cookieの削除
+//     setcookie(session_name(), '', time() - 3600, '/');
