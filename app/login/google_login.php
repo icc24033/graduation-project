@@ -141,22 +141,63 @@ if (isset($_GET['code'])) {
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
 
         if ($emailDomain === ICC_DOMAIN) {
+           try {
+                // PDOを使って安全に接続
+                $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            session_regenerate_id(true); // true を指定することで古いセッションファイルを破棄
+                // login_tableからメールアドレスを検索
+                $sql = "SELECT COUNT(*) FROM login_table WHERE email = :email";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':email', $userEmail);
+                $stmt->execute();
+                
+                // 照合結果を取得
+                $user_exists = $stmt->fetchColumn(); 
 
-            // 認証成功: セッションに情報を保存
-            $_SESSION['user_email'] = $userEmail; // アカウントのアドレスを獲得
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user_picture'] = $userInfo['picture'] ?? null; // アカウントのアイコン画像を獲得
-            
-            // ホーム画面に遷移
-            header('Location: ' . HOME_URL);
-            exit();
+                if ($user_exists > 0) {
+                    // 照合成功：ログイン続行
+                    session_regenerate_id(true); 
+
+                    // 認証成功: セッションに情報を保存
+                    $_SESSION['user_email'] = $userEmail; 
+                    $_SESSION['logged_in'] = true;
+                    $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
+
+                    // データベース接続を閉じる
+                    $pdo = null;
+                    
+                    // ホーム画面に遷移
+                    header('Location: ' . HOME_URL);
+                    exit();
+                }
+            }
+            catch (PDOException $e) {
+                // データベース接続またはクエリ実行エラー
+                // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
+                error_log("DB Connection Error: " . $e->getMessage()); 
+                sleep(2); // 遅延処理
+                die("認証に失敗しました。アプリケーションのエラーが発生しました。");
+
+                // データベース接続を閉じる
+                $pdo = null;
+            }
+            // 照合失敗：ループを抜けてエラーメッセージ表示へ
+            catch (Exception $e) {
+                // その他のエラー処理
+                error_log("General Error: " . $e->getMessage());
+                sleep(2); // 遅延処理
+                die("認証に失敗しました。アプリケーションのエラーが発生しました。");
+            // データベース接続を閉じる
+            $pdo = null;
+            }
         }
+        sleep(3); // 失敗時に3秒待機
+        // ドメイン不一致またはメールアドレスが取得できなかった場合
+        die("認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
     }
     sleep(3); // 失敗時に3秒待機
-    // ドメイン不一致またはメールアドレスが取得できなかった場合
-    die("認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
+    die("認証に失敗しました。メールアドレスが取得できませんでした。");
 }
 
 // -------------------------------------------------------------------------
