@@ -19,3 +19,9 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
+
+// // セッションの破棄
+//     session_unset();
+//     session_destroy();
+// // Cookieの削除
+//     setcookie(session_name(), '', time() - 3600, '/');
