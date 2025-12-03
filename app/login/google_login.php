@@ -126,6 +126,10 @@ function send_curl_request(string $url, ?array $data, ?string $accessToken, stri
 function handle_login_error(): void
 {
     sleep(3); // 遅延処理
+    // 残っているセッションデータをクリア
+    session_unset();
+    session_destroy();
+    
     header('Location: login_error.html');
     exit(); // リダイレクト後は必ず exit()
 }
