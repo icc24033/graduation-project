@@ -152,7 +152,7 @@ if (isset($_GET['code'])) {
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                 // login_tableからメールアドレスを検索
-                $sql = "SELECT COUNT(*) FROM login_table WHERE email = :email";
+                $sql = "SELECT COUNT(*) FROM login_table WHERE user_email = :email";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(':email', $userEmail);
                 $stmt->execute();
@@ -182,11 +182,24 @@ if (isset($_GET['code'])) {
                 // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
                 error_log("DB Connection Error: " . $e->getMessage()); 
                 sleep(2); // 遅延処理
-                die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
+                
+                // ★★★ ここを一時的に置き換えます ★★★
+                die("DB接続エラー詳細: " . $e->getMessage()); 
+                // ★★★ 元のコード: die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
 
-                // データベース接続を閉じる
+                // データベース接続を閉じる (この行はここに残して問題ありません)
                 $pdo = null;
             }
+            // catch (PDOException $e) {
+            //     // データベース接続またはクエリ実行エラー
+            //     // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
+            //     error_log("DB Connection Error: " . $e->getMessage()); 
+            //     sleep(2); // 遅延処理
+            //     die("1:認証に失敗しました。アプリケーションのエラーが発生しました。");
+
+            //     // データベース接続を閉じる
+            //     $pdo = null;
+            // }
             // 照合失敗：ループを抜けてエラーメッセージ表示へ
             catch (Exception $e) {
                 // その他のエラー処理

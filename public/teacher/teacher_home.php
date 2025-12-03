@@ -42,11 +42,9 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // ãƒ‡ãƒ
         <meta name="robots" content="nofollow,noindex">
         <link rel="stylesheet" type="text/css" href="css/reset.css">
         <link rel="stylesheet" type="text/css" href="css/common.css">
-<<<<<<< HEAD
         <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
-=======
         <link rel="stylesheet" type="text/css" href="css/teacher_home/user_menu.css">
->>>>>>> 251e0babe652978e2507ebdc17d88ca2ec63f53d
+
     </head>
     <body>
         <header> 
