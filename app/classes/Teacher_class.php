@@ -9,7 +9,7 @@ class Teacher extends User_MasAndTeach {
 
     // コンストラクタで親クラスのコンストラクタを呼び出し、権限を 'teacher' に設定
     public function __construct(string $userId) {
-        parent::__construct($userId, 'teacher');
+        parent::__construct($userId, 'teacher@icc_ac.jp');
     }
 
     public function getFunctionCardsHtml(array $links): string {
