@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
     let currentOpenToggle = null;
-    let currentOpenMenu = null;
     let currentTableInput = null; 
 
     /**
@@ -178,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const links = menu.querySelectorAll('a');
         links.forEach(link => {
             link.addEventListener('click', (e) => {
-                //e.preventDefault();
-                //e.stopPropagation();
+                e.preventDefault();
+                e.stopPropagation();
 
                 const selectedValue = e.target.textContent;
             
@@ -188,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
                 let shouldRedirectSide = false; // サイドバーが変更された場合にリダイレクトするフラグ
-                let shouldRedirectCenter = false; // テーブル内が変更された場合にリダイレクトするフラグ
 
 
                 // A. サイドバーのドロップダウンだった場合 (sidebarのトグルボタンがクリックされて開いたメニュー)
@@ -223,12 +221,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
-                    const studentSelectedCourseId = e.target.getAttribute('data-selected-course');
+    
+                    // 🌟 修正ポイント: ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
+                    const newCourseId = e.target.getAttribute('data-current-course-center');
+                
+                    // 1. 表示用のSPANを更新
                     currentTableInput.textContent = selectedValue;
-
-                    if (studentSelectedCourseId) {
-                        const selectedCourseId = studentSelectedCourseId;
-                        shouldRedirectCenter = true;
+                    currentTableInput.setAttribute('data-selected-course-center', newCourseId); 
+                    
+                    // 2. 隠し入力フィールドを特定し、値を更新
+                    const currentRow = currentTableInput.closest('.table-row');
+                    if (currentRow) {
+                        const hiddenInput = currentRow.querySelector('.course-hidden-input');
+                        if (hiddenInput) {
+                            // 🌟 最重要：POSTで送信される値を更新！
+                            hiddenInput.value = newCourseId; 
+                        }
                     }
                 }
             
@@ -238,10 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (shouldRedirectSide) {
                     // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
                     redirectToStudentAccountPage(finalCourseId, finalYear);
-                }
-                else if (shouldRedirectCenter) {
-                    // student_course.phpに値を送信せずにリダイレクト
-                    window.location.href = `../../../app/teacher/student_account_edit_backend/student_course_edit.php`;
                 }
             });
         });

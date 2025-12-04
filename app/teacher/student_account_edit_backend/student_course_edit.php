@@ -18,6 +18,7 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
+//UPDATE test_student SET course_id = 1, course_name = "システムデザインコース" WHERE student_id = 25004;
 
 //test_studentに格納されているcourse_idとcourse_nameの変更
 $update_course_sql = ("UPDATE test_student SET course_id = ?, course_name = ? WHERE student_id = ?");
@@ -28,19 +29,36 @@ try {
     //データベース接続
     $pdo = new PDO($dsn, $user_name, $user_pass, $options);
     $stmt_course = $pdo->query($course_select_sql);
-    $courses = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
+    $all_courses = $stmt_course->fetchAll(); // コースIDとコース名を取得
+
+    // コースIDをキー、コース名を値とする連想配列を作成
+    $courses = [];
+    foreach ($all_courses as $course) {
+        $courses[$course['course_id']] = $course;
+    }
 
     $stmt_update = $pdo->prepare($update_course_sql);
-    
+
+    //var_dump($courses);
+
+
     foreach ($selected_student as $student_id => $course_id) {
         // update_course_sqlのWHERE句のstudent_idに対応するレコードのcourse_idとcourse_nameを更新
+
+        $course_id = (int)$course_id;
+
+        var_dump($course_id, $courses[$course_id]['course_name'], $student_id);
+
         $stmt_update->execute([$course_id, $courses[$course_id]['course_name'], $student_id]);
     }
 
 }
+catch (PDOException $e) {
+    throw new PDOException($e->getMessage(), (int)$e->getCode());
+}
 
 echo "学生のコース情報を更新しました。";
-
+/*
 $_SESSION['student_account'] = [
     'success' => true,
     'before' => 'teacher_home',
@@ -53,5 +71,5 @@ $_SESSION['student_account'] = [
     'student_sql' => $student_sql,
     'current_year' => $received_current_year
 ];
-
+*/
 ?>
