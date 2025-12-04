@@ -26,7 +26,6 @@ if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
     $received_current_year = substr($received_current_year, -2);
 }
 
-
 // POSTで受けとった値を変数に格納
 $selected_student = $_POST['students'] ?? [];
 
