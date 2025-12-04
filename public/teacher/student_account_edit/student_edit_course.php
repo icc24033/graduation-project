@@ -116,8 +116,11 @@ catch (PDOException $e) {
                             <?php if (!empty($course)): ?>
                                 <?php foreach ($course as $row): ?>
                                     <li>
-                                        <a href="#" data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                                            <?php echo htmlspecialchars($row['course_name']); ?>
+                                        <a href="#" 
+                                           data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" 
+                                           data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>"
+                                           data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>">
+                                           <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>
                                 <?php endforeach; ?>
@@ -138,6 +141,8 @@ catch (PDOException $e) {
             
             <div class="content-area">
                 <form action="..\..\..\app\teacher\student_account_edit_backend\student_course_edit.php" method="post">
+                <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
+                <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
@@ -168,12 +173,12 @@ catch (PDOException $e) {
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
                                 </div>
                                 <div class="column-course">
-                                    <span class="course-display" 
+                                    <a href="#" class="course-display" 
                                         data-course-name-display 
                                         data-dropdown-for="courseDropdownMenu"
                                         data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
                                         <?php echo htmlspecialchars($student_row['course_name']);?>
-                                    </span>
+                                    </a>
                                 <input type="hidden" 
                                     name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
                                     value="<?php echo htmlspecialchars($student_row['course_id']); ?>"

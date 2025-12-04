@@ -222,8 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
     
-                    // 🌟 修正ポイント: ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
-                    const newCourseId = e.target.getAttribute('data-current-course-center');
+                    // ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
+                    const newCourseId = e.target.getAttribute('data-selected-course-center');
                 
                     // 1. 表示用のSPANを更新
                     currentTableInput.textContent = selectedValue;

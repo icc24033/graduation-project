@@ -1,4 +1,31 @@
-<?
+<?php
+//セッション開始
+session_start();
+
+// ----------------------------------------------------
+// 【重要】JavaScriptから送信されたコースIDを取得する処理
+// ----------------------------------------------------
+
+
+$received_course_id = null;
+$message = "コースIDは受信されませんでした。";
+
+// 2. デコードが成功し、かつ 'course_id' と'current_year'が存在するかチェック
+if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
+    // コースIDを取得
+    $received_course_id = $_POST['course_id'];
+    // 年度の取得
+    $received_current_year = $_POST['current_year'];
+} else {
+    // データ受信に失敗した場合
+    $received_course_id = 1; // デフォルト値を設定（例: 1）
+
+    $received_current_year = date("Y"); 
+    
+    // $received_current_year の下2桁を取得
+    $received_current_year = substr($received_current_year, -2);
+}
+
 
 // POSTで受けとった値を変数に格納
 $selected_student = $_POST['students'] ?? [];
@@ -45,10 +72,7 @@ try {
     foreach ($selected_student as $student_id => $course_id) {
         // update_course_sqlのWHERE句のstudent_idに対応するレコードのcourse_idとcourse_nameを更新
 
-        $course_id = (int)$course_id;
-
-        var_dump($course_id, $courses[$course_id]['course_name'], $student_id);
-
+        $course_id = (int)$course_id; // コースIDを整数に変換
         $stmt_update->execute([$course_id, $courses[$course_id]['course_name'], $student_id]);
     }
 
@@ -57,8 +81,11 @@ catch (PDOException $e) {
     throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
 
-echo "学生のコース情報を更新しました。";
-/*
+//コース情報取得SQLクエリ
+$course_sql = ("SELECT * FROM course;");
+//テストstudentに格納されている学生情報の取得
+$student_sql = ("SELECT * FROM test_student WHERE course_id = ?;");
+
 $_SESSION['student_account'] = [
     'success' => true,
     'before' => 'teacher_home',
@@ -71,5 +98,9 @@ $_SESSION['student_account'] = [
     'student_sql' => $student_sql,
     'current_year' => $received_current_year
 ];
-*/
+
+// ★ student_addition.php にリダイレクトして処理を終了
+header("Location: ../../../public/teacher/student_account_edit/student_edit_course.php");
+exit(); // リダイレクト後は必ず処理を終了
+
 ?>
