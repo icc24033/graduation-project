@@ -164,27 +164,33 @@ if (isset($_GET['code'])) {
 
         if ($emailDomain === ICC_DOMAIN) {
            try {
-                // PDOを使って安全に接続
                 $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // login_tableからメールアドレスを検索
-                $sql = "SELECT COUNT(*) FROM login_table WHERE user_email = :email";
+                // login_tableからメールアドレスを検索し、user_gradeとuser_idを取得する
+                // 取得カラムに user_grade と user_id を追加
+                $sql = "SELECT user_id, user_grade FROM login_table WHERE user_email = :email";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(':email', $userEmail);
                 $stmt->execute();
                 
-                // 照合結果を取得
-                $user_exists = $stmt->fetchColumn(); 
+                // 結果を連想配列で1行取得する
+                $user_data = $stmt->fetch(PDO::FETCH_ASSOC); 
 
-                if ($user_exists > 0) {
-                    // 照合成功：ログイン続行
+                // if ($user_exists > 0) の代わりに、if ($user_data) でチェック
+                if ($user_data) {
+                    // 照合成功：メールアドレスがテーブルに存在する場合
+                    // セッションIDを再生成してセッション固定攻撃を防止
                     session_regenerate_id(true); 
 
                     // 認証成功: セッションに情報を保存
                     $_SESSION['user_email'] = $userEmail; 
                     $_SESSION['logged_in'] = true;
                     $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
+                    
+                    // $user_data から grade と user_id をセッションに保存
+                    $_SESSION['user_grade'] = $user_data['grade']; 
+                    $_SESSION['user_id'] = $user_data['user_id']; 
 
                     // データベース接続を閉じる
                     $pdo = null;
