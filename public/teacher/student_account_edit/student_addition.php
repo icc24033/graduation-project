@@ -92,10 +92,10 @@ catch (PDOException $e) {
                     <li class="nav-item is-active"><a href="student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\student_course.php">コースの編集</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
                 
-                <form action="..\..\..\app\teacher\student_account_edit_backend\csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
+                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="this.form.submit();">
                         <label for="csvFile" class="custom-file-upload-button">
