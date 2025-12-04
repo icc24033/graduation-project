@@ -18,8 +18,6 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-//test_studentテーブルから学生情報を取得するSQL
-$student_sql = ("SELECT * FROM test_student WHERE course_id = ?"); 
 
 //test_studentに格納されているcourse_idとcourse_nameの変更
 $update_course_sql = ("UPDATE test_student SET course_id = ?, course_name = ? WHERE student_id = ?");
@@ -32,12 +30,16 @@ try {
     $stmt_course = $pdo->query($course_select_sql);
     $courses = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
 
-    foreach ($courses as $selected_course_id => $student_id) {
-
-
+    $stmt_update = $pdo->prepare($update_course_sql);
+    
+    foreach ($selected_student as $student_id => $course_id) {
+        // update_course_sqlのWHERE句のstudent_idに対応するレコードのcourse_idとcourse_nameを更新
+        $stmt_update->execute([$course_id, $courses[$course_id]['course_name'], $student_id]);
     }
 
 }
+
+echo "学生のコース情報を更新しました。";
 
 $_SESSION['student_account'] = [
     'success' => true,
