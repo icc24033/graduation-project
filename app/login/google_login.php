@@ -212,59 +212,35 @@ if (isset($_GET['code'])) {
                     handle_login_error();
                 }
             }
-            // catch (PDOException $e) {
-            //     // データベース接続またはクエリ実行エラー
-            //     // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
-            //     $pdo = null;
-            //     error_log("DB Connection Error: " . $e->getMessage());
-            //     // 共通のエラー処理関数を呼び出す
-            //     handle_login_error();
-            // }
-            // //照合失敗：ループを抜けてエラーメッセージ表示へ
-            // catch (Exception $e) {
-            //     // その他のエラー処理
-            //     error_log("General Error: " . $e->getMessage());
-            //     $pdo = null;
-            //     handle_login_error();
-            // }
-    //     }
-    //     // ドメイン不一致またはメールアドレスが取得できなかった場合
-    //     // 共通のエラー処理関数を呼び出す
-    //     else {
-    //         handle_login_error();
-    //     }
-    // }
-    // else {
-    //     // メールアドレスが取得できなかった場合
-    //     // 共通のエラー処理関数を呼び出す
-    //     handle_login_error();
-    // }
-    // ★ポイント2: DB接続エラーをキャッチし、エラーコードを表示して処理停止
             catch (PDOException $e) {
-                // 開発環境向け：具体的なエラーメッセージを表示（本番環境では非推奨）
+                // データベース接続またはクエリ実行エラー
+                // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
                 $pdo = null;
-                error_log("DB_ERROR: " . $e->getMessage()); 
-                die("致命的なDBエラーが発生しました。設定を確認してください。<br>エラーコード: " . $e->getMessage());
+                error_log("DB Connection Error: " . $e->getMessage());
+                // 共通のエラー処理関数を呼び出す
+                handle_login_error();
             }
-            // その他の例外をキャッチ
+            //照合失敗：ループを抜けてエラーメッセージ表示へ
             catch (Exception $e) {
+                // その他のエラー処理
+                error_log("General Error: " . $e->getMessage());
                 $pdo = null;
-                error_log("GENERAL_ERROR: " . $e->getMessage()); 
-                die("致命的な一般エラーが発生しました。管理者にご連絡ください。");
+                handle_login_error();
             }
         }
-        // ドメイン不一致の場合
+        // ドメイン不一致またはメールアドレスが取得できなかった場合
+        // 共通のエラー処理関数を呼び出す
         else {
-            sleep(3); 
-            // エラーダイ表示 or リダイレクト
-            die("3:認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
+            handle_login_error();
         }
     }
-    // メールアドレスが取得できなかった場合
     else {
-        sleep(3); 
-        die("4:認証に失敗しました。メールアドレスが取得できませんでした。");
+        // メールアドレスが取得できなかった場合
+        // 共通のエラー処理関数を呼び出す
+        handle_login_error();
     }
+    ★ポイント2: DB接続エラーをキャッチし、エラーコードを表示して処理停止
+            
 }
 
 // -------------------------------------------------------------------------
