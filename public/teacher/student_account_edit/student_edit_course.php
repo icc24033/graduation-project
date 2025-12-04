@@ -171,11 +171,11 @@ catch (PDOException $e) {
                                     <span class="course-display" 
                                         data-course-name-display 
                                         data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course="<?php echo htmlspecialchars($student_row['course_id']); ?>">
+                                        data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
                                         <?php echo htmlspecialchars($student_row['course_name']);?>
                                     </span>
                                 <input type="hidden" 
-                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>][course_id]" 
+                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
                                     value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
                                     class="course-hidden-input">
                                 </div>
