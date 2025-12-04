@@ -9,7 +9,7 @@ class Master extends User_MasAndTeach {
     
     // コンストラクタで親クラスのコンストラクタを呼び出し、権限を 'master' に設定
     public function __construct(string $userId) {
-        parent::__construct($userId, 'master');
+        parent::__construct($userId, 'master_@icc_ac.jp');
     }
 
     public function getFunctionCardsHtml(array $links): string {

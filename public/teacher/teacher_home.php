@@ -31,50 +31,54 @@ if (!isset($_SESSION['user_email'])) {
 // セッションから画像URLを取得
 $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // デフォルト画像を準備
 
+// クラスファイルを読み込む
+// パスは teacher_home.php の位置から /app/classes/ への相対パス
+$base_path = __DIR__ . '/../../app/classes/';
+
+require_once $base_path . 'User_class.php'; 
+require_once $base_path . 'Teacher_class.php'; 
+require_once $base_path . 'Master_class.php'; 
+
 // ユーザーの権限レベルと固有IDをセッションから取得
-// デフォルト値を設定することで、セッション未設定時のエラーを防ぐ
 $user_grade = $_SESSION['user_grade'] ?? 'student'; 
 $current_user_id = $_SESSION['user_id'] ?? '';
 $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
 
-// 遷移先ファイルの定義
-// リンク先にIDは含めず、セッションからIDを読み取らせる
-$link_time_table_create = "time_table_create.php";
-$link_time_table_edit = "time_table_edit.php";
-$link_account_edit = "account_edit.php";
-$link_permission_grant = "permission_grant.php";
-$link_notification_edit = "notification_edit.php";
-$link_subject_edit = "subject_edit.php"; // 授業詳細編集 (セッションからIDを取得)
-$link_time_table_view = "time_table_view.php";
-$link_send_setting = "send_setting.php";
+// 遷移先ファイルの定義（クラスに渡すため配列化）
+// リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
+$links = [
+    // 開発状況に応じてリンクを修正する
+    'link_time_table_create' => "time_table_create.php",
+    'link_time_table_edit'   => "time_table_edit.php",
+    'link_account_edit'      => "account_edit.php",
+    'link_permission_grant'  => "permission_grant.php",
+    'link_notification_edit' => "notification_edit.php",
+    'link_subject_edit'      => "subject_edit.php", 
+    'link_time_table_view'   => "time_table_view.php",
+    'link_send_setting'      => "send_setting.php"
+];
 
+$user_object = null;
 
-// 機能カードのHTMLを格納する変数
+// 権限に応じて適切なユーザーオブジェクトを生成
+switch ($user_grade) {
+    case 'master@icc_ac.jp':
+        $user_object = new Master_class($current_user_id);
+        break;
+    case 'teacher@icc_ac.jp':
+        $user_object = new Teacher_class($current_user_id);
+        break;
+    default:
+        // 権限がない場合や未定義の場合、オブジェクトは生成しない
+        break;
+}
+
 $function_cards_html = '';
 
-// --- 機能カードの出し分けロジック ---
-
-if ($user_grade === 'master') {
-    // マスタアカウント用の全機能カード
-    $function_cards_html = <<<HTML
-        <div class="card"><a href="{$link_time_table_create}"><img class="card_icon_calendar-plus" src="images/calendar-plus.png"><p class="card_main">時間割り作成</p><p class="card_sub">期間を設定して<br>時間割を作成します。</p></a></div>
-        <div class="card"><a href="{$link_time_table_edit}"><img class="card_icon_square-pen" src="images/square-pen.png"><p class="card_main">時間割り編集</p><p class="card_sub">編集したいコースごとに<br>時間割を編集します。</p></a></div>
-        <div class="card"><a href="{$link_account_edit}"><img class="card_icon_user-round" src="images/user-round-cog.png"><p class="card_main">アカウント編集</p><p class="card_sub">アカウントの情報を確認、編集<br>することができます。</p></a></div>
-        <div class="card"><a href="{$link_permission_grant}"><img class="card_icon_shield-check" src="images/shield-check.png"><p class="card_main">権限付与</p><p class="card_sub">先生アカウントなどの<br>権限を付与します。</p></a></div>
-        <div class="card"><a href="{$link_notification_edit}"><img class="card_icon_bell-dot" src="images/bell-dot.png"><p class="card_main">通知事項編集</p><p class="card_sub">通知事項を編集します。</p></a></div>
-        <div class="card"><a href="{$link_subject_edit}"><img class="card_icon_clipboard-list" src="images/clipboard-list.png"><p class="card_main">授業詳細編集</p><p class="card_sub">授業詳細を編集します。</p></a></div>
-        <div class="card"><a href="{$link_time_table_view}"><img class="card_icon_calendar-clock" src="images/calendar-clock.png"><p class="card_main">時間割り閲覧</p><p class="card_sub">先4週間分を選択したコースごとに<br>閲覧します。</p></a></div>
-        <div class="card"><a href="{$link_send_setting}"><img class="card_icon_mails" src="images/mails.png"><p class="card_main">送信先設定</p><p class="card_sub">時間割の通知メール<br>送信先を設定します。</p></a></div>
-HTML;
-} elseif ($user_grade === 'teacher') {
-    // 先生アカウント用のカード (授業詳細編集、時間割り閲覧、アカウント編集)
-    $function_cards_html = <<<HTML
-        <div class="card"><a href="{$link_subject_edit}"><img class="card_icon_clipboard-list" src="images/clipboard-list.png"><p class="card_main">授業詳細編集</p><p class="card_sub">受け持つ授業詳細を編集します。</p></a></div>
-        <div class="card"><a href="{$link_time_table_view}"><img class="card_icon_calendar-clock" src="images/calendar-clock.png"><p class="card_main">時間割り閲覧</p><p class="card_sub">自分の担当コースの<br>時間割を閲覧します。</p></a></div>
-        <div class="card"><a href="{$link_account_edit}"><img class="card_icon_user-round" src="images/user-round-cog.png"><p class="card_main">アカウント編集</p><p class="card_sub">アカウントの情報を確認、編集<br>することができます。</p></a></div>
-HTML;
-} 
-// その他の権限（例: student）の場合は、$function_cards_htmlは空のまま（何も表示しない）
+// オブジェクトが生成されていれば、メソッドを呼び出してHTMLを取得
+if ($user_object instanceof User_MasAndTeach) {
+    $function_cards_html = $user_object->getFunctionCardsHtml($links);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -106,76 +110,13 @@ HTML;
         </header>
 
         <div class="main">
-            <!-- 機能 -->
             <section class="tool">
-                <img class="title_icon" src="./images/icon_tool.png" alt="機能アイコン">
+                <img class="title_icon" src="images/icon_tool.png" alt="機能アイコン">
                 <p class="title_name">機能</p>
             </section>
+            
             <div class="background">
-                <!-- 時間割り作成カード -->
-                 <div class="card">
-                    <a href="">
-                        <img class="card_icon_calendar-plus" src="images/calendar-plus.png">
-                        <p class="card_main">時間割り作成</p>
-                        <p class="card_sub">期間を設定して<br>時間割を作成します。</p>
-                    </a>
-                </div>
-                <!-- 時間割り編集カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_square-pen" src="images/square-pen.png">
-                        <p class="card_main">時間割り編集</p>
-                        <p class="card_sub">編集したいコースごとに<br>時間割を編集します。</p>
-                    </a>
-                </div>
-                <!-- アカウント編集カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_user-round" src="images/user-round-cog.png">
-                        <p class="card_main">アカウント編集</p>
-                        <p class="card_sub">アカウントの情報を確認、編集<br>することができます。</p>
-                    </a>
-                </div>
-                <!-- 権限付与カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_shield-check" src="images/shield-check.png">
-                        <p class="card_main">権限付与</p>
-                        <p class="card_sub">通知事項を編集します。</p>
-                    </a>
-                </div>
-                <!-- 通知事項編集カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_bell-dot" src="images/bell-dot.png">
-                        <p class="card_main">通知事項編集</p>
-                        <p class="card_sub">通知事項を編集します。</p>
-                    </a>
-                </div>
-                <!-- 授業詳細編集カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_clipboard-list" src="images/clipboard-list.png">
-                        <p class="card_main">授業詳細編集</p>
-                        <p class="card_sub">授業詳細を編集します。</p>
-                    </a>
-                </div>
-                <!-- 時間割り閲覧カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_calendar-clock" src="images/calendar-clock.png">
-                        <p class="card_main">時間割り閲覧</p>
-                        <p class="card_sub">先4週間分を選択したコースごとに<br>閲覧します。</p>
-                    </a>
-                </div>
-                <!-- 送信先設定カード -->
-                <div class="card">
-                    <a href="">
-                        <img class="card_icon_mails" src="images/mails.png">
-                        <p class="card_main">送信先設定</p>
-                        <p class="card_sub">期間を設定して<br>時間割を作成します。</p>
-                    </a>
-                </div>
+                <?= $function_cards_html ?> 
             </div>
         </div>
         <!-- ここから仮置きのコード -->
