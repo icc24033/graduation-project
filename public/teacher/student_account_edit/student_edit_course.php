@@ -98,7 +98,7 @@ catch (PDOException $e) {
                                     <a href="#" 
                                        data-current-year="<?php echo htmlspecialchars($year);?>" 
                                        data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
-                                       data-current-page="student_delete">
+                                       data-current-page="student_edit_course">
                                        20<?php echo htmlspecialchars($year); ?>年度
                                     </a>
                                 </li>
@@ -229,23 +229,6 @@ catch (PDOException $e) {
             </div>
         </main>
     </div>
-    <div class="modal-overlay" id="addCountModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>生徒アカウント追加</h2>
-            </div>
-            <div class="modal-body">
-                <p>追加する生徒の人数を入力してください。</p>
-                <div class="input-container">
-                    <input type="number" id="studentCountInput" min="1" max="50" value="1">
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button modal-cancel-button" id="cancelAddCount">キャンセル</button>
-                <button class="modal-button modal-confirm-button" id="confirmAddCount">追加</button>
-            </div>
-        </div>
-    </div>
-
     <script src="js/script.js"></script>
 </body>
 </html>

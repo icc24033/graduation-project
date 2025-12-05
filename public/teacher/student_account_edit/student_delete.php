@@ -146,151 +146,95 @@ catch (PDOException $e) {
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"><input type="checkbox" id="selectAllCheckbox"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20001" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20001"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20002" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20002"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20003" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20003"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20004" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20004"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20005" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20005"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20006" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20006"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20007" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20007"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20008" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20008"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20009" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20009"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20010" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20010"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20011" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20011"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20012" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20012"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20013" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20013"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20014" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20014"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20015" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20015"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
+                    <?php 
+                        // $stmt_test_studentが有効な場合のみループ
+                        if ($stmt_test_student): 
+                            $has_students = false; // データが存在したかどうかのフラグ
+
+                            while ($student_row = $stmt_test_student->fetch()): 
+            
+                                // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
+                                $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
+
+                                if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
+                                $has_students = true;
+                        ?>
+                            <div class="table-row">
+                                <div class="column-check">
+                                    <input type="checkbox" 
+                                        class="row-checkbox" 
+                                        data-student-id="<?php echo htmlspecialchars($student_row['student_id']); ?>" 
+                                    >
+                                </div>
+                                <div class="column-student-id">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>" disabled>
+                                </div>
+                                <div class="column-name">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
+                                </div>
+                                <div class="column-course">
+                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
+                                </div>
+                            </div>
+
+                        <?php 
+                                endif; // if ($student_year_prefix === $current_year_short) 終了
+                            endwhile; // whileループ終了
+                            
+                            // ループ後にデータがなかった場合のエラー表示
+                            if (!$has_students):
+                        ?>
+                                <div class="table-row">
+                                    <div class="column-check"></div> 
+                                    <div class="column-student-id"></div> 
+                                    <div class="column-name">学生情報が見つかりません。</div> 
+                                    <div class="column-course"></div>
+                                </div>
+                        <?php 
+                            endif;
+                        else:
+                        ?>
+                            <div class="table-row">
+                                <div class="column-check"></div> 
+                                <div class="column-student-id"></div> 
+                                <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
+                                <div class="column-course"></div>
+                            </div>
+                        <?php endif; ?>
                 </div>
-                
-                <button class="add-button" id="deleteActionButton">削除</button>
-                <button class="complete-button">完了</button>
-                <div class="modal-overlay" id="deleteModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>アカウント削除確認</h2>
-                        </div>
-                        <div class="modal-body">
-                            <p>以下の0件のアカウントを削除してもよろしいですか？</p>
-                            <div class="delete-list-container">
-                                <div id="selectedStudentList"></div>
+                <?php 
+                        // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
+                        if ($has_students): 
+                ?>
+                    <button class="add-button" id="deleteActionButton">削除</button>
+                    <button class="complete-button">完了</button>
+                    <div class="modal-overlay" id="deleteModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>アカウント削除確認</h2>
+                            </div>
+                            <div class="modal-body">
+                                <p>以下の0件のアカウントを削除してもよろしいですか？</p>
+                                <div class="delete-list-container">
+                                    <div id="selectedStudentList"></div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
+
+                                <form method="POST" action="../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
+                                    <div id="hiddenInputsContainer" style="display: none;"></div>
+                                
+                                    <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
+                                </form>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
-                            <button class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
-                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
             </div>
         </main>
     </div>

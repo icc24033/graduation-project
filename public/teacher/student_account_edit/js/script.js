@@ -286,6 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 
+        // フォーム要素とhidden inputのコンテナを取得
+        const deleteForm = document.getElementById('deleteForm');
+        const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
+
         // 削除ボタン (deleteActionButton) をクリックした時の処理
         if (openButton && modal && deleteCountDisplay) {
             openButton.addEventListener('click', () => {
@@ -330,6 +334,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // 削除件数の表示を更新
                 deleteCountDisplay.innerHTML = `以下の**${selectedStudents.length}件**のアカウントを削除してもよろしいですか？`;
+
+                // --- ★ ココが重要: 選択された学生IDをhidden inputとしてフォームに動的に追加 ---
+                
+                // まず、古いhidden inputをすべて削除
+                hiddenInputsContainer.innerHTML = ''; 
+                
+                // 新しいhidden inputを作成して追加
+                selectedStudents.forEach((student, index) => {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    // 配列として受け取れるようにname属性を 'student_ids[]' に設定
+                    hiddenInput.name = 'delete_student_id[]'; 
+                    hiddenInput.value = student.id;
+                    hiddenInputsContainer.appendChild(hiddenInput);
+                });
+
 
                 // モーダルを表示
                 modal.style.display = 'flex';
