@@ -38,12 +38,11 @@ header{
     /* ★変更: absolute/top/right/transform を削除 */
     /* position: relative; は user_menu.css で定義されているため、ここでは不要 */
     
-    /*
+    
     position: absolute; 
     right: 20px;            
     top: 50%;               
     transform: translateY(-50%);
-    */
     
     width: 60px;            /* アイコンのサイズ */
     height: 60px;           /* アイコンのサイズ */

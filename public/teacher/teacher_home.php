@@ -28,9 +28,6 @@ if (!isset($_SESSION['user_email'])) {
     exit();
 }
 
-// セッションから画像URLを取得
-$user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // デフォルト画像を準備
-
 // クラスファイルを読み込む
 // パスは teacher_home.php の位置から /app/classes/ への相対パス
 $base_path = __DIR__ . '/../../app/classes/';
@@ -43,6 +40,7 @@ require_once $base_path . 'Master_class.php';
 $user_grade = $_SESSION['user_grade'] ?? 'student'; 
 $current_user_id = $_SESSION['user_id'] ?? '';
 $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+$smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャンパスのロゴ画像パス
 
 // 遷移先ファイルの定義（クラスに渡すため配列化）
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
@@ -100,7 +98,15 @@ if ($user_object instanceof User_MasAndTeach) {
             <div class="user-avatar" id="userAvatar">
                 <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
             </div>
-            <!-- ユーザーメニューポップアップ (仮)-->
+            
+            <!--  ICCスマートキャンパスロゴ -->
+            <!-- 
+                <img src="<.?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="100" height="50">
+                これをヘッダー内の左上に配置する
+            -->
+                <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 20px;">
+            
+                <!-- ユーザーメニューポップアップ (仮)-->
             <div class="user-menu-popup" id="userMenuPopup">
                 <a href="../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
