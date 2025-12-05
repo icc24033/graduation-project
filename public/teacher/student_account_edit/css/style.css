@@ -220,10 +220,8 @@
 .content-area {
     flex-grow: 1;
     padding: 30px 50px 50px 50px; 
-    /* 【追加】ここから */
     display: flex;
     flex-direction: column;
-    /* 【追加】ここまで */
     align-items: center; 
 }
 
@@ -233,7 +231,7 @@
     margin-bottom: 30px;
     border: 1px solid #CFD5DF;
     border-radius: 5px;
-    height: 700px;  
+    height: 700px;
     overflow-y: auto; /* 縦方向のスクロールを有効にする */
     position: relative; /* stickyの基準にするため */
 }
