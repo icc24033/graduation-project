@@ -1,3 +1,72 @@
+<?php
+
+// require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
+
+// セッション開始
+session_start();
+
+// セッションから処理結果を取得
+$status = $_SESSION['student_account'] ?? null;
+
+// セッションデータを取得したらすぐに削除 (二重表示防止のため)
+////unset($_SESSION['student_account']);
+
+// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
+$current_course_id = $status['course_id']; 
+$course = []; // コースデータを格納する配列を初期化
+
+// 現在の年度の取得
+$current_year = date("Y");
+$current_year = substr($current_year, -2); // 下2桁を取得
+
+// 現在の月を取得
+$current_month = date('n');
+
+// 学年度の配列を作成
+if ($current_month < 4) {
+    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+}
+else {
+    $school_year = [ $current_year, $current_year - 1 ];
+}
+
+
+try {
+    //データベース接続
+    $pdo = 
+        new PDO(
+            $status['database_connection'],
+            $status['database_user_name'],
+            $status['database_user_pass'],
+            $status['database_options']
+        );
+
+    //　リストに表示するコース情報を取得
+    $stmt_course = $pdo->query($status['course_sql']);
+    $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
+
+    // 　テストstudentに格納されている学生情報の取得
+    $stmt_test_student = $pdo->prepare($status['student_sql']);
+    $stmt_test_student->execute([$status['course_id']]);
+
+    // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
+    if (!empty($course)) {
+        // 連想配列のキーを指定して値を取得
+        $current_course_name = $course[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
+    } else {
+        $current_course_name = 'コース情報が見つかりません';
+    }
+}
+catch (PDOException $e) {
+    // データベース接続/クエリ実行エラー発生時
+    error_log("DB Error: " . $e->getMessage());
+    $current_course_name = 'エラー: データベース接続失敗';
+    // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
+    // throw new PDOException($e->getMessage(), (int)$e->getCode());
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -17,47 +86,61 @@
 
         <main class="main-content">
             <nav class="sidebar">
-                <ul>
+            <ul>
                     <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
-                            <span class="current-value">2025年度</span>
+                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
+                            <span class="current-value">20<?php echo $status['current_year']?>年度</span>
                         </button>
                         <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <li><a href="#" data-year="2026">2026年度</a></li>
-                            <li><a href="#" data-year="2025">2025年度</a></li>
-                            <li><a href="#" data-year="2024">2024年度</a></li>
-                            <li><a href="#" data-year="2023">2023年度</a></li>
+                            <?php foreach ($school_year as $year): ?>
+                                <li>
+                                    <a href="#" 
+                                       data-current-year="<?php echo htmlspecialchars($year);?>" 
+                                       data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
+                                       data-current-page="student_delete">
+                                       20<?php echo htmlspecialchars($year); ?>年度
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
-            
+
                     <li class="nav-item is-group-label">コース</li> 
                     <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="courseDropdownToggle" aria-expanded="false">
-                            <span class="current-value">システムデザインコース</span>
+                        <button class="dropdown-toggle" 
+                                id="courseDropdownToggle" 
+                                aria-expanded="false" 
+                                data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
+                                data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
+                            <span class="current-value"><?php echo htmlspecialchars($current_course_name); ?></span>
                         </button>
                         <ul class="dropdown-menu" id="courseDropdownMenu">
-                            <li><a href="#" data-course="system-design">システムデザインコース</a></li>
-                            <li><a href="#" data-course="web-creator">Webクリエイタコース</a></li>
-                            <li><a href="#" data-course="multimedia-oa">マルチメディアOAコース</a></li>
-                            <li><a href="#" data-course="applied-info">応用情報コース</a></li>
-                            <li><a href="#" data-course="basic-info">基本情報コース</a></li>
-                            <li><a href="#" data-course="it-passport">ITパスポートコース</a></li>
-                            <li><a href="#" data-course="1-1">1年1組</a></li>
-                            <li><a href="#" data-course="1-2">1年2組</a></li>
+                            <?php if (!empty($course)): ?>
+                                <?php foreach ($course as $row): ?>
+                                    <li>
+                                        <a href="#" 
+                                           data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" 
+                                           data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>"
+                                           data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>"
+                                           data-current-page="student_delete">
+                                           <?php echo htmlspecialchars($row['course_name']); ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                                <!-- ---------------------------------------------------------------------------------- -->
+                            <?php else: ?>
+                                <li><a href="#">コース情報が見つかりません</a></li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item"><a href="student_addition.html">アカウントの追加</a></li>
-                    <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
+                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
-                
-                <button class="download-button">
-                    <img class="download_icon" src="images/download_icon.png"alt="ダウンロードアイコン">名簿ダウンロード
-                </button>
             </nav>
 
             <div class="content-area">

@@ -12,7 +12,7 @@ $status = $_SESSION['student_account'] ?? null;
 ////unset($_SESSION['student_account']);
 
 // ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-$current_course_id = $status['course_id']; // コースIDは1からなので、配列インデックス用に-1する
+$current_course_id = $status['course_id']; 
 $course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
@@ -52,7 +52,7 @@ try {
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$status['course_id'] - 1]['course_name'];
+        $current_course_name = $course[$status['course_id'] - 1]['course_name'];    // コースIDは1からなので、配列インデックス用に-1する
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -95,8 +95,11 @@ catch (PDOException $e) {
                         <ul class="dropdown-menu" id="yearDropdownMenu">
                             <?php foreach ($school_year as $year): ?>
                                 <li>
-                                    <a href="#" data-current-year="<?php echo htmlspecialchars($year);?>" data-current-course="<?php echo htmlspecialchars($current_course_id); ?>">
-                                        20<?php echo htmlspecialchars($year); ?>年度
+                                    <a href="#" 
+                                       data-current-year="<?php echo htmlspecialchars($year);?>" 
+                                       data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
+                                       data-current-page="student_delete">
+                                       20<?php echo htmlspecialchars($year); ?>年度
                                     </a>
                                 </li>
                             <?php endforeach; ?>
@@ -119,7 +122,8 @@ catch (PDOException $e) {
                                         <a href="#" 
                                            data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" 
                                            data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>"
-                                           data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>">
+                                           data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>"
+                                           data-current-page="student_edit_course">
                                            <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>
@@ -133,7 +137,7 @@ catch (PDOException $e) {
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
-                    <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>

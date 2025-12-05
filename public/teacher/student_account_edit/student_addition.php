@@ -11,8 +11,8 @@ $status = $_SESSION['student_account'] ?? null;
 // セッションデータを取得したらすぐに削除 (二重表示防止のため)
 ////unset($_SESSION['student_account']);
 
-// ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-$current_course_id = $status['course_id']; // コースIDは1からなので、配列インデックス用に-1する
+// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
+$current_course_id = $status['course_id']; 
 $course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
@@ -52,7 +52,7 @@ try {
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$status['course_id'] - 1]['course_name'];
+        $current_course_name = $course[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -87,10 +87,9 @@ catch (PDOException $e) {
         <main class="main-content">
             <nav class="sidebar">
                 <ul>
-                    
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item is-active"><a href="student_addition.php">アカウントの作成</a></li>
-                    <li class="nav-item"><a href="student_delete.html">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
@@ -103,8 +102,8 @@ catch (PDOException $e) {
                         </label>
                     </div>
                 </form>
-                
             </nav>
+
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
