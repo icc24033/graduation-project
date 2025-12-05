@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // ----------------------------------------------------------------------
     // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
@@ -340,15 +341,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 // まず、古いhidden inputをすべて削除
                 hiddenInputsContainer.innerHTML = ''; 
                 
-                // 新しいhidden inputを作成して追加
+                // 1. 選択された学生IDの配列をhidden inputとしてフォームに動的に追加
                 selectedStudents.forEach((student, index) => {
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
-                    // 配列として受け取れるようにname属性を 'student_ids[]' に設定
+                    // パラメータ名: 'delete_student_id[]'
                     hiddenInput.name = 'delete_student_id[]'; 
                     hiddenInput.value = student.id;
                     hiddenInputsContainer.appendChild(hiddenInput);
                 });
+
+                // 2. ★ 追加: 現在のコースID (current_course_id) をhidden inputとして追加
+                const courseToggle = document.getElementById('courseDropdownToggle');
+                const currentCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : '';
+
+                if (currentCourseId) {
+                    const hiddenCourseInput = document.createElement('input');
+                    hiddenCourseInput.type = 'hidden';
+                    hiddenCourseInput.name = 'course_id'; // パラメータ名
+                    hiddenCourseInput.value = currentCourseId;
+                    hiddenInputsContainer.appendChild(hiddenCourseInput);
+                }
+
+                // 3. ★ 追加: 現在の年度 (current_year) をhidden inputとして追加
+                const yearToggle = document.getElementById('yearDropdownToggle');
+                const currentYear = yearToggle ? yearToggle.getAttribute('data-current-year') : '';
+
+                if (currentYear) {
+                    const hiddenYearInput = document.createElement('input');
+                    hiddenYearInput.type = 'hidden';
+                    hiddenYearInput.name = 'current_year'; // パラメータ名
+                    hiddenYearInput.value = currentYear;
+                    hiddenInputsContainer.appendChild(hiddenYearInput);
+                }
 
 
                 // モーダルを表示
