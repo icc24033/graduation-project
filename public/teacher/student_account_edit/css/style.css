@@ -233,16 +233,7 @@
     margin-bottom: 30px;
     border: 1px solid #CFD5DF;
     border-radius: 5px;
-    
-    /* 削除/コメントアウト */
-    /* height: 700px; */ 
-    
-    /* 【追加】ここから */
-    flex-grow: 1;
-    min-height: 150px; 
-    max-height: calc(100vh - 350px); 
-    /* 【追加】ここまで */
-
+    height: 700px;  
     overflow-y: auto; /* 縦方向のスクロールを有効にする */
     position: relative; /* stickyの基準にするため */
 }

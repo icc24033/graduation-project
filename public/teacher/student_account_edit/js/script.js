@@ -158,17 +158,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ユーティリティ: 非同期通信でコースIDと年度をPHPに送信し、生徒リストを更新する
     // (ここではリダイレクト処理として実装)
-    const redirectToStudentAccountPage = (courseId, year) => {
-        if (!courseId || !year) {
+    const redirectToStudentAccountPage = (courseId, year, page) => {
+        if (!courseId || !year || !page) {
             console.error('コースIDまたは年度が未定義です。');
             return;
         }
 
-        // サーバーサイドの処理ファイル
-        const url = '../../../app/teacher/student_account_edit_backend/student_course.php'; 
-    
-        // コースIDと年度をURLパラメータとして付与してリダイレクト
-        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
+        if (page === 'student_edit_course') {
+            // student_edit_course.php へリダイレクト
+            const url = '../../../app/teacher/student_account_edit_backend/backend_student_course.php'; 
+            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
+            return;
+        }
+        else if (page === 'student_delete') {
+            // student_delete.php へリダイレクト
+            const url = '../../../app/teacher/student_account_edit_backend/backend_student_delete.php'; 
+            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
+            return;
+        }
     };
 
 
@@ -186,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // ※ トグルボタンのdata属性をHTML/PHP側で設定していることが前提
                 let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
+                let finalPage = null
                 let shouldRedirectSide = false; // サイドバーが変更された場合にリダイレクトするフラグ
 
 
@@ -200,9 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentOpenToggle.id === 'courseDropdownToggle') {
                         const selectedCourseId = e.target.getAttribute('data-current-course');
                         const selectedYear = e.target.getAttribute('data-current-year');
+                        const selectedPage = e.target.getAttribute('data-current-page');
                         if (selectedCourseId) {
                             finalCourseId = selectedCourseId;
                             finalYear = selectedYear;
+                            finalPage = selectedPage;
                             // ★ 修正: courseToggle ではなく currentOpenToggle を使用
                             shouldRedirectSide = true; 
                         }
@@ -211,10 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (currentOpenToggle.id === 'yearDropdownToggle') {
                         const selectedYear = e.target.getAttribute('data-current-year');
                         const selectedCourseId = e.target.getAttribute('data-current-course');
+                        const selectedPage = e.target.getAttribute('data-current-page');
                         if (selectedYear) {
                             finalYear = selectedYear;
                             finalCourseId = selectedCourseId;
-                            // ★ 修正: yearToggle ではなく currentOpenToggle を使用
+                            finalPage = selectedPage;
+                            
                             shouldRedirectSide = true; 
                         }
                     }
@@ -222,8 +234,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // B. テーブルのコースドロップダウンだった場合 
                 else if (currentTableInput) {
     
-                    // 🌟 修正ポイント: ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
-                    const newCourseId = e.target.getAttribute('data-current-course-center');
+                    // ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
+                    const newCourseId = e.target.getAttribute('data-selected-course-center');
                 
                     // 1. 表示用のSPANを更新
                     currentTableInput.textContent = selectedValue;
@@ -245,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 最後にリダイレクト（ページ全体を再読み込み）を実行
                 if (shouldRedirectSide) {
                     // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
-                    redirectToStudentAccountPage(finalCourseId, finalYear);
+                    redirectToStudentAccountPage(finalCourseId, finalYear, finalPage);
                 }
             });
         });
@@ -273,6 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // rowCheckboxes を動的に再取得する必要がある場合があるが、ここでは初期のものを利用
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+
+        // フォーム要素とhidden inputのコンテナを取得
+        const deleteForm = document.getElementById('deleteForm');
+        const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
 
         // 削除ボタン (deleteActionButton) をクリックした時の処理
         if (openButton && modal && deleteCountDisplay) {
@@ -318,6 +334,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // 削除件数の表示を更新
                 deleteCountDisplay.innerHTML = `以下の**${selectedStudents.length}件**のアカウントを削除してもよろしいですか？`;
+
+                // --- ★ ココが重要: 選択された学生IDをhidden inputとしてフォームに動的に追加 ---
+                
+                // まず、古いhidden inputをすべて削除
+                hiddenInputsContainer.innerHTML = ''; 
+                
+                // 新しいhidden inputを作成して追加
+                selectedStudents.forEach((student, index) => {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    // 配列として受け取れるようにname属性を 'student_ids[]' に設定
+                    hiddenInput.name = 'delete_student_id[]'; 
+                    hiddenInput.value = student.id;
+                    hiddenInputsContainer.appendChild(hiddenInput);
+                });
+
 
                 // モーダルを表示
                 modal.style.display = 'flex';

@@ -11,7 +11,7 @@ $status = $_SESSION['student_account'] ?? null;
 // セッションデータを取得したらすぐに削除 (二重表示防止のため)
 ////unset($_SESSION['student_account']);
 
-// ★ 追加: コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
+// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
 $current_course_id = $status['course_id']; 
 $course = []; // コースデータを格納する配列を初期化
 
@@ -52,7 +52,7 @@ try {
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
         // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$status['course_id'] - 1]['course_name'];    // コースIDは1からなので、配列インデックス用に-1する
+        $current_course_name = $course[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
@@ -66,18 +66,18 @@ catch (PDOException $e) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <title>生徒アカウント作成編集 アカウントの追加</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css"> 
+    <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
-<body id="student_addition">
-
+<body id="student_delete">
     <div class="app-container">
         <header class="app-header">
             <h1>生徒アカウント作成編集</h1>
@@ -86,7 +86,7 @@ catch (PDOException $e) {
 
         <main class="main-content">
             <nav class="sidebar">
-                <ul>
+            <ul>
                     <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
@@ -98,7 +98,7 @@ catch (PDOException $e) {
                                     <a href="#" 
                                        data-current-year="<?php echo htmlspecialchars($year);?>" 
                                        data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
-                                       data-current-page="student_edit_course">
+                                       data-current-page="student_delete">
                                        20<?php echo htmlspecialchars($year); ?>年度
                                     </a>
                                 </li>
@@ -123,7 +123,7 @@ catch (PDOException $e) {
                                            data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" 
                                            data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>"
                                            data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>"
-                                           data-current-page="student_edit_course">
+                                           data-current-page="student_delete">
                                            <?php echo htmlspecialchars($row['course_name']); ?>
                                         </a>
                                     </li>
@@ -137,24 +137,20 @@ catch (PDOException $e) {
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
+                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
-                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
             </nav>
-            
+
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php" method="post">
-                <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
-                <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
-                    <div class="account-table-container">
-                        <div class="table-header">
-                            <div class="column-check"></div> <div class="column-student-id">学生番号</div>
-                            <div class="column-name">氏名</div>
-                            <div class="column-course">コース</div>
-                        </div>
-                        
-                        <?php 
+                <div class="account-table-container">
+                    <div class="table-header">
+                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-name">氏名</div>
+                        <div class="column-course">コース</div>
+                    </div>
+                    <?php 
                         // $stmt_test_studentが有効な場合のみループ
                         if ($stmt_test_student): 
                             $has_students = false; // データが存在したかどうかのフラグ
@@ -169,24 +165,19 @@ catch (PDOException $e) {
                         ?>
                             <div class="table-row">
                                 <div class="column-check">
+                                    <input type="checkbox" 
+                                        class="row-checkbox" 
+                                        data-student-id="<?php echo htmlspecialchars($student_row['student_id']); ?>" 
+                                    >
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>" disabled>
                                 </div>
                                 <div class="column-name">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
-                                    <a href="#" class="course-display" 
-                                        data-course-name-display 
-                                        data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
-                                        <?php echo htmlspecialchars($student_row['course_name']);?>
-                                    </a>
-                                <input type="hidden" 
-                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
-                                    value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
-                                    class="course-hidden-input">
+                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
                                 </div>
                             </div>
 
@@ -205,7 +196,6 @@ catch (PDOException $e) {
                                 </div>
                         <?php 
                             endif;
-                            // DB接続エラーなどで$stmt_test_studentがnullの場合
                         else:
                         ?>
                             <div class="table-row">
@@ -215,17 +205,36 @@ catch (PDOException $e) {
                                 <div class="column-course"></div>
                             </div>
                         <?php endif; ?>
-
-                    </div>
-                    <?php 
+                </div>
+                <?php 
                         // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
                         if ($has_students): 
-                    ?>
-                        <button class="complete-button" type="submit">完了</button>
-                    <?php 
-                    endif; 
-                    ?>
-                </form>
+                ?>
+                    <button class="add-button" id="deleteActionButton">削除</button>
+                    <button class="complete-button">完了</button>
+                    <div class="modal-overlay" id="deleteModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>アカウント削除確認</h2>
+                            </div>
+                            <div class="modal-body">
+                                <p>以下の0件のアカウントを削除してもよろしいですか？</p>
+                                <div class="delete-list-container">
+                                    <div id="selectedStudentList"></div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
+
+                                <form method="POST" action="../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
+                                    <div id="hiddenInputsContainer" style="display: none;"></div>
+                                
+                                    <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </main>
     </div>
