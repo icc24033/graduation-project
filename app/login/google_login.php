@@ -7,6 +7,7 @@ require_once __DIR__ . '/../session/session_config.php'; // セッション設�
 
 // 1. 環境設定
 session_start();
+
 // エラー報告の有効化
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -130,9 +131,16 @@ function handle_login_error(): void
     session_unset();
     session_destroy();
     
-    header('Location: login_error.html');
+    header('Location: login_error.html'); //パスは public/login/login_error.html を指す
     exit(); // リダイレクト後は必ず exit()
 }
+
+function debug_errorhandle(): void
+{
+    session_unset();
+    session_destroy();
+    exit();
+} 
 
 // -------------------------------------------------------------------------
 //【A. コールバック処理：認可コードを受け取った後の処理】
@@ -161,21 +169,22 @@ if (isset($_GET['code'])) {
 
     if ($userEmail) { // メールアドレスが取得できた場合
         $emailDomain = substr(strrchr($userEmail, "@"), 1);
-
         if ($emailDomain === ICC_DOMAIN) {
+
            try {
                 $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // エラーモードを例外に設定
 
                 // login_tableからメールアドレスを検索し、user_gradeとuser_idを取得する
                 // 取得カラムに user_grade と user_id を追加
                 $sql = "SELECT user_id, user_grade FROM login_table WHERE user_email = :email";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(':email', $userEmail);
-                $stmt->execute();
+                $stmt->execute(); // クエリ実行
                 
                 // 結果を連想配列で1行取得する
                 $user_data = $stmt->fetch(PDO::FETCH_ASSOC); 
+                $pdo = null;
 
                 // if ($user_exists > 0) の代わりに、if ($user_data) でチェック
                 if ($user_data) {
@@ -189,11 +198,10 @@ if (isset($_GET['code'])) {
                     $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
                     
                     // $user_data から grade と user_id をセッションに保存
-                    $_SESSION['user_grade'] = $user_data['grade']; 
-                    $_SESSION['user_id'] = $user_data['user_id']; 
+                    $_SESSION['user_grade'] = $user_data['user_grade']; 
+                    $_SESSION['user_id'] = $user_data['user_id'];
 
                     // データベース接続を閉じる
-                    $pdo = null;
                     
                     // HTTPヘッダーでキャッシュを無効化
                     // ブラウザの履歴に戻ってもページが再読み込みされない。
@@ -201,69 +209,42 @@ if (isset($_GET['code'])) {
                     header("Pragma: no-cache");
                     header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 
-                    // 履歴操作用の redirect.php にリダイレクト
-                    header('Location: redirect.php'); 
+                    // 履歴操作用の publicフォルダ内のloginフォルダにあるredirect.php にリダイレクト
+                    header('Location: redirect.php'); // パスは public/login/redirect.php を指す
                     exit();
                 }
                 else {
                     // 照合失敗：メールアドレスがテーブルに存在しない場合
-                    $pdo = null; // データベース接続を閉じる
                     // 共通のエラー処理関数を呼び出す
                     handle_login_error();
                 }
             }
-            // catch (PDOException $e) {
-            //     // データベース接続またはクエリ実行エラー
-            //     // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
-            //     $pdo = null;
-            //     error_log("DB Connection Error: " . $e->getMessage());
-            //     // 共通のエラー処理関数を呼び出す
-            //     handle_login_error();
-            // }
-            // //照合失敗：ループを抜けてエラーメッセージ表示へ
-            // catch (Exception $e) {
-            //     // その他のエラー処理
-            //     error_log("General Error: " . $e->getMessage());
-            //     $pdo = null;
-            //     handle_login_error();
-            // }
-    //     }
-    //     // ドメイン不一致またはメールアドレスが取得できなかった場合
-    //     // 共通のエラー処理関数を呼び出す
-    //     else {
-    //         handle_login_error();
-    //     }
-    // }
-    // else {
-    //     // メールアドレスが取得できなかった場合
-    //     // 共通のエラー処理関数を呼び出す
-    //     handle_login_error();
-    // }
-    // ★ポイント2: DB接続エラーをキャッチし、エラーコードを表示して処理停止
             catch (PDOException $e) {
-                // 開発環境向け：具体的なエラーメッセージを表示（本番環境では非推奨）
+                // データベース接続またはクエリ実行エラー
+                // 攻撃者にエラー内容を伝えず、一般的なエラーメッセージを返す
                 $pdo = null;
-                error_log("DB_ERROR: " . $e->getMessage()); 
-                die("致命的なDBエラーが発生しました。設定を確認してください。<br>エラーコード: " . $e->getMessage());
+                error_log("DB Connection Error: " . $e->getMessage());
+                // 共通のエラー処理関数を呼び出す
+                handle_login_error();
             }
-            // その他の例外をキャッチ
+            //照合失敗：ループを抜けてエラーメッセージ表示へ
             catch (Exception $e) {
+                // その他のエラー処理
+                error_log("General Error: " . $e->getMessage());
                 $pdo = null;
-                error_log("GENERAL_ERROR: " . $e->getMessage()); 
-                die("致命的な一般エラーが発生しました。管理者にご連絡ください。");
+                handle_login_error();
             }
         }
-        // ドメイン不一致の場合
+        // ドメイン不一致またはメールアドレスが取得できなかった場合
+        // 共通のエラー処理関数を呼び出す
         else {
-            sleep(3); 
-            // エラーダイ表示 or リダイレクト
-            die("3:認証に失敗しました。ICCのGoogleアカウントでのみログイン可能です。");
+            handle_login_error();
         }
     }
-    // メールアドレスが取得できなかった場合
     else {
-        sleep(3); 
-        die("4:認証に失敗しました。メールアドレスが取得できませんでした。");
+        // メールアドレスが取得できなかった場合
+        // 共通のエラー処理関数を呼び出す
+        handle_login_error();
     }
 }
 
@@ -293,5 +274,4 @@ $authUrl = $auth_endpoint . '?' . http_build_query(array(
 // Googleのログイン画面へリダイレクト
 header('Location: ' . $authUrl);
 exit();
-
 ?>

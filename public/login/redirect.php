@@ -1,33 +1,38 @@
 <?php
-// ログインしていない場合は強制的にログイン画面へリダイレクト
-session_start();
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: login.html'); // login.html は同じディレクトリにあると仮定
-    exit();
-}
-// ブラウザの戻るボタンで認証ページに戻るのを防ぐためのファイル
+// ----------------------------------------------------
+// ブラウザの戻るボタン対策用の中間ページ
+// ----------------------------------------------------
 
-// ----------------------------------------------------
-// キャッシュを無効化
-// ----------------------------------------------------
+// キャッシュを徹底的に無効化するヘッダーを出力
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-// ----------------------------------------------------
-// 履歴スタックを操作
-// ----------------------------------------------------
+
+// ※ ここで session_start() や条件分岐を行わないことで
+//    500エラーのリスクを極限まで減らします。
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>リダイレクト中...</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+        }
+    </style>
     <script>
-        // window.location.replace()で履歴からこのページを消去
+        // ページ読み込み完了を待たずに即座にリダイレクト開始
         window.location.replace("../teacher/teacher_home.php");
     </script>
 </head>
 <body>
-    <p>ログイン成功。ホーム画面に移動しています...</p>
+    <p>ログインしました。</p>
+    <p>ホーム画面へ移動しています...</p>
 </body>
 </html>
-<?php exit; ?>

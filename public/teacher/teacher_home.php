@@ -63,10 +63,10 @@ $user_object = null;
 // 権限に応じて適切なユーザーオブジェクトを生成
 switch ($user_grade) {
     case 'master@icc_ac.jp':
-        $user_object = new Master_class($current_user_id);
+        $user_object = new Master($current_user_id);
         break;
     case 'teacher@icc_ac.jp':
-        $user_object = new Teacher_class($current_user_id);
+        $user_object = new Teacher($current_user_id);
         break;
     default:
         // 権限がない場合や未定義の場合、オブジェクトは生成しない
