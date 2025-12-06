@@ -40,9 +40,7 @@ header{
     
     
     position: absolute; 
-    right: 20px;            
-    top: 50%;               
-    transform: translateY(-50%);
+    right: 20px;
     
     width: 60px;            /* アイコンのサイズ */
     height: 60px;           /* アイコンのサイズ */

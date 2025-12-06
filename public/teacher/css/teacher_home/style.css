@@ -170,8 +170,8 @@ body{
 .user-avatar {
     /* ... 既存のposition/top/right/transform設定 ... */
     
-    width: 60px !important;    /* ★サイズがゼロでないか確認 */
-    height: 60px !important;   /* ★サイズがゼロでないか確認 */
+    width: 60px !important;    /* 幅を60pxに固定 */
+    height: 60px !important;   /* 高さを60pxに固定 */
     
     /* ... その他の設定 ... */
 }

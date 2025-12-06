@@ -98,7 +98,7 @@ if ($user_object instanceof User_MasAndTeach) {
             <div class="user-avatar" id="userAvatar">
                 <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
             </div>
-            
+
             <!--  ICCスマートキャンパスロゴ -->
             <!-- 
                 <img src="<.?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="100" height="50">
@@ -110,7 +110,7 @@ if ($user_object instanceof User_MasAndTeach) {
             <div class="user-menu-popup" id="userMenuPopup">
                 <a href="../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
-                    ICCスマートキャンパスからログアウト
+                    アプリからログアウト
                 </a>
             </div>
         </header>
