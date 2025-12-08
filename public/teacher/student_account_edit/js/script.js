@@ -183,6 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
             return;
         }
+        else {
+            window.location.href = '../../../app/teacher/student_account_edit_backend/backend_student_grade_csv_edit.php';
+            return;
+        }
     };
 
 
