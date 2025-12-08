@@ -29,8 +29,8 @@ if (!isset($_SESSION['user_email'])) {
 }
 
 // クラスファイルを読み込む
-// パスは teacher_home.php の位置から /app/classes/ への相対パス
-$base_path = __DIR__ . '/../../app/classes/';
+// パスは teacher_home.php の位置から /app/classes/user/ への相対パス
+$base_path = __DIR__ . '/../../app/classes/user/';
 
 require_once $base_path . 'User_class.php'; 
 require_once $base_path . 'Teacher_class.php'; 

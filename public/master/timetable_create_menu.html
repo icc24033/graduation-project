@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時間割り作成</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+
+</head>
+<body>
+    <div class="app-container">
+    <header class="app-header">
+        <h1>時間割り作成</h1>
+        <i class="fa-regular fa-calendar-plus user_icon"></i>
+    </header>
+
+    <div class="main-section">
+
+        <nav class="sidebar" style="z-index: 50;">
+            <!-- 新規作成ボタン -->
+            <div class="pt-6 pb-4 border-b border-gray-200">
+                <a href="aaa.html" class="sidebar-new-button">
+                    <i class="fa-solid fa-plus mr-2"></i>
+                    新規作成
+                </a>
+            </div>
+
+            <!-- 作成済み時間割エリア -->
+            <div class="px-4 py-4 space-y-4">
+                
+                <!-- ラジオボタン群 -->
+                <div>
+                    <!-- 1. 選択したコース -->
+                    <div class="mb-3">
+                        <label class="radio-group-label">
+                            <input type="radio" name="displayMode" value="select" checked onchange="changeDisplayMode('select')">
+                            <span class="font-bold">選択</span>
+                        </label>
+                        
+                        <!-- コース選択ドロップダウン -->
+                        <div class="ml-6 mt-1 relative">
+                            <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
+                                <span class="current-value">システムデザインコース</span>
+                            </button>
+                            <ul id="courseDropdownMenu" class="dropdown-menu">
+                                <li><a href="#">システムデザインコース</a></li>
+                                <li><a href="#">Webクリエイタコース</a></li>
+                                <li><a href="#">マルチメディアOAコース</a></li>
+                                <li><a href="#">応用情報コース</a></li>
+                                <li><a href="#">基本情報コース</a></li>
+                                <li><a href="#">ITパスポートコース</a></li>
+                                <li><a href="#">１年１組</a></li>
+                                <li><a href="#">１年２組</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 2. 現在反映 -->
+                    <div class="mb-2">
+                        <label class="radio-group-label">
+                            <input type="radio" name="displayMode" value="current" onchange="changeDisplayMode('current')">
+                            <span>現在反映されている時間割り</span>
+                        </label>
+                    </div>
+
+                    <!-- 3. 次の期間 -->
+                    <div class="mb-2">
+                        <label class="radio-group-label">
+                            <input type="radio" name="displayMode" value="next" onchange="changeDisplayMode('next')">
+                            <span>次の期間で反映される時間割り</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 区切り線 -->
+                <div id="savedListDivider" class="sidebar-divider hidden"></div>
+
+                <!-- 作成済みリストエリア -->
+                <ul id="savedListContainer" class="hidden">
+                    <li class="is-group-label">作成済み時間割</li>
+                    <!-- JSでここに追加 -->
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            
+            <div class="control-area">
+                <div class="period-box">
+                    <span class="period-label">適用期間</span>
+                    <div class="period-inputs">
+                        <input type="date" class="date-input" id="startDate">
+                        <span class="date-separator">～</span>
+                        <input type="date" class="date-input" id="endDate">
+                    </div>
+                </div>
+
+                <!-- コース表示エリア -->
+                <div class="course-display">
+                    <h2 id="mainCourseDisplay" class="text-2xl font-bold text-slate-700 border-b-2 border-blue-200 px-2 inline-block">
+                        システムデザインコース
+                    </h2>
+                </div>
+            </div>
+
+            <div class="timetable-container">
+                <div class="timetable-wrap">
+                    <table class="timetable">
+                        <thead>
+                            <tr>
+                                <th class="table-corner"></th>
+                                <th class="day-header" data-day="月">月</th>
+                                <th class="day-header" data-day="火">火</th>
+                                <th class="day-header" data-day="水">水</th>
+                                <th class="day-header" data-day="木">木</th>
+                                <th class="day-header" data-day="金">金</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-body">
+                            <!-- 1限 -->
+                            <tr>
+                                <td class="period-cell">
+                                    <div class="period-number">1</div>
+                                    <div class="period-time">9:10~</div>
+                                    <div class="period-time">10:40</div>
+                                </td>
+                                <td class="timetable-cell" data-day="月" data-period="1"></td>
+                                <td class="timetable-cell" data-day="火" data-period="1"></td>
+                                <td class="timetable-cell" data-day="水" data-period="1"></td>
+                                <td class="timetable-cell" data-day="木" data-period="1"></td>
+                                <td class="timetable-cell" data-day="金" data-period="1"></td>
+                            </tr>
+                            <!-- 2限 -->
+                            <tr>
+                                <td class="period-cell">
+                                    <div class="period-number">2</div>
+                                    <div class="period-time">10:50~</div>
+                                    <div class="period-time">12:20</div>
+                                </td>
+                                <td class="timetable-cell" data-day="月" data-period="2"></td>
+                                <td class="timetable-cell" data-day="火" data-period="2"></td>
+                                <td class="timetable-cell" data-day="水" data-period="2"></td>
+                                <td class="timetable-cell" data-day="木" data-period="2"></td>
+                                <td class="timetable-cell" data-day="金" data-period="2"></td>
+                            </tr>
+                            <!-- 3限 -->
+                            <tr>
+                                <td class="period-cell">
+                                    <div class="period-number">3</div>
+                                    <div class="period-time">13:10~</div>
+                                    <div class="period-time">14:40</div>
+                                </td>
+                                <td class="timetable-cell" data-day="月" data-period="3"></td>
+                                <td class="timetable-cell" data-day="火" data-period="3"></td>
+                                <td class="timetable-cell" data-day="水" data-period="3"></td>
+                                <td class="timetable-cell" data-day="木" data-period="3"></td>
+                                <td class="timetable-cell" data-day="金" data-period="3"></td>
+                            </tr>
+                            <!-- 4限 -->
+                            <tr>
+                                <td class="period-cell">
+                                    <div class="period-number">4</div>
+                                    <div class="period-time">14:50~</div>
+                                    <div class="period-time">16:20</div>
+                                </td>
+                                <td class="timetable-cell" data-day="月" data-period="4"></td>
+                                <td class="timetable-cell" data-day="火" data-period="4"></td>
+                                <td class="timetable-cell" data-day="水" data-period="4"></td>
+                                <td class="timetable-cell" data-day="木" data-period="4"></td>
+                                <td class="timetable-cell" data-day="金" data-period="4"></td>
+                            </tr>
+                            <!-- 5限 -->
+                            <tr>
+                                <td class="period-cell">
+                                    <div class="period-number">5</div>
+                                    <div class="period-time">16:30~</div>
+                                    <div class="period-time">17:50</div>
+                                </td>
+                                <td class="timetable-cell" data-day="月" data-period="5"></td>
+                                <td class="timetable-cell" data-day="火" data-period="5"></td>
+                                <td class="timetable-cell" data-day="水" data-period="5"></td>
+                                <td class="timetable-cell" data-day="木" data-period="5"></td>
+                                <td class="timetable-cell" data-day="金" data-period="5"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="footer-button-area">
+                <button id="deleteButton" class="delete-button">
+                    削除
+                </button>
+                <button id="completeButton" class="complete-button">
+                    完了
+                </button>
+            </div>
+
+        </main>
+    </div>
+</div>
+    <!-- モーダル -->
+    <div id="classModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="modal-title">○曜日 ○限</h2>
+            <div class="modal-form-area">
+                <div class="modal-form-item">
+                    <label class="modal-label">授業名：</label>
+                    <div class="modal-select-wrapper">
+                        <select id="inputClassName" class="modal-select">
+                            <option value="">(選択してください)</option>
+                            <option value="Javaプログラミング">Javaプログラミング</option>
+                            <option value="Webデザイン演習">Webデザイン演習</option>
+                            <option value="データベース基礎">データベース基礎</option>
+                            <option value="ネットワーク構築">ネットワーク構築</option>
+                            <option value="セキュリティ概論">セキュリティ概論</option>
+                            <option value="プロジェクト管理">プロジェクト管理</option>
+                            <option value="キャリアデザイン">キャリアデザイン</option>
+                            <option value="HR">HR</option>
+                        </select>
+                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
+                    </div>
+                </div>
+                <div class="modal-form-item">
+                    <label class="modal-label">担当先生：</label>
+                    <div class="modal-select-wrapper">
+                        <select id="inputTeacherName" class="modal-select">
+                            <option value="">(選択してください)</option>
+                            <option value="佐藤 健一">佐藤 健一</option>
+                            <option value="鈴木 花子">鈴木 花子</option>
+                            <option value="高橋 誠">高橋 誠</option>
+                            <option value="田中 優子">田中 優子</option>
+                            <option value="渡辺 剛">渡辺 剛</option>
+                            <option value="伊藤 直人">伊藤 直人</option>
+                            <option value="山本 さくら">山本 さくら</option>
+                        </select>
+                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
+                    </div>
+                </div>
+                <div class="modal-form-item">
+                    <label class="modal-label">教室場所：</label>
+                    <div class="modal-select-wrapper">
+                        <select id="inputRoomName" class="modal-select">
+                            <option value="">(選択してください)</option>
+                            <option value="201教室">201教室</option>
+                            <option value="202教室">202教室</option>
+                            <option value="301演習室">301演習室</option>
+                            <option value="302演習室">302演習室</option>
+                            <option value="4F大講義室">4F大講義室</option>
+                            <option value="別館Lab A">別館Lab A</option>
+                            <option value="別館Lab B">別館Lab B</option>
+                        </select>
+                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-button-area">
+                <button id="btnCancel" class="modal-cancel-button">キャンセル</button>
+                <button id="btnSave" class="modal-save-button">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- データ管理 ---
+        let savedTimetables = [];
+
+        // --- ラジオボタンによるモード変更 ---
+        function changeDisplayMode(mode) {
+            const toggleBtn = document.getElementById('courseDropdownToggle');
+            
+            if (mode === 'select') {
+                toggleBtn.classList.remove('disabled');
+            } else {
+                toggleBtn.classList.add('disabled');
+            }
+
+            // リストを再描画
+            renderSavedList(mode);
+        }
+
+        // --- 保存済みリストを描画する関数 ---
+        function renderSavedList(mode) {
+            const container = document.getElementById('savedListContainer');
+            const divider = document.getElementById('savedListDivider');
+            
+            // タイトル以外のアイテムをクリア
+            const items = container.querySelectorAll('li:not(.is-group-label)');
+            items.forEach(item => item.remove());
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // 1. まず現在のコースで絞り込む
+            const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
+            let filteredRecords = savedTimetables.filter(item => item.course === currentCourse);
+
+            // 2. モードに応じた期間フィルタリング
+            if (mode === 'select') {
+                // 全件表示
+            } else if (mode === 'current') {
+                // 現在期間
+                filteredRecords = filteredRecords.filter(item => {
+                    if (!item.startDate) return false;
+                    const isStarted = item.startDate <= todayStr;
+                    const isNotEnded = !item.endDate || item.endDate >= todayStr;
+                    return isStarted && isNotEnded;
+                });
+            } else if (mode === 'next') {
+                // 次の期間
+                filteredRecords = filteredRecords.filter(item => {
+                    if (!item.startDate) return false;
+                    return item.startDate > todayStr;
+                });
+            }
+
+            if (filteredRecords.length > 0) {
+                container.classList.remove('hidden');
+                divider.classList.remove('hidden');
+            } else {
+                // データがない場合でも枠自体は残すが、見えなくするなら hidden をつける
+                // ここでは中身が空になるだけにする
+            }
+
+            filteredRecords.forEach(record => {
+                const dateLabel = getFormattedDate(record.startDate);
+                
+                const newItem = document.createElement('li');
+                newItem.className = 'nav-item saved-item';
+                newItem.setAttribute('data-id', record.id);
+                newItem.innerHTML = `
+                    <a href="#">
+                        <i class="fa-regular fa-file-lines text-blue-500"></i>
+                        <span>${record.course}</span>
+                        <span class="saved-meta">${dateLabel}</span>
+                    </a>
+                `;
+                
+                newItem.addEventListener('click', handleSavedItemClick);
+                container.appendChild(newItem);
+            });
+        }
+
+        // --- ドロップダウン制御 ---
+        function setupDropdown(toggleId, menuId, onChangeCallback) {
+            const toggle = document.getElementById(toggleId);
+            const menu = document.getElementById(menuId);
+
+            if (toggle && menu) {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (toggle.classList.contains('disabled')) return;
+
+                    document.querySelectorAll('.dropdown-menu.is-open').forEach(openMenu => {
+                        if (openMenu !== menu) {
+                            openMenu.classList.remove('is-open');
+                            const btnId = openMenu.id.replace('Menu', 'Toggle');
+                            const btn = document.getElementById(btnId);
+                            if(btn) btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                    toggle.setAttribute('aria-expanded', !isExpanded);
+                    
+                    if (!isExpanded) {
+                        const rect = toggle.getBoundingClientRect();
+                        menu.style.top = `${rect.top}px`;
+                        menu.style.left = `${rect.right + 10}px`;
+                        menu.classList.add('is-open');
+                    } else {
+                        menu.classList.remove('is-open');
+                    }
+                });
+
+                menu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const selectedValue = e.target.textContent;
+                        toggle.querySelector('.current-value').textContent = selectedValue;
+                        toggle.setAttribute('aria-expanded', 'false');
+                        menu.classList.remove('is-open');
+
+                        if (onChangeCallback) {
+                            onChangeCallback();
+                        }
+                    });
+                });
+            }
+        }
+
+        setupDropdown('courseDropdownToggle', 'courseDropdownMenu', refreshTimetableDisplay);
+
+        // 閉じる処理
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
+                if (menu.contains(e.target)) return;
+                menu.classList.remove('is-open');
+                const btnId = menu.id.replace('Menu', 'Toggle');
+                const btn = document.getElementById(btnId);
+                if(btn) btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+        const sidebar = document.querySelector('.sidebar');
+        if(sidebar) {
+            sidebar.addEventListener('scroll', () => {
+                document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
+                    menu.classList.remove('is-open');
+                    const btnId = menu.id.replace('Menu', 'Toggle');
+                    const btn = document.getElementById(btnId);
+                    if(btn) btn.setAttribute('aria-expanded', 'false');
+                });
+            });
+        }
+
+        // --- モーダル & セル編集 ---
+        const modal = document.getElementById('classModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const inputClassName = document.getElementById('inputClassName');
+        const inputTeacherName = document.getElementById('inputTeacherName');
+        const inputRoomName = document.getElementById('inputRoomName');
+        const btnCancel = document.getElementById('btnCancel');
+        const btnSave = document.getElementById('btnSave');
+        let currentCell = null;
+
+        document.querySelectorAll('.timetable-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                if (!document.querySelector('input[value="select"]').checked) {
+                    alert('編集は「選択」モードで行ってください。');
+                    return;
+                }
+
+                currentCell = this;
+                const day = this.dataset.day;
+                const period = this.dataset.period;
+                modalTitle.textContent = `${day}曜日 ${period}限`;
+                
+                const existingClass = this.querySelector('.class-name')?.textContent || '';
+                const existingTeacher = this.querySelector('.teacher-name span')?.textContent || '';
+                const existingRoom = this.querySelector('.room-name span')?.textContent || '';
+                
+                setSelectValue(inputClassName, existingClass);
+                setSelectValue(inputTeacherName, existingTeacher.trim());
+                setSelectValue(inputRoomName, existingRoom.trim());
+
+                modal.classList.remove('hidden');
+                document.body.classList.add('modal-open');
+                setTimeout(() => inputClassName.focus(), 100);
+            });
+        });
+
+        function setSelectValue(select, val) {
+            let found = false;
+            for(let i=0; i<select.options.length; i++) {
+                if(select.options[i].value === val) { select.selectedIndex = i; found = true; break; }
+            }
+            if(!found) select.value = "";
+        }
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            currentCell = null;
+        };
+        btnCancel.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+
+        btnSave.addEventListener('click', function() {
+            if (!currentCell) return;
+            const c = inputClassName.value;
+            const t = inputTeacherName.value;
+            const r = inputRoomName.value;
+            if (c || t || r) updateCell(currentCell, c, t, r);
+            else clearCell(currentCell);
+            closeModal();
+        });
+
+        function updateCell(cell, c, t, r) {
+            cell.innerHTML = `
+                <div class="class-content">
+                    <div class="class-name">${c}</div>
+                    <div class="class-detail">
+                        ${t ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${t}</span></div>` : ''}
+                        ${r ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${r}</span></div>` : ''}
+                    </div>
+                </div>`;
+            cell.classList.add('is-filled');
+        }
+        function clearCell(cell) {
+            cell.innerHTML = '';
+            cell.classList.remove('is-filled');
+        }
+
+        // --- 完了ボタン & 保存処理 ---
+        const completeButton = document.getElementById('completeButton');
+        const deleteButton = document.getElementById('deleteButton');
+        const savedListContainer = document.getElementById('savedListContainer');
+        const savedListDivider = document.getElementById('savedListDivider');
+        const currentCourseEl = document.querySelector('#courseDropdownToggle .current-value');
+
+        function getFormattedDate(inputVal) {
+            if (!inputVal) return '';
+            const parts = inputVal.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[1]}/${parts[2]}~`;
+        }
+
+        // --- テーブル表示リフレッシュ & リスト更新 ---
+        function refreshTimetableDisplay() {
+            const mode = document.querySelector('input[name="displayMode"]:checked').value;
+            if (mode !== 'select') return;
+
+            const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
+            
+            const displayEl = document.getElementById('mainCourseDisplay');
+            if(displayEl) displayEl.textContent = currentCourse;
+
+            renderSavedList('select');
+
+            // 最新のデータを検索
+            const record = savedTimetables.slice().reverse().find(item => item.course === currentCourse);
+
+            document.querySelectorAll('.timetable-cell').forEach(cell => clearCell(cell));
+            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+
+            if (record) {
+                record.data.forEach(item => {
+                    const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+                    if (targetCell) updateCell(targetCell, item.className, item.teacherName, item.roomName);
+                });
+                
+                const listItem = document.querySelector(`.saved-item[data-id="${record.id}"]`);
+                if (listItem) listItem.classList.add('active');
+            }
+        }
+
+        // --- 完了ボタンイベント ---
+        completeButton.addEventListener('click', function() {
+            if (!document.querySelector('input[value="select"]').checked) {
+                alert('「選択」モードでのみ保存可能です。');
+                return;
+            }
+
+            const courseText = currentCourseEl.textContent;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate) {
+                alert('適用期間の開始日を入力してください。');
+                return;
+            }
+
+            const currentGridData = [];
+            document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
+                currentGridData.push({
+                    day: cell.dataset.day, period: cell.dataset.period,
+                    className: cell.querySelector('.class-name')?.textContent || '',
+                    teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
+                    roomName: cell.querySelector('.room-name span')?.textContent || ''
+                });
+            });
+
+            const newRecord = {
+                id: Date.now(), 
+                course: courseText,
+                startDate: startDate,
+                endDate: endDate,
+                data: currentGridData
+            };
+            savedTimetables.push(newRecord);
+
+            const currentMode = document.querySelector('input[name="displayMode"]:checked').value;
+            renderSavedList(currentMode);
+
+            alert('作成済み時間割に保存しました。');
+        });
+
+        // --- 削除ボタンイベント (実装確認済み) ---
+        deleteButton.addEventListener('click', function() {
+            // 1. モードチェック
+            if (!document.querySelector('input[value="select"]').checked) {
+                alert('削除は「選択」モードで行ってください。');
+                return;
+            }
+
+            // 2. 選択中のアイテムがあるかチェック
+            const activeItem = document.querySelector('.saved-item.active');
+            if (!activeItem) {
+                alert('削除する時間割をリストから選択してください。');
+                return;
+            }
+
+            // 3. 確認ダイアログ
+            if(!confirm('この作成済み時間割を削除しますか？')) return;
+
+            // 4. データ削除実行
+            const id = parseInt(activeItem.getAttribute('data-id'));
+            savedTimetables = savedTimetables.filter(item => item.id !== id);
+
+            // 5. 画面更新
+            const currentMode = document.querySelector('input[name="displayMode"]:checked').value;
+            renderSavedList(currentMode);
+            
+            // 6. テーブルクリア & コース名リセット表示
+            document.querySelectorAll('.timetable-cell').forEach(cell => clearCell(cell));
+            
+            alert('削除しました。');
+        });
+
+        // リストクリック処理
+        function handleSavedItemClick(e) {
+            e.preventDefault();
+            const selectRadio = document.querySelector('input[value="select"]');
+            selectRadio.checked = true;
+            changeDisplayMode('select');
+
+            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+
+            const id = parseInt(this.getAttribute('data-id'));
+            const record = savedTimetables.find(item => item.id === id);
+
+            if (record) {
+                const toggle = document.querySelector('#courseDropdownToggle .current-value');
+                toggle.textContent = record.course;
+                const displayEl = document.getElementById('mainCourseDisplay');
+                if(displayEl) displayEl.textContent = record.course;
+                
+                document.getElementById('startDate').value = record.startDate;
+                document.getElementById('endDate').value = record.endDate;
+
+                document.querySelectorAll('.timetable-cell').forEach(cell => clearCell(cell));
+                record.data.forEach(item => {
+                    const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+                    if (targetCell) updateCell(targetCell, item.className, item.teacherName, item.roomName);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
