@@ -1,233 +1,287 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------------------
-    // 1. ドロップダウンメニューの制御 (サイドバー & テーブル内)
+    // 1. ドロップダウンメニューの制御 (テーブル内 + モーダル内)
     // ----------------------------------------------------------------------
 
-    // 必要な要素を全て取得
-    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-    const dropdownMenus = document.querySelectorAll('.dropdown-menu');
-    // data-dropdown-forを持つテーブル内のコース表示要素を取得
-    const tableCourseInputs = document.querySelectorAll('.course-display[data-dropdown-for]'); 
+    // 全てのドロップダウンメニュー要素 (テーブル内: .dropdown-menu と モーダル内: .modal-dropdown-menu を両方取得)
+    const allDropdownMenus = document.querySelectorAll('.dropdown-menu, .modal-dropdown-menu');
     
+    // 全てのドロップダウン表示要素 (テーブル内とモーダル内を統合)
+    const allDisplayInputs = document.querySelectorAll('.subject-display[data-dropdown-for], .course-display[data-dropdown-for], .modal-course-display[data-dropdown-for], .subject-item[data-dropdown-for]');
     // 現在開いているドロップダウンを追跡する変数
-    let currentOpenToggle = null;
-    let currentOpenMenu = null;
-    // テーブル内のどの要素に紐づいているかを追跡
-    let currentTableInput = null; 
+    let currentOpenMenu = null;    // 開いているメニュー要素 (例: #courseDropdownMenu, #modalInfoDropdownMenu)
+    let currentTableInput = null;  // クリックされた表示要素 (例: .course-display, .modal-course-display)
 
     /**
      * すべてのドロップダウンを閉じる関数
      */
     const closeAllDropdowns = () => {
-        // 1. サイドバーのメニューを閉じる
-        document.querySelectorAll('.dropdown-toggle[aria-expanded="true"]').forEach(openToggle => {
-            openToggle.setAttribute('aria-expanded', 'false');
-            // .nav-itemの子要素である .dropdown-menu を探して閉じる
-            const openMenu = openToggle.closest('.nav-item')?.querySelector('.dropdown-menu');
-            if (openMenu) openMenu.classList.remove('is-open');
-        });
-
-        // 2. テーブルのコースドロップダウンを閉じる
-        if (currentTableInput) {
-            currentTableInput.classList.remove('is-open-course-dropdown');
-            
-            // 関連するサイドバーのメニューを非表示にする
-            const menuId = currentTableInput.getAttribute('data-dropdown-for');
-            const menu = document.getElementById(menuId);
-            if (menu) {
-                menu.classList.remove('is-open');
-                // 位置指定をリセット (テーブル用設定を解除)
-                menu.style.left = '';
-                menu.style.top = '';
-                menu.style.position = ''; // スタイルをリセット
-            }
+        if (currentOpenMenu) {
+            currentOpenMenu.classList.remove('is-open');
+            // 授業名ドロップダウン用にカスタムクラスを削除 (CSS調整用)
+            currentOpenMenu.classList.remove('is-open-subject-dropdown'); 
+            // スタイルをリセット
+            currentOpenMenu.style.position = '';
+            currentOpenMenu.style.top = '';
+            currentOpenMenu.style.left = '';
+            currentOpenMenu.style.minWidth = '';
+            currentOpenMenu.style.zIndex = '';
         }
-        
-        // 追跡変数をリセット
-        currentOpenToggle = null;
+        if (currentTableInput) {
+             // 関連するCSSクラスを削除
+             currentTableInput.classList.remove('is-open-course-dropdown');
+             currentTableInput.classList.remove('is-open-subject-dropdown'); 
+        }
+
         currentOpenMenu = null;
-        currentTableInput = null; 
+        currentTableInput = null;
     };
 
-    // --- 1-1. サイドバードロップダウンの開閉制御 ---
-    dropdownToggles.forEach(toggle => {
-        toggle.addEventListener('click', (event) => {
-            // 親の .nav-item を見つける
-            const navItem = toggle.closest('.nav-item');
-            // 同じ親の中にある .dropdown-menu を見つける
-            const menu = navItem ? navItem.querySelector('.dropdown-menu') : null;
+    // ----------------------------------------------------------------------
+    // 授業名/コース表示要素のクリックイベント
+    // ----------------------------------------------------------------------
+    
+    /** * クリックされた表示要素にドロップダウンを表示する共通ハンドラ 
+     * @param {Event} event - イベントオブジェクト
+     */
+    const handleDisplayInputClick = (event) => {
+        const input = event.currentTarget; // クリックされた要素 (.subject-item, .course-displayなど)
+        event.stopPropagation(); // documentクリックイベント発火防止
+        
+        const targetMenuId = input.dataset.dropdownFor;
+        const targetMenu = document.getElementById(targetMenuId);
 
-            if (menu) {
-                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-                
-                closeAllDropdowns(); // まず全て閉じる
+        if (!targetMenu) return;
 
-                if (!isExpanded) { // クリックした要素が閉じている場合のみ開く
-                    toggle.setAttribute('aria-expanded', 'true');
-                    menu.classList.add('is-open');
+        // 開閉処理: クリックされた要素が既に開いているものと同じなら閉じる
+        const isOpening = currentTableInput !== input || !targetMenu.classList.contains('is-open');
+        
+        closeAllDropdowns(); // 念のため全て閉じる
 
-                    // 【メニューの位置設定】
-                    const rect = toggle.getBoundingClientRect();
-                    
-                    // サイドバーのドロップダウンは、トグルの右側 + 5px、ボタンの下に配置
-                    menu.style.left = `${rect.right + 5}px`;
-                    menu.style.top = `${rect.top + rect.height}px`;
-                    menu.style.position = 'fixed'; // 固定配置
-
-                    currentOpenToggle = toggle;
-                    currentOpenMenu = menu;
-                }
+        if (isOpening) {
+            // ★【追記】削除・編集対象の特定のため、is-selectedクラスを更新
+            // モーダル内の subject-item がクリックされた場合のみ処理
+            if (input.classList.contains('subject-item')) {
+                // 他の subject-item の選択状態をリセット
+                document.querySelectorAll('#modalSubjectList .subject-item').forEach(item => {
+                    item.classList.remove('is-selected');
+                });
+                // 今回クリックされた要素を選択状態にする
+                input.classList.add('is-selected'); 
             }
-            event.stopPropagation(); // documentクリックイベントの発火を防ぐ
-        });
-    });
+            
+            // ドロップダウンを開く
+            targetMenu.classList.add('is-open');
+            currentOpenMenu = targetMenu;
+            currentTableInput = input;
 
-    // --- 1-2. テーブルのコースドロップダウン開閉制御 ---
-    tableCourseInputs.forEach(input => {
-        input.addEventListener('click', (event) => {
-            const menuId = input.getAttribute('data-dropdown-for');
-            // サイドバー（あるいは任意の場所）にあるドロップダウンメニュー要素を取得
-            const menu = document.getElementById(menuId);
-
-            if (menu) {
-                const isOpened = input.classList.contains('is-open-course-dropdown');
+            // モーダル内のドロップダウンかどうかで処理を分ける
+            if (input.classList.contains('modal-course-display') || input.classList.contains('subject-item')) {
                 
-                closeAllDropdowns(); // まず全て閉じる
-
-                if (!isOpened) { // クリックした要素が閉じている場合のみ開く
-                    input.classList.add('is-open-course-dropdown'); // 開いている状態をマーク (CSSで枠線適用など)
-                    menu.classList.add('is-open'); // メニューを表示
-                    menu.style.position = 'fixed'; // 固定配置
-
-                    // 【メニューの位置設定】
-                    const rect = input.getBoundingClientRect();
-                    
-                    // テーブルの入力フィールドの右側 + 5px、入力フィールドの下に配置
-                    menu.style.left = `${rect.right + 5}px`;
-                    menu.style.top = `${rect.top + rect.height}px`;
-                    
-                    currentTableInput = input; // 現在のテーブル入力を設定
+                // ★【追記】subject-itemがクリックされた場合、トリガー要素にも開いているクラスを付与
+                if (input.classList.contains('subject-item')) {
+                     input.classList.add('is-open-subject-dropdown');
                 }
+                
+                // subject-itemがクリックされた場合、位置を計算し、fixedで画面を基準に配置する
+                const inputRect = input.getBoundingClientRect();
+                
+                targetMenu.style.position = 'fixed';
+                
+                // top: クリックされた要素の上端と合わせる
+                targetMenu.style.top = `${inputRect.top}px`;
+                
+                // left: クリックされた要素の右端に隣接させる
+                targetMenu.style.left = `${inputRect.right}px`;
+                
+                targetMenu.style.minWidth = ''; 
+                targetMenu.style.zIndex = '1010'; 
+
+                // ドロップダウンが画面右端をはみ出さないように調整 (任意)
+                const viewportWidth = window.innerWidth;
+                // 注意: offsetWidthはdisplay: none;の時は0になるため、事前にCSSで設定された幅を使うか、開いてから調整が必要
+                // ここでは開いてから調整する前提で、念のためoffsetWidthを取得します
+                const menuWidth = targetMenu.offsetWidth || 250; // CSSのデフォルト幅250pxを使用
+
+                if (inputRect.right + menuWidth > viewportWidth - 20) { // 右端から20pxの余裕
+                    // はみ出る場合、左側に表示する (リストの左端にドロップダウンの右端を合わせる)
+                    targetMenu.style.left = `${inputRect.left - menuWidth}px`;
+                }
+
+            } else {
+                // テーブル内のドロップダウン
+                
+                // コース名と授業名でクラスを分ける (CSSでスタイルを調整可能にする)
+                if (input.classList.contains('course-display')) {
+                    input.classList.add('is-open-course-dropdown');
+                } else if (input.classList.contains('subject-display')) {
+                    input.classList.add('is-open-subject-dropdown');
+                    targetMenu.classList.add('is-open-subject-dropdown'); 
+                }
+
+                // 位置を設定 (テーブル内の入力フィールドの直下に画面固定で表示)
+                const inputRect = input.getBoundingClientRect();
+                
+                targetMenu.style.position = 'fixed';
+                targetMenu.style.top = `${inputRect.bottom}px`;
+                targetMenu.style.left = `${inputRect.left}px`;
+                targetMenu.style.minWidth = `${inputRect.width}px`; 
+                targetMenu.style.zIndex = '1010'; // 他の要素より手前に表示
             }
-            event.stopPropagation(); // documentクリックイベントの発火を防ぐ
-        });
+        }
+    };
+    
+    // ドロップダウンリスナーの初期登録
+    allDisplayInputs.forEach(input => {
+        input.addEventListener('click', handleDisplayInputClick);
     });
 
+    // ----------------------------------------------------------------------
+    // ドロップダウンメニュー内の選択イベント
+    // ----------------------------------------------------------------------
 
-    // --- 2. メニュー項目の選択処理 ---
-    dropdownMenus.forEach(menu => {
-        const links = menu.querySelectorAll('a');
-        links.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const selectedValue = e.target.textContent;
-
-                // A. サイドバーのドロップダウンだった場合 (currentOpenToggleが設定されている)
-                if (currentOpenToggle) {
-                    const currentValueSpan = currentOpenToggle.querySelector('.current-value');
-                    if (currentValueSpan) {
-                        currentValueSpan.textContent = selectedValue;
-                    }
-                } 
-                // B. テーブルのコースドロップダウンだった場合 (currentTableInputが設定されている)
-                else if (currentTableInput) {
-                    currentTableInput.textContent = selectedValue;
-                }
+    allDropdownMenus.forEach(menu => {
+        menu.addEventListener('click', (event) => {
+            // li > a 要素がクリックされたかを確認
+            const link = event.target.closest('li a');
+            if (link && currentTableInput) {
+                event.preventDefault();
                 
-                closeAllDropdowns(); // 選択後、全て閉じる
-            });
+                // 選択されたテキストを取得
+                const selectedText = link.textContent.trim();
+
+                // テーブル内またはモーダル内の表示要素に反映
+                currentTableInput.textContent = selectedText;
+
+                // 関連付けられているデータ属性があれば、それも更新する
+                const selectedData = link.dataset.infoCategory || link.dataset.course;
+                if (selectedData) {
+                    currentTableInput.dataset.selectedValue = selectedData;
+                }
+
+                // 選択状態のクラスを更新
+                menu.querySelectorAll('li').forEach(li => li.classList.remove('is-selected'));
+                link.closest('li').classList.add('is-selected');
+
+                // ドロップダウンを閉じる
+                closeAllDropdowns();
+            }
         });
     });
+    
+    // ----------------------------------------------------------------------
+    // 画面のどこかをクリックしたら閉じる (バブリングを利用)
+    // ----------------------------------------------------------------------
 
-    // --- 3. どこかをクリックしたらメニューを閉じる ---
     document.addEventListener('click', (event) => {
-        // ドロップダウンの親要素 (.has-dropdown) またはテーブルのコース表示要素 (.course-display) 
-        // のどちらにも該当しない場所がクリックされた場合に閉じる
-        if (!event.target.closest('.has-dropdown') && !event.target.closest('.course-display')) {
+        // ドロップダウンメニュー自体またはそのトリガー要素がクリックされた場合は処理しない
+        if (currentOpenMenu && !currentOpenMenu.contains(event.target) && !event.target.closest('[data-dropdown-for]')) {
             closeAllDropdowns();
         }
     });
 
+
     // ----------------------------------------------------------------------
-    // 4. student_delete.html 固有の削除モーダル・チェックボックス処理
+    // 2. チェックボックスの制御 (全選択・行ハイライトの準備)
+    // ----------------------------------------------------------------------
+    
+    const allRowCheckboxes = document.querySelectorAll('.table-row .column-check input[type="checkbox"]');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', () => {
+            const isChecked = selectAllCheckbox.checked;
+            allRowCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const row = checkbox.closest('.table-row');
+                if (row) {
+                    if (isChecked) {
+                        row.classList.add('is-checked');
+                    } else {
+                        row.classList.remove('is-checked');
+                    }
+                }
+            });
+        });
+    }
+
+    allRowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const row = checkbox.closest('.table-row');
+            if (row) {
+                if (checkbox.checked) {
+                    row.classList.add('is-checked');
+                } else {
+                    row.classList.remove('is-checked');
+                }
+            }
+            
+            if (selectAllCheckbox) {
+                const allChecked = Array.from(allRowCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+            }
+        });
+    });    
+
+
+    // ----------------------------------------------------------------------
+    // 3. teacher_delete.html 固有の削除モーダル・チェックボックス処理 
     // ----------------------------------------------------------------------
 
-    // student_delete.html 固有の処理
-    if (document.body.id === 'student_delete') {
+    if (document.body.id === 'teacher_delete') {
         const modal = document.getElementById('deleteModal');
         const openButton = document.getElementById('deleteActionButton'); 
         const cancelButton = document.getElementById('cancelDeleteButton');
-        const studentListContainer = document.getElementById('selectedStudentList');
-        // modal.querySelector は modal が存在する場合のみ実行
-        const deleteCountDisplay = modal ? modal.querySelector('.modal-body p') : null;
+        const teacherListContainer = document.getElementById('selectedTeacherList'); 
         
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const deleteCountDisplay = modal ? modal.querySelector('.modal-body p') : null;
         const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 
-        // 削除ボタン (deleteActionButton) をクリックした時の処理
         if (openButton && modal && deleteCountDisplay) {
             openButton.addEventListener('click', () => {
-                const selectedStudents = [];
+                const selectedTeachers = [];
                 
-                // チェックされた行のデータを取得
-                rowCheckboxes.forEach(checkbox => {
+                allRowCheckboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         const row = checkbox.closest('.table-row');
-                        
-                        const id = checkbox.getAttribute('data-student-id'); 
-                        const name = checkbox.getAttribute('data-student-name');
-                        
-                        if (id && name) { // data属性から情報を取得
-                            selectedStudents.push({ id, name });
-                        } else if (row) {
-                            // data属性がない場合は、行の入力フィールドから取得するフォールバック処理
-                            // 注意: ここで input が見つからない可能性もある
-                            const idInput = row.querySelector('.column-student-id input');
+                        if (row) {
                             const nameInput = row.querySelector('.column-name input');
-                            const idValue = idInput ? idInput.value : 'ID不明';
-                            const nameValue = nameInput ? nameInput.value : '氏名不明';
-                            selectedStudents.push({ id: idValue, name: nameValue });
+                            const mailInput = row.querySelector('.column-mail input');
+                            
+                            const nameValue = nameInput ? nameInput.value.trim() : '氏名不明';
+                            const mailValue = mailInput ? mailInput.value.trim() : 'メールアドレス不明';
+                            
+                            selectedTeachers.push({ name: nameValue, mail: mailValue });
                         }
                     }
                 });
 
-                // 選択された学生がいない場合はアラートを表示して中断
-                if (selectedStudents.length === 0) {
+                if (selectedTeachers.length === 0) {
                     alert('削除するアカウントを選択してください。');
                     return;
                 }
                 
-                // モーダル内のリストをクリア
-                studentListContainer.innerHTML = '';
+                teacherListContainer.innerHTML = '';
                 
-                // 選択された学生の情報をモーダルに追加
-                selectedStudents.forEach(student => {
+                selectedTeachers.forEach(teacher => {
                     const item = document.createElement('div');
                     item.classList.add('deleted-item');
-                    // ID（学生番号）と氏名を表示
-                    item.textContent = `${student.id}: ${student.name}`;
-                    studentListContainer.appendChild(item);
+                    item.textContent = `${teacher.name} (${teacher.mail})`;
+                    teacherListContainer.appendChild(item);
                 });
                 
-                // 削除件数の表示を更新
-                deleteCountDisplay.innerHTML = `以下の**${selectedStudents.length}件**のアカウントを削除してもよろしいですか？`;
+                deleteCountDisplay.innerHTML = `以下の**${selectedTeachers.length}件**のアカウントを削除してもよろしいですか？`;
 
-                // モーダルを表示
                 modal.style.display = 'flex';
             });
         }
 
-        // キャンセルボタンをクリックした時の処理 (モーダルを消す)
         if (cancelButton && modal) {
             cancelButton.addEventListener('click', () => {
                 modal.style.display = 'none';
             });
         }
 
-        // モーダルのオーバーレイをクリックした時の処理 (モーダルを消す)
         if (modal) {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -235,269 +289,128 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-
-        // 全選択/全解除の機能
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', () => {
-                rowCheckboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllCheckbox.checked;
-                    // 行の背景色変更
-                    const row = checkbox.closest('.table-row');
-                    if (row) {
-                        if (checkbox.checked) {
-                            row.classList.add('is-checked');
-                        } else {
-                            row.classList.remove('is-checked');
-                        }
-                    }
-                });
-            });
-        }
         
-        // 個別チェックボックスのクリック時の行背景色変更
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                const row = checkbox.closest('.table-row');
-                if (row) {
-                    if (checkbox.checked) {
-                        row.classList.add('is-checked');
-                    } else {
-                        row.classList.remove('is-checked');
-                        // 一つでもチェックが外れたら、全選択チェックボックスを解除
-                        if (selectAllCheckbox) {
-                            selectAllCheckbox.checked = false;
-                        }
-                    }
-                }
-                
-                // 全てのチェックボックスがチェックされたら全選択チェックボックスをチェック
-                if (selectAllCheckbox) {
-                    const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
-                    selectAllCheckbox.checked = allChecked;
-                }
-            });
-        });
-
-
-        // 削除確認ボタン（モーダル内の「削除」）が押された時の処理
         if (confirmDeleteButton && modal) {
             confirmDeleteButton.addEventListener('click', () => {
-                // *** ここにサーバーに削除リクエストを送る処理を記述します (Fetch APIなどを使用) ***
-                
-                // 例としてアラートを表示し、モーダルを閉じる
                 alert('削除を実行しました。 (※実際にはこの後にサーバー処理が必要です)');
                 modal.style.display = 'none';
-                // 削除が成功したら、チェックされた行をDOMから削除する処理などを追加
             });
         }
     }
-});
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteActionButton = document.getElementById('deleteActionButton');
-    const deleteModal = document.getElementById('deleteModal');
-    const cancelDeleteButton = document.getElementById('cancelDeleteButton');
     
-    // --- 1. サイドバーの「アカウントの削除」リンクの動作確認 ---
-    // もしこのリンクがモーダルを表示させている場合、このリンクのイベントリスナーを見直す必要があります。
-    // HTMLのリンク自体（<a href="student_delete.html">）はページ遷移をします。
-
-    // --- 2. テーブル下の「削除」ボタンを押したときの処理 ---
-    deleteActionButton.addEventListener('click', function() {
-        // ここで、選択された学生リストのデータを取得・更新するロジックを挟む
-        
-        // モーダルを表示する
-        deleteModal.classList.add('is-open-modal');
-    });
-
-    // --- 3. キャンセルボタンでモーダルを閉じる処理 ---
-    cancelDeleteButton.addEventListener('click', function() {
-        // モーダルを非表示にする
-        deleteModal.classList.remove('is-open-modal');
-    });
-    
-    // --- 4. モーダル外をクリックして閉じる処理 (オプション) ---
-    deleteModal.addEventListener('click', function(event) {
-        if (event.target.id === 'deleteModal') {
-            deleteModal.classList.remove('is-open-modal');
-        }
-    });
-    
-    // 他のモーダル表示・非表示に関するJavaScriptがあれば、それらを修正する必要があります。
-});
-// ----------------------------------------------------------------------
-    // 5. student_addition.html 固有のアカウント追加処理
     // ----------------------------------------------------------------------
-    
-    // student_addition.html 固有の処理
-    if (document.body.id === 'student_addition') {
-        const addButton = document.querySelector('.add-button');
-        const tableContainer = document.querySelector('.account-table-container');
+    // 4. table-row クリックでモーダル表示 (class.html 用)
+    // ----------------------------------------------------------------------
 
-        if (addButton && tableContainer) {
-            // 新しい行のHTMLテンプレート
-            // 学生番号と氏名の value="氏名" は、新しい行なので空欄にするべきですが、
-            // 既存のHTMLテンプレートに倣い、ここでは空の行のテンプレートを定義します。
-            // 既存の行の value が "20001" や "氏名" になっていますが、
-            // 新規追加なので、ここでは空のテンプレート `value=""` を使用します。
-            const newRowTemplate = `
-                <div class="table-row">
-                    <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="" data-student-name=""></div> 
-                    <div class="column-student-id"><input type="text" value=""></div> 
-                    <div class="column-name"><input type="text" value=""></div> 
-                    <div class="column-course">
-                        <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                    </div>
-                </div>
-            `;
+    const detailsModal = document.getElementById('teacherDetailsModal');
+    const modalTeacherName = document.getElementById('modalTeacherName');
+    const modalTeacherDisplayName = detailsModal ? detailsModal.querySelector('.teacher-display-name-modal') : null; 
+    const confirmButton = document.getElementById('confirmButton');
+    const addButton = detailsModal ? detailsModal.querySelector('.add-subject-button') : null;
+    // ★【追記】削除ボタンを取得
+    const deleteButton = detailsModal ? detailsModal.querySelector('.delete-subject-button') : null;
+
+    const tableRows = document.querySelectorAll('.master-grant-table .table-row'); 
+
+    // モーダル要素が存在する場合に有効化
+    if (detailsModal) {
+        
+        tableRows.forEach(row => {
             
-            // 最新の学生番号を取得し、次の番号を推測する関数
-            const getNextStudentId = () => {
-                const studentIdInputs = tableContainer.querySelectorAll('.column-student-id input');
-                let maxId = 0;
-                
-                // 既存の入力フィールドから最大値を探す
-                studentIdInputs.forEach(input => {
-                    const id = parseInt(input.value, 10);
-                    if (!isNaN(id) && id > maxId) {
-                        maxId = id;
-                    }
-                });
-                
-                // 最大値 + 1 を返す。もし行がなければ適当な初期値 (例: 20016)
-                // 既存のHTMLが20015で終わっているので、20016を初期値とします。
-                return maxId > 0 ? (maxId + 1).toString() : '20016';
-            };
+            const nameDisplay = row.querySelector('.column-name span');
+            const name = nameDisplay ? nameDisplay.textContent.trim() : '';
 
-
-            addButton.addEventListener('click', () => {
-                // 1. 新しい行の要素を作成
-                const newRow = document.createElement('div');
-                newRow.innerHTML = newRowTemplate.trim();
-                const newRowElement = newRow.firstChild;
-                
-                // 2. 学生番号とdata属性を更新 (任意)
-                // 新しい行は基本的に空欄ですが、もし自動採番したい場合はここで更新します。
-                const nextId = getNextStudentId();
-                const studentIdInput = newRowElement.querySelector('.column-student-id input');
-                const checkbox = newRowElement.querySelector('.row-checkbox');
-                
-                if (studentIdInput) {
-                    studentIdInput.value = nextId; // 次の学生番号を自動入力
-                }
-                if (checkbox) {
-                    checkbox.setAttribute('data-student-id', nextId);
-                    checkbox.setAttribute('data-student-name', '氏名'); // 初期値として仮の氏名を設定
-                    checkbox.setAttribute('data-student-couse', 'コース');
-                }
-
-                // 3. テーブルコンテナの最後に追加
-                tableContainer.appendChild(newRowElement);
-                
-                // 4. 追加された行のコース表示要素にイベントリスナーを再設定
-                // 既存のイベントリスナー（1-2. テーブルのコースドロップダウン開閉制御）を新しい要素にも適用
-                const newCourseInput = newRowElement.querySelector('.course-display[data-dropdown-for]');
-                if (newCourseInput) {
-                    // ドロップダウンのクリックイベントを再登録するための関数
-                    setupCourseDropdown(newCourseInput);
-                }
-                
-                // 5. 追加された行のチェックボックスにイベントリスナーを再設定 (オプション: 削除ページとの連携が必要なければ不要)
-                // このページ (student_addition.html) ではチェックボックスの機能は不要ですが、
-                // テンプレートとして残しておきます。
-                // setupRowCheckbox(newRowElement.querySelector('.row-checkbox'));
-
-                // 6. 追加された行までスクロール
-                tableContainer.scrollTop = tableContainer.scrollHeight;
-            });
-            
-            /**
-             * 新しい行のコースドロップダウンにイベントリスナーを設定するヘルパー関数
-             * (既存のコード 1-2 のロジックを再利用するため)
-             */
-            const setupCourseDropdown = (input) => {
-                input.addEventListener('click', (event) => {
-                    const menuId = input.getAttribute('data-dropdown-for');
-                    const menu = document.getElementById(menuId);
-
-                    if (menu) {
-                        const isOpened = input.classList.contains('is-open-course-dropdown');
-                        
-                        // 既存の closeAllDropdowns 関数は既に定義されているものとする
-                        closeAllDropdowns(); 
-
-                        if (!isOpened) { 
-                            input.classList.add('is-open-course-dropdown'); 
-                            menu.classList.add('is-open'); 
-                            menu.style.position = 'fixed'; 
-
-                            const rect = input.getBoundingClientRect();
-                            
-                            menu.style.left = `${rect.right + 5}px`;
-                            menu.style.top = `${rect.top + rect.height}px`;
-                            
-                            // currentTableInput は既存のスコープで定義されているものとする
-                            currentTableInput = input; 
-                        }
-                    }
-                    event.stopPropagation(); 
-                });
-            };
-        }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-    // 1. 要素の取得
-    const addButton = document.querySelector('.button-group .add-button:last-child'); // 追加人数入力ボタン
-    const modal = document.getElementById('addCountModal'); // モーダルオーバーレイ
-    const cancelButton = document.getElementById('cancelAddCount'); // キャンセルボタン
-    const confirmButton = document.getElementById('confirmAddCount'); // 追加ボタン
-    const countInput = document.getElementById('studentCountInput'); // 人数入力フィールド
-
-    // 2. モーダル表示ロジック
-    if (addButton) {
-        addButton.addEventListener('click', () => {
-            modal.classList.add('is-open-modal');
-            countInput.focus(); // 入力フィールドにフォーカスを当てる
-        });
-    }
-
-    // 3. モーダル非表示ロジック
-    const closeModal = () => {
-        modal.classList.remove('is-open-modal');
-    };
-
-    // キャンセルボタン
-    if (cancelButton) {
-        cancelButton.addEventListener('click', closeModal);
-    }
-
-    // オーバーレイ（背景）クリック
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target.id === 'addCountModal') { // オーバーレイ自体がクリックされた場合
-                closeModal();
-            }
-        });
-    }
-
-    // 4. 追加ボタンのロジック (ダミー処理)
-    if (confirmButton) {
-        confirmButton.addEventListener('click', () => {
-            const count = parseInt(countInput.value, 10);
-            
-            if (isNaN(count) || count < 1) {
-                alert('有効な人数（1以上）を入力してください。');
+            if (name === '') {
                 return;
             }
 
-            // 【ここに生徒アカウントを追加する処理を実装します】
-            console.log(`${count} 名のアカウントを追加する処理を実行...`);
-            alert(`${count} 名のアカウントを追加しました。（※この処理はダミーです）`);
-            
-            closeModal();
+            row.addEventListener('click', (event) => {
+                // チェックボックス、ドロップダウン表示要素 (.course-display/.subject-display) 内でのクリックは無視
+                if (event.target.closest('input')) return;
+                if (event.target.closest('.course-display')) return;
+                if (event.target.closest('.subject-display')) return;
+
+                // モーダルコンテンツの動的更新
+                const currentName = name; 
+                modalTeacherName.textContent = `${currentName} 先生`; 
+                
+                if (modalTeacherDisplayName) {
+                    // モーダル左側の「講師名」欄を更新
+                    modalTeacherDisplayName.textContent = `${currentName}`; 
+                }
+                
+                // モーダルを表示
+                detailsModal.style.display = 'flex';
+                closeAllDropdowns(); // テーブル内のドロップダウンが開いていたら閉じる
+            });
         });
+        
+        // モーダルのオーバーレイをクリックした時の処理 (モーダルを閉じる)
+        detailsModal.addEventListener('click', (e) => {
+            if (e.target === detailsModal) {
+                detailsModal.style.display = 'none';
+                closeAllDropdowns(); // モーダル内のドロップダウンも閉じる
+            }
+        });
+        
+        // 確定ボタン（モーダル内の「確定」）が押された時の処理
+        if (confirmButton) {
+            confirmButton.addEventListener('click', () => {
+                alert('アカウント情報の変更を確定しました。');
+                detailsModal.style.display = 'none';
+                closeAllDropdowns();
+            });
+        }
+        
+        // 追加ボタン (+) が押された時の処理
+        if (addButton) {
+            addButton.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                
+                const subjectList = document.getElementById('modalSubjectList');
+                if (subjectList) {
+                    // 1. 新しい subject-item 要素を作成
+                    const newItem = document.createElement('div');
+                    newItem.classList.add('subject-item');
+                    // ドロップダウン制御に必要な属性を付与
+                    newItem.setAttribute('data-dropdown-for', 'modalSubjectDropdown');
+                    
+                    // 2. 表示テキストを設定 (選択肢がないため、仮のテキストを設定)
+                    newItem.textContent = '新規授業'; 
+                    
+                    // 3. リストの末尾に挿入
+                    subjectList.appendChild(newItem);
+
+                    // 4. 新しい項目にドロップダウンのクリックイベントを付与 (共通ハンドラを使用)
+                    newItem.addEventListener('click', handleDisplayInputClick);
+                }
+            });
+        }
+        
+        // 削除ボタン (-) が押された時の処理
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                
+                const subjectList = document.getElementById('modalSubjectList');
+                if (subjectList) {
+                    // 現在選択されている (is-selected クラスを持つ) 項目を検索
+                    const selectedItem = subjectList.querySelector('.subject-item.is-selected');
+                    
+                    if (selectedItem) {
+                        // 選択された項目をリストから削除
+                        subjectList.removeChild(selectedItem);
+                        
+                        // 項目が削除されたため、ドロップダウンを閉じる（念のため）
+                        closeAllDropdowns();
+                        
+                    } else {
+                        // 選択されている項目がない場合
+                        alert('削除する授業項目を選択してください。');
+                    }
+                }
+            });
+        }
+        
     }
-    
-    // 以下、既存のロジックを続ける
-    // ------------------------------------
-    // ドロップダウンロジックなど...
 });

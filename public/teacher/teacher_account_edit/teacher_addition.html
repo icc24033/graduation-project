@@ -12,113 +12,90 @@
     <div class="app-container">
         <header class="app-header">
             <h1>先生アカウント作成編集</h1>
-            <img class="user_icon" src="images/user_icon.png"alt="ユーザーアイコン">
+            <img class="user-icon" src="images/user-icon.png"alt="ユーザーアイコン">
         </header>
 
         <main class="main-content">
             <nav class="sidebar">
+                <li class="nav-item is-group-label"><a href="#">編集</a></li>
                 <ul>
-                    <li class="nav-item is-group-label">年度</li> 
-                    <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false">
-                            <span class="current-value">2025年度</span>
-                        </button>
-                        <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <li><a href="#" data-year="2026">2026年度</a></li>
-                            <li><a href="#" data-year="2025">2025年度</a></li>
-                            <li><a href="#" data-year="2024">2024年度</a></li>
-                            <li><a href="#" data-year="2023">2023年度</a></li>
-                        </ul>
-                    </li>                   
-                    <li class="nav-item is-group-label">編集</li>
-                    <li class="nav-item"><a href="teacher_addition.html">アカウントの追加</a></li>
+                    <li class="nav-item"><a href="teacher_addition.html" class="is-active">アカウントの追加</a></li>
                     <li class="nav-item"><a href="teacher_delete.html">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="teacher_empowerment.html">権限付与</a></li>
-                    <li class="nav-item"><a href="teacher_permission_revocation.html">権限取り消し</a></li>
-                    <li class="nav-item"><a href="teacher_changeof_course.html">担当コース変更</a></li>
-                    <li class="nav-item"><a href="teacher_changeof_teachingcourse.html">授業担当コース変更</a></li>
+                    <li class="nav-item"><a href="teacher_Information.html">アカウント情報変更</a></li>
+                    <li class="nav-item"><a href="master.html">マスタの付与</a></li>
+                    <li class="nav-item"><a href="class.html">担当授業確認</a></li>
                 </ul>
-                
                 <button class="download-button">
-                    <img class="download_icon" src="images/download_icon.png"alt="ダウンロードアイコン">名簿ダウンロード
+                    <span class="material-symbols-outlined download-icon">download</span>
+                    名簿ダウンロード
                 </button>
             </nav>
+            
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"><input type="checkbox" id="selectAllCheckbox"></div>
                         <div class="column-name">氏名</div>
-                        <div class="column-course">担当コース</div>
+                        <div class="column-mail">メールアドレス</div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
+                    </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                     <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
-                    </div>
-                    <div class="table-row">
-                        <div class="column-check"><input type="checkbox" class="row-checkbox" data-teacher-name="氏名"></div> 
-                        <div class="column-name"><input type="text" value="氏名"></div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                        </div>
+                    <div class="table-row"> 
+                        <div class="column-name"><input type="text" value="氏名"></div>
+                        <div class="column-mail"><input type="email" value="メールアドレス"></div>
                     </div>
                 </div>
                 
