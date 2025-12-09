@@ -139,7 +139,7 @@ catch (PDOException $e) {
 
 
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php">コースの編集</a></li>
@@ -178,7 +178,7 @@ catch (PDOException $e) {
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
                                 </div>
                                 <div class="column-name">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
                                     <a href="#" class="course-display" 

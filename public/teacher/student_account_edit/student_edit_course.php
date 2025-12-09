@@ -171,10 +171,10 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>" disabled>
                                 </div>
                                 <div class="column-name">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
                                     <a href="#" class="course-display" 
