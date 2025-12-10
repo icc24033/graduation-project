@@ -25,6 +25,12 @@ if (!file_exists($config_path)) {
 
 $config = require_once $config_path;
 
+// クラスファイルの読み込み
+require_once __DIR__ . '/../classes/login/LoginUser.php';   // インターフェース
+require_once __DIR__ . '/../classes/login/Student_login_class.php'; // 生徒クラス
+require_once __DIR__ . '/../classes/login/Teacher_login_class.php'; // 先生クラス
+require_once __DIR__ . '/../classes/login/AuthRepository_class.php'; // リポジトリ
+
 // ----------------------------------------------------
 // 3. 定数の設定
 // ----------------------------------------------------
@@ -148,33 +154,35 @@ if (isset($_GET['code'])) {
                 $pdo = new PDO($dsn, DB_USER, DB_PASS);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // ユーザー検索 (IDと権限を取得)
-                $sql = "SELECT user_id, user_grade FROM login_table WHERE user_email = :email";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':email', $userEmail);
-                $stmt->execute();
+                // ★★★ 変更点: ポリモーフィズム（多態性）を活用 ★★★
+                $authRepo = new AuthRepository($pdo);
+                $user = $authRepo->findUserByEmail($userEmail); // LoginUser オブジェクトが返る
                 
-                $user_data = $stmt->fetch(PDO::FETCH_ASSOC); 
-                $pdo = null; // 接続を閉じる
+                $pdo = null; // 接続解除
 
-                if ($user_data) {
-                    // --- 認証成功 ---
-                    session_regenerate_id(true); 
-
-                    $_SESSION['user_email']   = $userEmail; 
+                if ($user) {
+                    // --- 共通のログイン成功処理 ---
+                    session_regenerate_id(true);
+                    $_SESSION['user_email']   = $userEmail;
                     $_SESSION['logged_in']    = true;
                     $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
-                    
-                    // DBから取得した権限とIDを保存
-                    $_SESSION['user_grade'] = $user_data['user_grade']; 
-                    $_SESSION['user_id']    = $user_data['user_id'];
 
-                    // redirect.php へリダイレクト
-                    header('Location: redirect.php');
+                    // --- ユーザータイプを問わず共通のメソッドで値を取得 ---
+                    $_SESSION['user_id']    = $user->getUserId();
+                    $_SESSION['user_grade'] = $user->getUserGrade();
+
+                    // ログインしたユーザーが生徒の場合
+                    // --- 生徒固有の追加情報をセッションに保存 ---
+                    if ($user instanceof StudentLogin) {
+                        $_SESSION['user_course'] = $user->getCourseId();
+                    }
+                    
+                    // それぞれのホーム画面へリダイレクト
+                    header('Location: ' . $user->getHomeUrl());
                     exit();
-                }
-                else {
-                    // DBにデータなし
+
+                } else {
+                    // DBに登録なし
                     handle_login_error();
                 }
             }
@@ -192,17 +200,34 @@ if (isset($_GET['code'])) {
         handle_login_error();
     }
 } 
-// ▲▲▲ ここまでが if (isset($_GET['code'])) のブロック ▲▲▲
-
-
 // -------------------------------------------------------------------------
 // 【B. 認証開始処理：login.htmlから直接呼び出された場合の処理】
 // -------------------------------------------------------------------------
 
-// ログイン済みの場合はホームへ
+// ログイン済みの場合は、権限に応じたホーム画面へリダイレクト
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: ' . HOME_URL);
-    exit();
+    
+    // セッションから必要な情報を取得
+    $grade    = $_SESSION['user_grade'] ?? '';
+    $userId   = $_SESSION['user_id'] ?? '';
+    $courseId = $_SESSION['user_course'] ?? ''; // 生徒の場合のみ存在
+
+    // ポリモーフィズムを活用するため、セッション情報からオブジェクトを復元
+    $loginUser = null;
+
+    if ($grade === 'student@icc_ac.jp') {
+        // 生徒クラスをインスタンス化
+        $loginUser = new StudentLogin($userId, $grade, $courseId);
+    } else if ($grade === 'teacher@icc_ac.jp' || $grade === 'master@icc_ac.jp') {
+        // 先生クラスをインスタンス化
+        $loginUser = new TeacherLogin($userId, $grade);
+    } 
+
+    // クラスのメソッド (getHomeUrl) を使ってURLを取得しリダイレクト
+    if ($loginUser) {
+        header('Location: ' . $loginUser->getHomeUrl());
+        exit();
+    }
 }
 
 // 認証URLを生成してGoogleへリダイレクト
