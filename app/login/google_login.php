@@ -126,6 +126,18 @@ function handle_login_error(): void
 
 if (isset($_GET['code'])) {
 
+    // 0. CSRF対策の実装
+    $session_state = $_SESSION['oauth_state'] ?? '';
+    $retuned_state = $_GET['state'] ?? '';
+
+    // セッション内のstateを削除（使い捨て）
+    unset($_SESSION['oauth_state']);
+
+    if (empty($session_state) || $session_state !== $retuned_state) {
+        error_log("CSRF Error: Invalid state parameter");
+        handle_login_error();
+    }
+
     // 1. トークン交換
     $token_params = array(
         'code'          => $_GET['code'],
@@ -230,6 +242,11 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     }
 }
 
+// state パラメーターの生成
+// ランダムな文字列を生成する
+$state = bin2hex(random_bytes(16));
+$_SESSION['oauth_state'] = $state; // セッションに保存して後で検証する
+
 // 認証URLを生成してGoogleへリダイレクト
 $authUrl = $auth_endpoint . '?' . http_build_query(array(
     'client_id'     => CLIENT_ID,
@@ -237,7 +254,8 @@ $authUrl = $auth_endpoint . '?' . http_build_query(array(
     'response_type' => 'code',
     'scope'         => $scope,
     'access_type'   => 'online',
-    'prompt'        => 'select_account' // アカウント選択画面を強制
+    'prompt'        => 'select_account',// アカウント選択画面を強制
+    'state'         => $state
 ));
 
 header('Location: ' . $authUrl);
