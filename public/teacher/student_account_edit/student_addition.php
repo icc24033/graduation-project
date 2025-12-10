@@ -12,6 +12,7 @@ $status = $_SESSION['student_account'] ?? null;
 // 現在の年度の取得
 $current_year = date("Y");
 $current_year = (int)substr($current_year, -2); // 下2桁を取得
+$current_year = 26;
 
 // 現在の月を取得
 $current_month = date('n');

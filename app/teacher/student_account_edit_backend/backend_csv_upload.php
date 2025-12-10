@@ -29,8 +29,12 @@ $sql_create_csv_table =
     user_id INT PRIMARY KEY,
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
-    delete_flg INT DEFAULT 0
+    delete_flg INT DEFAULT 0,
+    course_id INT
 );";
+// course_idの行数取得
+$sql_course_id_count = "SELECT COUNT(*) FROM course;";
+    
 
 try {
     $pdo = new PDO($dsn, $user_name, $user_pass, $options);
@@ -38,6 +42,11 @@ try {
     //CSVデータ保存用テーブルの削除
     $stmt_delete = $pdo->prepare($sql_delete_csv_table);
     $stmt_delete->execute();
+
+    //course_idの行数取得
+    $stmt_course_id = $pdo->prepare($sql_course_id_count);
+    $stmt_course_id->execute();
+    $course_id_count = (int)$stmt_course_id->fetchColumn();
 
     //CSVデータ保存用テーブルの作成
     $stmt_create = $pdo->prepare($sql_create_csv_table);
@@ -204,7 +213,13 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 continue;
             }
 
-            $sql_1 = "INSERT INTO csv_table (user_id, name, approvalUserAddress) VALUES (?, ?, ?);";
+            // コースIDの確認
+            $course_id = $data[3];
+            // コースIDが整数であることを確認
+            if (ctype_digit($course_id) === true && (int)$course_id >= 1 && (int)$course_id <= $course_id_count) {
+                
+
+            $sql_1 = "INSERT INTO csv_table (user_id, name, approvalUserAddress, course_id) VALUES (?, ?, ?, ?);";
 
             try {
                 $stmt = $pdo->prepare($sql_1);
