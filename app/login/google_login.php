@@ -53,59 +53,12 @@ $token_endpoint = 'https://oauth2.googleapis.com/token';
 $userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo';
 
 
-// -------------------------------------------------------------------------
-// 関数定義エリア
-// -------------------------------------------------------------------------
+require_once __DIR__ . '/../classes/login/GoogleOAuthService_class.php';
 
-/**
- * 指定されたエンドポイントにcURLリクエストを送信する関数
- */
-function send_curl_request(string $url, ?array $data, ?string $accessToken, string $error_message): array
-{
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
-    if ($data !== null) {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    }
+// サービスクラスの初期化
+$googleService = new GoogleOAuthService(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
-    $headers = [];
-    if ($accessToken !== null) {
-        $headers[] = "Authorization: Bearer {$accessToken}";
-    }
-    if (!empty($headers)) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    }
-    
-    // SSL設定
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-    $cafile_path = __DIR__ . '/../../config/cacert.pem';
-    curl_setopt($ch, CURLOPT_CAINFO, $cafile_path);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curl_error = curl_error($ch);
-    curl_close($ch);
-    
-    if ($curl_error) {
-        die("{$error_message} cURLエラー: " . $curl_error);
-    }
-    if ($http_code !== 200) {
-        die("{$error_message} HTTPコード {$http_code} レスポンス: {$response}");
-    }
-    
-    $result = json_decode($response, true);
-    if (isset($result['error'])) {
-        $desc = $result['error_description'] ?? $result['error'];
-        die("{$error_message} Google APIエラー: " . $desc);
-    }
-
-    return $result;
-}
-
-/** * ログインエラー時の共通処理
+/** * ログインエラー時の共通処理関数
  */
 function handle_login_error(): void
 {
@@ -128,29 +81,21 @@ if (isset($_GET['code'])) {
 
     // 0. CSRF対策の実装
     $session_state = $_SESSION['oauth_state'] ?? '';
-    $retuned_state = $_GET['state'] ?? '';
+    $returned_state = $_GET['state'] ?? '';
 
     // セッション内のstateを削除（使い捨て）
     unset($_SESSION['oauth_state']);
 
-    if (empty($session_state) || $session_state !== $retuned_state) {
+    if (empty($session_state) || $session_state !== $returned_state) {
         error_log("CSRF Error: Invalid state parameter");
         handle_login_error();
     }
 
     // 1. トークン交換
-    $token_params = array(
-        'code'          => $_GET['code'],
-        'client_id'     => CLIENT_ID,
-        'client_secret' => CLIENT_SECRET,
-        'redirect_uri'  => REDIRECT_URI,
-        'grant_type'    => 'authorization_code'
-    );
-    $token = send_curl_request($token_endpoint, $token_params, null, "トークン交換");
-    $accessToken = $token['access_token'];
+    $accessToken = $googleService->fetchAccessToken($_GET['code']);
 
     // 2. ユーザー情報取得
-    $userInfo = send_curl_request($userinfo_endpoint, null, $accessToken, "ユーザー情報取得");
+    $userInfo = $googleService->fetchUserInfo($accessToken);
     $userEmail = $userInfo['email'] ?? null;
 
     // 3. ドメインチェックとDB照合
@@ -248,16 +193,6 @@ $state = bin2hex(random_bytes(16));
 $_SESSION['oauth_state'] = $state; // セッションに保存して後で検証する
 
 // 認証URLを生成してGoogleへリダイレクト
-$authUrl = $auth_endpoint . '?' . http_build_query(array(
-    'client_id'     => CLIENT_ID,
-    'redirect_uri'  => REDIRECT_URI,
-    'response_type' => 'code',
-    'scope'         => $scope,
-    'access_type'   => 'online',
-    'prompt'        => 'select_account',// アカウント選択画面を強制
-    'state'         => $state
-));
-
-header('Location: ' . $authUrl);
+header('Location: ' . $googleService->getAuthUrl($state));
 exit();
 ?>
