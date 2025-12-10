@@ -45,7 +45,7 @@ $options = [
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
 //テストstudentに格納されている学生情報の取得
-$student_sql = ("SELECT * FROM test_student WHERE course_id = ?;");
+$student_sql = ("SELECT * FROM student WHERE course_id = ?;");
 
 $_SESSION['student_account'] = [
     'success' => true,
