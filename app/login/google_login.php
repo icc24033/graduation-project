@@ -170,6 +170,12 @@ if (isset($_GET['code'])) {
                     // --- ユーザータイプを問わず共通のメソッドで値を取得 ---
                     $_SESSION['user_id']    = $user->getUserId();
                     $_SESSION['user_grade'] = $user->getUserGrade();
+
+                    // ログインしたユーザーが生徒の場合
+                    // --- 生徒固有の追加情報をセッションに保存 ---
+                    if ($user instanceof StudentLogin) {
+                        $_SESSION['user_course'] = $user->getCourseId();
+                    }
                     
                     // それぞれのホーム画面へリダイレクト
                     header('Location: ' . $user->getHomeUrl());

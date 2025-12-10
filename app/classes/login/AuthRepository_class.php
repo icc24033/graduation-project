@@ -22,7 +22,9 @@ class AuthRepository {
         // student テーブルの student_mail カラムで検索します。
         $sql = "
             SELECT 
-                s.student_id 
+                s.student_id,
+                sl.user_grade,
+                s.course_id
             FROM student_login_table sl
             INNER JOIN student s ON sl.student_id = s.student_id
             WHERE s.student_mail = :email
@@ -33,7 +35,12 @@ class AuthRepository {
         $studentData = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($studentData) {
-            return new StudentLogin($studentData['student_id']);
+            // 取得した grade と course_id、student_id をコンストラクタに渡す
+            return new StudentLogin(
+                $studentData['student_id'], 
+                $studentData['user_grade'], 
+                $studentData['course_id']
+            );
         }
 
         // ---------------------------------------------------------
