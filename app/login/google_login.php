@@ -204,10 +204,30 @@ if (isset($_GET['code'])) {
 // 【B. 認証開始処理：login.htmlから直接呼び出された場合の処理】
 // -------------------------------------------------------------------------
 
-// ログイン済みの場合はホームへ
+// ログイン済みの場合は、権限に応じたホーム画面へリダイレクト
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: ' . HOME_URL);
-    exit();
+    
+    // セッションから必要な情報を取得
+    $grade    = $_SESSION['user_grade'] ?? '';
+    $userId   = $_SESSION['user_id'] ?? '';
+    $courseId = $_SESSION['user_course'] ?? ''; // 生徒の場合のみ存在
+
+    // ポリモーフィズムを活用するため、セッション情報からオブジェクトを復元
+    $loginUser = null;
+
+    if ($grade === 'student@icc_ac.jp') {
+        // 生徒クラスをインスタンス化
+        $loginUser = new StudentLogin($userId, $grade, $courseId);
+    } else if ($grade === 'teacher@icc_ac.jp' || $grade === 'master@icc_ac.jp') {
+        // 先生クラスをインスタンス化
+        $loginUser = new TeacherLogin($userId, $grade);
+    } 
+
+    // クラスのメソッド (getHomeUrl) を使ってURLを取得しリダイレクト
+    if ($loginUser) {
+        header('Location: ' . $loginUser->getHomeUrl());
+        exit();
+    }
 }
 
 // 認証URLを生成してGoogleへリダイレクト
