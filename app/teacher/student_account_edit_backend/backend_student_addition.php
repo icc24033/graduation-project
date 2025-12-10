@@ -23,6 +23,7 @@ $student_count_sql = ("SELECT COUNT(*)  FROM test_student WHERE LEFT(student_id,
 
 $_SESSION['student_account'] = [
     'success' => true,
+    'backend' => 'student_addition',
     'before' => 'teacher_home',
     'database_connection' => $dsn,
     'database_user_name' => $user_name,

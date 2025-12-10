@@ -26,7 +26,7 @@ $sql_delete_csv_table = "DROP TABLE IF EXISTS csv_table;";
 //ーーーーーーCSVデータの書式が確定していないので後回しーーーーーーーーーーーーーーーーーーーー
 $sql_create_csv_table = 
     "CREATE TABLE csv_table (
-    user_id INT PRIMARY KEY,
+    student_id INT PRIMARY KEY,
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
     delete_flg INT DEFAULT 0,
@@ -46,7 +46,7 @@ try {
     //course_idの行数取得
     $stmt_course_id = $pdo->prepare($sql_course_id_count);
     $stmt_course_id->execute();
-    $course_id_count = (int)$stmt_course_id->fetchColumn();
+    $course_id_count = $stmt_course_id->fetchColumn();
 
     //CSVデータ保存用テーブルの作成
     $stmt_create = $pdo->prepare($sql_create_csv_table);
@@ -68,7 +68,7 @@ $sql_delete_error_table = "DROP TABLE IF EXISTS error_student_table;";
 //↓user_idをVARCHAR型にしてるのは、不正な形式のユーザーIDも格納するため
 $sql_create_error_table = 
     "CREATE TABLE error_student_table (
-    user_id VARCHAR(100) PRIMARY KEY,
+    student_id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
     error_id INT,
@@ -214,17 +214,47 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             }
 
             // コースIDの確認
-            $course_id = $data[3];
-            // コースIDが整数であることを確認
-            if (ctype_digit($course_id) === true && (int)$course_id >= 1 && (int)$course_id <= $course_id_count) {
-                
-
-            $sql_1 = "INSERT INTO csv_table (user_id, name, approvalUserAddress, course_id) VALUES (?, ?, ?, ?);";
+            if (isset($data[3]) && ctype_digit($data[3]) === true) {
+                $column_course_id = (int)$data[3];
+                if ($column_course_id >= 1 && $column_course_id <= $course_id_count) {
+                    // 正常なコースID
+                }
+                else {
+                    //error_student_tableに格納
+                    try {
+                        $stmt = $pdo->prepare($sql_insert_error_student);
+                        //SQL文を実行
+                        $error_id = 3001; //コースID不正エラー
+                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    }
+                    catch (PDOException $e) {
+                        //エラー処理
+                        echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    }
+                    continue;
+                }
+            }
+            else {
+                //error_student_tableに格納
+                try {
+                    $stmt = $pdo->prepare($sql_insert_error_student);
+                    //SQL文を実行
+                    $error_id = 3002; //コースID形式不正エラー
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                }
+                catch (PDOException $e) {
+                    //エラー処理
+                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                }
+                continue;
+            }
+            
+            $sql_1 = "INSERT INTO csv_table (student_id, name, approvalUserAddress, course_id) VALUES (?, ?, ?, ?);";
 
             try {
                 $stmt = $pdo->prepare($sql_1);
                 //SQL文を実行
-                $stmt->execute([$column_user_id, $column_name, $column_address]);
+                $stmt->execute([$column_user_id, $column_name, $column_address, $column_course_id]);
 
                 $insert_count++;
             }
@@ -267,6 +297,41 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'error_table' => 'error_student_table' 
         ];
 
+        
+        //データベース接続情報
+        $host = 'localhost';
+        $db_name = 'icc_smart_campus';
+        $user_name = 'root';
+        $user_pass = 'root';
+        $charset = 'utf8mb4';
+
+        $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+
+        //csv_tableに格納されている学生情報の取得
+        $csv_table_student_sql = ("SELECT * FROM csv_table;");
+        
+        //コース情報取得SQLクエリ
+        $course_sql = ("SELECT * FROM course;");
+
+        $_SESSION['student_account'] = [
+            'success' => true,
+            'backend' => 'csv_upload',
+            'before' => 'teacher_home',
+            'database_connection' => $dsn,
+            'database_user_name' => $user_name,
+            'database_user_pass' => $user_pass,
+            'database_options' => $options, 
+            'csv_table_student_sql' => $csv_table_student_sql,
+            'course_sql' => $course_sql
+        ];
+
+
    }
     else {
         //echo "CSVファイルを開くことができませんでした。";
@@ -281,7 +346,7 @@ else {
 
 
 // ★ CSV_edit.php にリダイレクトして処理を終了
-header("Location: CSV_edit.php");
+header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>
