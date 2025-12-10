@@ -87,7 +87,7 @@ catch (PDOException $e) {
         <main class="main-content">
             <nav class="sidebar">
             <ul>
-                    <li class="nav-item is-group-label">年度</li> 
+                <li class="nav-item is-group-label">年度</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
                             <span class="current-value">20<?php echo $status['current_year']?>年度</span>
@@ -136,9 +136,9 @@ catch (PDOException $e) {
                     </li>
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item"><a href="student_addition.php">アカウントの作成</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
             </nav>
@@ -204,14 +204,13 @@ catch (PDOException $e) {
                                 <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
                                 <div class="column-course"></div>
                             </div>
-                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
                 <?php 
                         // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
                         if ($has_students): 
                 ?>
                     <button class="add-button" id="deleteActionButton">削除</button>
-                    <button class="complete-button">完了</button>
                     <div class="modal-overlay" id="deleteModal">
                         <div class="modal-content">
                             <div class="modal-header">

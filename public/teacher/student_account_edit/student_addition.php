@@ -8,16 +8,11 @@ session_start();
 // セッションから処理結果を取得
 $status = $_SESSION['student_account'] ?? null;
 
-// セッションデータを取得したらすぐに削除 (二重表示防止のため)
-////unset($_SESSION['student_account']);
-
-// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
-$current_course_id = $status['course_id']; 
-$course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
 $current_year = date("Y");
-$current_year = substr($current_year, -2); // 下2桁を取得
+$current_year = (int)substr($current_year, -2); // 下2桁を取得
+$current_year = 26;
 
 // 現在の月を取得
 $current_month = date('n');
@@ -41,21 +36,10 @@ try {
             $status['database_options']
         );
 
-    //　リストに表示するコース情報を取得
-    $stmt_course = $pdo->query($status['course_sql']);
-    $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
-
     // 　テストstudentに格納されている学生情報の取得
-    $stmt_test_student = $pdo->prepare($status['student_sql']);
-    $stmt_test_student->execute([$status['course_id']]);
-
-    // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
-    if (!empty($course)) {
-        // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
-    } else {
-        $current_course_name = 'コース情報が見つかりません';
-    }
+    $stmt_test_student = $pdo->prepare($status['student_count_sql']);
+    $stmt_test_student->execute([$current_year]);
+    $student_count = $stmt_test_student->fetchColumn();
 }
 catch (PDOException $e) {
     // データベース接続/クエリ実行エラー発生時
@@ -88,9 +72,9 @@ catch (PDOException $e) {
             <nav class="sidebar">
                 <ul>
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item is-active"><a href="student_addition.php">アカウントの作成</a></li>
+                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="student_grade_transfar.html">学年の移動</a></li>
+                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
                 
@@ -114,7 +98,7 @@ catch (PDOException $e) {
                     
                     <div class="table-row">
                         <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="20001" data-student-name="氏名"></div> 
-                        <div class="column-student-id"><input type="text" value="20001"></div> 
+                        <div class="column-student-id"><input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>></div> 
                         <div class="column-name"><input type="text" name="name" placeholder="氏名"></div> 
                         <div class="column-course">
                             <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>

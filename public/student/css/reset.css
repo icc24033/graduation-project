@@ -8,6 +8,7 @@ header, footer, main, nav, section, article {
     margin: 0;
     border: 0;
     font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
     font-weight: 400;
     color: #222222;
 }

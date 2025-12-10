@@ -177,10 +177,20 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
             return;
         }
+        else if (page === 'student_grade_transfer') {
+            // student_grade_transfer.php へリダイレクト
+            const url = '../../../app/teacher/student_account_edit_backend/backend_student_grade_transfer.php'; 
+            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
+            return;
+        }
+        else {
+            window.location.href = '../../../app/teacher/student_account_edit_backend/backend_student_grade_csv_edit.php';
+            return;
+        }
     };
 
 
-    // --- 2-1. サイドバーのメニュー項目選択処理 ---
+    // --- 2. サイドバーのメニュー項目選択処理 ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
         links.forEach(link => {
