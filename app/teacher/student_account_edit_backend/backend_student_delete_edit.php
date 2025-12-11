@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo = new PDO($dsn, $user_name, $user_pass, $options);
         
-        $student_delete_sql = ("DELETE FROM test_student WHERE student_id = ?;");
+        $student_delete_sql = ("DELETE FROM student WHERE student_id = ?;");
         $stmt = $pdo->prepare($student_delete_sql);
         foreach ($delete_student_id as $student_id) {
             $stmt->execute([$student_id]);
@@ -54,8 +54,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     //コース情報取得SQLクエリ
     $course_sql = ("SELECT * FROM course;");
-    //テストstudentに格納されている学生情報の取得
-    $student_sql = ("SELECT * FROM test_student WHERE course_id = ?;");
+    //studentテーブルに格納されている学生情報の取得
+    $student_sql = ("SELECT 
+                        S.student_id,
+                        S.student_name,
+                        S.course_id,
+                        C.course_name 
+                    FROM
+                        student AS S 
+                    INNER JOIN 
+                        course AS C 
+                    ON 
+                        S.course_id = C.course_id 
+                    WHERE 
+                        S.course_id = ?;"
+                    );
 
     $_SESSION['student_account'] = [
         'success' => true,
