@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addButton && tableContainer) {
             const newRowTemplate = `
                 <div class="table-row">
-                    <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="" data-student-name=""></div> 
+                    <div class="column-check"></div> 
                     <div class="column-student-id"><input type="text" value="" name="student_id[]" class="input-student-id"></div> 
                     <div class="column-name"><input type="text" value="" name="student_name[]" placeholder="氏名を入力" class="input-student-name"></div> 
                     <div class="column-course">
@@ -576,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const rowHTML = `
                         <div class="table-row">
-                            <div class="column-check"><input type="checkbox" class="row-checkbox" data-student-id="${studentId}" data-student-name=""></div> 
+                            <div class="column-check"></div> 
                             <div class="column-student-id"><input type="text" value="${studentId}" name="student_id[]" class="input-student-id"></div> 
                             <div class="column-name"><input type="text" value="" name="student_name[]" placeholder="氏名を入力" class="input-student-name"></div> 
                             <div class="column-course">

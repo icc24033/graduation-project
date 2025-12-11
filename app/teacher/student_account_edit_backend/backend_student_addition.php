@@ -19,10 +19,11 @@ $options = [
 ];
 
 //テストstudentに格納されている学生情報の数の取得
-$student_count_sql = ("SELECT COUNT(*)  FROM test_student WHERE LEFT(student_id, 2) = ?;");
+$student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
 
 $_SESSION['student_account'] = [
     'success' => true,
+    'backend' => 'student_addition',
     'before' => 'teacher_home',
     'database_connection' => $dsn,
     'database_user_name' => $user_name,

@@ -1,4 +1,7 @@
 <?php
+// google_login.php
+// GoogleOAuth2.0 を利用したログイン機能を実装するためのフローを取りまとめたコード
+
 // ----------------------------------------------------
 // 1. セッション設定の読み込み
 // ----------------------------------------------------
@@ -25,6 +28,12 @@ if (!file_exists($config_path)) {
 
 $config = require_once $config_path;
 
+// クラスファイルの読み込み
+require_once __DIR__ . '/../classes/login/LoginUser.php';   // インターフェース
+require_once __DIR__ . '/../classes/login/Student_login_class.php';  // 生徒クラス
+require_once __DIR__ . '/../classes/login/Teacher_login_class.php';  // 先生クラス
+require_once __DIR__ . '/../classes/login/AuthRepository_class.php'; // リポジトリ
+
 // ----------------------------------------------------
 // 3. 定数の設定
 // ----------------------------------------------------
@@ -47,59 +56,12 @@ $token_endpoint = 'https://oauth2.googleapis.com/token';
 $userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo';
 
 
-// -------------------------------------------------------------------------
-// 関数定義エリア
-// -------------------------------------------------------------------------
+require_once __DIR__ . '/../classes/login/GoogleOAuthService_class.php';
 
-/**
- * 指定されたエンドポイントにcURLリクエストを送信する関数
- */
-function send_curl_request(string $url, ?array $data, ?string $accessToken, string $error_message): array
-{
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
-    if ($data !== null) {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    }
+// サービスクラスの初期化
+$googleService = new GoogleOAuthService(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
-    $headers = [];
-    if ($accessToken !== null) {
-        $headers[] = "Authorization: Bearer {$accessToken}";
-    }
-    if (!empty($headers)) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    }
-    
-    // SSL設定
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-    $cafile_path = __DIR__ . '/../../config/cacert.pem';
-    curl_setopt($ch, CURLOPT_CAINFO, $cafile_path);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curl_error = curl_error($ch);
-    curl_close($ch);
-    
-    if ($curl_error) {
-        die("{$error_message} cURLエラー: " . $curl_error);
-    }
-    if ($http_code !== 200) {
-        die("{$error_message} HTTPコード {$http_code} レスポンス: {$response}");
-    }
-    
-    $result = json_decode($response, true);
-    if (isset($result['error'])) {
-        $desc = $result['error_description'] ?? $result['error'];
-        die("{$error_message} Google APIエラー: " . $desc);
-    }
-
-    return $result;
-}
-
-/** * ログインエラー時の共通処理
+/** * ログインエラー時の共通処理関数
  */
 function handle_login_error(): void
 {
@@ -120,19 +82,23 @@ function handle_login_error(): void
 
 if (isset($_GET['code'])) {
 
+    // 0. CSRF対策の実装
+    $session_state = $_SESSION['oauth_state'] ?? '';
+    $returned_state = $_GET['state'] ?? '';
+
+    // セッション内のstateを削除（使い捨て）
+    unset($_SESSION['oauth_state']);
+
+    if (empty($session_state) || $session_state !== $returned_state) {
+        error_log("CSRF Error: Invalid state parameter");
+        handle_login_error();
+    }
+
     // 1. トークン交換
-    $token_params = array(
-        'code'          => $_GET['code'],
-        'client_id'     => CLIENT_ID,
-        'client_secret' => CLIENT_SECRET,
-        'redirect_uri'  => REDIRECT_URI,
-        'grant_type'    => 'authorization_code'
-    );
-    $token = send_curl_request($token_endpoint, $token_params, null, "トークン交換");
-    $accessToken = $token['access_token'];
+    $accessToken = $googleService->fetchAccessToken($_GET['code']);
 
     // 2. ユーザー情報取得
-    $userInfo = send_curl_request($userinfo_endpoint, null, $accessToken, "ユーザー情報取得");
+    $userInfo = $googleService->fetchUserInfo($accessToken);
     $userEmail = $userInfo['email'] ?? null;
 
     // 3. ドメインチェックとDB照合
@@ -148,33 +114,35 @@ if (isset($_GET['code'])) {
                 $pdo = new PDO($dsn, DB_USER, DB_PASS);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // ユーザー検索 (IDと権限を取得)
-                $sql = "SELECT user_id, user_grade FROM login_table WHERE user_email = :email";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':email', $userEmail);
-                $stmt->execute();
+                // ★★★ 変更点: ポリモーフィズム（多態性）を活用 ★★★
+                $authRepo = new AuthRepository($pdo);
+                $user = $authRepo->findUserByEmail($userEmail); // LoginUser オブジェクトが返る
                 
-                $user_data = $stmt->fetch(PDO::FETCH_ASSOC); 
-                $pdo = null; // 接続を閉じる
+                $pdo = null; // 接続解除
 
-                if ($user_data) {
-                    // --- 認証成功 ---
-                    session_regenerate_id(true); 
-
-                    $_SESSION['user_email']   = $userEmail; 
+                if ($user) {
+                    // --- 共通のログイン成功処理 ---
+                    session_regenerate_id(true);
+                    $_SESSION['user_email']   = $userEmail;
                     $_SESSION['logged_in']    = true;
                     $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
-                    
-                    // DBから取得した権限とIDを保存
-                    $_SESSION['user_grade'] = $user_data['user_grade']; 
-                    $_SESSION['user_id']    = $user_data['user_id'];
 
-                    // redirect.php へリダイレクト
-                    header('Location: redirect.php');
+                    // --- ユーザータイプを問わず共通のメソッドで値を取得 ---
+                    $_SESSION['user_id']    = $user->getUserId();
+                    $_SESSION['user_grade'] = $user->getUserGrade();
+
+                    // ログインしたユーザーが生徒の場合
+                    // --- 生徒固有の追加情報をセッションに保存 ---
+                    if ($user instanceof StudentLogin) {
+                        $_SESSION['user_course'] = $user->getCourseId();
+                    }
+                    
+                    // それぞれのホーム画面へリダイレクト
+                    header('Location: ' . $user->getHomeUrl());
                     exit();
-                }
-                else {
-                    // DBにデータなし
+
+                } else {
+                    // DBに登録なし
                     handle_login_error();
                 }
             }
@@ -192,29 +160,42 @@ if (isset($_GET['code'])) {
         handle_login_error();
     }
 } 
-// ▲▲▲ ここまでが if (isset($_GET['code'])) のブロック ▲▲▲
-
-
 // -------------------------------------------------------------------------
 // 【B. 認証開始処理：login.htmlから直接呼び出された場合の処理】
 // -------------------------------------------------------------------------
 
-// ログイン済みの場合はホームへ
+// ログイン済みの場合は、権限に応じたホーム画面へリダイレクト
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: ' . HOME_URL);
-    exit();
+    
+    // セッションから必要な情報を取得
+    $grade    = $_SESSION['user_grade'] ?? '';
+    $userId   = $_SESSION['user_id'] ?? '';
+    $courseId = $_SESSION['user_course'] ?? ''; // 生徒の場合のみ存在
+
+    // ポリモーフィズムを活用するため、セッション情報からオブジェクトを復元
+    $loginUser = null;
+
+    if ($grade === 'student@icc_ac.jp') {
+        // 生徒クラスをインスタンス化
+        $loginUser = new StudentLogin($userId, $grade, $courseId);
+    } else if ($grade === 'teacher@icc_ac.jp' || $grade === 'master@icc_ac.jp') {
+        // 先生クラスをインスタンス化
+        $loginUser = new TeacherLogin($userId, $grade);
+    } 
+
+    // クラスのメソッド (getHomeUrl) を使ってURLを取得しリダイレクト
+    if ($loginUser) {
+        header('Location: ' . $loginUser->getHomeUrl());
+        exit();
+    }
 }
 
-// 認証URLを生成してGoogleへリダイレクト
-$authUrl = $auth_endpoint . '?' . http_build_query(array(
-    'client_id'     => CLIENT_ID,
-    'redirect_uri'  => REDIRECT_URI,
-    'response_type' => 'code',
-    'scope'         => $scope,
-    'access_type'   => 'online',
-    'prompt'        => 'select_account' // アカウント選択画面を強制
-));
+// state パラメーターの生成
+// ランダムな文字列を生成する
+$state = bin2hex(random_bytes(16));
+$_SESSION['oauth_state'] = $state; // セッションに保存して後で検証する
 
-header('Location: ' . $authUrl);
+// 認証URLを生成してGoogleへリダイレクト
+header('Location: ' . $googleService->getAuthUrl($state));
 exit();
 ?>
