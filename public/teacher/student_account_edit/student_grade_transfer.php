@@ -179,8 +179,31 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo 1 + ($selected_year - $current_year); ?>年">
+                                    <select 
+                                        name="grade_changes[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
+                                        class="course-display grade-select" 
+                                        style="width: 100%; text-align: center;"> 
+                                        
+                                        <?php 
+                                        // 仮に最大学年を 3 と設定します。
+                                        $max_grade = 3;
+                                        
+                                        // 現在の学年を計算
+                                        // 注意：$selected_year と $current_year の値が同じなら結果は常に 1 になります。
+                                        // 本当に表示したい学年計算ロジック（例：入学年度と現在の年度の差）に変更してください。
+                                        $current_grade = 1 + ($selected_year - $current_year);
+                                        
+                                        for ($grade = 1; $grade <= $max_grade; $grade++): 
+                                        ?>
+                                            <option 
+                                                value="<?php echo $grade; ?>" 
+                                                <?php echo ($grade == $current_grade) ? 'selected' : ''; ?>>
+                                                <?php echo $grade; ?>年
+                                            </option>
+                                        <?php endfor; ?>
+                                    </select>
                                 </div>
+
                                 <div class="column-name">
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
