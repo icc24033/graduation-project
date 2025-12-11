@@ -1,4 +1,7 @@
 <?php
+// google_login.php
+// GoogleOAuth2.0 を利用したログイン機能を実装するためのフローを取りまとめたコード
+
 // ----------------------------------------------------
 // 1. セッション設定の読み込み
 // ----------------------------------------------------
@@ -27,8 +30,8 @@ $config = require_once $config_path;
 
 // クラスファイルの読み込み
 require_once __DIR__ . '/../classes/login/LoginUser.php';   // インターフェース
-require_once __DIR__ . '/../classes/login/Student_login_class.php'; // 生徒クラス
-require_once __DIR__ . '/../classes/login/Teacher_login_class.php'; // 先生クラス
+require_once __DIR__ . '/../classes/login/Student_login_class.php';  // 生徒クラス
+require_once __DIR__ . '/../classes/login/Teacher_login_class.php';  // 先生クラス
 require_once __DIR__ . '/../classes/login/AuthRepository_class.php'; // リポジトリ
 
 // ----------------------------------------------------

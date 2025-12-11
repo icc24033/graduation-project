@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/LoginUser.php';
-
 // Teacher_login_class.php
 // 先生アカウントのログイン情報を管理するクラス
 // LoginUser インターフェースを実装
+require_once __DIR__ . '/LoginUser.php';
+
 class TeacherLogin implements LoginUser {
     private string $teacherId;
     private string $gradeName; // 'master@icc_ac.jp' など

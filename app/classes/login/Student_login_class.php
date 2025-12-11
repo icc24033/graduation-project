@@ -1,4 +1,7 @@
 <?php
+// Student_login_class.php
+// studentを識別するために必要な情報を管理するクラス
+// LoginUser インターフェイスを実装
 require_once __DIR__ . '/LoginUser.php';
 
 // Student_login_class.php

@@ -1,4 +1,7 @@
 <?php
+// AuthRepository_class.php
+// studentまたはteacher(master)を判別するプロパティ
+// 戻り値として、Student_login_class.php, Teacher_login_classのコンストラクタの値を返す
 require_once __DIR__ . '/Student_login_class.php';
 require_once __DIR__ . '/Teacher_login_class.php';
 
