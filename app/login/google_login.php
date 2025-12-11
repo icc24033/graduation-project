@@ -3,9 +3,16 @@
 // GoogleOAuth2.0 を利用したログイン機能を実装するためのフローを取りまとめたコード
 
 // ----------------------------------------------------
+// 0. SecurityHelperの読み込み
+// ----------------------------------------------------
+require_once __DIR__ . '/../classes/security/SecurityHelper.php';
+
+// セキュリティヘッダーの適用
+SecurityHelper::applySecureHeaders();
+
+// ----------------------------------------------------
 // 1. セッション設定の読み込み
 // ----------------------------------------------------
-// session_config.php 内で session_start() していないことが前提
 require_once __DIR__ . '/../session/session_config.php'; 
 
 // セッションが開始されていない場合のみ開始
@@ -20,13 +27,13 @@ error_reporting(E_ALL);
 // ----------------------------------------------------
 // 2. 機密情報の読み込み
 // ----------------------------------------------------
-$config_path = __DIR__ . '/../../config/secrets_local.php'; 
+$config_path = __DIR__ . '/../../config/secrets_local.php';
 
 if (!file_exists($config_path)) {
     die("エラー: 機密情報ファイルが見つかりません。パスを確認してください: " . $config_path);
 }
 
-$config = require_once $config_path;
+$config = require $config_path;
 
 // クラスファイルの読み込み
 require_once __DIR__ . '/../classes/login/LoginUser.php';   // インターフェース

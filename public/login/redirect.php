@@ -1,16 +1,16 @@
 <?php
-// ----------------------------------------------------
+// redirect.php
 // ブラウザの戻るボタン対策用の中間ページ
-// ----------------------------------------------------
+
+// 0. SecurityHelper.php の呼び出し
+require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
 
 // キャッシュを徹底的に無効化するヘッダーを出力
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-
-// ※ ここで session_start() や条件分岐を行わないことで
-//    500エラーのリスクを極限まで減らします。
 ?>
 <!DOCTYPE html>
 <html lang="ja">

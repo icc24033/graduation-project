@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/secrets_local.php';
+require_once __DIR__ . '/../../../config/secrets_local.php';
 // SecurityHelper.php
 // セキュリティ関連のヘルパークラス
 // Webアプリケーション全体で使用されるセキュリティ機能を提供するクラス

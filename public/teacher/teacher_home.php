@@ -1,4 +1,11 @@
 <?php
+// teacher_home.php
+// 先生用ホーム画面
+
+// セキュリティヘッダーの適用
+require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
+
 // 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
 
 // 7日間SSOを維持するための設定
@@ -19,14 +26,11 @@ session_set_cookie_params([
     'samesite' => 'Lax'
 ]);
 
-// セッションを開始
-session_start();
+// セッション開始とログイン判定を一括で行う
+SecurityHelper::requireLogin();
 
-// ログインしていない場合は強制的にログイン画面へリダイレクト
-if (!isset($_SESSION['user_email'])) {
-    header('Location: ../login/login.html');
-    exit();
-}
+// セキュリティヘッダーを適用
+SecurityHelper::applySecureHeaders();
 
 // クラスファイルを読み込む
 // パスは teacher_home.php の位置から /app/classes/user/ への相対パス
@@ -45,8 +49,7 @@ $smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャ�
 // 遷移先ファイルの定義（クラスに渡すため配列化）
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
 $links = [
-    // 開発状況に応じてリンクを修正する
-    'link_time_table_create' => "time_table_create.php",
+    'link_time_table_create' => "../master/timetable_create_menu.html",
     'link_time_table_edit'   => "time_table_edit.php",
     'link_account_edit'      => "account_edit.php",
     'link_permission_grant'  => "permission_grant.php",
