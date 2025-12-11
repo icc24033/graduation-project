@@ -17,6 +17,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="nofollow, noindex">
     <title>リダイレクト中...</title>
     <style>
         body {
