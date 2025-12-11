@@ -24,6 +24,7 @@ $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) =
 $_SESSION['student_account'] = [
     'success' => true,
     'backend' => 'student_addition',
+    'error_csv' => false,
     'before' => 'teacher_home',
     'database_connection' => $dsn,
     'database_user_name' => $user_name,

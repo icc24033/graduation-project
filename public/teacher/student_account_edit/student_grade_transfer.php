@@ -19,6 +19,9 @@ $course = []; // コースデータを格納する配列を初期化
 $current_year = date("Y");
 $current_year = substr($current_year, -2); // 下2桁を取得
 
+$selected_year = date("Y");
+$selected_year = substr($selected_year, -2); // 下2桁を取得
+
 // 現在の月を取得
 $current_month = date('n');
 
@@ -74,6 +77,7 @@ catch (PDOException $e) {
     <title>生徒アカウント作成編集 アカウントの追加</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -148,7 +152,7 @@ catch (PDOException $e) {
             </nav>
 
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php" method="post">
+                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
                 <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
                 <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">
@@ -175,8 +179,31 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
+                                    <select 
+                                        name="grade_changes[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
+                                        class="course-display grade-select" 
+                                        style="width: 100%; text-align: center;"> 
+                                        
+                                        <?php 
+                                        // 仮に最大学年を 3 と設定します。
+                                        $max_grade = 3;
+                                        
+                                        // 現在の学年を計算
+                                        // 注意：$selected_year と $current_year の値が同じなら結果は常に 1 になります。
+                                        // 本当に表示したい学年計算ロジック（例：入学年度と現在の年度の差）に変更してください。
+                                        $current_grade = 1 + ($selected_year - $current_year);
+                                        
+                                        for ($grade = 1; $grade <= $max_grade; $grade++): 
+                                        ?>
+                                            <option 
+                                                value="<?php echo $grade; ?>" 
+                                                <?php echo ($grade == $current_grade) ? 'selected' : ''; ?>>
+                                                <?php echo $grade; ?>年
+                                            </option>
+                                        <?php endfor; ?>
+                                    </select>
                                 </div>
+
                                 <div class="column-name">
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>

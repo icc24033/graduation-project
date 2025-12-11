@@ -66,17 +66,6 @@
     padding: 5px 0; 
 }
 
-/*************************************************************************************/
-/* アクティブなnav-item内のリンクの背景色 */
-.nav-item.is-active a {
-    /* 例: 目立たせるために濃い背景色を設定 */
-    background-color: #384d64; /* 青色 */
-    
-    /* テキストの色を白に変更して、背景色とのコントラストを確保 */
-    color: white; 
-}
-/*************************************************************************************/
-
 .nav-item a, .dropdown-toggle {
     display: block;
     /* --- デフォルトの幅は290pxを維持 --- */
@@ -96,6 +85,19 @@
     border-bottom-left-radius: 10px;
 }
 
+
+/*************************************************************************************/
+/* アクティブなnav-item内のリンクの背景色 */
+.nav-item.is-active a {
+    /* 例: 目立たせるために濃い背景色を設定 */
+    background-color: #495666; /* 青色 */
+    
+    /* テキストの色を白に変更して、背景色とのコントラストを確保 */
+    color: white; 
+}
+/*************************************************************************************/
+
+
 /* グループラベルのスタイル（「編集」など） */
 .is-group-label {
     pointer-events: none; 
@@ -106,6 +108,11 @@
 /* 現在の値の表示（年度、コース） */
 .dropdown-toggle .current-value {
     margin-left: 0;
+}
+
+.nav-item a.is-active {
+    /* ホバー時と同じ背景色を固定で適用 */
+    background-color: #CFD5DF; 
 }
 
 /* ホバー時のスタイル（非アクティブ時） */
@@ -207,13 +214,57 @@
     border-bottom-left-radius: 10px;
 }
 
-.download-button:hover {
-    background-color: #CFD5DF;/* ホバー色グレー */
+/* --- ダウンロードボタン --- */
+.download-button {
+    position: absolute;
+    bottom: 50px;
+    left: 35px; 
+    display: flex;
+    text-align: center;
+    align-items: center;
+    padding: 10px 20px; 
+    color: #fff;
+    background-color: #495666; /* ボタンカラー */
+    border: none; /* 画像に合わせて線をなくす */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
 }
 
-.download-button .download_icon {
-    margin-right: 10px; /* アイコンとテキストの間隔を調整 */
+/*************************************************************************************/
+/* input[type="file"] を完全に非表示にして、「ファイルが選択されていません」の文字をなくす */
+#csvFile {
+    /* 視覚的に非表示にするための一般的な手法 */
+    opacity: 0; 
+    position: absolute; /* 他の要素に影響を与えないように絶対配置 */
+    width: 0.1px;
+    height: 0.1px;
+    overflow: hidden;
+    z-index: -1; /* 他の要素の下に配置 */
+}
+/*************************************************************************************/
+
+.download-icon {
+    color: #fff;
+}
+
+.download-button:hover,.download-icon:hover {
+    background-color: #CFD5DF;/* ホバー色グレー */
+    color: #222;
+}
+
+.download-button .download-icon {
+    /* フォントアイコンとして表示するために、フォントの設定を追加 */
+    font-family: 'Material Symbols Outlined';
+    font-weight: 400; /* Material Symbolsの標準ウェイト */
     font-size: 20px;
+    margin-right: 10px; /* アイコンとテキストの間隔を調整 */
+}
+
+.download-button .download-icon {
+    color: inherit; 
 }
 
 /* --- メインのリストエリア --- */
@@ -225,13 +276,13 @@
     align-items: center; 
 }
 
-.account-table-container { /* 204行目あたり */
+.account-table-container {
     width: 100%;
     max-width: 800px;
     margin-bottom: 30px;
     border: 1px solid #CFD5DF;
     border-radius: 5px;
-    height: 700px;
+    height: 650px; /* テーブルが表示される最大高さを設定 */
     overflow-y: auto; /* 縦方向のスクロールを有効にする */
     position: relative; /* stickyの基準にするため */
 }
@@ -335,11 +386,12 @@
 
 /* 追加ボタン */
 .add-button{
-    background-color: #F8FF99; 
+    background-color: #495666; /* ボタンカラー */
+    color: #fff; 
     width: 180px;
     padding: 10px 30px;
     border: none;
-    border-radius: 10px;
+    border-radius: 5px;
     font-size: 20px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -354,23 +406,32 @@
     gap: 50px;
 }
 
-/* 完了ボタン */     
+/* --- 完了ボタン (コンテンツの下部・右側に配置) --- */
 .complete-button {
-    background-color: #F8FF99; 
+    background-color: #495666; /* ボタンカラー */
+    color: #fff; 
     width: 180px;
-    padding: 25px 30px; 
+    padding: 15px 30px; 
     border: none;
-    border-radius: 10px;
-    font-size: 25px;
+    border-radius: 5px;
+    font-size: 20px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     transition: background-color 0.5s;
-    /* 位置の修正: 固定を解除し、右寄せにするための設定 */
-    margin-left: auto; /* 左側のマージンを自動にして右寄せにする */
-    z-index: auto; /* z-indexをリセット */
+    /* 画面右下に固定するための設定に変更 */
+    position: fixed; /* 固定位置に設定 */
+    bottom: 50px; /* ダウンロードボタンのbottom: 50pxと合わせる */
+    /* サイドバー(180px)とコンテンツエリアのパディング(200px)を考慮して右端から調整 */
+    right: 100px; /* 画面右端からの距離を設定 */
+    z-index: 998; /* 固定しているのでz-indexも設定 */
+    margin-left: auto; 
+    margin-right: auto;
+    margin-top: auto; 
 }
+
 .add-button:hover,.complete-button:hover {
     background-color: #CFD5DF;/* ホバー色変更 */
+    color: #222;
 }
 
 /* テキスト入力フィールドがクリック・入力されている行の背景色をホバーと同じにする */
@@ -433,7 +494,7 @@
 .modal-content {
     background-color: #fff;
     padding: 30px;
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     width: 90%;
     max-width: 450px; /* 最大幅を指定してデザインを制御 */
@@ -495,6 +556,7 @@
 }
 .modal-delete-button:hover {
     background-color: #CFD5DF;
+    color: #222;
 
 }
 
@@ -514,7 +576,7 @@
     font-size: 14px;
     color: #222;
     padding: 3px 0;
-    border-bottom: 1px dashed #CFD5DF;
+    border-bottom: 1px solid #CFD5DF;
 }
 .deleted-item:last-child {
     border-bottom: none;
@@ -522,99 +584,15 @@
 
 /* 追加人数確認ボタン */
 .modal-confirm-button {
-    background-color: #F8FF99; /* アクセントカラー */
+    background-color: #495666; /* ボタンカラー */
+    color: #fff;
     color: #222;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .modal-confirm-button:hover {
     background-color: #CFD5DF;
+    color: #222;
 }
-
-
-/*お試しCSS*/
-
-
-/* ---------------------------------- */
-/* サイドバー内のファイルアップロードフォームの調整 */
-/* ---------------------------------- */
-
-
-
-/* --- ダウンロードボタン --- */
-/*
-.download-button {
-    position: absolute;
-    bottom: 50px;
-    left: 35px; 
-    display: flex;
-    text-align: center;
-    align-items: center;
-    padding: 10px 20px; 
-    background-color: #F8FF99; /* アクセントカラー */
-    /*border: none; /* 画像に合わせて線をなくす *//*
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.5s;
-}
-*/
-
-
-.sidebar .download-form {/* 絶対位置指定を使用し、サイドバーの下に固定する */
-    position: absolute;
-    bottom: 20px; /* サイドバーの下端から20px上に配置 */
-    left: 0;
-    
-    /* サイドバーの幅全体に広げる */
-    width: 100%; 
-    box-sizing: border-box; /* paddingを含めて幅100%にする */
-
-    /* 既存のスタイルを調整 */
-    margin-top: 0; 
-    padding: 0 10px; 
-    text-align: center;
-}
-
-/* カスタムボタンのスタイル設定 (前回からの変更点) */
-.custom-file-upload-button {
-    /* 必須のスタイルを再確認 */
-    /* width: 100%; が .sidebar .download-form の幅に合わせて適用されます */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    /* ボタンのサイズと余白をサイドバーに合わせる */
-    width: 100%; /* サイドバーの幅全体を使う */
-    box-sizing: border-box; /* paddingとborderをwidthに含める */
-    padding: 10px 15px;
-    margin: 0 auto; /* 中央寄せ */
-    
-    /* ボタンの見た目 */
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-
-/* ファイル入力要素を完全に非表示にするためのCSS (再掲) */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/**/
-
 
 /* --- 追加人数入力モーダル固有のスタイル --- */
 #studentCountInput {
@@ -622,7 +600,7 @@
     padding: 5px 10px;
     font-size: 14px;
     text-align: center;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 #studentCountInput::-webkit-outer-spin-button,
@@ -630,9 +608,9 @@
     margin: 0px;
 }
 
-/* --- レスポンシブ対応 (最大画面幅 950px) --- */
-@media (max-width: 950px) {
-    /* --- レイアウトのコンテナ --- */
+/* --- レスポンシブ対応 (最大画面幅 1200px) --- */
+@media (max-width: 1200px) {
+/* --- レイアウトのコンテナ --- */
     .app-container {
         padding-top: 70px; /* ヘッダーの高さ */
     }
@@ -661,16 +639,14 @@
     
     /* ナビゲーションアイテムの幅をサイドバーに合わせて調整 */
     .nav-item a, .dropdown-toggle {
-        width: 170px; /* サイドバーの幅 200px に合わせた調整 (180 - 10px(sidebar padding)) */
-        padding: 9px 10px 9px 10px; /* 左右のパディングを減らす */
+        width: 170px; 
+        padding: 9px 10px; /* 左右のパディングを減らす */
     }
 
     /* ドロップダウンメニューの位置調整 */
     .dropdown-menu {
-        /* サイドバーが180pxになったことに伴い、 left の位置計算を調整する必要があるため、
-           位置調整はJavaScriptに任せるか、この画面幅では使用しないことを推奨します。
-           ここでは、表示幅が狭いため、固定位置指定を解除します */
-        position: absolute; /* fixed を解除 */
+        /* fixed の解除は不要ですが、ここでは一旦元のコードに合わせて absolute にする */
+        position: absolute; 
         width: 180px; /* メニュー幅を狭くする */
     }
     
@@ -693,6 +669,10 @@
         padding: 10px;
     }
 
+}
+
+/* --- レスポンシブ対応 (最大画面幅 1000px) --- */
+@media (max-width: 1000px) {
     /* --- メインのリストエリア --- */
     .content-area {
         /* 左側にサイドバーの幅(180px)を空けるためにパディングを追加 */
@@ -739,12 +719,12 @@
         width: 100px;
     }
     
-    .column-name {/* 250→200 */
-        width: 200px;
+    .column-name {/* 250→180 */
+        width: 180px;
     }
     
-    .column-course {/* 280→250 */
-        width: 250px;
+    .column-course {/* 280→220 */
+        width: 220px;
     }
 
     /* --- ボタン群 --- */
@@ -762,26 +742,12 @@
 
     /* --- 完了ボタン (コンテンツの下部・右側に配置) --- */
     .complete-button {
-        position: static; 
-        margin-left: auto; /* 右寄せにする */
-        margin-right: 15px; /* 右端に寄せすぎないようにマージンを追加 */
-        margin-top: 20px; /* 上部ボタン群との間隔を確保 */
-        width: 160px; /* モバイルサイズに調整 */
-        font-size: 20px; 
-        padding: 15px 20px;
+        left: 200px; /* サイドバー(180px) + content-area左パディング(20px) */
+        right: 15px; /* content-area右パディング(15px) */
+        width: 120px; 
+        font-size: 16px; 
+        padding: 10px 20px;
+        bottom: 20px;
+        margin-right: 0;
     }
-
-
-    /* ファイル入力要素を完全に非表示にするためのCSS */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
 }
