@@ -44,35 +44,20 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-//UPDATE test_student SET course_id = 1, course_name = "システムデザインコース" WHERE student_id = 25004;
-
 //test_studentに格納されているcourse_idとcourse_nameの変更
-$update_course_sql = ("UPDATE test_student SET course_id = ?, course_name = ? WHERE student_id = ?");
-//コース情報を取得するSQL
-$course_select_sql = ("SELECT * FROM course");
+$update_course_sql = ("UPDATE student SET course_id = ? WHERE student_id = ?");
 
 try {
     //データベース接続
     $pdo = new PDO($dsn, $user_name, $user_pass, $options);
-    $stmt_course = $pdo->query($course_select_sql);
-    $all_courses = $stmt_course->fetchAll(); // コースIDとコース名を取得
-
-    // コースIDをキー、コース名を値とする連想配列を作成
-    $courses = [];
-    foreach ($all_courses as $course) {
-        $courses[$course['course_id']] = $course;
-    }
-
+    //studentテーブルの更新
     $stmt_update = $pdo->prepare($update_course_sql);
 
-    //var_dump($courses);
-
-
     foreach ($selected_student as $student_id => $course_id) {
-        // update_course_sqlのWHERE句のstudent_idに対応するレコードのcourse_idとcourse_nameを更新
+        // update_course_sqlのWHERE句のstudent_idに対応するレコードのcourse_idを更新
 
-        $course_id = (int)$course_id; // コースIDを整数に変換
-        $stmt_update->execute([$course_id, $courses[$course_id]['course_name'], $student_id]);
+        ////$course_id = (int)$course_id; // コースIDを整数に変換
+        $stmt_update->execute([$course_id, $student_id]);
     }
 
 }
@@ -83,7 +68,20 @@ catch (PDOException $e) {
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
 //テストstudentに格納されている学生情報の取得
-$student_sql = ("SELECT * FROM test_student WHERE course_id = ?;");
+$student_sql = ("SELECT 
+                    S.student_id,
+                    S.student_name,
+                    S.course_id,
+                    C.course_name 
+                FROM
+                    student AS S 
+                INNER JOIN 
+                    course AS C 
+                ON 
+                    S.course_id = C.course_id 
+                WHERE 
+                    S.course_id = ?;"
+                );
 
 $_SESSION['student_account'] = [
     'success' => true,
