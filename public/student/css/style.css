@@ -58,6 +58,14 @@ body {
   align-items: center;
 }
 
+.date-btn {
+  height: 40px;
+  padding: 10px 15px;
+  background-color: #495666;
+  color: #ffffff;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
 
 .date-btn p {
   color: #ffffff;
@@ -577,11 +585,4 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 /* ホバー時の演出（少し明るくする） */
 .date-button-container:hover {
   background-color: #586372;
-}
-.date-btn {
-  height: 40px;
-  padding: 10px 15px;
-  background-color: #495666;
-  border-radius: 9px;
-  flex-shrink: 0;
 }
