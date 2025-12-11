@@ -19,6 +19,9 @@ $course = []; // コースデータを格納する配列を初期化
 $current_year = date("Y");
 $current_year = substr($current_year, -2); // 下2桁を取得
 
+$selected_year = date("Y");
+$selected_year = substr($selected_year, -2); // 下2桁を取得
+
 // 現在の月を取得
 $current_month = date('n');
 
@@ -74,6 +77,7 @@ catch (PDOException $e) {
     <title>生徒アカウント作成編集 アカウントの追加</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -148,7 +152,7 @@ catch (PDOException $e) {
             </nav>
 
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php" method="post">
+                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
                 <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
                 <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">
@@ -175,7 +179,7 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>">
+                                    <input type="text" value="<?php echo 1 + ($selected_year - $current_year); ?>年">
                                 </div>
                                 <div class="column-name">
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>

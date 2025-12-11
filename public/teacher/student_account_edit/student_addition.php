@@ -79,6 +79,7 @@ else {
     <title>生徒アカウント作成編集 アカウントの追加</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -103,8 +104,8 @@ else {
                 
                 <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
-                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="visually-hidden" onchange="this.form.submit();">
-                        <label for="csvFile" class="custom-file-upload-button">
+                        <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
+                        <label for="csvFile" class="download-button">
                             <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
                         </label>
                     </div>
@@ -161,16 +162,60 @@ else {
                 </div>
                 <button class="complete-button">完了</button>
 
-                <?php elseif ($status['backend'] === 'csv_upload'): ?>
+                <?php elseif ($status['backend'] === 'csv_upload' && $status['error_csv'] === false): ?>
                     <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition_edit.php" method="post">
-                        <button class="complete-button">完了</button>
+                        <button class="complete-button">追加完了</button>
                     </form>
                 <?php endif; ?>
             </div>
         </main>
     </div>
+
+
     
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　エラーデータ？件</h3>
+
+    <?php if ($status['error_csv'] === true): ?>
+
+
+        
+
+    <!--    ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓何かいい感じにしてほしいです　タグは<h3>じゃなくても全然〇です↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
+    -->     
+    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
+
+    
+
+
+    <div class="content-area">
+        <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <div class="account-table-container">
+                <div class="table-header">
+                <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                <div class="column-name">氏名</div>
+                <div class="column-course">コース</div>
+            </div>
+                    
+            <div class="table-row">
+                <div class="column-check">
+                </div> 
+                <div class="column-student-id">
+                    <input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>>
+                </div> 
+                <div class="column-name">
+                    <input type="text" name="name" placeholder="氏名">
+                </div> 
+                <div class="column-course">
+                    <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                </div>
+            </div>
+        </div>
+        <button class="add-button" id="deleteActionButton">編集完了</button>
+        </form>
+
+    </div>
+    <?php endif; ?>
+
     <div class="modal-overlay" id="addCountModal">
         <div class="modal-content">
             <div class="modal-header">

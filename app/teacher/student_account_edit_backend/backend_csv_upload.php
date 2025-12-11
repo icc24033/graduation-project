@@ -285,18 +285,13 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             // DB接続が失敗した場合などのエラー
             $error_count = -1; 
         }
-        
-        
-        // ★ 処理結果をセッションに格納
-        $_SESSION['upload_status'] = [
-            'success' => true,
-            'insert_count' => $insert_count ?? 0, // 挿入件数
-            'error_count' => $error_count, // エラー件数
-            // 表示ページでDBからデータを取得するための情報
-            'db_table' => 'csv_table', 
-            'error_table' => 'error_student_table' 
-        ];
 
+        if ($error_count > 0) {
+            $error_count_flag = true;
+        }
+        else {
+            $error_count_flag = false;
+        }
         
         //データベース接続情報
         $host = 'localhost';
@@ -322,6 +317,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
         $_SESSION['student_account'] = [
             'success' => true,
             'backend' => 'csv_upload',
+            'error_csv' => $error_count_flag,
             'before' => 'teacher_home',
             'database_connection' => $dsn,
             'database_user_name' => $user_name,
