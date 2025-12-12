@@ -106,7 +106,7 @@ else {
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
                         <label for="csvFile" class="download-button">
-                            <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
+                        <span class="material-symbols-outlined download-icon">download</span> 名簿ダウンロード
                         </label>
                     </div>
                 </form>
@@ -174,20 +174,18 @@ else {
 
     
 
-    <?php if ($status['error_csv'] === true): ?>
+    <?php if (true): ?>
 
 
         
 
     <!--    ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓何かいい感じにしてほしいです　タグは<h3>じゃなくても全然〇です↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
     <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-    -->     
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-
-    
-
-
+    -->
     <div class="content-area">
+        <div class="error-edit-container">
+        <h3>CSVエラーデータ編集</h3>
+        <div>
         <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">
                 <div class="table-header">

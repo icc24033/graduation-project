@@ -49,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentOpenToggle = null;
     let currentTableInput = null; 
-
+    let currentGradeInput = null; // ★ 学年ドロップダウンの追跡用
+    
     /**
      * すべてのドロップダウンを閉じる関数
      */
@@ -75,11 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 menu.style.position = ''; 
             }
         }
+        // ★ ここに学年ドロップダウンを閉じる処理を追加
+        if (currentGradeInput) {
+            currentGradeInput.classList.remove('is-open-course-dropdown'); // クラスを共用
+            
+            const menuId = currentGradeInput.getAttribute('data-dropdown-for'); // 'gradeDropdownMenu'
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                menu.classList.remove('is-open');
+                // 位置指定をリセット
+                menu.style.left = '';
+                menu.style.top = '';
+                menu.style.position = ''; 
+            }
+        }
         
         // 追跡変数をリセット
         currentOpenToggle = null;
         currentOpenMenu = null;
         currentTableInput = null; 
+        currentGradeInput = null; // ★ リセット
     };
 
     // --- 1-1. サイドバードロップダウンの開閉制御 ---
@@ -119,11 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * コースドロップダウンにイベントリスナーを設定するヘルパー関数
-     * @param {HTMLElement} input - コース表示要素 (.course-display)
+     * (元の setupInitialCourseDropdowns() で利用されていたが、定義がなかったため追加)
+     * @param {HTMLElement} input - コース表示要素 (.course-display[data-course-input])
      */
     const setupCourseDropdown = (input) => {
         input.addEventListener('click', (event) => {
-            const menuId = input.getAttribute('data-dropdown-for');
+            const menuId = input.getAttribute('data-dropdown-for'); // 'courseDropdownMenu'
             const menu = document.getElementById(menuId);
 
             if (menu) {
@@ -142,11 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     menu.style.left = `${rect.right + 5}px`;
                     menu.style.top = `${rect.top + rect.height}px`;
                     
-                    currentTableInput = input; // 現在のテーブル入力を設定
+                    currentTableInput = input; // コースドロップダウンなので currentTableInput を設定
                 }
             }
             event.stopPropagation(); 
         });
+    };
+
+    // 初期ロード時に存在する要素にイベントを設定
+    const setupInitialGradeDropdowns = () => {
+        tableGradeInputs.forEach(setupGradeDropdown);
     };
 
     setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
@@ -262,6 +284,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }
+                // ★ ここに学年選択だった場合のロジックを追加
+                else if (currentGradeInput) {
+                    // 選択されたのが学年メニュー内のリンクだった場合
+                    const newGradeValue = e.target.getAttribute('data-selected-grade-center');
+                    const newGradeDisplay = e.target.textContent;
+
+                    // 1. 表示用のaタグを更新
+                    currentGradeInput.textContent = newGradeDisplay;
+                    currentGradeInput.setAttribute('data-current-grade-value', newGradeValue);
+                    
+                    // 2. 隠し入力フィールドを特定し、値を更新
+                    const currentRow = currentGradeInput.closest('.table-row');
+                    if (currentRow) {
+                        // 学年移動用のHidden Inputを取得 (name="grade_changes[学生ID]")
+                        const hiddenInput = currentRow.querySelector('.grade-hidden-input');
+                        if (hiddenInput) {
+                            // 🌟 最重要：POSTで送信される値を更新！
+                            hiddenInput.value = newGradeValue; 
+                        }
+                    }
+                }
+                // ★ 追加部分ここまで
             
                 closeAllDropdowns(); // ドロップダウンを閉じる
 
@@ -364,6 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 2. ★ 追加: 現在のコースID (current_course_id) をhidden inputとして追加
                 const courseToggle = document.getElementById('courseDropdownToggle');
                 const currentCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : '';
+
+                const tableGradeInputs = document.querySelectorAll('.course-display[data-grade-display]');
 
                 if (currentCourseId) {
                     const hiddenCourseInput = document.createElement('input');
