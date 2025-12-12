@@ -1,3 +1,19 @@
+<?php
+
+session_start();
+
+$status = $_SESSION['subject'];
+
+$dsn = $status['dsn']; 
+$user = $status['user'];
+$pass = $status['pass'];
+$options = $status['options'];
+$subject_sql_first = $status['subject_sql_first'];
+$subject_sql_second = $status['subject_sql_second'];
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -32,14 +48,6 @@
     session_start();
     date_default_timezone_set('Asia/Tokyo');
 
-    // ▼▼▼ データベース接続設定 (環境に合わせて変更してください) ▼▼▼
-    $db_host = 'localhost';
-    $db_name = 'test';      
-    $db_user = 'root'; 
-    $db_pass = 'root'; 
-    
-    $dsn = "mysql:dbname={$db_name};host={$db_host};charset=utf8";
-    
     // === 時間割の時間定義 ===
     $time_schedule = [
         1 => '9:10 ～ 10:40', 2 => '10:50 ～ 12:20', 3 => '13:10 ～ 14:40',
@@ -190,27 +198,41 @@
             <?php
             // === データベース検索処理 ===
             try {
-                $db = new PDO($dsn, $db_user, $db_pass, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                ]);
+                // セッションから設定を取り出す
+                $config    = $_SESSION['subject'];
+                $table_map = $config['table_map']; // 対応リスト
+                $base_sql  = $config['base_sql'];  // SQLひな形
 
-                // 選択されたテーブルから、その曜日のデータを全件取得
-                // 1時間目から4時間目などを並び順(ASC)で取得
-                $sql = "SELECT * FROM {$target_table} WHERE day_of_week = :day ORDER BY period ASC";
-                
+                // DB接続
+                $db = new PDO($config['dsn'], $config['user'], $config['pass'], $config['options']);
+
+                // ▼▼▼ 選択されたコースに対応するテーブル名を決定 ▼▼▼
+                // POSTされたコースIDが、許可リスト(table_map)の中に存在するか確認
+                if (array_key_exists($selected_course, $table_map)) {
+                    $target_table = $table_map[$selected_course];
+                } else {
+                    // 存在しない場合（不正な値や初期状態）はデフォルトを使用
+                    $target_table = $table_map['system'];
+                }
+
+                // ▼▼▼ SQLの組み立て（sprintf関数を使用） ▼▼▼
+                // $base_sql の %s の部分に $target_table を安全に埋め込みます
+                // ここにSQL構文は一切書かれていません
+                $sql = sprintf($base_sql, $target_table);
+
+                // 実行準備
                 $stmt = $db->prepare($sql);
-                $stmt->bindValue(':day', $display_day_jp, PDO::PARAM_STR);
-                $stmt->execute();
+                
+                // 実行（? に曜日を入れる）
+                $stmt->execute([(string)$display_day_jp]);
                 
                 $all_schedule = $stmt->fetchAll();
 
                 if (empty($all_schedule)) {
                     echo "<div class='no-schedule'>授業データがありません（{$display_day_jp}曜日）</div>";
                 } else {
-                    // データをループして表示
+                    // ループ処理（ここは変更なし）
                     foreach($all_schedule as $item) {
-                        // DBのカラム名が正しいか確認してください
                         $s_name   = htmlspecialchars($item["subject_name"] ?? '未設定');
                         $teacher  = htmlspecialchars($item["teacher"] ?? '');
                         $room     = htmlspecialchars($item["room"] ?? '');
@@ -221,7 +243,6 @@
                         $item_list = preg_split('/[、,，]+/', $item_str, -1, PREG_SPLIT_NO_EMPTY);
                         $time_str = $time_schedule[$period] ?? "時間未定";
                         ?>
-                        
                         <section class="card">
                             <div class="info">
                                 <div class="subject-details">
@@ -231,7 +252,6 @@
                                 <div class="period-details">
                                     <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
                                     <div class="button-container">
-                                        
                                         <div class="dropdown-wrapper detail-dropdown-wrapper">
                                             <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>" aria-expanded="false">
                                                 <p>授業詳細</p>
@@ -248,7 +268,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div class="dropdown-wrapper item-dropdown-wrapper">
                                             <button type="button" class="button dropdown-toggle item-toggle" id="item-toggle-button-<?php echo $period; ?>" aria-expanded="false">
                                                 <span class="button-text-container">
