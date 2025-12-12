@@ -45,7 +45,7 @@ try {
     $stmt_course = $pdo->query($status['course_sql']);
     $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
 
-    // 　テストstudentに格納されている学生情報の取得
+    // 　studentに格納されている学生情報の取得
     $stmt_test_student = $pdo->prepare($status['student_sql']);
     $stmt_test_student->execute([$status['course_id']]);
 

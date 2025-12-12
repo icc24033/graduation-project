@@ -49,6 +49,7 @@ $student_sql = ("SELECT
                     S.student_id,
                     S.student_name,
                     S.course_id,
+                    S.grade,
                     C.course_name 
                 FROM
                     student AS S 

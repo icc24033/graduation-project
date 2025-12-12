@@ -44,7 +44,7 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-//test_studentに格納されているcourse_idとcourse_nameの変更
+//studentに格納されているcourse_idとcourse_nameの変更
 $update_course_sql = ("UPDATE student SET course_id = ? WHERE student_id = ?");
 
 try {
@@ -67,11 +67,12 @@ catch (PDOException $e) {
 
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
-//テストstudentに格納されている学生情報の取得
+//studentに格納されている学生情報の取得
 $student_sql = ("SELECT 
                     S.student_id,
                     S.student_name,
                     S.course_id,
+                    S.grade,
                     C.course_name 
                 FROM
                     student AS S 

@@ -191,7 +191,7 @@ catch (PDOException $e) {
                                     <?php 
                                         // 現在の学年を計算
                                         // 注意: $selected_year と $current_year の値が同じなら結果は常に 1 になります。
-                                        $current_grade = 1 + ($selected_year - $current_year); 
+                                        $current_grade = $student_row['grade'];
                                         $initial_display = $current_grade . '年'; 
                                         // 許可された最大学年。この値を基準に初期値を決定します。
                                         $max_grade = 2; 
@@ -205,7 +205,7 @@ catch (PDOException $e) {
                                     <a href="#" class="course-display" 
                                         data-grade-display
                                         data-dropdown-for="gradeDropdownMenu" 
-                                        data-current-grade-value="<?php echo htmlspecialchars($current_grade); ?>">
+                                        data-current-grade-value="<?php echo htmlspecialchars($student_row['grade']); ?>">
                                         <?php echo htmlspecialchars($initial_display); ?>
                                     </a>
                                     <input type="hidden" 
@@ -218,16 +218,7 @@ catch (PDOException $e) {
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
-                                    <a href="#" class="course-display" 
-                                        data-course-name-display 
-                                        data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
-                                        <?php echo htmlspecialchars($student_row['course_name']);?>
-                                    </a>
-                                <input type="hidden" 
-                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
-                                    value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
-                                    class="course-hidden-input">
+                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
                                 </div>
                             </div>
 
