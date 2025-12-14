@@ -171,17 +171,8 @@ else {
         </main>
     </div>
 
+    <?php if ($status['error_csv'] === true): ?>
 
-    
-
-    <?php if (true): ?>
-
-
-        
-
-    <!--    ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓何かいい感じにしてほしいです　タグは<h3>じゃなくても全然〇です↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-    -->
     <div class="content-area">
         <div class="error-edit-container">
         <h3>CSVエラーデータ編集</h3>

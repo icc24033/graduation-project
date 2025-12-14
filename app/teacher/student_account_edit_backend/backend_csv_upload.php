@@ -224,7 +224,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     try {
                         $stmt = $pdo->prepare($sql_insert_error_student);
                         //SQL文を実行
-                        $error_id = 3001; //コースID不正エラー
+                        $error_id = 1001; //コースID不正エラー
                         $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
                     }
                     catch (PDOException $e) {
@@ -239,7 +239,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 try {
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
-                    $error_id = 3002; //コースID形式不正エラー
+                    $error_id = 1002; //コースID形式不正エラー
                     $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
                 }
                 catch (PDOException $e) {
