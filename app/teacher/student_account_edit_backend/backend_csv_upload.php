@@ -73,7 +73,7 @@ $sql_create_error_table =
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
     error_id INT,
-    row_count INT
+    course_id INT
 );";
 
 //error_idの外部キー設定
@@ -110,7 +110,7 @@ catch (PDOException $e) {
 
 //error_student_tableの格納SQLクエリ
 $sql_insert_error_student = "INSERT INTO 
-                                error_student_table (student_id, name, approvalUserAddress, error_id, row_count) 
+                                error_student_table (student_id, name, approvalUserAddress, error_id, course_id) 
                             VALUES 
                                 (?, ?, ?, ?, ?);";
 
@@ -170,7 +170,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                         $stmt = $pdo->prepare($sql_insert_error_student);
                         //SQL文を実行
                         $error_id = 1001; //学年部分不正エラー
-                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                     }
                     catch (PDOException $e) {
                         //エラー処理
@@ -186,7 +186,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
                     $error_id = 1002; //ユーザーID形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
@@ -202,12 +202,11 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 $column_address = $data[2];
             }
             else {
-
                 try {
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
                     $error_id = 2001; //メールアドレス形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
@@ -228,7 +227,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                         $stmt = $pdo->prepare($sql_insert_error_student);
                         //SQL文を実行
                         $error_id = 1001; //コースID不正エラー
-                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                     }
                     catch (PDOException $e) {
                         //エラー処理
@@ -243,7 +242,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
                     $error_id = 1002; //コースID形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
