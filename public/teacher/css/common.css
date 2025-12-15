@@ -1,0 +1,60 @@
+header{
+    height: 100px;
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+    background-color:#C0DEFF;
+
+    /* ★追加: Flexboxで子要素を配置 */
+    display: flex;
+    /* ★追加: 子要素を右端に寄せる */
+    justify-content: flex-end; 
+    /* ★追加: 縦方向の中央揃え */
+    align-items: center; 
+    /* ★追加: 右側に余白 */
+    padding-right: 20px;
+}
+/*
+.header{
+    width: 60px;
+    height: 60px;
+    min-width: 50px;
+    border-radius: 50%; 
+    background-color: #ffffff; 
+    margin: auto 95%;
+    position: relative;
+    top: 25%;
+}
+*/
+  
+/* ==================================== */
+/* Googleアカウントアイコンのスタイル */
+/* ==================================== */
+
+/* ユーザーアバターのコンテナ (teacher_home.phpで追加したdiv要素) */
+.user-avatar {
+    /* ヘッダーの右上に絶対配置 */
+
+    /* ★変更: absolute/top/right/transform を削除 */
+    /* position: relative; は user_menu.css で定義されているため、ここでは不要 */
+    
+    
+    position: absolute; 
+    right: 20px;
+    
+    width: 60px;            /* アイコンのサイズ */
+    height: 60px;           /* アイコンのサイズ */
+    
+    border-radius: 50%;     /* 丸くする */
+    overflow: hidden;       /* 画像が枠からはみ出さないように */
+    border: 2px solid #fff; /* アイコンを際立たせるための枠線 */
+    z-index: 1001;          /* ヘッダーの上 (z-index: 1000) に表示 */
+    cursor: pointer;        /* クリック可能であることを示す */
+}
+
+/* アバター画像自体 */
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像の縦横比を維持しつつコンテナを埋める */
+}

@@ -1,0 +1,184 @@
+/* ～ウィンドサイズ最大～ */
+body{
+    background-color: #f9f9f9;
+}
+.tool{
+    display: flex;
+    justify-content: center;
+    height: 165px;
+    position: relative;
+    top: 100px;
+    margin-right: 50%;
+}
+@media (max-width:1700px){
+    .tool{
+        display: flex;
+        justify-content: center;
+        height: 165px;
+        position: relative;
+        top: 100px;
+        margin-right: 60%;
+    }
+}
+@media (max-width:1400px){
+    .tool{
+        display: flex;
+        justify-content: center;
+        height: 165px;
+        position: relative;
+        top: 100px;
+        margin-right: 70%;
+    }
+}
+.message_history{
+    display: flex;
+    height: 140px;
+    justify-content: center;
+    position: relative;
+    margin-right: 50%;
+    top: 80px;
+}
+
+/* 機能（アイコン） */
+.title_icon{
+    width: 35px;
+    height: 35px;
+    padding: 15px 0 5px 5px;
+}
+
+/* 機能（テキスト） */
+.title_name{
+    display: block;
+    padding:10px;
+    font-size: 30px;
+}
+
+.background{
+    display: flex;
+    gap: 25px 25px;
+    margin: 0 auto;
+    flex-wrap:wrap;
+    border-radius:30px;
+    width: 60%;
+    max-width: 800px;
+    min-width: 500px;
+}
+
+.card{
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    text-align: center;
+    width: 240px;
+    height: 220px;
+    border: solid 1px #e5e5e5;
+}
+
+.card a{
+    display: block;
+}
+.card:hover{
+    background-color: #c2c2c2;
+}
+
+/* 時間割り作成 */
+.card_icon_calendar-plus{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E0F7FA;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+/* 時間割り編集 */
+.card_icon_square-pen{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #FFFDE7;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+
+/* アカウント編集 */
+.card_icon_user-round{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #F3E8FF;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 権限付与 */
+.card_icon_shield-check{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #F7FEE7;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 通知事項編集 */
+.card_icon_bell-dot{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E0F2F1;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 授業詳細編集 */
+.card_icon_clipboard-list{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #E6FFEE;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 時間割り閲覧 */
+.card_icon_calendar-clock{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #EEF2FF;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+/* 送信先設定 */
+.card_icon_mails{
+    padding: 8px 10px 8px 10px;
+    width: 28px;
+    background-color: #FFE4E4;
+    border-radius: 28px;
+    margin: 8px 82px 5px 82px;
+}
+
+
+.card_main{
+    padding: 3px 10px 6px 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.card_sub{
+    padding: 3px 10px 6px 10px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+
+/* .user-avatar の定義を見直し */
+.user-avatar {
+    /* ... 既存のposition/top/right/transform設定 ... */
+    
+    width: 60px !important;    /* 幅を60pxに固定 */
+    height: 60px !important;   /* 高さを60pxに固定 */
+    
+    /* ... その他の設定 ... */
+}
+
+/* 画像自体も親要素のサイズに合わせる */
+.user-avatar .avatar-image {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+}

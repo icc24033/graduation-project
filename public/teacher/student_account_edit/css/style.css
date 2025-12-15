@@ -1,0 +1,777 @@
+/* --- レイアウトのコンテナ --- */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /*要素をブラウザウィンドウの高さと等しくする*/
+}
+
+/* --- ヘッダー --- */
+.app-header {
+    /* 画面上部に固定 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF;
+    height: 70px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.user_icon {
+    font-size: 24px;
+}
+
+/* --- メインコンテンツとサイドバーのレイアウト --- */
+.main-content {
+    padding-top: 70px;
+    margin-top: 30px; 
+    display: flex;
+    flex-grow: 1; 
+}
+
+/* --- サイドバー (ナビゲーション) --- */
+.sidebar {
+    /* 画面の左側に固定 */
+    position: fixed; 
+    left: 0;
+    bottom: 0;
+    top: 70px; 
+    /* 常に最前面に表示 */
+    z-index: 999;
+    width: 300px; 
+    background-color: #F3F8FF;
+    padding: 0 0 0 10px;
+    flex-shrink: 0; 
+    border-right: solid 1px #CFD5DF;
+}
+
+.sidebar ul { 
+    padding: 0;
+}
+
+.nav-item {
+    position: relative; /*CSSで要素を元の位置から相対的にずらして配置する*/
+    padding: 5px 0; 
+}
+
+.nav-item a, .dropdown-toggle {
+    display: block;
+    /* --- デフォルトの幅は290pxを維持 --- */
+    width: 290px;
+    padding: 10px 20px;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 通常時にも角丸を設定し、ホバー時のちらつきを防止 */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+
+/*************************************************************************************/
+/* アクティブなnav-item内のリンクの背景色 */
+.nav-item.is-active a {
+    /* 例: 目立たせるために濃い背景色を設定 */
+   background-color: #CFD5DF; /* 青色 */
+    
+    /* テキストの色を白に変更して、背景色とのコントラストを確保 */
+    /*color: white;*/ 
+}
+/*************************************************************************************/
+
+
+/* グループラベルのスタイル（「編集」など） */
+.is-group-label {
+    pointer-events: none; 
+    border-bottom: none;
+    padding: 15px 0; 
+}
+
+/* 現在の値の表示（年度、コース） */
+.dropdown-toggle .current-value {
+    margin-left: 0;
+}
+
+.nav-item a.is-active {
+    /* ホバー時と同じ背景色を固定で適用 */
+    background-color: #CFD5DF; 
+}
+
+/* ホバー時のスタイル（非アクティブ時） */
+.nav-item a:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+
+/* ドロップダウンボタンが閉じている時のホバー効果 */
+/* 年度 */
+#yearDropdownToggle[aria-expanded="false"]:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+/* コース */
+#courseDropdownToggle[aria-expanded="false"]:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+
+/* ドロップダウンボタンアクティブ状態の制御 */
+
+/* 【コースボタン】 閉じている時 -> 透明 */
+#courseDropdownToggle[aria-expanded="false"] {
+    background-color: transparent; 
+}
+
+/* 【コースボタン】 開いた時 -> グレー */
+#courseDropdownToggle[aria-expanded="true"] {
+    background-color: #CFD5DF; 
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* 【年度ボタン】 閉じている時 -> 透明 */
+#yearDropdownToggle[aria-expanded="false"] {
+    background-color: transparent; 
+}
+
+/* 【年度ボタン】 開いた時 -> グレー */
+#yearDropdownToggle[aria-expanded="true"] {
+    background-color: #CFD5DF; 
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* --- ドロップダウンメニューのスタイル --- */
+.dropdown-menu {
+    /* 絶対位置指定から、画面全体を基準とした固定位置指定に変更 */
+    position: fixed;
+    width: 250px; 
+    background-color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4); /* 影を強調し、浮いていることを示す */
+    z-index: 1001; /* ヘッダー(1000)より高くし、最前面に表示 */
+    display: none; /* 初期状態で非表示にする */
+    border-radius: 20px;
+}
+
+/* is-openクラスが付いたメニューを表示 */
+.dropdown-menu.is-open {
+    padding: 10px 0 ; 
+    display: block; 
+    width: 250px;
+    border: 1px solid #CFD5DF;
+    top: auto; 
+    left: auto;
+}
+
+/* コースのドロップダウンメニューに高さとスクロールを適用 */
+#courseDropdownMenu {
+    /* サイドバーのスペースを考慮し、画面の高さに合わせて調整 */
+    max-height: 200px; /* 最大高さを指定 */
+    overflow-y: auto; /* 縦方向のスクロールを有効にする */
+    /* 横方向のスクロールを非表示にする */
+    overflow-x: hidden;
+}
+
+.dropdown-menu li a {
+    display: block;
+    /* ホバー範囲をメニュー幅に収めるため230pxに設定 */
+    width: 230px;
+    padding: 9px 10px; /* 画像に合わせてパディングを調整 */
+    text-align: left;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    font-weight: 400;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 左右に10pxの余白を設定 */
+    margin: 0 0 0 10px; 
+}
+
+.dropdown-menu li a:hover {
+    /* widthの再設定を削除し、ちらつきを防止 */
+    background-color: #CFD5DF; /* グレー */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* --- ダウンロードボタン --- */
+.download-button {
+    position: absolute;
+    bottom: 50px;
+    left: 35px; 
+    display: flex;
+    text-align: center;
+    align-items: center;
+    padding: 10px 20px; 
+    color: #fff;
+    background-color: #495666; /* ボタンカラー */
+    border: none; /* 画像に合わせて線をなくす */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
+}
+
+.download-icon {
+    color: #fff;
+}
+
+/*************************************************************************************/
+/* input[type="file"] を完全に非表示にして、「ファイルが選択されていません」の文字をなくす */
+#csvFile {
+    /* 視覚的に非表示にするための一般的な手法 */
+    opacity: 0; 
+    position: absolute; /* 他の要素に影響を与えないように絶対配置 */
+    width: 0.1px;
+    height: 0.1px;
+    overflow: hidden;
+    z-index: -1; /* 他の要素の下に配置 */
+}
+/*************************************************************************************/
+
+.download-button:hover,.download-icon:hover {
+    background-color: #CFD5DF;/* ホバー色グレー */
+    color: #222;
+}
+
+.download-button .download-icon {
+    /* フォントアイコンとして表示するために、フォントの設定を追加 */
+    font-family: 'Material Symbols Outlined';
+    font-weight: 400; /* Material Symbolsの標準ウェイト */
+    font-size: 20px;
+    margin-right: 10px; /* アイコンとテキストの間隔を調整 */
+}
+
+.download-button .download-icon {
+    color: inherit; 
+}
+
+/* --- メインのリストエリア --- */
+.content-area {
+    flex-grow: 1;
+    padding: 30px 50px 50px 50px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+.account-table-container {
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 30px;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    height: 650px; /* テーブルが表示される最大高さを設定 */
+    overflow-y: auto; /* 縦方向のスクロールを有効にする */
+    position: relative; /* stickyの基準にするため */
+}
+
+/* テーブルヘッダー */
+.table-header {
+    display: flex;
+    background-color: #C0DEFF; 
+    padding: 10px 0;
+    font-weight: bold;
+    text-align: center;
+    font-weight: 700;
+    /* ヘッダーを固定する */
+    position: sticky; /* スクロール時に固定する */
+    top: 0; /* 容器の上端に固定する */
+    z-index: 10; /* 他の行の上に表示されるようにする */
+}
+/* テーブルの行 */
+.table-row {
+    display: flex;
+    background-color: #fff;
+    border-bottom: 1px solid #CFD5DF; /* 行間の線　グレー */
+    align-items: center;
+    padding: 5px 0;
+    transition: background-color 0.3s; /* スムーズな色変更 */
+}
+
+.table-row:last-of-type {
+    border-bottom: none;
+}
+
+/* ホバー時のスタイル */
+.table-row:hover {
+    background-color: #F0F8FF; /* ホバー時のベースカラー*/
+}
+
+/* JS連携: チェックが付いた行のスタイル */
+.table-row.is-checked {
+    /* チェックが付いた時の行の背景色をベースカラーの #F0F8FF に変更 */
+    background-color: #F0F8FF; 
+    padding-left: 0; 
+}
+
+/* チェックボックスにチェックが付いた時に背景色を適用する */
+/* .table-row:has(...) は、その要素の子孫に特定の要素が存在する場合にスタイルを適用します。 */
+.table-row:has(.column-check input[type="checkbox"]:checked) {
+    background-color: #F0F8FF;
+}
+
+/* カラムの幅設定 */
+.column-check {
+    padding: 0 20px 0 10px;
+    width: 22px;
+}
+
+.column-student-id {
+    padding:0 10px;
+    width: 200px;
+}
+
+.column-name {
+    padding:0 10px;
+    width: 250px;
+}
+
+.column-course {
+    padding:0 10px;
+    width: 280px;
+}
+
+/* 入力フィールドのスタイル */
+.table-row input[type="text"] {
+    width: calc(100% - 15px); /* パディングを考慮して調整 */
+    padding: 6px 8px;
+    margin: 4px 7px;
+    border: 1px solid #CFD5DF; /* 枠線を薄く */
+    border-radius: 3px;
+    font-size: 13px;
+    
+}
+
+/* テキスト入力にフォーカスがある時の枠線を黒に変更 */
+.table-row input[type="text"]:focus {
+    outline: none; /* デフォルトのアウトラインを削除 */
+    box-shadow: 0 0 3px rgba(34, 34, 34, 0.3); /* 軽い影を追加 */
+    background-color: #fff; /* 背景色を白に戻す */
+}
+
+/* チェックボックス */
+.column-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #CFD5DF;
+}
+
+/* チェックが付いた時のチェックボックスの色（CSSのみで対応できる範囲） */
+.column-check input[type="checkbox"]:checked {
+    /* チェックボックスの色を最も簡単に変える方法 */
+    accent-color: #F0F8FF; 
+}
+
+/* 追加ボタン */
+.add-button{
+    background-color: #495666; /* ボタンカラー */
+    color: #fff; 
+    width: 180px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
+}
+
+/*ボタンを横並びにするコンテナ --- */
+.button-group {
+    /* 固定設定をすべて削除し、コンテンツフローに戻す */
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+/* --- 完了ボタン (コンテンツの下部・右側に配置) --- */
+.complete-button {
+    background-color: #495666; /* ボタンカラー */
+    color: #fff; 
+    width: 180px;
+    padding: 15px 30px; 
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
+    /* 画面右下に固定するための設定に変更 */
+    position: fixed; /* 固定位置に設定 */
+    bottom: 50px; /* ダウンロードボタンのbottom: 50pxと合わせる */
+    /* サイドバー(180px)とコンテンツエリアのパディング(200px)を考慮して右端から調整 */
+    right: 100px; /* 画面右端からの距離を設定 */
+    z-index: 998; /* 固定しているのでz-indexも設定 */
+    margin-left: auto; 
+    margin-right: auto;
+    margin-top: auto; 
+}
+
+.add-button:hover,.complete-button:hover {
+    background-color: #CFD5DF;/* ホバー色変更 */
+    color: #222;
+}
+
+/* テキスト入力フィールドがクリック・入力されている行の背景色をホバーと同じにする */
+/* このスタイルは、.course-displayが開いている行にも適用されます */
+.table-row:has(input[type="text"]:focus),
+.table-row:has(.course-display.is-open-course-dropdown) {
+    background-color: #F0F8FF;
+}
+
+/* テーブル内のコース表示領域のスタイル */
+.course-display {
+    display: block;
+    width: calc(100% - 15px);
+    padding: 6px 8px;
+    margin: 4px 7px;
+    border: 1px solid #CFD5DF;
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer; /* クリック可能であることを示す */
+    text-align: left;
+    white-space: nowrap; /* テキストの折り返しを防ぐ */
+    overflow: hidden; /* はみ出したテキストを隠す */
+    text-overflow: ellipsis; /* はみ出しを三点リーダーで示す */
+    background-color: #fff; /* 通常の背景色 */
+}
+
+/* ホバー時のスタイル */
+.course-display:hover {
+    background-color: #F0F8FF;
+}
+
+/* コースドロップダウンが「開いている時」のスタイルをテキスト入力の:focusと統一 */
+.course-display.is-open-course-dropdown {
+    background-color: #fff; /* 開いている時は背景を白に戻す */
+    box-shadow: 0 0 3px rgba(34, 34, 34, 0.3); /* 影を追加 */
+}
+
+/*　--- 削除 --- */
+/* モーダル背景（薄いグレー） */
+.modal-overlay {
+    /* 初期状態を非表示に設定 */
+    display: none; /* これだけを残して、モーダルを非表示にする */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* 背景の暗いオーバーレイ */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 他の要素より手前に表示 */
+}
+
+/* JavaScriptでモーダルを表示するためのクラス */
+.modal-overlay.is-open-modal {
+    display: flex;
+}
+
+/* モーダルウィンドウ本体（白背景のボックス） */
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px; /* 最大幅を指定してデザインを制御 */
+    height: auto;
+    text-align: center;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 20px; 
+}
+
+.modal-body {
+    margin-bottom: 30px;
+}
+
+.modal-body p {
+    font-size: 14px;
+    color: #222;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* モーダルウィンドウボタンフッター */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modal-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    width: 160px; /* 2つのボタンを横並びにする */
+    gap: 0 50px;
+}
+
+/* モーダルウィンドウキャンセルボタン */
+.modal-cancel-button {
+    background-color: #fff;
+    color: #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-cancel-button:hover {
+    background-color: #CFD5DF;
+}
+
+/* モーダルウィンドウ削除確認ボタン */
+.modal-delete-button {
+    background-color: #ff5e5e; /* 赤色 */
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-delete-button:hover {
+    background-color: #CFD5DF;
+    color: #222;
+
+}
+
+/* モーダルウィンドウ削除対象リストのコンテナ */
+.delete-list-container {
+    max-height: 150px; /* スクロール可能にするための高さ制限 */
+    overflow-y: auto;
+    border: 1px solid #CFD5DF;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #F0F8FF;
+    text-align: left;
+}
+
+/* モーダルウィンドウリスト内の個別の学生情報 */
+.deleted-item {
+    font-size: 14px;
+    color: #222;
+    padding: 3px 0;
+    border-bottom: 1px solid #CFD5DF;
+}
+.deleted-item:last-child {
+    border-bottom: none;
+}
+
+/* 追加人数確認ボタン */
+.modal-confirm-button {
+    background-color: #495666; /* ボタンカラー */
+    color: #fff;
+    color: #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-confirm-button:hover {
+    background-color: #CFD5DF;
+    color: #222;
+}
+
+/* --- 追加人数入力モーダル固有のスタイル --- */
+#studentCountInput {
+    width: 100px;
+    padding: 5px 10px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#studentCountInput::-webkit-outer-spin-button,
+#studentCountInput::-webkit-inner-spin-button {
+    margin: 0px;
+}
+
+/* --- レスポンシブ対応 (最大画面幅 1200px) --- */
+@media (max-width: 1200px) {
+/* --- レイアウトのコンテナ --- */
+    .app-container {
+        padding-top: 70px; /* ヘッダーの高さ */
+    }
+
+    /* --- ヘッダー --- */
+    .app-header {
+        height: 70px; /* ヘッダーの高さ */
+        padding: 0 15px; /* 左右のパディングを減らす */
+        /* タイトルとアイコンを左右に配置するため、justify-contentを変更 */
+        justify-content: space-between;
+    }
+
+    /* --- メインコンテンツとサイドバーのレイアウト --- */
+    .main-content {
+        padding-top: 0; /* ヘッダーの固定位置と被らないように調整 */
+        margin-top: 0;
+    }
+
+    /* --- サイドバー (ナビゲーション) --- */
+    .sidebar {
+        /* 幅を300pxから180pxに縮小 */
+        width: 180px; 
+        /* 固定位置の top をヘッダーの高さに合わせて修正 */
+        top: 70px; 
+    }
+    
+    /* ナビゲーションアイテムの幅をサイドバーに合わせて調整 */
+    .nav-item a, .dropdown-toggle {
+        width: 170px; 
+        padding: 9px 10px; /* 左右のパディングを減らす */
+    }
+
+    /* ドロップダウンメニューの位置調整 */
+    .dropdown-menu {
+        /* fixed の解除は不要ですが、ここでは一旦元のコードに合わせて absolute にする */
+        position: absolute; 
+        width: 180px; /* メニュー幅を狭くする */
+    }
+    
+    .dropdown-menu.is-open {
+        width: 180px;
+    }
+    
+    .dropdown-menu li a {
+        width: 160px; /* メニュー内のリンク幅を調整 */
+        margin: 0 0 0 10px; 
+    }
+
+    /* ダウンロードボタンの位置調整 */
+    .download-button {
+        bottom: 20px;
+        left: 5px; 
+        width: 90%; /* 幅をサイドバーに合わせて調整 */
+        max-width: 160px;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+}
+
+/* --- レスポンシブ対応 (最大画面幅 1000px) --- */
+@media (max-width: 1000px) {
+    /* --- メインのリストエリア --- */
+    .content-area {
+        /* 左側にサイドバーの幅(180px)を空けるためにパディングを追加 */
+        padding: 20px 15px 80px 200px; 
+        align-items: center; /* ボタン類は中央寄せに戻す */
+    }
+
+    /* --- テーブルのコンテナとスクロール --- */
+    .account-table-container {
+        /* 画面の残りの幅に合わせて最大幅を調整（コンテンツエリアの幅内で100%に） */
+        width: 100%;
+        max-width: 100%; 
+        height: 650px;
+        overflow-y: auto; /* 縦スクロールを有効に戻す */
+        overflow-x: auto; /* 横スクロールを有効にする */
+        border: 1px solid #CFD5DF;
+    }
+
+    /* テーブル全体を収めるための内部コンテナ */
+    .table-header,
+    .table-row {
+        /* 最小幅を維持し、横スクロールを可能にする */
+        min-width: 500px; 
+        width: 100%;
+        padding: 5px 0;
+        position: sticky; /* ヘッダーの固定を維持 */
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid #CFD5DF; 
+    }
+    
+    .table-row {
+        position: static;
+        border-bottom: 1px solid #CFD5DF; 
+    }
+
+    /* カラムの幅設定 */
+    .column-check {
+        padding: 0 10px 0 10px; 
+        width: 22px;
+    }
+    
+    .column-student-id {/* 200→100 */
+        width: 100px;
+    }
+    
+    .column-name {/* 250→180 */
+        width: 180px;
+    }
+    
+    .column-course {/* 280→220 */
+        width: 220px;
+    }
+
+    /* --- ボタン群 --- */
+    .button-group {
+        flex-direction: row; /* ボタンを横並びに戻す */
+        gap: 20px; 
+        width: auto;
+    }
+
+    .add-button {
+        width: 140px; /* サイズを調整 */
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    /* --- 完了ボタン (コンテンツの下部・右側に配置) --- */
+    .complete-button {
+        left: 200px; /* サイドバー(180px) + content-area左パディング(20px) */
+        right: 15px; /* content-area右パディング(15px) */
+        width: 120px; 
+        font-size: 16px; 
+        padding: 10px 20px;
+        bottom: 20px;
+        margin-right: 0;
+    }
+}
+
+/* ------------------------------------------------------------- */
+/* CSVエラーデータ編集エリアのスタイル調整 */
+/* ------------------------------------------------------------- */
+
+/* CSVエラーデータ編集エリアのラッパーに追加 */
+.error-edit-container {
+    /* メインテーブルと同じ最大幅を適用 */
+    width: 100%;
+    max-width: 800px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 50px; /* .content-areaの左パディングと同じ値 */
+    padding-right: 50px; /* .content-areaの右パディングと同じ値 */
+}
+
+/* CSVエラーデータ編集の見出し */
+.error-edit-container h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #495666;
+    text-align: left;
+    margin-bottom: 20px; 
+}

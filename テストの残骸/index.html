@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICCスマートキャンパス</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="background-overlay"></div> 
+    
+    <main class="schedule-page">
+        <header class="card-header">
+            <span class="header-title">ICCスマートキャンパス</span>
+            <i class="fas fa-user user-icon"></i>
+        </header>
+
+        <div class="schedule-info-bar">
+            <div class="info-item">
+                <i class="far fa-calendar-alt"></i> 時間割
+            </div>
+            <div class="info-day">11 / 27 (木)</div>
+        </div>
+
+        
+        <div class="lecture-card">
+            <div class="lecture-main-info">
+                <div class="lecture-title-area">
+                    <span class="lecture-subject">C#</span>
+                    <span class="lecture-class">プ実12</span>
+                </div>
+                <div class="lecture-time-area">
+                    <div class="lecture-period">1限 (9:10 ~ 10:40)</div>
+                    
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="detail-csharp">授業詳細 <i class="fas fa-caret-right"></i></button>
+                        <div id="detail-csharp" class="dropdown-content">
+                            <p>今日はC#の基本構文について学びます。 Visual Studioで新しいプロジェクトを作成し、コンソールアプリケーションを作成しましょう。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="materials-csharp">持ってくるもの <i class="fas fa-caret-right"></i></button>
+                        <div id="materials-csharp" class="dropdown-content">
+                            <ul>
+                                <li>ノートパソコン</li>
+                                <li>筆記用具</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lecture-card">
+            <div class="lecture-main-info">
+                <div class="lecture-title-area">
+                    <span class="lecture-subject">選択科目</span>
+                    <span class="lecture-class">マルチ2,3,シス2</span>
+                </div>
+                <div class="lecture-time-area">
+                    <div class="lecture-period">2限 (10:50 ~ 12:20)</div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="detail-elective">授業詳細 <i class="fas fa-caret-right"></i></button>
+                        <div id="detail-elective" class="dropdown-content">
+                            <p>今までにC#の基本構文にて場いつ葉を振り返ります。 Visual Studioで新規部署を作成し、コンソールアプリケーションを利用した、コンソールアプリケーション部門をじましょう。</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="materials-elective">持ってくるもの <i class="fas fa-caret-right"></i></button>
+                        <div id="materials-elective" class="dropdown-content">
+                            <ul>
+                                <li>グループ資料</li>
+                                <li>プレゼンテーション用データ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lecture-card">
+            <div class="lecture-main-info">
+                <div class="lecture-title-area">
+                    <span class="lecture-subject">卒業研究</span>
+                    <span class="lecture-class">マルチ2</span>
+                </div>
+                <div class="lecture-time-area">
+                    <div class="lecture-period">3限 (13:10 ~ 14:40)</div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="detail-grad1">授業詳細 <i class="fas fa-caret-right"></i></button>
+                        <div id="detail-grad1" class="dropdown-content">
+                            <p>中間発表会のフィードバックを行います。次回の発表に向けて改善点を洗い出しましょう。</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="materials-grad1">持ってくるもの <i class="fas fa-caret-right"></i></button>
+                        <div id="materials-grad1" class="dropdown-content">
+                            <ul>
+                                <li>中間発表資料</li>
+                                <li>フィードバックシート</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lecture-card">
+            <div class="lecture-main-info">
+                <div class="lecture-title-area">
+                    <span class="lecture-subject">卒業研究</span>
+                    <span class="lecture-class">マルチ2</span>
+                </div>
+                <div class="lecture-time-area">
+                    <div class="lecture-period">4限 (14:50 ~ 16:20)</div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="detail-grad2">授業詳細 <i class="fas fa-caret-right"></i></button>
+                        <div id="detail-grad2" class="dropdown-content">
+                            <p>個別相談会です。各自の研究テーマに関する疑問点や課題について、先生に相談しましょう。</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-block">
+                        <button class="dropdown-toggle" data-target="materials-grad2">持ってくるもの <i class="fas fa-caret-right"></i></button>
+                        <div id="materials-grad2" class="dropdown-content">
+                            <ul>
+                                <li>研究計画書</li>
+                                <li>相談したい内容をまとめたメモ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+    <footer class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>ホーム</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="far fa-calendar-alt"></i>
+            <span>カレンダー</span>
+        </a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

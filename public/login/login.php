@@ -1,0 +1,36 @@
+<?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// SecurityHelperの読み込み
+require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
+
+// セキュリティヘッダーの適用
+//SecurityHelper::applySecureHeaders();
+?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>ICCスマートキャンパス</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="nofollow, noindex">
+    <link rel="stylesheet" href="css/login_css/style.css"> 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+    <div class="container">   
+        <h1 class="app-name">ICCスマートキャンパス</h1>
+        <h2 class="tagline">学生生活をサポートする<br>タスク管理ツール</h2>
+        <a href="auth.php" class="start-button-link">
+            <button class="start-button">始める</button>
+        </a>
+        <h3 class="feature-title">ICCスマートキャンパスが選ばれる理由</h3>
+        <p class="feature-text">
+            ICCスマートキャンパスを使えば、時間割管理の効率性と学校生活の満足度が向上します
+        </p>
+    </div>
+</body>
+</html>
