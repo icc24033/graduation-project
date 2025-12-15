@@ -3,17 +3,17 @@
 // 先生用ホーム画面
 
 // ----------------------------------------------------
-// ★デバッグ用：エラーを表示させる設定（本番公開時には削除してください）
+// 0. SecurityHelperの読み込み
 // ----------------------------------------------------
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// セキュリティヘッダーの適用
 require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
+
+// セキュリティヘッダーを適用（一番最初に実行）
 SecurityHelper::applySecureHeaders();
 
-// 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
+// ----------------------------------------------------
+// 1. セッション設定（SSO維持のための設定）
+// ----------------------------------------------------
+// ※ SecurityHelper::requireLogin() 内の session_start() より前に設定する必要があります
 
 // 7日間SSOを維持するための設定
 $session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
@@ -33,12 +33,16 @@ session_set_cookie_params([
     'samesite' => 'Lax'
 ]);
 
-// セッション開始とログイン判定を一括で行う
+// ----------------------------------------------------
+// 2. ログインチェック（セッション開始含む）
+// ----------------------------------------------------
+// ここで session_start() が行われ、未ログインならリダイレクトされます
 SecurityHelper::requireLogin();
 
-// セキュリティヘッダーを適用
-SecurityHelper::applySecureHeaders();
 
+// ----------------------------------------------------
+// 3. アプリケーションロジック
+// ----------------------------------------------------
 // クラスファイルを読み込む
 // パスは teacher_home.php の位置から /app/classes/user/ への相対パス
 $base_path = __DIR__ . '/../../app/classes/user/';
@@ -56,7 +60,7 @@ $smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャ�
 // 遷移先ファイルの定義（クラスに渡すため配列化）
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
 $links = [
-    'link_time_table_create' => "../master/timetable_create_menu.html",
+    'link_time_table_create' => "../master/timetable_create/create_timetable.php",
     'link_time_table_edit'   => "time_table_edit.php",
     'link_account_edit'      => "account_edit.php",
     'link_permission_grant'  => "permission_grant.php",
@@ -85,6 +89,7 @@ $function_cards_html = '';
 
 // オブジェクトが生成されていれば、メソッドを呼び出してHTMLを取得
 if ($user_object instanceof User_MasAndTeach) {
+    // ※このHTMLはクラス内で生成されるため、ここではエスケープしません
     $function_cards_html = $user_object->getFunctionCardsHtml($links);
 }
 ?>
@@ -106,17 +111,11 @@ if ($user_object instanceof User_MasAndTeach) {
     <body>
         <header> 
             <div class="user-avatar" id="userAvatar">
-                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+                <img src="<?= SecurityHelper::escapeHtml($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
             </div>
 
-            <!--  ICCスマートキャンパスロゴ -->
-            <!-- 
-                <img src="<.?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="100" height="50">
-                これをヘッダー内の左上に配置する
-            -->
-                <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 20px;">
+            <img src="<?= SecurityHelper::escapeHtml($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 20px;">
             
-                <!-- ユーザーメニューポップアップ (仮)-->
             <div class="user-menu-popup" id="userMenuPopup">
                 <a href="../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
@@ -135,7 +134,7 @@ if ($user_object instanceof User_MasAndTeach) {
                 <?= $function_cards_html ?> 
             </div>
         </div>
-        <!-- ここから仮置きのコード -->
+        
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const userAvatar = document.getElementById('userAvatar');

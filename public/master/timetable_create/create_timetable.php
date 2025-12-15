@@ -1,3 +1,46 @@
+<?php
+// create_timetable.php
+// 時間割り作成画面
+
+// ----------------------------------------------------
+// 0. SecurityHelperの読み込み
+// ----------------------------------------------------
+// ※配置場所が public/master/ などの2階層目を想定しています
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+
+// セキュリティヘッダーを適用（一番最初に実行）
+SecurityHelper::applySecureHeaders();
+
+// ----------------------------------------------------
+// 1. セッション設定（SSO維持のための設定）
+// ----------------------------------------------------
+// teacher_home.php と同様の設定を適用し、セッション切れを防ぎます
+$session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
+
+// サーバー側GCの有効期限を設定
+ini_set('session.gc_maxlifetime', $session_duration);
+
+// クライアント側（ブラウザ）のCookie有効期限を設定
+session_set_cookie_params([
+    'lifetime' => $session_duration,
+    'path' => '/',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', // HTTPSならtrue
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
+// ----------------------------------------------------
+// 2. ログインチェック（セッション開始含む）
+// ----------------------------------------------------
+// 未ログインの場合はログイン画面へリダイレクトされます
+SecurityHelper::requireLogin();
+
+// ----------------------------------------------------
+// 3. ユーザー情報の取得（表示用）
+// ----------------------------------------------------
+// ※必要に応じて、現在ログインしているユーザー名などを取得する処理をここに追加します
+$user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -21,7 +64,6 @@
         <img class="header_icon" src="./images/calendar-plus.png">
     </header>
 
-    <!-- メイン画面 -->
     <div class="app-container">
         <div class="main-section">
 
@@ -29,7 +71,7 @@
             <nav class="sidebar" style="z-index: 50;">
                 <!-- 新規作成ボタン -->
                 <div class="pt-6 pb-4 border-b border-gray-200">
-                    <button id="mainCreateNewBtn" class="sidebar-new-button" disabled>
+                    <button id="mainCreateNewBtn" class="sidebar-new-button">
                         <i class="fa-solid fa-plus mr-2"></i>
                         新規作成
                     </button>
@@ -213,7 +255,7 @@
 
             <div class="modal-button-area">
                 <button id="createCancelBtn" class="modal-cancel-button">キャンセル</button>
-                <button id="createSubmitBtn" class="modal-save-button" disabled>決定</button>
+                <button id="createSubmitBtn" class="modal-save-button" disabled>作成開始</button>
             </div>
         </div>
     </div>
@@ -326,6 +368,22 @@
             const selectedCourse = createCourseSelect.value;
             const isTest = document.getElementById('checkTestMode').checked;
             
+            // --- ★追加: 重複チェック ---
+            const sDate = mainStartDate.value;
+            const eDate = mainEndDate.value;
+            
+            const hasOverlap = savedTimetables.some(record => {
+                if (record.course !== selectedCourse) return false;
+                const recEnd = record.endDate || record.startDate;
+                return (sDate <= recEnd) && (eDate >= record.startDate);
+            });
+
+            if (hasOverlap) {
+                alert('指定された適用期間は、同じコースの既存の時間割と重複しています。\n別の期間を指定するか、既存の時間割を削除してください。');
+                return;  //処理中断
+            }
+            // ---------------------------
+
             // メイン画面反映（コース名）
             const toggle = document.querySelector('#courseDropdownToggle .current-value');
             toggle.textContent = selectedCourse;
@@ -622,7 +680,7 @@
             alert('保存しました。');
         });
 
-        // 削除ボタン (修正済み)
+        // 削除ボタン
         deleteButton.addEventListener('click', () => {
             if (!document.querySelector('input[value="select"]').checked) { alert('削除は「選択」モードで行ってください。'); return; }
             const activeItem = document.querySelector('.saved-item.active');
@@ -644,18 +702,14 @@
 
             if(!confirm('本当に削除しますか？')) return;
 
-            // 1. 配列から削除
             const index = savedTimetables.findIndex(item => item.id === id);
             if (index !== -1) savedTimetables.splice(index, 1);
 
-            // 2. DOMから即座に削除
             activeItem.remove();
-
-            // 3. リスト再描画 (整合性のため)
+            
             const currentMode = document.querySelector('input[name="displayMode"]:checked').value;
             renderSavedList(currentMode);
             
-            // 4. テーブルクリア
             document.querySelectorAll('.timetable-cell').forEach(cell => { cell.innerHTML = ''; cell.classList.remove('is-filled'); });
             document.getElementById('mainCourseDisplay').textContent = "（未選択）";
             
