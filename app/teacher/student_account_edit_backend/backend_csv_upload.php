@@ -68,7 +68,8 @@ $sql_delete_error_table = "DROP TABLE IF EXISTS error_student_table;";
 //↓user_idをVARCHAR型にしてるのは、不正な形式のユーザーIDも格納するため
 $sql_create_error_table = 
     "CREATE TABLE error_student_table (
-    student_id VARCHAR(100) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(100),
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
     error_id INT,
@@ -108,8 +109,10 @@ catch (PDOException $e) {
 
 
 //error_student_tableの格納SQLクエリ
-$sql_insert_error_student = 
-    "INSERT INTO error_student_table VALUES (?, ?, ?, ?, ?);";
+$sql_insert_error_student = "INSERT INTO 
+                                error_student_table (student_id, name, approvalUserAddress, error_id, row_count) 
+                            VALUES 
+                                (?, ?, ?, ?, ?);";
 
 
 //CSVファイルがアップロードされたか確認
@@ -288,9 +291,11 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
 
         if ($error_count > 0) {
             $error_count_flag = true;
+            $csv_error_table_sql = "SELECT * FROM error_student_table;";
         }
         else {
             $error_count_flag = false;
+            $csv_error_table_sql = null;
         }
         
         //データベース接続情報
@@ -324,11 +329,12 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'database_user_pass' => $user_pass,
             'database_options' => $options, 
             'csv_table_student_sql' => $csv_table_student_sql,
-            'course_sql' => $course_sql
+            'course_sql' => $course_sql,
+            'csv_error_table_sql' => $csv_error_table_sql
         ];
 
 
-   }
+    }
     else {
         //echo "CSVファイルを開くことができませんでした。";
     }
