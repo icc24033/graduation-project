@@ -171,7 +171,10 @@ else {
         </main>
     </div>
 
-    <?php if ($status['error_csv'] === true): ?>
+    <?php if ($status['error_csv'] === true): 
+            $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
+            $error_stmt->execute();    
+    ?>
 
     <div class="content-area">
         <div class="error-edit-container">
@@ -197,6 +200,9 @@ else {
                 <div class="column-course">
                     <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
                 </div>
+                <div class="column-mail-address">
+                    <input type="text" name="mail-address" placeholder="メールアドレス">
+                </div> 
             </div>
         </div>
         <button class="add-button" id="deleteActionButton">編集完了</button>
