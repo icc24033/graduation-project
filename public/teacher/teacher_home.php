@@ -2,6 +2,13 @@
 // teacher_home.php
 // 先生用ホーム画面
 
+// ----------------------------------------------------
+// ★デバッグ用：エラーを表示させる設定（本番公開時には削除してください）
+// ----------------------------------------------------
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // セキュリティヘッダーの適用
 require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
