@@ -1,5 +1,11 @@
 <?php
 
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
 // セッション開始
@@ -113,7 +119,6 @@ else {
             </nav>
 
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition_edit.php" method="post">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
@@ -162,7 +167,6 @@ else {
                         <button class="add-button">追加人数入力</button>
                     </div>
                     <button class="complete-button">完了</button>
-                </form>
 
                 <?php elseif ($status['backend'] === 'csv_upload' && $status['error_csv'] === false): ?>
                     <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csvdata_upload.php" method="post">
