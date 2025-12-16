@@ -263,7 +263,7 @@
             createModal.classList.remove('hidden');
             document.body.classList.add('modal-open');
             
-            // 初期化
+            // 初期化　要検討事項として処理
             createGradeSelect.value = "";
             createCourseSelect.innerHTML = '<option value="">先に学年を選択してください</option>';
             createCourseSelect.disabled = true;
@@ -282,7 +282,7 @@
         //  新規作成モーダルロジック
         // ==========================
         
-        // 学年選択 -> コース絞り込み
+        // 学年選択 -> コース絞り込み 要検討事項として処理
         createGradeSelect.addEventListener('change', function() {
             const grade = this.value;
             createCourseSelect.innerHTML = '<option value="">コースを選択してください</option>';
@@ -307,9 +307,11 @@
             const isCsv = checkCsv.checked;
             const hasFile = document.getElementById('csvFile').files.length > 0;
 
+            // 必須項目のバリデーションチェック
             let isValid = grade !== "" && course !== "";
             if (isCsv && !hasFile) isValid = false;
 
+            // isValidが上の条件式と合致していたら、disable(押すことができません)となる
             createSubmitBtn.disabled = !isValid;
         }
         
