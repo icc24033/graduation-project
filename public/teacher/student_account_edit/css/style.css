@@ -90,10 +90,10 @@
 /* アクティブなnav-item内のリンクの背景色 */
 .nav-item.is-active a {
     /* 例: 目立たせるために濃い背景色を設定 */
-    background-color: #495666; /* 青色 */
+   background-color: #CFD5DF; /* 青色 */
     
     /* テキストの色を白に変更して、背景色とのコントラストを確保 */
-    color: white; 
+    /*color: white;*/ 
 }
 /*************************************************************************************/
 
@@ -233,6 +233,10 @@
     transition: background-color 0.5s;
 }
 
+.download-icon {
+    color: #fff;
+}
+
 /*************************************************************************************/
 /* input[type="file"] を完全に非表示にして、「ファイルが選択されていません」の文字をなくす */
 #csvFile {
@@ -245,10 +249,6 @@
     z-index: -1; /* 他の要素の下に配置 */
 }
 /*************************************************************************************/
-
-.download-icon {
-    color: #fff;
-}
 
 .download-button:hover,.download-icon:hover {
     background-color: #CFD5DF;/* ホバー色グレー */
@@ -321,7 +321,7 @@
 
 /* JS連携: チェックが付いた行のスタイル */
 .table-row.is-checked {
-    /* 修正箇所: チェックが付いた時の行の背景色をベースカラーの #F0F8FF に変更 */
+    /* チェックが付いた時の行の背景色をベースカラーの #F0F8FF に変更 */
     background-color: #F0F8FF; 
     padding-left: 0; 
 }
@@ -351,7 +351,7 @@
 .column-course {
     padding:0 10px;
     width: 280px;
-}
+} 
 
 /* 入力フィールドのスタイル */
 .table-row input[type="text"] {
@@ -750,4 +750,28 @@
         bottom: 20px;
         margin-right: 0;
     }
+}
+
+/* ------------------------------------------------------------- */
+/* CSVエラーデータ編集エリアのスタイル調整 */
+/* ------------------------------------------------------------- */
+
+/* CSVエラーデータ編集エリアのラッパーに追加 */
+.error-edit-container {
+    /* メインテーブルと同じ最大幅を適用 */
+    width: 100%;
+    max-width: 800px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 50px; /* .content-areaの左パディングと同じ値 */
+    padding-right: 50px; /* .content-areaの右パディングと同じ値 */
+}
+
+/* CSVエラーデータ編集の見出し */
+.error-edit-container h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #495666;
+    text-align: left;
+    margin-bottom: 20px; 
 }

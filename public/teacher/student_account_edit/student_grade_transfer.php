@@ -93,7 +93,7 @@ catch (PDOException $e) {
             <nav class="sidebar">
                 <ul>
                 <li class="nav-item is-group-label">年度</li> 
-                <li class="nav-item has-dropdown">
+                    <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
                             <span class="current-value">20<?php echo $status['current_year']?>年度</span>
                         </button>
@@ -108,6 +108,15 @@ catch (PDOException $e) {
                                     </a>
                                 </li>
                             <?php endforeach; ?>
+                        </ul>
+                        <ul class="dropdown-menu" id="gradeDropdownMenu">
+                            <?php for ($grade = 1; $grade <= 2; $grade++): ?>
+                                <li>
+                                    <a href="#" data-selected-grade-center="<?php echo $grade; ?>">
+                                        <?php echo $grade; ?>年
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
                         </ul>
                     </li>
             
@@ -179,45 +188,37 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                 </div>
                                 <div class="column-student-id">
-                                    <select 
-                                        name="grade_changes[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
-                                        class="course-display grade-select" 
-                                        style="width: 100%; text-align: center;"> 
-                                        
-                                        <?php 
-                                        // 仮に最大学年を 3 と設定します。
-                                        $max_grade = 3;
-                                        
+                                    <?php 
                                         // 現在の学年を計算
-                                        // 注意：$selected_year と $current_year の値が同じなら結果は常に 1 になります。
-                                        // 本当に表示したい学年計算ロジック（例：入学年度と現在の年度の差）に変更してください。
-                                        $current_grade = 1 + ($selected_year - $current_year);
-                                        
-                                        for ($grade = 1; $grade <= $max_grade; $grade++): 
-                                        ?>
-                                            <option 
-                                                value="<?php echo $grade; ?>" 
-                                                <?php echo ($grade == $current_grade) ? 'selected' : ''; ?>>
-                                                <?php echo $grade; ?>年
-                                            </option>
-                                        <?php endfor; ?>
-                                    </select>
+                                        // 注意: $selected_year と $current_year の値が同じなら結果は常に 1 になります。
+                                        $current_grade = $student_row['grade'];
+                                        $initial_display = $current_grade . '年'; 
+                                        // 許可された最大学年。この値を基準に初期値を決定します。
+                                        $max_grade = 2; 
+
+                                        // 初期値が範囲外の場合、表示を調整する
+                                        if ($current_grade < 1 || $current_grade > $max_grade) {
+                                            $initial_display = '学年不明'; 
+                                            $current_grade = 0; // 送信しない値
+                                        }
+                                    ?>
+                                    <a href="#" class="course-display" 
+                                        data-grade-display
+                                        data-dropdown-for="gradeDropdownMenu" 
+                                        data-current-grade-value="<?php echo htmlspecialchars($student_row['grade']); ?>">
+                                        <?php echo htmlspecialchars($initial_display); ?>
+                                    </a>
+                                    <input type="hidden" 
+                                        name="grade_changes[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
+                                        value="<?php echo htmlspecialchars($current_grade); ?>"
+                                        class="grade-hidden-input">
                                 </div>
 
                                 <div class="column-name">
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
-                                    <a href="#" class="course-display" 
-                                        data-course-name-display 
-                                        data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
-                                        <?php echo htmlspecialchars($student_row['course_name']);?>
-                                    </a>
-                                <input type="hidden" 
-                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
-                                    value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
-                                    class="course-hidden-input">
+                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
                                 </div>
                             </div>
 

@@ -1,4 +1,3 @@
-
 // ----------------------------------------------------------------------
 // ページのHTMLが完全に読み込まれた後に実行されるメインロジック
 // ----------------------------------------------------------------------
@@ -6,8 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------------------------------------------------
     // ユーティリティ: カスタムアラート / モーダル
-    // alert() の代替として、エラーメッセージを表示するためのシンプルなカスタムモーダルが必要です。
-    // HTML内にID "customAlertModal" と "customAlertMessage" を持つ要素が必要です。
     // ----------------------------------------------------------------------
     const customAlertModal = document.getElementById('customAlertModal');
     const customAlertMessage = document.getElementById('customAlertMessage');
@@ -18,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customAlertMessage.textContent = message;
             customAlertModal.style.display = 'flex';
         } else {
-            // カスタムアラートが未定義の場合のフォールバック (Canvasでは避けるべき)
+            // カスタムアラートが未定義の場合のフォールバック
             console.error('カスタムアラートのHTML要素が見つかりません。');
         }
     };
@@ -40,16 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
     const dropdownMenus = document.querySelectorAll('.dropdown-menu');
-    const tableCourseInputs = document.querySelectorAll('.course-display[data-dropdown-for]'); 
+    const tableCourseInputs = document.querySelectorAll('.course-display[data-dropdown-for]:not([data-grade-display])'); 
+    
+    // tableGradeInputs の再定義: data-grade-display を持つものを選択
+    const tableGradeInputs = document.querySelectorAll('.course-display[data-grade-display]'); 
 
-    // ★ 修正: トグルボタンの要素をここで定義
     const courseToggle = document.getElementById('courseDropdownToggle');
     const yearToggle = document.getElementById('yearDropdownToggle');
 
     
     let currentOpenToggle = null;
-    let currentTableInput = null; 
-
+    let currentTableInput = null; // コース用
+    let currentGradeInput = null; // 学年用
+    
     /**
      * すべてのドロップダウンを閉じる関数
      */
@@ -69,7 +69,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const menu = document.getElementById(menuId);
             if (menu) {
                 menu.classList.remove('is-open');
-                // 位置指定をリセット
+                menu.style.left = '';
+                menu.style.top = '';
+                menu.style.position = ''; 
+            }
+        }
+        // 3. テーブルの学年ドロップダウンを閉じる
+        if (currentGradeInput) {
+            currentGradeInput.classList.remove('is-open-course-dropdown');
+            
+            const menuId = currentGradeInput.getAttribute('data-dropdown-for'); 
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                menu.classList.remove('is-open');
                 menu.style.left = '';
                 menu.style.top = '';
                 menu.style.position = ''; 
@@ -78,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 追跡変数をリセット
         currentOpenToggle = null;
-        currentOpenMenu = null;
         currentTableInput = null; 
+        currentGradeInput = null; 
     };
 
     // --- 1-1. サイドバードロップダウンの開閉制御 ---
@@ -104,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     menu.style.position = 'fixed'; 
 
                     currentOpenToggle = toggle;
-                    currentOpenMenu = menu;
                 }
             }
             event.stopPropagation(); 
@@ -112,24 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- 1-2. テーブルのコースドロップダウン開閉制御 ---
-    // 初期ロード時に存在する要素にイベントを設定する関数
     const setupInitialCourseDropdowns = () => {
         tableCourseInputs.forEach(setupCourseDropdown);
     };
 
-    /**
-     * コースドロップダウンにイベントリスナーを設定するヘルパー関数
-     * @param {HTMLElement} input - コース表示要素 (.course-display)
-     */
     const setupCourseDropdown = (input) => {
         input.addEventListener('click', (event) => {
-            const menuId = input.getAttribute('data-dropdown-for');
+            const menuId = input.getAttribute('data-dropdown-for'); 
             const menu = document.getElementById(menuId);
 
             if (menu) {
                 const isOpened = input.classList.contains('is-open-course-dropdown');
                 
-                closeAllDropdowns(); // まず全て閉じる
+                closeAllDropdowns(); 
 
                 if (!isOpened) { 
                     input.classList.add('is-open-course-dropdown'); 
@@ -138,18 +144,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const rect = input.getBoundingClientRect();
                     
-                    // テーブルの入力フィールドの右側 + 5px、入力フィールドの下に配置
                     menu.style.left = `${rect.right + 5}px`;
                     menu.style.top = `${rect.top + rect.height}px`;
                     
-                    currentTableInput = input; // 現在のテーブル入力を設定
+                    currentTableInput = input; // コースドロップダウンなので currentTableInput を設定
                 }
             }
             event.stopPropagation(); 
         });
     };
 
-    setupInitialCourseDropdowns(); // ページロード時に既存の要素に設定
+    // --- 1-3. テーブルの学年ドロップダウン開閉制御 ---
+    const setupGradeDropdown = (input) => {
+        input.addEventListener('click', (event) => {
+            const menuId = input.getAttribute('data-dropdown-for'); // 'gradeDropdownMenu'
+            const menu = document.getElementById(menuId);
+
+            if (menu) {
+                const isOpened = input.classList.contains('is-open-course-dropdown');
+                
+                closeAllDropdowns(); 
+
+                if (!isOpened) { 
+                    input.classList.add('is-open-course-dropdown'); 
+                    menu.classList.add('is-open'); 
+                    menu.style.position = 'fixed'; 
+
+                    const rect = input.getBoundingClientRect();
+                    
+                    menu.style.left = `${rect.right + 5}px`;
+                    menu.style.top = `${rect.top + rect.height}px`;
+                    
+                    currentGradeInput = input; // 学年ドロップダウンなので currentGradeInput を設定
+                }
+            }
+            event.stopPropagation(); 
+        });
+    };
+
+    // 初期ロード時に存在する要素にイベントを設定
+    const setupInitialGradeDropdowns = () => {
+        tableGradeInputs.forEach(setupGradeDropdown);
+    };
+
+    setupInitialCourseDropdowns(); 
+    setupInitialGradeDropdowns(); 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -157,40 +196,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // ユーティリティ: 非同期通信でコースIDをPHPに送信し、生徒リストを更新する
     // ----------------------------------------------------------------------
 
-    // ユーティリティ: 非同期通信でコースIDと年度をPHPに送信し、生徒リストを更新する
-    // (ここではリダイレクト処理として実装)
     const redirectToStudentAccountPage = (courseId, year, page) => {
         if (!courseId || !year || !page) {
             console.error('コースIDまたは年度が未定義です。');
             return;
         }
 
+        const baseUrl = '../../../app/teacher/student_account_edit_backend/';
+        let url = '';
+
         if (page === 'student_edit_course') {
-            // student_edit_course.php へリダイレクト
-            const url = '../../../app/teacher/student_account_edit_backend/backend_student_course.php'; 
-            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
-            return;
+            url = baseUrl + 'backend_student_course.php'; 
         }
         else if (page === 'student_delete') {
-            // student_delete.php へリダイレクト
-            const url = '../../../app/teacher/student_account_edit_backend/backend_student_delete.php'; 
-            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
-            return;
+            url = baseUrl + 'backend_student_delete.php'; 
         }
         else if (page === 'student_grade_transfer') {
-            // student_grade_transfer.php へリダイレクト
-            const url = '../../../app/teacher/student_account_edit_backend/backend_student_grade_transfer.php'; 
-            window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
-            return;
+            url = baseUrl + 'backend_student_grade_transfer.php'; 
         }
         else {
-            window.location.href = '../../../app/teacher/student_account_edit_backend/backend_student_grade_csv_edit.php';
-            return;
+            url = baseUrl + 'backend_student_grade_csv_edit.php';
         }
+
+        window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;
     };
 
 
-    // --- 2. サイドバーのメニュー項目選択処理 ---
+    // --- 2. ドロップダウンメニュー項目選択処理 (★ 修正) ---
     dropdownMenus.forEach(menu => {
         const links = menu.querySelectorAll('a');
         links.forEach(link => {
@@ -200,21 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const selectedValue = e.target.textContent;
             
-                // ★ 修正: トグルボタンから現在の値を取得
-                // ※ トグルボタンのdata属性をHTML/PHP側で設定していることが前提
+                // トグルボタンから現在の値を取得
                 let finalCourseId = courseToggle ? courseToggle.getAttribute('data-current-course') : null;
                 let finalYear = yearToggle ? yearToggle.getAttribute('data-current-year') : null;
                 let finalPage = null
-                let shouldRedirectSide = false; // サイドバーが変更された場合にリダイレクトするフラグ
+                let shouldRedirectSide = false; 
 
-
-                // A. サイドバーのドロップダウンだった場合 (sidebarのトグルボタンがクリックされて開いたメニュー)
-                if (currentOpenToggle) {
+                // A. サイドバーのドロップダウンがアクティブな場合 (最優先)
+                // クリックされたメニューがサイドバーのトグルで開いたものであり、かつトグルがアクティブであるか
+                if (currentOpenToggle && menu.contains(e.target)) {
                     const currentValueSpan = currentOpenToggle.querySelector('.current-value');
                     if (currentValueSpan) {
                         currentValueSpan.textContent = selectedValue; // 選択された値を表示に反映
                     }
-            
+                
                     // 1. コースドロップダウンが選択された場合
                     if (currentOpenToggle.id === 'courseDropdownToggle') {
                         const selectedCourseId = e.target.getAttribute('data-current-course');
@@ -224,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             finalCourseId = selectedCourseId;
                             finalYear = selectedYear;
                             finalPage = selectedPage;
-                            // ★ 修正: courseToggle ではなく currentOpenToggle を使用
+                            currentOpenToggle.setAttribute('data-current-course', selectedCourseId); // トグルボタンのdata属性を更新
                             shouldRedirectSide = true; 
                         }
                     } 
@@ -237,47 +268,81 @@ document.addEventListener('DOMContentLoaded', () => {
                             finalYear = selectedYear;
                             finalCourseId = selectedCourseId;
                             finalPage = selectedPage;
-                            
+                            currentOpenToggle.setAttribute('data-current-year', selectedYear); // トグルボタンのdata属性を更新
                             shouldRedirectSide = true; 
                         }
                     }
+
+                    // ★ リダイレクトが必要な場合は、ここで処理を終了し closeAllDropdowns() は実行しない
+                    if (shouldRedirectSide) {
+                        redirectToStudentAccountPage(finalCourseId, finalYear, finalPage);
+                        return; 
+                    }
                 }
-                // B. テーブルのコースドロップダウンだった場合 
-                else if (currentTableInput) {
-    
-                    // ここでローカル変数として newCourseId を定義し、e.targetから直接取得します。
-                    const newCourseId = e.target.getAttribute('data-selected-course-center');
-                
-                    // 1. 表示用のSPANを更新
-                    currentTableInput.textContent = selectedValue;
-                    currentTableInput.setAttribute('data-selected-course-center', newCourseId); 
-                    
-                    // 2. 隠し入力フィールドを特定し、値を更新
-                    const currentRow = currentTableInput.closest('.table-row');
-                    if (currentRow) {
-                        const hiddenInput = currentRow.querySelector('.course-hidden-input');
-                        if (hiddenInput) {
-                            // 🌟 最重要：POSTで送信される値を更新！
-                            hiddenInput.value = newCourseId; 
+                // B. テーブル内のドロップダウンがアクティブな場合
+                // クリックされたメニューが、開いているテーブル入力要素に対応しているか
+                else if ((currentTableInput || currentGradeInput) && menu.contains(e.target)) {
+
+                    // アクティブな要素がどちらか特定
+                    const activeInput = currentTableInput || currentGradeInput;
+                    const menuId = activeInput.getAttribute('data-dropdown-for'); 
+
+                    // 1. コースドロップダウンが選択された場合
+                    if (menuId === 'courseDropdownMenu') {
+                        const newCourseId = e.target.getAttribute('data-selected-course-center');
+                        
+                        // 表示用のSPANを更新
+                        activeInput.textContent = selectedValue;
+                        activeInput.setAttribute('data-selected-course-center', newCourseId); 
+                        
+                        // 隠し入力フィールド (course-hidden-input) を更新
+                        const currentRow = activeInput.closest('.table-row');
+                        if (currentRow) {
+                            const hiddenInput = currentRow.querySelector('.course-hidden-input');
+                            if (hiddenInput) {
+                                hiddenInput.value = newCourseId; 
+                            }
+                        }
+                    } 
+                    // 2. 学年ドロップダウンが選択された場合
+                    else if (menuId === 'gradeDropdownMenu') {
+                        const newGradeValue = e.target.getAttribute('data-selected-grade-center');
+                        const newGradeDisplay = e.target.textContent;
+
+                        // 表示用のaタグを更新
+                        activeInput.textContent = newGradeDisplay;
+                        activeInput.setAttribute('data-current-grade-value', newGradeValue);
+                        
+                        // 隠し入力フィールド (grade-hidden-input) を更新
+                        const currentRow = activeInput.closest('.table-row');
+                        if (currentRow) {
+                            const hiddenInput = currentRow.querySelector('.grade-hidden-input');
+                            if (hiddenInput) {
+                                hiddenInput.value = newGradeValue; 
+                            }
                         }
                     }
                 }
-            
-                closeAllDropdowns(); // ドロップダウンを閉じる
-
-                // 最後にリダイレクト（ページ全体を再読み込み）を実行
-                if (shouldRedirectSide) {
-                    // コース選択、年度選択のどちらの場合も、現在選択されている両方の値でリダイレクト
-                    redirectToStudentAccountPage(finalCourseId, finalYear, finalPage);
-                }
+                
+                // リダイレクトしない場合のみ、ドロップダウンを閉じる
+                closeAllDropdowns(); 
             });
         });
     });
 
-    // --- 3. どこかをクリックしたらメニューを閉じる ---
+    // --- 3. どこかをクリックしたらメニューを閉じる (★ 修正) ---
     document.addEventListener('click', (event) => {
-        if (!event.target.closest('.has-dropdown') && !event.target.closest('.course-display')) {
-            closeAllDropdowns();
+        // クリックされた要素が、
+        // 1. サイドバーのトグル (.dropdown-toggle)
+        // 2. テーブルのドロップダウン表示要素 (.course-display)
+        // 3. ドロップダウンメニューそのもの (.dropdown-menu)
+        // のいずれでもない場合にのみ、ドロップダウンを閉じる
+        if (
+            !event.target.closest('.dropdown-toggle') && 
+            !event.target.closest('.course-display') &&
+            !event.target.closest('.dropdown-menu')
+        ) {
+             closeAllDropdowns();
         }
     });
 
@@ -293,8 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteCountDisplay = modal ? modal.querySelector('.modal-body p') : null;
         
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        // rowCheckboxes を動的に再取得する必要がある場合があるが、ここでは初期のものを利用
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 
         // フォーム要素とhidden inputのコンテナを取得
@@ -307,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedStudents = [];
                 
                 // チェックされた行のデータを取得
-                document.querySelectorAll('.row-checkbox').forEach(checkbox => { // 常に最新のチェックボックスを取得
+                document.querySelectorAll('.row-checkbox').forEach(checkbox => { 
                     if (checkbox.checked) {
                         const row = checkbox.closest('.table-row');
                         
@@ -438,7 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // 個別チェックボックスのイベントリスナーを全て再設定
-        // 新しい行が追加される可能性があるため、document.querySelectorAllを毎回使用する
         document.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', () => {
                 updateRowHighlight(checkbox);
@@ -451,7 +513,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirmDeleteButton && modal) {
             confirmDeleteButton.addEventListener('click', () => {
                 console.log('--- 削除を実行しました。 (※実際にはこの後にサーバー処理が必要です) ---');
-                // 実際にはFetch APIでサーバーにリクエストを送る
                 
                 // 成功時の処理: モーダルを閉じる
                 modal.style.display = 'none';
@@ -536,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. モーダル表示ロジック
         if (addCountButton && modal) {
             addCountButton.addEventListener('click', () => {
-                modal.style.display = 'flex'; // is-open-modal クラスの代わりに style.display を使用
+                modal.style.display = 'flex'; 
                 countInput.focus(); 
             });
         }
@@ -563,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButton.addEventListener('click', () => {
                 const count = parseInt(countInput.value, 10);
                 
-                if (isNaN(count) || count < 1 || count > 100) { // 上限を設定
+                if (isNaN(count) || count < 1 || count > 100) { 
                     showCustomAlert('有効な人数（1～100）を入力してください。');
                     return;
                 }

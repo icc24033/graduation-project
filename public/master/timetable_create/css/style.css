@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Noto Sans JP', sans-serif;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     color: #222;
     font-size: 16px;
     font-weight: 400;
@@ -29,7 +29,7 @@ ol {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f9f9f9;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -134,7 +134,7 @@ ol {
     padding: 8px 15px;
     text-align: left;
     border: 1px solid #CFD5DF;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     cursor: pointer;
     transition: background-color 0.3s;
     position: relative;
@@ -175,7 +175,7 @@ ol {
 .dropdown-menu {
     position: fixed;
     width: 250px;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
     z-index: 1001;
     display: none;
@@ -291,7 +291,7 @@ ol {
     flex: 1;
     padding: 2.5rem;
     overflow: auto;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     position: relative;
     margin-left: 300px;
     width: calc(100% - 300px);
@@ -310,7 +310,7 @@ ol {
     border: 1px solid #CFD5DF;
     border-radius: 0.5rem;
     padding: 1rem;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     position: relative;
 }
 
@@ -318,7 +318,7 @@ ol {
     position: absolute;
     top: -0.75rem;
     left: 1rem;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     padding: 0 0.5rem;
     font-weight: 700;
     font-size: 0.875rem;
@@ -336,7 +336,7 @@ ol {
     padding: 0.25rem 0.5rem;
     color: #495666;
     outline: none;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
 }
 
 .date-input:focus {
@@ -424,7 +424,7 @@ ol {
 }
 
 .timetable-cell {
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     transition: background-color 0.2s;
     cursor: pointer;
     padding: 0.5rem;
@@ -511,7 +511,7 @@ ol {
 }
 
 .delete-button {
-    background-color: #ef4444;
+    background-color: #FF5F5F;
     color: #fff;
     width: 180px;
     padding: 15px 30px;
@@ -551,7 +551,7 @@ body.modal-open {
 
 /* 編集モーダル */
 .modal-content {
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     border-radius: 0.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     width: 500px;
@@ -561,7 +561,7 @@ body.modal-open {
 
 /* 新規作成モーダル */
 .create-modal-content {
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     border-radius: 0.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     width: 600px;
@@ -621,7 +621,7 @@ body.modal-open {
     border-radius: 0.25rem;
     padding: 0.5rem 0.75rem;
     outline: none;
-    background-color: #f3f3f3;
+    background-color: #f9f9f9;
     appearance: none;
     cursor: pointer;
     color: #333;

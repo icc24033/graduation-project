@@ -106,7 +106,7 @@ else {
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
                         <label for="csvFile" class="download-button">
-                            <span class="material-symbols-outlined">upload</span> 名簿ダウンロード
+                        <span class="material-symbols-outlined download-icon">download</span> 名簿ダウンロード
                         </label>
                     </div>
                 </form>
@@ -171,44 +171,49 @@ else {
         </main>
     </div>
 
-
-    
-
-    <?php if ($status['error_csv'] === true): ?>
-
-
-        
-
-    <!--    ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓何かいい感じにしてほしいです　タグは<h3>じゃなくても全然〇です↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-    -->     
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-
-    
-
+    <?php if ($status['error_csv'] === true): 
+        $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
+        $error_stmt->execute();    
+    ?>
 
     <div class="content-area">
+        <div class="error-edit-container">
+        <h3>CSVエラーデータ編集</h3>
+        <div>
         <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">
                 <div class="table-header">
                 <div class="column-check"></div> <div class="column-student-id">学生番号</div>
                 <div class="column-name">氏名</div>
-                <div class="column-course">コース</div>
+                <div class="column-course">メールアドレス</div>
             </div>
-                    
+            <?php while ($error_row = $error_stmt->fetch()): ?>
             <div class="table-row">
                 <div class="column-check">
                 </div> 
                 <div class="column-student-id">
-                    <input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>>
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][student_id]" 
+                           value=<?php echo htmlspecialchars($error_row['student_id']); ?>>
                 </div> 
                 <div class="column-name">
-                    <input type="text" name="name" placeholder="氏名">
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][name]" 
+                           value=<?php echo htmlspecialchars($error_row['name']); ?>>
                 </div> 
                 <div class="column-course">
-                    <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][approvalUserAddress]" 
+                           value=<?php echo htmlspecialchars($error_row['approvalUserAddress']); ?>>
                 </div>
+                <input type="hidden" 
+                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][id]" 
+                       value=<?php echo htmlspecialchars($error_row['id']); ?>>
+                <input type="hidden" 
+                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][course_id]" 
+                       value=<?php echo htmlspecialchars($error_row['course_id']); ?>>
             </div>
+            <?php endwhile; ?>
         </div>
         <button class="add-button" id="deleteActionButton">編集完了</button>
         </form>
