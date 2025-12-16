@@ -1,3 +1,16 @@
+<?php
+// 必要なファイルの読み込み
+// 現在の edit_timetable.php (public/teacher/timetable_change/) からの相対パス
+require_once '../../../app/classes/security/SecurityHelper.php';
+
+// セキュリティヘッダーの適用（X-Frame-Options, X-XSS-Protectionなど）
+SecurityHelper::applySecureHeaders();
+
+// セッションの開始（もしログインチェック等も行うならここで実施）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -28,6 +41,7 @@
                     <div>
                         <div class="mb-3">
                             <label class="radio-group-label">
+                                <!-- ラジオボタン1（コース選択） -->
                                 <input type="radio" name="displayMode" value="select" checked onchange="changeDisplayMode('select')">
                                 <span class="font-bold">選択</span>
                             </label>
@@ -36,6 +50,7 @@
                                 <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
                                     <span class="current-value">システムデザインコース</span>
                                 </button>
+                                <!-- コースドロップダウンメニュー -->
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
                                     <li><a href="#">システムデザインコース</a></li>
                                     <li><a href="#">Webクリエイタコース</a></li>
@@ -46,6 +61,7 @@
                         </div>
                         <div class="mb-2">
                             <label class="radio-group-label">
+                                <!-- ラジオボタン2（全コースの表示）-->
                                 <input type="radio" name="displayMode" value="all" onchange="changeDisplayMode('all')">
                                 <span>すべてのコース</span>
                             </label>
@@ -196,6 +212,13 @@
 
     <script>
         // ==================== データ管理 ====================
+        // データをデータベースから取得して、データ管理に格納する。
+        // それに伴って、データベースに接続して、該当するデータを取得するためのphpファイルを作成する必要がある。
+        // データ取得php
+        // コースごとに、現在と次回反映予定の時間割を取得する。
+        // Json形式でデータを格納していく
+        // 変更予定の時間割を、振り分けたIDごとに用意しているchanges属性に格納し、データベーステーブルに格納していく。
+
         let savedTimetables = [
             {
                 id: 1,
@@ -443,6 +466,15 @@
 
         // ==================== UI更新関数 ====================
         
+
+        /**
+         * 関数 changeDisplayMode
+         * 概要：ラジオボタンで選択した表示の内容を切り替える関数
+         * 引数：mode
+         * mode：
+         * 'select'、'all'のどちらかを受け取る
+         * 'select'の時は、
+         */
         function changeDisplayMode(mode) {
             const toggleBtn = document.getElementById('courseDropdownToggle');
             if (mode === 'select') {
