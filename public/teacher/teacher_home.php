@@ -61,7 +61,7 @@ $smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャ�
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
 $links = [
     'link_time_table_create' => "../master/timetable_create/create_timetable.php",
-    'link_time_table_edit'   => "time_table_edit.php",
+    'link_time_table_edit'   => "timetable_change/edit_timetable.php",
     'link_account_edit'      => "account_edit.php",
     'link_permission_grant'  => "permission_grant.php",
     'link_notification_edit' => "notification_edit.php",
