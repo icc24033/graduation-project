@@ -555,6 +555,7 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         const btnSave = document.getElementById('btnSave');
         let currentCell = null;
 
+        
         document.querySelectorAll('.timetable-cell').forEach(cell => {
             cell.addEventListener('click', function() {
                 if (!document.querySelector('input[value="select"]').checked) {
