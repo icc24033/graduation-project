@@ -14,7 +14,6 @@ define('DB_PASS', $config['db_pass']);
 
 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
-
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -36,7 +35,12 @@ $csv_table_student_sql = ("SELECT * FROM csv_table;");
 $insert_student_sql = ("INSERT IGNORE INTO student (student_id, student_mail, student_name, course_id, grade) VALUES (?, ?, ?, ?, ?);");
 
 //csv_tableから取得した学生情報をstudent_login_tableに格納するSQLクエリ
-$insert_student_login_sql = ("INSERT INTO student_login_table (id, student_id, user_grade) VALUES (?, ?, 'student@icc_ac.jp');");
+$insert_student_login_sql = ("INSERT INTO 
+                                student_login_table (id, student_id, user_grade) 
+                              SELECT 
+                                ?, ?, 'student@icc_ac.jp' 
+                              WHERE NOT EXISTS 
+                                (SELECT 1 FROM student_login_table WHERE student_id = ?);");
 
 //student_login_tableに格納してある値の数を取得するSQLクエリ
 $student_login_count_sql = ("SELECT COUNT(*) FROM student_login_table;");
@@ -78,6 +82,7 @@ try {
         $stmt_insert_login = $db->prepare($insert_student_login_sql);
         $stmt_insert_login->execute([
             $total_login_users,
+            $row['student_id'],
             $row['student_id']
         ]);
 
