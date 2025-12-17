@@ -7,29 +7,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. 削除対象の学生IDの配列 (JavaScriptで 'delete_student_id[]' と定義)
     $delete_student_id = $_POST['delete_student_id'] ?? []; 
     
-    
-    //データベース接続情報
-    $host = 'localhost';
-    $db_name = 'icc_smart_campus';
-    $user_name = 'root';
-    $user_pass = 'root';
-    $charset = 'utf8mb4';
+    $config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-    $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+    $config = require $config_path;
 
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
+    define('DB_HOST', $config['db_host']);
+    define('DB_NAME', $config['db_name']);
+    define('DB_USER', $config['db_user']);
+    define('DB_PASS', $config['db_pass']);
+
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
     // POSTで受け取った受け取ったdelete_student_idｗも元にテーブル内の学生情報を削除するSQLクエリ
     try {
-        $pdo = new PDO($dsn, $user_name, $user_pass, $options);
+        //データベース接続
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
         
+        //studentテーブルの削除
         $student_delete_sql = ("DELETE FROM student WHERE student_id = ?;");
         $stmt = $pdo->prepare($student_delete_sql);
+
+        //student_loginテーブルの削除
+        $student_login_delete_sql = ("DELETE FROM student_login_table WHERE student_id = ?;");
+        $stmt_login = $pdo->prepare($student_login_delete_sql);
+
+
         foreach ($delete_student_id as $student_id) {
+            // delete_student_idのstudent_idに対応するレコードを削除
+            $stmt_login->execute([$student_id]);
+
+            // studentテーブルの削除を実行
             $stmt->execute([$student_id]);
         }
     } catch (PDOException $e) {
@@ -73,9 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['student_account'] = [
         'success' => true,
         'before' => 'teacher_home',
-        'database_connection' => $dsn,
-        'database_user_name' => $user_name,
-        'database_user_pass' => $user_pass,
         'database_options' => $options,
         'course_sql' => $course_sql,
         'course_id' => $received_course_id,

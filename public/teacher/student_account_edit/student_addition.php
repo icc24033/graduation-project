@@ -11,6 +11,17 @@ error_reporting(E_ALL);
 // セッション開始
 session_start();
 
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
 // セッションから処理結果を取得
 $status = $_SESSION['student_account'] ?? null;
 
@@ -20,18 +31,6 @@ if ($status['backend'] === 'student_addition') {
     $current_year = (int)substr($current_year, -2); // 下2桁を取得
 
     try {
-        
-        $config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-        $config = require $config_path;
-
-        define('DB_HOST', $config['db_host']);
-        define('DB_NAME', $config['db_name']);
-        define('DB_USER', $config['db_user']);
-        define('DB_PASS', $config['db_pass']);
-
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-        
         //データベース接続
         $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
@@ -51,13 +50,7 @@ if ($status['backend'] === 'student_addition') {
 else if ($status['backend'] === 'csv_upload') {
     try {
         //データベース接続
-        $pdo = 
-            new PDO(
-                $status['database_connection'],
-                $status['database_user_name'],
-                $status['database_user_pass'],
-                $status['database_options']
-            );
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // csv_tableに格納されている今年度の学生の取得
         $stmt_csv_table = $pdo->prepare($status['csv_table_student_sql']);

@@ -3,6 +3,18 @@
 // セッション開始
 session_start();
 
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
+
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -36,7 +48,9 @@ $delete_csv_table_sql = ("DELETE FROM csv_table WHERE student_id = ?;");
 $count_csv_table_sql = ("SELECT COUNT(*) as count FROM csv_table;");
 
 try {
-    $db = new PDO($dsn, $user_name, $user_pass, $options);
+    //データベース接続
+    $db = new PDO($dsn, DB_USER, DB_PASS);
+    
     //csv_tableに格納されている学生の取得
     $stmt_select = $db->prepare($csv_table_student_sql);
     $stmt_select->execute();
