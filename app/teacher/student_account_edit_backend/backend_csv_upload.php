@@ -2,18 +2,16 @@
 session_start();
 
 //データベース情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
 
 /////////////////////////////////////
@@ -37,7 +35,8 @@ $sql_course_id_count = "SELECT COUNT(*) FROM course;";
     
 
 try {
-    $pdo = new PDO($dsn, $user_name, $user_pass, $options);
+    //データベース接続
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     //CSVデータ保存用テーブルの削除
     $stmt_delete = $pdo->prepare($sql_delete_csv_table);
@@ -68,11 +67,12 @@ $sql_delete_error_table = "DROP TABLE IF EXISTS error_student_table;";
 //↓user_idをVARCHAR型にしてるのは、不正な形式のユーザーIDも格納するため
 $sql_create_error_table = 
     "CREATE TABLE error_student_table (
-    student_id VARCHAR(100) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(100),
     name VARCHAR(100),
     approvalUserAddress VARCHAR(100),
     error_id INT,
-    row_count INT
+    course_id INT
 );";
 
 //error_idの外部キー設定
@@ -108,8 +108,10 @@ catch (PDOException $e) {
 
 
 //error_student_tableの格納SQLクエリ
-$sql_insert_error_student = 
-    "INSERT INTO error_student_table VALUES (?, ?, ?, ?, ?);";
+$sql_insert_error_student = "INSERT INTO 
+                                error_student_table (student_id, name, approvalUserAddress, error_id, course_id) 
+                            VALUES 
+                                (?, ?, ?, ?, ?);";
 
 
 //CSVファイルがアップロードされたか確認
@@ -167,7 +169,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                         $stmt = $pdo->prepare($sql_insert_error_student);
                         //SQL文を実行
                         $error_id = 1001; //学年部分不正エラー
-                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                     }
                     catch (PDOException $e) {
                         //エラー処理
@@ -183,7 +185,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
                     $error_id = 1002; //ユーザーID形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
@@ -199,12 +201,11 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 $column_address = $data[2];
             }
             else {
-
                 try {
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
                     $error_id = 2001; //メールアドレス形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
@@ -224,8 +225,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     try {
                         $stmt = $pdo->prepare($sql_insert_error_student);
                         //SQL文を実行
-                        $error_id = 3001; //コースID不正エラー
-                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                        $error_id = 1001; //コースID不正エラー
+                        $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                     }
                     catch (PDOException $e) {
                         //エラー処理
@@ -239,8 +240,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 try {
                     $stmt = $pdo->prepare($sql_insert_error_student);
                     //SQL文を実行
-                    $error_id = 3002; //コースID形式不正エラー
-                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $column_number]);
+                    $error_id = 1002; //コースID形式不正エラー
+                    $stmt->execute([$data[0], $data[1], $data[2], $error_id, $data[3]]);
                 }
                 catch (PDOException $e) {
                     //エラー処理
@@ -288,19 +289,12 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
 
         if ($error_count > 0) {
             $error_count_flag = true;
+            $csv_error_table_sql = "SELECT * FROM error_student_table;";
         }
         else {
             $error_count_flag = false;
+            $csv_error_table_sql = null;
         }
-        
-        //データベース接続情報
-        $host = 'localhost';
-        $db_name = 'icc_smart_campus';
-        $user_name = 'root';
-        $user_pass = 'root';
-        $charset = 'utf8mb4';
-
-        $dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
 
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -319,16 +313,14 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'backend' => 'csv_upload',
             'error_csv' => $error_count_flag,
             'before' => 'teacher_home',
-            'database_connection' => $dsn,
-            'database_user_name' => $user_name,
-            'database_user_pass' => $user_pass,
             'database_options' => $options, 
             'csv_table_student_sql' => $csv_table_student_sql,
-            'course_sql' => $course_sql
+            'course_sql' => $course_sql,
+            'csv_error_table_sql' => $csv_error_table_sql
         ];
 
 
-   }
+    }
     else {
         //echo "CSVファイルを開くことができませんでした。";
     }

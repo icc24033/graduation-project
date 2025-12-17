@@ -1,56 +1,32 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background-color: #f9f9f9;
-    color: #222;
-    font-size: 16px;
-    font-weight: 400;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-ul,
-ol {
-    list-style: none;
-}
-
-/* スクロールバー */
-::-webkit-scrollbar {
+    /* スクロールバー */
+    ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f9f9f9;
-}
-
-::-webkit-scrollbar-thumb {
+    }
+    
+    ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
-}
-
-/* --- メイン画面用スタイル --- */
-.app-container {
+    }
+    
+    /* レイアウト */
+    .app-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     min-width: 1024px;
     overflow-x: auto;
-}
-
-.app-header {
+    }
+    
+    .app-header {
     position: fixed;
     top: 0;
     left: 0;
@@ -65,26 +41,28 @@ ol {
     text-align: center;
     gap: 10px;
     min-width: 1024px;
-}
-
-.app-header h1 {
+    }
+    
+    .app-header h1 {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
-}
-
-.header_icon{
-    width: 28px;
-}
-
-.main-section {
+    }
+    
+    .user_icon {
+    font-size: 24px;
+    color: #333;
+    }
+    
+    .main-section {
     padding-top: 70px;
     margin-top: 30px;
     display: flex;
     flex-grow: 1;
-}
-
-.sidebar {
+    }
+    
+    /* サイドバー */
+    .sidebar {
     position: fixed;
     left: 0;
     bottom: 0;
@@ -96,9 +74,9 @@ ol {
     flex-shrink: 0;
     border-right: solid 1px #CFD5DF;
     overflow-y: auto;
-}
-
-.sidebar-new-button {
+    }
+    
+    .sidebar-new-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -113,28 +91,28 @@ ol {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     transition: background-color 0.5s;
     cursor: pointer;
-}
-
-.sidebar-new-button:hover {
+    }
+    
+    .sidebar-new-button:hover {
     background-color: #CFD5DF;
     color: #222;
-}
-
-.sidebar-new-button:disabled {
+    }
+    
+    .sidebar-new-button:disabled {
     background-color: #94a3b8;
     cursor: not-allowed;
     opacity: 0.7;
     box-shadow: none;
-    color: #fff;
-}
-
-.dropdown-toggle {
+    }
+    
+    /* ドロップダウン & ラジオボタン用スタイル */
+    .dropdown-toggle {
     display: flex;
     width: 240px;
     padding: 8px 15px;
     text-align: left;
     border: 1px solid #CFD5DF;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     cursor: pointer;
     transition: background-color 0.3s;
     position: relative;
@@ -143,39 +121,47 @@ ol {
     border-radius: 6px;
     color: #334155;
     font-size: 0.9rem;
-}
-
-.dropdown-toggle:hover,
-.dropdown-toggle[aria-expanded="true"] {
+    }
+    
+    .dropdown-toggle .current-value {
+    margin-left: 0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+    
+    .dropdown-toggle:hover,
+    .dropdown-toggle[aria-expanded="true"] {
     background-color: #e2e8f0;
     border-color: #94a3b8;
-}
-
-.dropdown-toggle::after {
+    }
+    
+    .dropdown-toggle::after {
     content: '\f078';
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     margin-left: 10px;
     font-size: 0.7rem;
     transition: transform 0.3s;
-}
-
-.dropdown-toggle[aria-expanded="true"]::after {
+    }
+    
+    .dropdown-toggle[aria-expanded="true"]::after {
     transform: rotate(180deg);
-}
-
-.dropdown-toggle.disabled {
+    }
+    
+    .dropdown-toggle.disabled {
     background-color: #e2e8f0;
     color: #94a3b8;
     cursor: not-allowed;
     pointer-events: none;
     border-color: #cbd5e1;
-}
-
-.dropdown-menu {
+    }
+    
+    .dropdown-menu {
     position: fixed;
     width: 250px;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
     z-index: 1001;
     display: none;
@@ -183,28 +169,27 @@ ol {
     max-height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-.dropdown-menu.is-open {
+    }
+    
+    .dropdown-menu.is-open {
     padding: 5px 0;
     display: block;
     border: 1px solid #CFD5DF;
     animation: fadeIn 0.1s ease-out;
-}
-
-@keyframes fadeIn {
+    }
+    
+    @keyframes fadeIn {
     from {
-        opacity: 0;
-        transform: translateX(-5px);
+    opacity: 0;
+    transform: translateX(-5px);
     }
-
     to {
-        opacity: 1;
-        transform: translateX(0);
+    opacity: 1;
+    transform: translateX(0);
     }
-}
-
-.dropdown-menu li a {
+    }
+    
+    .dropdown-menu li a {
     display: block;
     width: 100%;
     padding: 8px 15px;
@@ -215,216 +200,229 @@ ol {
     cursor: pointer;
     color: #334155;
     transition: background 0.2s;
-}
-
-.dropdown-menu li a:hover {
+    }
+    
+    .dropdown-menu li a:hover {
     background-color: #CFD5DF;
-}
-
-.sidebar-divider {
-    height: 1px;
-    background-color: #CFD5DF;
-    margin: 20px 20px 10px 0;
-    width: 260px;
-}
-
-.is-group-label {
-    pointer-events: none;
-    padding: 10px 0 5px 0;
-    font-weight: bold;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.saved-item a {
-    font-size: 0.9rem;
-    color: #334155;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: flex-start;
-    padding: 8px 15px;
-    border-radius: 6px;
-    margin-right: 20px;
-    transition: background 0.2s;
-}
-
-.saved-item a:hover {
-    background-color: #CFD5DF;
-    color: #1e293b;
-}
-
-.saved-item.active a {
-    background-color: #cbd5e1;
-    font-weight: bold;
-    color: #0f172a;
-    border-left: 4px solid #495666;
-    border-radius: 0 6px 6px 0;
-}
-
-.saved-meta {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-left: auto;
-}
-
-.radio-group-label {
+    }
+    
+    .radio-group-label {
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: 4px 0;
     color: #334155;
     font-size: 0.9rem;
-}
-
-.radio-group-label:hover {
+    }
+    
+    .radio-group-label:hover {
     color: #0f172a;
-}
-
-.radio-group-label input[type="radio"] {
+    }
+    
+    .radio-group-label input[type="radio"] {
     margin-right: 8px;
-    accent-color: #495666;
+    accent-color: #3b82f6;
     cursor: pointer;
-}
-
-.main-content {
+    }
+    
+    .sidebar-divider {
+    height: 1px;
+    background-color: #CFD5DF;
+    margin: 20px 20px 10px 0;
+    width: 260px;
+    }
+    
+    .is-group-label {
+    pointer-events: none;
+    padding: 10px 0 5px 0;
+    font-weight: bold;
+    color: #666;
+    font-size: 0.9rem;
+    }
+    
+    /* 作成済みリスト */
+    .saved-item a {
+    font-size: 0.9rem;
+    color: #334155;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    justify-content: flex-start;
+    padding: 8px 15px;
+    border-radius: 6px;
+    margin-right: 20px;
+    transition: background 0.2s;
+    position: relative;
+    }
+    
+    .saved-item a:hover {
+    background-color: #CFD5DF;
+    color: #1e293b;
+    }
+    
+    .saved-item.active a {
+    background-color: #cbd5e1;
+    font-weight: bold;
+    color: #0f172a;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 6px 6px 0;
+    }
+    
+    .changed-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
     flex: 1;
     padding: 2.5rem;
     overflow: auto;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     position: relative;
     margin-left: 300px;
     width: calc(100% - 300px);
-}
-
-.control-area {
+    }
+    
+    .control-area {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-end;
     margin-bottom: 2rem;
     gap: 1.5rem;
-}
-
-.period-box {
-    border: 1px solid #CFD5DF;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    background-color: #f9f9f9;
-    position: relative;
-}
-
-.period-label {
-    position: absolute;
-    top: -0.75rem;
-    left: 1rem;
-    background-color: #f9f9f9;
-    padding: 0 0.5rem;
-    font-weight: 700;
-    font-size: 0.875rem;
-}
-
-.period-inputs {
+    }
+    
+    /* 週ナビゲーション */
+    .week-navigator {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.date-input {
+    gap: 1rem;
+    background-color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
     border: 1px solid #CFD5DF;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    color: #495666;
-    outline: none;
-    background-color: #f9f9f9;
-}
-
-.date-input:focus {
-    border-color: #CFD5DF;
-}
-
-.course-display {
+    }
+    
+    .week-nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #334155;
+    padding: 0 0.5rem;
+    transition: color 0.2s;
+    }
+    
+    .week-nav-btn:hover {
+    color: #3b82f6;
+    }
+    
+    .week-nav-btn:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+    }
+    
+    .week-display {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #1e293b;
+    min-width: 240px;
+    text-align: center;
+    }
+    
+    .course-display {
     text-align: right;
-}
-
-.timetable-container {
+    }
+    
+    /* 時間割テーブル */
+    .timetable-container {
     padding-bottom: 5rem;
-}
-
-.timetable-wrap {
+    }
+    
+    .timetable-wrap {
     border-radius: 1rem;
     border: 1px solid #495666;
     overflow: hidden;
     min-width: 800px;
-}
-
-.timetable {
+    }
+    
+    .timetable {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-}
-
-.timetable th,
-.timetable td {
+    }
+    
+    .timetable th,
+    .timetable td {
     border: 1px solid #495666;
     text-align: center;
     vertical-align: middle;
-}
-
-.timetable thead tr th {
+    }
+    
+    .timetable thead tr th {
     border-top: none;
-}
-
-.timetable tr th:first-child,
-.timetable tr td:first-child {
+    }
+    
+    .timetable tr th:first-child,
+    .timetable tr td:first-child {
     border-left: none;
-}
-
-.timetable tr th:last-child,
-.timetable tr td:last-child {
+    }
+    
+    .timetable tr th:last-child,
+    .timetable tr td:last-child {
     border-right: none;
-}
-
-.timetable tbody tr:last-child td,
-.timetable tbody tr:last-child th {
+    }
+    
+    .timetable tbody tr:last-child td,
+    .timetable tbody tr:last-child th {
     border-bottom: none;
-}
-
-.table-corner {
+    }
+    
+    .table-corner {
     background-color: #F3F8FF;
     width: 6rem;
-}
-
-.day-header {
+    }
+    
+    .day-header {
     background-color: #F3F8FF;
     height: 50px;
     font-weight: 500;
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: #495666;
-}
-
-.period-cell {
+    line-height: 1.2;
+    padding: 5px;
+    }
+    
+    .period-cell {
     background-color: #F3F8FF;
     padding: 1rem 0;
     height: 7rem;
     vertical-align: middle;
     color: #495666;
-}
-
-.period-number {
+    }
+    
+    .period-number {
     font-size: 1.5rem;
     font-weight: 400;
     margin-bottom: 0.25rem;
-}
-
-.period-time {
+    }
+    
+    .period-time {
     font-size: 0.75rem;
     color: #495666;
     font-weight: 500;
-}
-
-.timetable-cell {
-    background-color: #f9f9f9;
+    }
+    
+    .timetable-cell {
+    background-color: #f3f3f3;
     transition: background-color 0.2s;
     cursor: pointer;
     padding: 0.5rem;
@@ -432,26 +430,41 @@ ol {
     height: 7rem;
     overflow: hidden;
     max-height: 7rem;
-}
-
-.timetable-cell:hover {
+    }
+    
+    .timetable-cell:hover {
     background-color: #CFD5DF;
-}
-
-.timetable-cell.is-filled {
+    }
+    
+    .timetable-cell.is-filled {
     background-color: #F3F8FF;
-}
-
-.class-content {
+    }
+    
+    .timetable-cell.is-changed {
+    background-color: #C0DEFF;
+    border: 2px solid #89B4E8;
+    }
+    
+    .timetable-cell.is-changed .class-name,
+    .timetable-cell.is-changed .class-detail {
+    color: #334155;
+    }
+    
+    .timetable-cell.is-changed .teacher-name .icon,
+    .timetable-cell.is-changed .room-name .icon {
+    color: #64748b;
+    }
+    
+    .class-content {
     display: flex;
     flex-direction: column;
     height: 100%;
     justify-content: space-between;
     pointer-events: none;
     overflow: hidden;
-}
-
-.class-name {
+    }
+    
+    .class-name {
     font-weight: 700;
     color: #495666;
     word-break: break-all;
@@ -460,9 +473,9 @@ ol {
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
-}
-
-.class-detail {
+    }
+    
+    .class-detail {
     margin-top: 0.25rem;
     font-size: 0.75rem;
     color: #495666;
@@ -470,65 +483,56 @@ ol {
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
-}
-
-.teacher-name,
-.room-name {
+    }
+    
+    .teacher-name,
+    .room-name {
     display: flex;
     align-items: center;
-}
-
-.teacher-name .icon,
-.room-name .icon {
+    }
+    
+    .teacher-name .icon,
+    .room-name .icon {
     margin-right: 0.25rem;
     color: #CFD5DF;
-}
-
-.footer-button-area {
+    }
+    
+    /* フッターボタン */
+    .footer-button-area {
     position: absolute;
     bottom: 1.5rem;
     right: 2.5rem;
     display: flex;
     gap: 1rem;
-}
-
-.complete-button {
-    background-color: #495666;
+    }
+    
+    .action-button {
     color: #fff;
-    width: 180px;
     padding: 15px 30px;
     border: none;
     border-radius: 5px;
-    font-size: 25px;
+    font-size: 18px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.5s;
-}
-
-.complete-button:hover {
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    }
+    
+    .save-changes-button {
+    background-color: #495666;
+    width: 220px;
+    justify-content: center;
+    }
+    
+    .save-changes-button:hover {
     background-color: #CFD5DF;
     color: #222;
-}
-
-.delete-button {
-    background-color: #FF5F5F;
-    color: #fff;
-    width: 180px;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 5px;
-    font-size: 25px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.5s;
-}
-
-.delete-button:hover {
-    background-color: #dc2626;
-}
-
-/* --- 共通モーダルスタイル --- */
-.modal-overlay {
+    }
+    
+    /* モーダル */
+    .modal-overlay {
     position: fixed;
     top: 0;
     right: 0;
@@ -539,184 +543,155 @@ ol {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.modal-overlay.hidden {
+    }
+    
+    .modal-overlay.hidden {
     display: none;
-}
-
-body.modal-open {
+    }
+    
+    body.modal-open {
     overflow: hidden;
-}
-
-/* 編集モーダル */
-.modal-content {
-    background-color: #f9f9f9;
+    }
+    
+    .modal-content {
+    background-color: #f3f3f3;
     border-radius: 0.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     width: 500px;
     padding: 2rem;
     animation: fadeInUp 0.3s ease-out;
-}
-
-/* 新規作成モーダル */
-.create-modal-content {
-    background-color: #f9f9f9;
-    border-radius: 0.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    width: 600px;
-    padding: 2.5rem;
-    animation: fadeInUp 0.3s ease-out;
-}
-
-@keyframes fadeInUp {
+    }
+    
+    @keyframes fadeInUp {
     from {
-        opacity: 0;
-        transform: translateY(20px);
+    opacity: 0;
+    transform: translateY(20px);
     }
-
     to {
-        opacity: 1;
-        transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
     }
-}
-
-.modal-title {
+    }
+    
+    .modal-title {
     font-size: 1.25rem;
     font-weight: 500;
     margin-bottom: 2rem;
     color: #333;
-}
-
-.modal-form-area {
+    }
+    
+    .modal-form-area {
     margin: 1.5rem 1rem;
-}
-
-.modal-form-area > div + div {
+    }
+    
+    .modal-form-area > div + div {
     margin-top: 1.5rem;
-}
-
-.modal-form-item {
+    }
+    
+    .modal-form-item {
     display: flex;
     align-items: center;
-}
-
-.modal-label {
+    }
+    
+    .modal-label {
     width: 8rem;
     text-align: right;
     padding-right: 1rem;
     font-weight: 500;
     flex-shrink: 0;
     color: #495666;
-}
-
-.modal-select-wrapper {
+    }
+    
+    .modal-select-wrapper {
     position: relative;
     flex: 1;
-}
-
-.modal-select {
+    }
+    
+    .modal-select {
     width: 100%;
     border: 1px solid #CFD5DF;
     border-radius: 0.25rem;
     padding: 0.5rem 0.75rem;
     outline: none;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     appearance: none;
     cursor: pointer;
     color: #333;
-}
-
-.modal-select:focus {
+    }
+    
+    .modal-select:focus {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
     border-color: transparent;
-}
-
-.select-arrow {
+    }
+    
+    .select-arrow {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
     color: #94a3b8;
-}
-
-.modal-button-area {
+    }
+    
+    .modal-button-area {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     gap: 1rem;
     margin-top: 2.5rem;
-}
-
-.modal-cancel-button,
-.modal-save-button {
+    flex-wrap: nowrap;
+    }
+    
+    .modal-cancel-button,
+    .modal-save-button,
+    .modal-undo-button {
     padding: 0.5rem 1.5rem;
     border-radius: 0.25rem;
     background-color: #495666;
     color: #fff;
     transition: 0.2s;
-}
-
-.modal-cancel-button:hover,
-.modal-save-button:hover {
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    }
+    
+    .modal-cancel-button:hover,
+    .modal-save-button:hover {
     color: #222;
     background-color: #CFD5DF;
-}
-
-/* 新規作成モーダル固有のスタイル */
-.create-form-group {
-    margin-bottom: 20px;
-}
-
-.create-form-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
+    }
+    
+    .modal-undo-button {
+    background-color: #FF5F5F;
+    }
+    
+    .modal-undo-button:hover {
+    background-color: #ff7a7a;
+    }
+    
+    .modal-undo-button:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+    opacity: 0.6;
+    }
+    
+    .modal-date-input {
+    width: 100%;
+    border: 1px solid #CFD5DF;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    background-color: #e2e8f0;
     color: #334155;
-}
-
-.checkbox-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #CFD5DF;
-}
-
-.checkbox-label {
+    cursor: not-allowed;
+    }
+    
+    .error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
-    cursor: pointer;
-    font-weight: bold;
-    color: #334155;
-}
-
-.checkbox-label input {
-    margin-right: 10px;
-    width: 18px;
-    height: 18px;
-    accent-color: #495666;
-    cursor: pointer;
-}
-
-.file-input-area {
-    display: none;
-    margin-left: 28px;
-    margin-top: 8px;
-}
-
-.file-input-area.active {
-    display: block;
-}
-
-.file-input {
-    display: block;
-    width: 100%;
-    padding: 8px;
-    border: 2px dashed #CFD5DF;
-    border-radius: 6px;
-    background-color: #fff;
-    color: #64748b;
-    cursor: pointer;
-}
+    gap: 6px;
+    }

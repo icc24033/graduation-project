@@ -35,14 +35,20 @@ else {
 
 
 try {
+    
+    $config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+    $config = require $config_path;
+
+    define('DB_HOST', $config['db_host']);
+    define('DB_NAME', $config['db_name']);
+    define('DB_USER', $config['db_user']);
+    define('DB_PASS', $config['db_pass']);
+
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
     //データベース接続
-    $pdo = 
-        new PDO(
-            $status['database_connection'],
-            $status['database_user_name'],
-            $status['database_user_pass'],
-            $status['database_options']
-        );
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     //　リストに表示するコース情報を取得
     $stmt_course = $pdo->query($status['course_sql']);
@@ -59,6 +65,8 @@ try {
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
+    // データべース接続切断
+    $pdo = null;
 }
 catch (PDOException $e) {
     // データベース接続/クエリ実行エラー発生時
@@ -191,7 +199,7 @@ catch (PDOException $e) {
                                     <?php 
                                         // 現在の学年を計算
                                         // 注意: $selected_year と $current_year の値が同じなら結果は常に 1 になります。
-                                        $current_grade = 1 + ($selected_year - $current_year); 
+                                        $current_grade = $student_row['grade'];
                                         $initial_display = $current_grade . '年'; 
                                         // 許可された最大学年。この値を基準に初期値を決定します。
                                         $max_grade = 2; 
@@ -205,7 +213,7 @@ catch (PDOException $e) {
                                     <a href="#" class="course-display" 
                                         data-grade-display
                                         data-dropdown-for="gradeDropdownMenu" 
-                                        data-current-grade-value="<?php echo htmlspecialchars($current_grade); ?>">
+                                        data-current-grade-value="<?php echo htmlspecialchars($student_row['grade']); ?>">
                                         <?php echo htmlspecialchars($initial_display); ?>
                                     </a>
                                     <input type="hidden" 
@@ -218,16 +226,7 @@ catch (PDOException $e) {
                                     <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
-                                    <a href="#" class="course-display" 
-                                        data-course-name-display 
-                                        data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course-center="<?php echo htmlspecialchars($student_row['course_id']); ?>">
-                                        <?php echo htmlspecialchars($student_row['course_name']);?>
-                                    </a>
-                                <input type="hidden" 
-                                    name="students[<?php echo htmlspecialchars($student_row['student_id']); ?>]" 
-                                    value="<?php echo htmlspecialchars($student_row['course_id']); ?>"
-                                    class="course-hidden-input">
+                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
                                 </div>
                             </div>
 

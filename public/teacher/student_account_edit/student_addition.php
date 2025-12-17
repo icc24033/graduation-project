@@ -1,9 +1,26 @@
 <?php
 
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
 // セッション開始
 session_start();
+
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
 // セッションから処理結果を取得
 $status = $_SESSION['student_account'] ?? null;
@@ -15,13 +32,7 @@ if ($status['backend'] === 'student_addition') {
 
     try {
         //データベース接続
-        $pdo = 
-            new PDO(
-                $status['database_connection'],
-                $status['database_user_name'],
-                $status['database_user_pass'],
-                $status['database_options']
-            );
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // 　テストstudentに格納されている今年度の学生数の取得
         $stmt_test_student = $pdo->prepare($status['student_count_sql']);
@@ -39,13 +50,7 @@ if ($status['backend'] === 'student_addition') {
 else if ($status['backend'] === 'csv_upload') {
     try {
         //データベース接続
-        $pdo = 
-            new PDO(
-                $status['database_connection'],
-                $status['database_user_name'],
-                $status['database_user_pass'],
-                $status['database_options']
-            );
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // csv_tableに格納されている今年度の学生の取得
         $stmt_csv_table = $pdo->prepare($status['csv_table_student_sql']);
@@ -113,57 +118,57 @@ else {
             </nav>
 
             <div class="content-area">
-                <div class="account-table-container">
-                    <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
-                        <div class="column-name">氏名</div>
-                        <div class="column-course">コース</div>
-                    </div>
-                    
-                    <?php  if ($status['backend'] === 'student_addition'): ?>
-                    <div class="table-row">
-                        <div class="column-check">
-                        </div> 
-                        <div class="column-student-id">
-                            <input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>>
-                        </div> 
-                        <div class="column-name">
-                            <input type="text" name="name" placeholder="氏名">
-                        </div> 
-                        <div class="column-course">
-                            <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                    <div class="account-table-container">
+                        <div class="table-header">
+                            <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                            <div class="column-name">氏名</div>
+                            <div class="column-course">コース</div>
                         </div>
+                        
+                        <?php  if ($status['backend'] === 'student_addition'): ?>
+                        <div class="table-row">
+                            <div class="column-check">
+                            </div> 
+                            <div class="column-student-id">
+                                <input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>>
+                            </div> 
+                            <div class="column-name">
+                                <input type="text" name="name" placeholder="氏名">
+                            </div> 
+                            <div class="column-course">
+                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                            </div>
+                        </div>
+
+                        <?php  elseif ($status['backend'] === 'csv_upload'): 
+                            while ($row = $stmt_csv_table->fetch()):
+                        ?>
+                        <div class="table-row">
+                            <div class="column-check">
+                            </div>
+                            <div class="column-student-id">
+                                <input type="text" value=<?php echo htmlspecialchars($row['student_id']); ?> disabled>
+                            </div>
+                            <div class="column-name">
+                                <input type="text" value=<?php echo htmlspecialchars($row['name']); ?> disabled>
+                            </div>
+                            <div class="column-course">
+                                <input type="text" value=<?php echo htmlspecialchars($courses[$row['course_id'] - 1]['course_name']); ?> disabled>
+                            </div>
+                        </div>
+                        <?php  endwhile; ?>
+                        <?php  endif; ?>
                     </div>
 
-                    <?php  elseif ($status['backend'] === 'csv_upload'): 
-                        while ($row = $stmt_csv_table->fetch()):
-                    ?>
-                    <div class="table-row">
-                        <div class="column-check">
-                        </div>
-                        <div class="column-student-id">
-                            <input type="text" value=<?php echo htmlspecialchars($row['student_id']); ?> disabled>
-                        </div>
-                        <div class="column-name">
-                            <input type="text" value=<?php echo htmlspecialchars($row['name']); ?> disabled>
-                        </div>
-                        <div class="column-course">
-                            <input type="text" value=<?php echo htmlspecialchars($courses[$row['course_id'] - 1]['course_name']); ?> disabled>
-                        </div>
+                    <?php if ($status['backend'] === 'student_addition'): ?>
+                    <div class="button-group">
+                        <button class="add-button">追加</button>
+                        <button class="add-button">追加人数入力</button>
                     </div>
-                    <?php  endwhile; ?>
-                    <?php  endif; ?>
-                </div>
-
-                <?php if ($status['backend'] === 'student_addition'): ?>
-                <div class="button-group">
-                    <button class="add-button">追加</button>
-                    <button class="add-button">追加人数入力</button>
-                </div>
-                <button class="complete-button">完了</button>
+                    <button class="complete-button">完了</button>
 
                 <?php elseif ($status['backend'] === 'csv_upload' && $status['error_csv'] === false): ?>
-                    <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition_edit.php" method="post">
+                    <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csvdata_upload.php" method="post">
                         <button class="complete-button">追加完了</button>
                     </form>
                 <?php endif; ?>
@@ -171,17 +176,11 @@ else {
         </main>
     </div>
 
+    <?php if ($status['error_csv'] === true): 
+        $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
+        $error_stmt->execute();    
+    ?>
 
-    
-
-    <?php if (true): ?>
-
-
-        
-
-    <!--    ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓何かいい感じにしてほしいです　タグは<h3>じゃなくても全然〇です↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-    <h3>　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　CSVエラーデータ編集</h3>
-    -->
     <div class="content-area">
         <div class="error-edit-container">
         <h3>CSVエラーデータ編集</h3>
@@ -189,24 +188,38 @@ else {
         <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">
                 <div class="table-header">
-                <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                <div class="column-check"></div> 
+                <div class="column-student-id">学生番号</div>
                 <div class="column-name">氏名</div>
-                <div class="column-course">コース</div>
+                <div class="column-course">メールアドレス</div>
             </div>
-                    
+            <?php while ($error_row = $error_stmt->fetch()): ?>
             <div class="table-row">
                 <div class="column-check">
                 </div> 
                 <div class="column-student-id">
-                    <input type="text" value=<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>>
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][student_id]" 
+                           value=<?php echo htmlspecialchars($error_row['student_id']); ?>>
                 </div> 
                 <div class="column-name">
-                    <input type="text" name="name" placeholder="氏名">
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][name]" 
+                           value=<?php echo htmlspecialchars($error_row['name']); ?>>
                 </div> 
                 <div class="column-course">
-                    <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
+                    <input type="text" 
+                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][approvalUserAddress]" 
+                           value=<?php echo htmlspecialchars($error_row['approvalUserAddress']); ?>>
                 </div>
+                <input type="hidden" 
+                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][id]" 
+                       value=<?php echo htmlspecialchars($error_row['id']); ?>>
+                <input type="hidden" 
+                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][course_id]" 
+                       value=<?php echo htmlspecialchars($error_row['course_id']); ?>>
             </div>
+            <?php endwhile; ?>
         </div>
         <button class="add-button" id="deleteActionButton">編集完了</button>
         </form>

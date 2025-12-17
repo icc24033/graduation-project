@@ -1,55 +1,39 @@
-header{
-    height: 100px;
-    width: 100%;
+.app-header{
+    /* 画面上部に固定 */
     position: fixed;
-    z-index: 1000;
-    background-color:#C0DEFF;
-
-    /* ★追加: Flexboxで子要素を配置 */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF;
+    height: 70px;
     display: flex;
-    /* ★追加: 子要素を右端に寄せる */
-    justify-content: flex-end; 
-    /* ★追加: 縦方向の中央揃え */
+    justify-content: center; /* 既存のflex-endを維持 */
     align-items: center; 
-    /* ★追加: 右側に余白 */
-    padding-right: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding-right: 20px;/* 右側に余白 */
+    gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
 }
-/*
-.header{
-    width: 60px;
-    height: 60px;
-    min-width: 50px;
-    border-radius: 50%; 
-    background-color: #ffffff; 
-    margin: auto 95%;
-    position: relative;
-    top: 25%;
-}
-*/
-  
-/* ==================================== */
-/* Googleアカウントアイコンのスタイル */
-/* ==================================== */
 
-/* ユーザーアバターのコンテナ (teacher_home.phpで追加したdiv要素) */
+.app-header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.header-icon {
+    width: 30px; /* アイコン画像の幅を24pxに設定 */
+    height: 30px; /* アイコン画像の高さを24pxに設定 */
+}
+
 .user-avatar {
-    /* ヘッダーの右上に絶対配置 */
-
-    /* ★変更: absolute/top/right/transform を削除 */
-    /* position: relative; は user_menu.css で定義されているため、ここでは不要 */
-    
-    
-    position: absolute; 
-    right: 20px;
-    
-    width: 60px;            /* アイコンのサイズ */
-    height: 60px;           /* アイコンのサイズ */
-    
-    border-radius: 50%;     /* 丸くする */
-    overflow: hidden;       /* 画像が枠からはみ出さないように */
-    border: 2px solid #fff; /* アイコンを際立たせるための枠線 */
-    z-index: 1001;          /* ヘッダーの上 (z-index: 1000) に表示 */
-    cursor: pointer;        /* クリック可能であることを示す */
+    width: 50px;           
+    height: 50px;          
+    border-radius: 50%;    
+    overflow: hidden;     
+    border: 2px solid #fff; 
+    z-index: 1001;          
+    cursor: pointer;       
 }
 
 /* アバター画像自体 */

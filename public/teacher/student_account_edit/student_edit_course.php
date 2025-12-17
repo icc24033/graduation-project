@@ -32,20 +32,25 @@ else {
 
 
 try {
+    $config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+    $config = require $config_path;
+
+    define('DB_HOST', $config['db_host']);
+    define('DB_NAME', $config['db_name']);
+    define('DB_USER', $config['db_user']);
+    define('DB_PASS', $config['db_pass']);
+
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
     //データベース接続
-    $pdo = 
-        new PDO(
-            $status['database_connection'],
-            $status['database_user_name'],
-            $status['database_user_pass'],
-            $status['database_options']
-        );
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     //　リストに表示するコース情報を取得
     $stmt_course = $pdo->query($status['course_sql']);
     $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
 
-    // 　テストstudentに格納されている学生情報の取得
+    // 　studentに格納されている学生情報の取得
     $stmt_test_student = $pdo->prepare($status['student_sql']);
     $stmt_test_student->execute([$status['course_id']]);
 
@@ -56,6 +61,8 @@ try {
     } else {
         $current_course_name = 'コース情報が見つかりません';
     }
+    // データベース接続終了
+    $pdo = null;
 }
 catch (PDOException $e) {
     // データベース接続/クエリ実行エラー発生時
@@ -108,6 +115,9 @@ catch (PDOException $e) {
                     </li>
 
                     <li class="nav-item is-group-label">コース</li> 
+
+
+
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" 
                                 id="courseDropdownToggle" 
@@ -135,6 +145,9 @@ catch (PDOException $e) {
                             <?php endif; ?>
                         </ul>
                     </li>
+
+
+
                     
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>

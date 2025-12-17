@@ -44,13 +44,13 @@ require_once $base_path . 'Master_class.php';
 $user_grade = $_SESSION['user_grade'] ?? 'student'; 
 $current_user_id = $_SESSION['user_id'] ?? '';
 $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
-$smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャンパスのロゴ画像パス
+$smartcampus_picture = 'images/smartcampus.png'; // ICCスマートキャンパスのロゴ画像パス
 
 // 遷移先ファイルの定義（クラスに渡すため配列化）
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
 $links = [
-    'link_time_table_create' => "../master/timetable_create_menu.html",
-    'link_time_table_edit'   => "time_table_edit.php",
+    'link_time_table_create' => "../master/timetable_create/create_timetable.php",
+    'link_time_table_edit'   => "timetable_change/edit_timetable.php",
     'link_account_edit'      => "account_edit.php",
     'link_permission_grant'  => "permission_grant.php",
     'link_notification_edit' => "notification_edit.php",
@@ -97,36 +97,32 @@ if ($user_object instanceof User_MasAndTeach) {
 
     </head>
     <body>
-        <header> 
-            <div class="user-avatar" id="userAvatar">
-                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+        <header class="app-header">
+            <h1>ホーム画面</h1>
+            <img class="header-icon" src="images/icon-house.png"alt="ヘッダーアイコン"> 
+            <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">   
             </div>
-
-            <!--  ICCスマートキャンパスロゴ -->
-            <!-- 
-                <img src="<.?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="100" height="50">
-                これをヘッダー内の左上に配置する
-            -->
-                <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 20px;">
-            
-                <!-- ユーザーメニューポップアップ (仮)-->
             <div class="user-menu-popup" id="userMenuPopup">
-                <a href="../logout/logout.php" class="logout-button">
-                    <span class="icon-key"></span>
-                    アプリからログアウト
-                </a>
-            </div>
+                    <a href="../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                        アプリからログアウト
+                    </a>
+                    <!-- リンク先わかりません -->
+                    <a href="" class="help-button">
+                        ヘルプ
+                    </a>
+                </div>
+            <!--  ICCスマートキャンパスロゴ -->
+            <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">  
         </header>
 
         <div class="main">
             <section class="tool">
-                <img class="title_icon" src="images/icon_tool.png" alt="機能アイコン">
-                <p class="title_name">機能</p>
-            </section>
-            
             <div class="background">
                 <?= $function_cards_html ?> 
             </div>
+            </section>
         </div>
         <!-- ここから仮置きのコード -->
         <script>
