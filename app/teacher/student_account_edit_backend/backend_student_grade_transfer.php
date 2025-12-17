@@ -26,16 +26,6 @@ if (isset($_GET['course_id']) && isset($_GET['current_year'])) {
     $received_current_year = substr($received_current_year, -2);
 }
 
-
-//データベース接続情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
-
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -65,9 +55,6 @@ $student_sql = ("SELECT
 $_SESSION['student_account'] = [
     'success' => true,
     'before' => 'teacher_home',
-    'database_connection' => $dsn,
-    'database_user_name' => $user_name,
-    'database_user_pass' => $user_pass,
     'database_options' => $options,
     'course_sql' => $course_sql,
     'course_id' => $received_course_id,

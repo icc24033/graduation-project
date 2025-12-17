@@ -3,14 +3,17 @@
 // セッション開始
 session_start();
 
-//データベース接続情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -45,7 +48,9 @@ $delete_csv_table_sql = ("DELETE FROM csv_table WHERE student_id = ?;");
 $count_csv_table_sql = ("SELECT COUNT(*) as count FROM csv_table;");
 
 try {
-    $db = new PDO($dsn, $user_name, $user_pass, $options);
+    //データベース接続
+    $db = new PDO($dsn, DB_USER, DB_PASS);
+    
     //csv_tableに格納されている学生の取得
     $stmt_select = $db->prepare($csv_table_student_sql);
     $stmt_select->execute();
@@ -119,9 +124,6 @@ $_SESSION['student_account'] = [
     'backend' => $backend,
     'error_csv' => false,
     'before' => 'teacher_home',
-    'database_connection' => $dsn,
-    'database_user_name' => $user_name,
-    'database_user_pass' => $user_pass,
     'database_options' => $options, 
     'csv_table_student_sql' => $csv_table_student_sql,
     'course_sql' => $course_sql,

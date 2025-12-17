@@ -32,14 +32,20 @@ else {
 
 
 try {
+    
+    $config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+    $config = require $config_path;
+
+    define('DB_HOST', $config['db_host']);
+    define('DB_NAME', $config['db_name']);
+    define('DB_USER', $config['db_user']);
+    define('DB_PASS', $config['db_pass']);
+
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+    
     //データベース接続
-    $pdo = 
-        new PDO(
-            $status['database_connection'],
-            $status['database_user_name'],
-            $status['database_user_pass'],
-            $status['database_options']
-        );
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     //　リストに表示するコース情報を取得
     $stmt_course = $pdo->query($status['course_sql']);

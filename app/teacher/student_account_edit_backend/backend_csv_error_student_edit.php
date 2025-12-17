@@ -2,14 +2,17 @@
 
 session_start();
 
-//データベース情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+$config = require $config_path;
+
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -35,7 +38,8 @@ $sql_delete_csv_error_id = "DELETE FROM error_student_table WHERE id = ?;";
 
 
 try {
-    $pdo = new PDO($dsn, $user_name, $user_pass, $options);
+    //データベース接続
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     if (isset($_POST['students']) && is_array($_POST['students'])) {
         
@@ -177,9 +181,6 @@ try {
             'backend' => 'csv_upload',
             'error_csv' => $error_count_flag,
             'before' => 'teacher_home',
-            'database_connection' => $dsn,
-            'database_user_name' => $user_name,
-            'database_user_pass' => $user_pass,
             'database_options' => $options, 
             'csv_table_student_sql' => $csv_table_student_sql,
             'course_sql' => $course_sql,
