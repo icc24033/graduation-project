@@ -15,7 +15,6 @@ body {
   flex-grow: 1;
   margin: 0 auto;
   box-sizing: border-box;
-  /* align-items: center; は不要のため削除 */
   background-color: #F3F8FF;
 }
 
@@ -60,18 +59,18 @@ body {
 
 .date-btn {
   height: 40px;
-  padding: 10px 15px;
+  padding: 10px 15px; /* パディングを調整 */
   background-color: #495666;
-  color: #ffffff;
   border-radius: 9px;
-  flex-shrink: 0;
+  flex-shrink: 0; /* 縮小させない */
+  border: none;
 }
 
 .date-btn p {
   color: #ffffff;
   letter-spacing: 8%;
   text-align: center;
-  font-weight: 700;
+  font-weight: 400;
   margin: 0;
 }
 
@@ -111,6 +110,7 @@ body {
   border-radius: 9px;
   flex-shrink: 0; /* 縮小させない */
   box-sizing: border-box;
+  border: none;
 }
 
 .search-img {
@@ -327,7 +327,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 .dropdown-content {
   max-height: 0; /* 閉じた状態の高さ */
   overflow: hidden;
-  padding: 0;
+  padding: 0 20px;
   width: 100%;
   transition: max-height 0.4s ease-in-out; 
   background-color: #ffffff;
@@ -340,23 +340,20 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 
 /* ドロップダウンが開いた時の共通スタイル */
 .dropdown-content.show {
-  max-height: 500px; /* 十分な高さを確保 */
-  padding: 0;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box; /* border-boxを維持 */
-
-  width: calc(100% + 15px); /* period-detailsの幅と左パディングを合わせて、カードの左端に揃える */
-  margin-left: -15px; /* period-details の左パディングを相殺 */
-  margin-top: 10px; /* ボタンとの隙間 */
-  border: 1px solid #CFD5DF;
-  overflow: hidden; 
+    max-height: 500px; /* 十分な高さを確保 */
+    padding: 0;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box; /* border-boxを維持 */
+    margin-top: 10px; /* ボタンとの隙間 */
+    border: 1px solid #CFD5DF;
+    overflow: hidden; 
 }
 
 /* 授業詳細ボタンがアクティブな時 */
 .detail-dropdown-wrapper.active .dropdown-toggle {
   background-color: #C0DEFF;
-  color: #222222; /* アクティブ時は黒 */
+
   box-shadow: none; /* 展開時は影を消す */
   border-radius: 16px; /* 角丸 */
 }
@@ -383,7 +380,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 .detail-content.show > .detail-box:first-child .detail-title {
   font-size: 16px;
   font-weight: 700;
-  color: #495666;
+  color: #222222;
   margin-bottom: 0;
 }
 
@@ -403,33 +400,32 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 .dropdown-content.item-content {
   height: auto; 
   border-radius: 20px;
-  border: 1px solid #CFD5DF;
   border-top: none;
   background-color: #ffffff;
 }
 
 /* 持ち物リストが開いた時の設定 */
-.item-content.show {
-  padding: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
+.item-content.show .item-list {
+  background-color: #ffffff; /* 白背景を明示 */
+  padding: 15px; /* .detail-box:not(:first-child) と同じパディング */
+  margin: 0 1px 10px 1px; /* 上下マージンを設定し、左右を少し内側に寄せる（シャドウ対策）*/
+  border-radius: 9px; /* 適度な角丸 */
+  list-style: none;
+  letter-spacing: normal; /* 文字間隔を通常に戻す */
+  text-align: left;
+  font-weight: 500;
+  box-sizing: border-box;
 }
 
-/* 持ち物リストのタイトル部分 (item-listの最初のliをタイトルとして使用) */
-.item-content.show .item-list > li:first-child {
-  background-color: #C0DEFF; 
-  padding: 10px;
-  margin: 0;
-  border-radius: 20px 20px 0 0; 
-  
-  /* タイトルとアイコンを並べる */
-  display: flex; 
-  justify-content: space-between;
+.mono-title {
+  background-color: #C0DEFF; /* タイトルの背景色 (水色) */
+  padding: 10px; /* 内側の余白 */
+  border-radius: 20px 20px 0 0; /* 上側だけ角丸 */
+  margin-bottom: 0;
+  box-shadow: none;
+  display: flex; /* タイトルとアイコンを並べる */
+  justify-content: space-between; /* タイトルとアイコンを両端に寄せる */
   align-items: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #495666;
-  list-style: none;
 }
 
 .item-list li {
@@ -438,13 +434,8 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   font-weight: 500;
 }
 
-/* 持ち物リスト内のタイトルアイコンの色を濃い色に */
-.item-content.show .item-list > li:first-child .button-icon {
-  filter: invert(30%) sepia(20%) saturate(600%) hue-rotate(180deg) brightness(30%) contrast(90%);
-}
-
 /* 持ち物リスト内の通常項目 */
-.item-content.show .item-list > li:not(:first-child) {
+.item-content.show .item-list {
   padding: 10px 24px;
   list-style: none;
 }
@@ -457,7 +448,6 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 /* 持ち物ボタンがアクティブな時 */
 .item-dropdown-wrapper.active .dropdown-toggle {
   background-color: #C0DEFF; /* 水色に変更 */
-  color: #222222; /* ★ アクティブ時は黒 */
   box-shadow: none;
   border-radius: 16px;
 }
@@ -479,6 +469,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 .item-dropdown-wrapper:not(.active) .item-toggle .item-icon {
   display: block; 
 }
+
 
 
 /* --- コース選択ドロップダウンのラッパー --- */
@@ -532,7 +523,6 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   margin-left: 0;
   border: none;
   border-radius: 0 0 9px 9px;
-  
 }
 
 /* ドロップダウンの各項目 (aタグ) */
@@ -556,33 +546,26 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   filter: invert(45%) sepia(85%) saturate(300%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
 
-/* 日付ボタン全体の見た目（画像の左側の黒い部分） */
-.date-button-container {
-  background-color: #4B5563; /* 画像に近いダークグレー */
-  color: #ffffff;              /* 文字色 */
-  padding: 8px 16px;          /* 内側の余白 */
-  border-radius: 10px;        /* 角を丸くする */
-  display: inline-flex;       /* 横並びにする */
-  align-items: center;        /* 上下中央揃え */
-  gap: 10px;                  /* 文字と入力欄の間隔 */
-  cursor: pointer;            /* マウスを乗せた時に指マークにする */
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* 影をつける（お好みで） */
-  font-weight: bold;
-  font-family: sans-serif;
+/* css/style.css に以下を追加・確認してください */
+
+/* --- ここが重要：ドロップダウンを左側に大きく広げる設定 --- */
+.detail-dropdown-wrapper.active .dropdown-content,
+.item-dropdown-wrapper.active .dropdown-content {
+  /* 幅 = 右エリア(100%) + 隙間(15px) + 左エリア(125px) */
+  width: calc(100% + 15px + 125px); 
+  
+  /* 左マージンをマイナスにして、強制的に左側へ移動させる */
+  margin-left: calc(-15px - 125px); 
+  
+  /* レイアウト崩れを防ぐための設定 */
+  box-sizing: border-box;
 }
 
-/* 入力欄のスタイル */
-.date-input {
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 14px;
-  color: #ffffff;
-  outline: none; /* 選択時の青い枠線を消す */
-  cursor: pointer;
+/* 持ち物リストの中身のスタイル（任意） */
+.item-content.show .item-list {
+  background-color: #ffffff;
+  padding: 15px;
+  margin: 0 1px 10px 1px;
+  border-radius: 9px;
 }
 
-/* ホバー時の演出（少し明るくする） */
-.date-button-container:hover {
-  background-color: #586372;
-}
