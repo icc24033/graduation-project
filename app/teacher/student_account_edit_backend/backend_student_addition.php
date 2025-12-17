@@ -2,16 +2,6 @@
 //セッション開始
 session_start();
 
-
-//データベース接続情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
-
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -26,9 +16,6 @@ $_SESSION['student_account'] = [
     'backend' => 'student_addition',
     'error_csv' => false,
     'before' => 'teacher_home',
-    'database_connection' => $dsn,
-    'database_user_name' => $user_name,
-    'database_user_pass' => $user_pass,
     'database_options' => $options, 
     'student_count_sql' => $student_count_sql 
 ];

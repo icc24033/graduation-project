@@ -1,14 +1,6 @@
 <?php
 session_start();
 
-//データベース情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -323,9 +315,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'backend' => 'csv_upload',
             'error_csv' => $error_count_flag,
             'before' => 'teacher_home',
-            'database_connection' => $dsn,
-            'database_user_name' => $user_name,
-            'database_user_pass' => $user_pass,
             'database_options' => $options, 
             'csv_table_student_sql' => $csv_table_student_sql,
             'course_sql' => $course_sql,

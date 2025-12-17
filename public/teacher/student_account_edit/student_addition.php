@@ -20,14 +20,20 @@ if ($status['backend'] === 'student_addition') {
     $current_year = (int)substr($current_year, -2); // 下2桁を取得
 
     try {
+        
+        $config_path = __DIR__ . '/../../../config/secrets_local.php';
+
+        $config = require $config_path;
+
+        define('DB_HOST', $config['db_host']);
+        define('DB_NAME', $config['db_name']);
+        define('DB_USER', $config['db_user']);
+        define('DB_PASS', $config['db_pass']);
+
+        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+        
         //データベース接続
-        $pdo = 
-            new PDO(
-                $status['database_connection'],
-                $status['database_user_name'],
-                $status['database_user_pass'],
-                $status['database_options']
-            );
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // 　テストstudentに格納されている今年度の学生数の取得
         $stmt_test_student = $pdo->prepare($status['student_count_sql']);

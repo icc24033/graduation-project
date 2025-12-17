@@ -29,27 +29,25 @@ if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
 // POSTで受けとった値を変数に格納
 $selected_student = $_POST['students'] ?? [];
 
-//データベース接続情報
-$host = 'localhost';
-$db_name = 'icc_smart_campus';
-$user_name = 'root';
-$user_pass = 'root';
-$charset = 'utf8mb4';
+$config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-$dsn = "mysql:host=$host;dbname=$db_name;charset=$charset";
+$config = require $config_path;
 
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+define('DB_HOST', $config['db_host']);
+define('DB_NAME', $config['db_name']);
+define('DB_USER', $config['db_user']);
+define('DB_PASS', $config['db_pass']);
+
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+
 
 //studentに格納されているcourse_idとcourse_nameの変更
 $update_course_sql = ("UPDATE student SET course_id = ? WHERE student_id = ?");
 
 try {
     //データベース接続
-    $pdo = new PDO($dsn, $user_name, $user_pass, $options);
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+
     //studentテーブルの更新
     $stmt_update = $pdo->prepare($update_course_sql);
 
