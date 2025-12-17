@@ -2,18 +2,11 @@
 // teacher_home.php
 // 先生用ホーム画面
 
-// ----------------------------------------------------
-// 0. SecurityHelperの読み込み
-// ----------------------------------------------------
+// セキュリティヘッダーの適用
 require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
-
-// セキュリティヘッダーを適用（一番最初に実行）
 SecurityHelper::applySecureHeaders();
 
-// ----------------------------------------------------
-// 1. セッション設定（SSO維持のための設定）
-// ----------------------------------------------------
-// ※ SecurityHelper::requireLogin() 内の session_start() より前に設定する必要があります
+// 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
 
 // 7日間SSOを維持するための設定
 $session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
@@ -33,16 +26,12 @@ session_set_cookie_params([
     'samesite' => 'Lax'
 ]);
 
-// ----------------------------------------------------
-// 2. ログインチェック（セッション開始含む）
-// ----------------------------------------------------
-// ここで session_start() が行われ、未ログインならリダイレクトされます
+// セッション開始とログイン判定を一括で行う
 SecurityHelper::requireLogin();
 
+// セキュリティヘッダーを適用
+SecurityHelper::applySecureHeaders();
 
-// ----------------------------------------------------
-// 3. アプリケーションロジック
-// ----------------------------------------------------
 // クラスファイルを読み込む
 // パスは teacher_home.php の位置から /app/classes/user/ への相対パス
 $base_path = __DIR__ . '/../../app/classes/user/';
@@ -55,7 +44,7 @@ require_once $base_path . 'Master_class.php';
 $user_grade = $_SESSION['user_grade'] ?? 'student'; 
 $current_user_id = $_SESSION['user_id'] ?? '';
 $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
-$smartcampus_picture = 'images/icc_smart_campus.png'; // ICCスマートキャンパスのロゴ画像パス
+$smartcampus_picture = 'images/smartcampus.png'; // ICCスマートキャンパスのロゴ画像パス
 
 // 遷移先ファイルの定義（クラスに渡すため配列化）
 // リンク先にIDは含めず、遷移先でセッションからIDを読み取らせる設計
@@ -89,7 +78,6 @@ $function_cards_html = '';
 
 // オブジェクトが生成されていれば、メソッドを呼び出してHTMLを取得
 if ($user_object instanceof User_MasAndTeach) {
-    // ※このHTMLはクラス内で生成されるため、ここではエスケープしません
     $function_cards_html = $user_object->getFunctionCardsHtml($links);
 }
 ?>
@@ -109,32 +97,34 @@ if ($user_object instanceof User_MasAndTeach) {
 
     </head>
     <body>
-        <header> 
-            <div class="user-avatar" id="userAvatar">
-                <img src="<?= SecurityHelper::escapeHtml($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+        <header class="app-header">
+            <h1>ホーム画面</h1>
+            <img class="header-icon" src="images/icon-house.png"alt="ヘッダーアイコン"> 
+            <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">   
             </div>
-
-            <img src="<?= SecurityHelper::escapeHtml($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 20px;">
-            
             <div class="user-menu-popup" id="userMenuPopup">
-                <a href="../logout/logout.php" class="logout-button">
-                    <span class="icon-key"></span>
-                    アプリからログアウト
-                </a>
-            </div>
+                    <a href="../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                        アプリからログアウト
+                    </a>
+                    <!-- リンク先わかりません -->
+                    <a href="" class="help-button">
+                        ヘルプ
+                    </a>
+                </div>
+            <!--  ICCスマートキャンパスロゴ -->
+            <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">  
         </header>
 
         <div class="main">
             <section class="tool">
-                <img class="title_icon" src="images/icon_tool.png" alt="機能アイコン">
-                <p class="title_name">機能</p>
-            </section>
-            
             <div class="background">
                 <?= $function_cards_html ?> 
             </div>
+            </section>
         </div>
-        
+        <!-- ここから仮置きのコード -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const userAvatar = document.getElementById('userAvatar');
