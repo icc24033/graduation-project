@@ -1,0 +1,155 @@
+/* --- レイアウトのコンテナ --- */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /*要素をブラウザウィンドウの高さと等しくする*/
+}
+
+/* --- ヘッダー --- */
+.app-header {
+    /* 画面上部に固定 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF;
+    height: 70px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.user_icon {
+    font-size: 24px;
+}
+
+/* --- メインコンテンツ --- */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 200px;
+}
+
+.button-container {
+    display: flex;
+    gap: 0 80px; /* ボタン同士の間隔 */
+}
+
+/* --- ボタン本体の修正 --- */
+.nav-button {
+    width: 500px;
+    height: 550px;
+    background-color: #F3F8FF;
+    border: 1px solid #CFD5DF;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease; /* transitionを共通化 */
+    
+    /* 追加: Flexboxでレイアウトを制御 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 左右中央揃え */
+    padding: 100px 20px; /* 上下の余白を調整 */
+    position: relative;
+}
+
+.icon-display {
+    font-size: 160px !important; /* アイコンを大きく表示 */
+    color: #495666;            /* ビジネスらしい濃い青 */
+    margin-bottom: 0;       /* タイトル（先生・学生）との間隔 */
+}
+
+.title {
+    padding: 0 20px; /* 上下の余白を調整 */
+}
+
+.title-text {
+    color: #495666;
+    font-size: 70px;
+    font-weight: bold;
+}
+
+.text {
+    color: #495666;
+    width: 80%; /* 幅を調整（ボタンからはみ出ないように） */
+    font-size: 16px;
+    margin-top: auto;
+    text-align: center;
+}
+
+/* ホバー */
+.nav-button:hover {
+    background-color: #CFD5DF;
+}
+
+@media (max-width: 1200px) {
+    /* ボタン */
+    .nav-button {
+        width: 400px;
+        border-radius: 18px;
+    }
+    .text {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .button-container {
+        gap: 0 60px; /* ボタン同士の間隔 */
+    }
+    .title {
+        font-size: 40px;
+        font-weight: bold;
+    }
+}
+
+@media (max-width: 900px) {
+    .button-container {
+        gap: 0 50px; /* ボタン同士の間隔 */
+    }
+    /* ボタン */
+    .nav-button {
+        width: 300px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 700px) {
+    .button-container {
+        gap: 0 30px; /* ボタン同士の間隔 */
+    }
+    /* ボタン */
+    .nav-button {
+        width: 200px;
+        border-radius: 10px;
+    }
+    .icon-display {
+        font-size: 100px !important; /* アイコンを大きく表示 */
+    }
+    
+    .title {
+        padding: 0 20px 10px 20px; /* 上下の余白を調整 */
+    }
+    
+    .title-text {
+        font-size: 60px;
+    }
+}
+
+@media (max-height: 900px) {
+    .main-content {
+        padding-top: 150px;
+    }
+}
