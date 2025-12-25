@@ -11,6 +11,8 @@ error_reporting(E_ALL);
 // セッション開始
 session_start();
 
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+
 $config_path = __DIR__ . '/../../../config/secrets_local.php';
 
 $config = require $config_path;
@@ -151,26 +153,26 @@ else {
                             </div> 
                             <div class="column-student-id">
                                 <input type="text" 
-                                    name="students[<?php echo $i; ?>][student_id]" 
-                                    value="<?php echo htmlspecialchars($student_count + 1 + ($current_year * 1000)); ?>">
+                                    name="students[<?php echo SecurityHelper::escapeHtml((string)$i); ?>][student_id]" 
+                                    value="<?php echo SecurityHelper::escapeHtml((string)($student_count + 1 + $i + ($current_year * 1000))); ?>">
                             </div> 
                             <div class="column-name">
                                 <input type="text" 
-                                    name="students[<?php echo $i; ?>][name]" 
+                                    name="students[<?php echo SecurityHelper::escapeHtml((string)$i); ?>][name]" 
                                     placeholder="氏名">
                             </div> 
-                                <div class="column-course">
-                                    <a href="#" class="course-display" 
-                                        data-course-name-display 
-                                        data-dropdown-for="courseDropdownMenu"
-                                        data-selected-course-center="7">
-                                        1年1組
-                                    </a>
+                            <div class="column-course">
+                                <a href="#" class="course-display" 
+                                    data-course-name-display 
+                                    data-dropdown-for="courseDropdownMenu"
+                                    data-selected-course-center="7">
+                                    1年1組
+                                </a>
                                 <input type="hidden" 
-                                    name="students[<?php echo $i; ?>][course_id]" 
+                                    name="students[<?php echo SecurityHelper::escapeHtml((string)$i); ?>][course_id]" 
                                     value="7"
                                     class="course-hidden-input">
-                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -190,7 +192,8 @@ else {
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-check"></div> 
+                        <div class="column-student-id">学生番号</div>
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
@@ -200,13 +203,17 @@ else {
                         <div class="column-check">
                         </div>
                         <div class="column-student-id">
-                            <input type="text" value=<?php echo htmlspecialchars($row['student_id']); ?> disabled>
+                            <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$row['student_id']); ?>" disabled>
                         </div>
                         <div class="column-name">
-                            <input type="text" value=<?php echo htmlspecialchars($row['name']); ?> disabled>
+                            <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$row['name']); ?>" disabled>
                         </div>
                         <div class="column-course">
-                            <input type="text" value=<?php echo htmlspecialchars($courses[$row['course_id'] - 1]['course_name']); ?> disabled>
+                            <?php 
+                                // コース名を取得。配列のインデックス調整ロジックはそのまま維持
+                                $course_name = $courses[$row['course_id'] - 1]['course_name'] ?? '不明なコース';
+                            ?>
+                            <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$course_name); ?>" disabled>
                         </div>
                     </div>
                     <?php endwhile; ?>
@@ -234,37 +241,43 @@ else {
         <div>
         <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">
-                <div class="table-header">
+            <div class="table-header">
                 <div class="column-check"></div> 
                 <div class="column-student-id">学生番号</div>
                 <div class="column-name">氏名</div>
                 <div class="column-course">メールアドレス</div>
             </div>
+            
             <?php while ($error_row = $error_stmt->fetch()): ?>
             <div class="table-row">
                 <div class="column-check">
                 </div> 
+                
                 <div class="column-student-id">
                     <input type="text" 
-                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][student_id]" 
-                           value=<?php echo htmlspecialchars($error_row['student_id']); ?>>
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][student_id]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['student_id']); ?>">
                 </div> 
+                
                 <div class="column-name">
                     <input type="text" 
-                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][name]" 
-                           value=<?php echo htmlspecialchars($error_row['name']); ?>>
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][name]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['name']); ?>">
                 </div> 
+                
                 <div class="column-course">
                     <input type="text" 
-                           name="students[<?php echo htmlspecialchars($error_row['id']); ?>][approvalUserAddress]" 
-                           value=<?php echo htmlspecialchars($error_row['approvalUserAddress']); ?>>
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][approvalUserAddress]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['approvalUserAddress']); ?>">
                 </div>
+
                 <input type="hidden" 
-                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][id]" 
-                       value=<?php echo htmlspecialchars($error_row['id']); ?>>
+                    name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][id]" 
+                    value="<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>">
+                    
                 <input type="hidden" 
-                       name="students[<?php echo htmlspecialchars($error_row['id']); ?>][course_id]" 
-                       value=<?php echo htmlspecialchars($error_row['course_id']); ?>>
+                    name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][course_id]" 
+                    value="<?php echo SecurityHelper::escapeHtml((string)$error_row['course_id']); ?>">
             </div>
             <?php endwhile; ?>
         </div>
