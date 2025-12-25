@@ -1,6 +1,6 @@
 <?php
 session_start();
-$status = $_SESSION['subject'] ?? [];
+$status = $_SESSION['timetable_details'] ?? [];
 $dsn = $status['dsn'] ?? ''; 
 $user = $status['user'] ?? '';
 $pass = $status['pass'] ?? '';
@@ -155,100 +155,84 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     </p>
 
     <main class="main-content" id="schedule-container">
-        <div class="schedule-list">
-            <?php
-            try {
-                if(empty($status)) throw new Exception("セッション設定がありません");
+    <div class="schedule-list">
+        <?php
+        try {
+            // --- ここをご自身の環境に合わせて書き換えてください ---
+            $dsn  = 'mysql:host=localhost;dbname=icc_smart_campus;charset=utf8';
+            $user = 'root'; // ユーザー名（通常は root）
+            $pass = 'root';     // パスワード（空でダメなら 'root' やご自身で設定したものを入力）
+            // --------------------------------------------------
 
-                $config = $_SESSION['subject'];
-                $db = new PDO($config['dsn'], $config['user'], $config['pass'], $config['options']);
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ];
 
-                $target_table = $config['table_map'][$selected_course] ?? $config['table_map']['system'];
-                $sql = sprintf($config['base_sql'], $target_table);
-                
-                $stmt = $db->prepare($sql);
-                $stmt->execute([(string)$display_day_jp]);
-                $all_schedule = $stmt->fetchAll();
+            $db = new PDO($dsn, $user, $pass, $options);
 
-                if (empty($all_schedule)) {
-                    echo "<div class='no-schedule'>授業データがありません（{$display_day_jp}曜日）</div>";
-                } else {
-                    foreach($all_schedule as $item) {
-                        $period = (int)$item["period"];
-                        $s_name = htmlspecialchars($item["subject_name"] ?? '未設定');
-                        $room = htmlspecialchars($item["room"] ?? '');
-                        $teacher = htmlspecialchars($item["teacher"] ?? '');
-                        $detail = nl2br(htmlspecialchars($item["course_detail"] ?? '詳細情報はありません'));
-                        $kadai_id = htmlspecialchars($item["kadai_id"] ?? 'なし');
-                        $item_str = $item["course_item"] ?? '特になし';
-                        $item_list = preg_split('/[、,，]+/', $item_str, -1, PREG_SPLIT_NO_EMPTY);
-                        $time_str = $time_schedule[$period] ?? "時間未定";
-                        ?>
-                        <section class="card">
-                            <div class="info">
-                                <div class="subject-details">
-                                    <h2 class="subject"><?php echo $s_name; ?></h2>
-                                    <p class="room-name"><?php echo $room; ?></p>
-                                </div>
-                                <div class="period-details">
-                                    <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
-                                    <div class="button-container">
-                                        <div class="dropdown-wrapper detail-dropdown-wrapper">
-                                            <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>" aria-expanded="false">
-                                                <p>授業詳細</p>
-                                                <img class="button-icon detail-icon" src="images/arrow_right.svg" alt="">
-                                            </button>
-                                        </div>
-                                        <div class="dropdown-wrapper item-dropdown-wrapper">
-                                            <button type="button" class="button dropdown-toggle item-toggle" id="item-toggle-button-<?php echo $period; ?>" aria-expanded="false">
-                                                <span class="button-text-container"><p>持ってくるもの</p></span>
-                                                <img class="button-icon item-icon" src="images/arrow_right.svg" alt="">
-                                            </button>
-                                        </div>
+            // 1. 曜日を数値に変換（画像のカラム day_of_week が 1, 2, 3... のため）
+            $day_to_num = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
+            $target_day_num = $day_to_num[$display_day_jp] ?? 1;
+
+            // 2. コースを subject_id に変換
+            $course_to_id = [
+                'system' => 1, 'web' => 2, 'multi' => 3, 
+                'ouyou' => 4, 'kihon' => 5, 'itikumi' => 6, 'nikumi' => 7
+            ];
+            $target_subject_id = $course_to_id[$selected_course] ?? 1;
+
+            // 3. SQLの実行（画像通りのテーブル名・カラム名）
+            $sql = "SELECT * FROM timetable_details 
+                    WHERE day_of_week = :day 
+                    AND subject_id = :sid 
+                    ORDER BY period ASC";
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute([
+                ':day' => $target_day_num,
+                ':sid' => $target_subject_id
+            ]);
+            $all_schedule = $stmt->fetchAll();
+
+            if (empty($all_schedule)) {
+                echo "<div class='no-schedule'>授業データがありません（{$display_day_jp}曜日）</div>";
+            } else {
+                foreach($all_schedule as $item) {
+                    $period = (int)$item["period"];
+                    // 画像にある class_detail（授業名(先生)）と bring_object（教室）を取得
+                    $s_name = htmlspecialchars($item["class_detail"] ?? '未設定');
+                    $room = htmlspecialchars($item["bring_object"] ?? '');
+                    
+                    $time_str = $time_schedule[$period] ?? "時間未定";
+                    ?>
+                    <section class="card">
+                        <div class="info">
+                            <div class="subject-details">
+                                <h2 class="subject"><?php echo $s_name; ?></h2>
+                                <p class="room-name">教室: <?php echo $room; ?></p>
+                            </div>
+                            <div class="period-details">
+                                <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
+                                <div class="button-container">
+                                    <div class="dropdown-wrapper detail-dropdown-wrapper">
+                                        <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>" aria-expanded="false">
+                                            <p>授業詳細</p>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="dropdown-content detail-content" id="detail-content-<?php echo $period; ?>">
-                                <div class="detail-box">
-                                    <div class="detail-title" style="font-weight:bold; color:#555;">担当教員</div>
-                                    <p class="detail-text"><?php echo $teacher; ?></p>
-                                </div>
-                                <div class="detail-box" style="margin-top:10px;">
-                                    <div class="detail-title" style="font-weight:bold; color:#555;">課題</div>
-                                    <p class="detail-text"><?php echo $kadai_id; ?></p>
-                                </div>
-                                <div class="detail-box" style="margin-top:10px;">
-                                    <div class="detail-title" style="font-weight:bold; color:#555;">授業の内容:</div>
-                                    <p class="detail-text"><?php echo $detail; ?></p>
-                                </div>
-                            </div>
-
-                            <div class="dropdown-content item-content" id="item-content-<?php echo $period; ?>">
-                                <ul class="item-list">
-                                    <li style="font-weight:bold;">持ってくるもの</li>
-                                    <?php 
-                                    if (empty($item_list) || (count($item_list)===1 && trim($item_list[0])==='特になし')) {
-                                        echo '<li>特になし</li>';
-                                    } else {
-                                        foreach($item_list as $idx => $val) {
-                                            $val = htmlspecialchars(trim($val));
-                                            $chkId = "item-chk-{$period}-{$idx}";
-                                            echo "<li><input type='checkbox' id='{$chkId}'><label for='{$chkId}' style='margin-left:5px;'>{$val}</label></li>";
-                                        }
-                                    }
-                                    ?>
-                                </ul>
-                            </div>
-                        </section> <?php
-                    } 
+                        </div>
+                    </section> 
+                    <?php
                 } 
-            } catch(Exception $e) {
-                echo "<div class='error-msg'>DBエラー: " . htmlspecialchars($e->getMessage()) . "</div>";
-            }
-            ?>
-        </div>
-    </main>
+            } 
+        } catch(Exception $e) {
+            echo "<div class='error-msg'>エラー: " . htmlspecialchars($e->getMessage()) . "</div>";
+        }
+        ?>
+    </div>
+</main>
 
     <script>
     "use strict";

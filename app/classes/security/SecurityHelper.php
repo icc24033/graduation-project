@@ -20,6 +20,7 @@ class SecurityHelper {
      * ２．ページ全体のセキュリティヘッダーを設定
      * 概要：・XSS やクリックジャッキングなどの攻撃を防ぐために、適切なセキュリティヘッダーを設定する
      * 　　　・このメソッドは、必ず各ページの最初に呼び出す
+     * 使用方法： SecurityHelper::applySecureHeaders();　これをページの最初に書く
      * @param void
      * @return void
      */
@@ -44,6 +45,7 @@ class SecurityHelper {
      * ３．ログインチェック（ゲートキーパー）
      * 概要：・セッションにログイン情報が存在するかを確認し、未ログインの場合はログインページへリダイレクトする
      * 　　　・このメソッドは、各ページの最初に呼び出す
+     * 使用方法： SecurityHelper::requireLogin();　これをページの最初に書く
      * @param void
      * @return void
      */
@@ -69,6 +71,7 @@ class SecurityHelper {
      * 概要：・セッションに遷移トークンを保存し、遷移元ページで生成したトークンをセッションに保存する
      * 　　　・遷移先ページでこのトークンを確認することで、正しい遷移順序を強制する(requireTransitionTokenとセットで使用)
      * 　　　・呼び出す場所は遷移元ページの最後
+     * 使用方法： SecurityHelper::setTransitionToken('unique_key');　これを遷移元ページの最後に書く
      * @param string $key 手形の名前
      * @return void
      * 
@@ -76,6 +79,7 @@ class SecurityHelper {
      * 概要：・セッションに保存されたトークンと、リクエストで送信されたトークンを比較し、一致しない場合はエラーページへリダイレクトする
      * 　　　・トークンは、遷移元ページで生成し、セッションに保存しておく必要がある
      *　　　 ・呼び出す場所は遷移先ページの最初
+     * 使用方法： SecurityHelper::requireTransitionToken('unique_key');　これを遷移先ページの最初に書く
      * @param string $key 手形の名前
      * @param bool $keepToken trueなら確認後も手形を残し（リロード対策）、falseなら没収（遷移の厳格化）
      * @return void
@@ -114,12 +118,14 @@ class SecurityHelper {
      * 概要：・セッションにCSRFトークンを生成し保存する
      * 　　　・フォームページでこのメソッドを呼び出し、生成されたトークンをフォームに埋め込む
      *　　　 ・呼び出す場所はフォームページの最初
+     * 使用方法： SecurityHelper::generateCsrfToken();　これをフォームページの最初に書く
      * @param void
      * @return string 生成されたCSRFトークン
      * 
      * メソッド2：validateCsrfToken
      * 概要：・セッションに保存されたCSRFトークンと、リクエストで送信されたトークンを比較し、一致しない場合は不正なリクエストとみなす
      * 　　　・呼び出す場所はフォーム処理ページの最初
+     * 使用方法： SecurityHelper::validateCsrfToken($_POST['csrf_token']);　これをフォーム処理ページの最初に書く
      * @param string|null $token リクエストで送信されたCSRFトークン
      * @return bool トークンが有効かどうか
      */
@@ -149,6 +155,7 @@ class SecurityHelper {
      * ６．セッション固定攻撃対策
      * 概要：・セッションIDを定期的に再生成し、セッション固定攻撃を防ぐ
      * 　　　・ログイン直後や重要な操作の直後にこのメソッドを呼び出す
+     * 使用方法： SecurityHelper::regenerateSession();　これをログイン直後や重要操作直後に書く
      * @param void
      */
     public static function regenerateSession(): void {
