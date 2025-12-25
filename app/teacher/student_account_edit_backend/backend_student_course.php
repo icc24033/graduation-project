@@ -35,6 +35,7 @@ $options = [
 
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
+
 //studentテーブルに格納されている学生情報の取得
 $student_sql = ("SELECT 
                     S.student_id,

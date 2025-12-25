@@ -544,57 +544,69 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // ---------------------------------
-        // 5-1. 単一行追加ボタン (.add-button) のロジック
+        // 5-1. 1行追加ボタンのロジック
         // ---------------------------------
         const addButton = document.querySelector('.button-group .add-button:first-child'); 
-        
+
         if (addButton && tableContainer) {
-            const newRowTemplate = `
-                <div class="table-row">
-                    <div class="column-check"></div> 
-                    <div class="column-student-id"><input type="text" value="" name="student_id[]" class="input-student-id"></div> 
-                    <div class="column-name"><input type="text" value="" name="student_name[]" placeholder="氏名を入力" class="input-student-name"></div> 
-                    <div class="column-course">
-                        <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コースを選択</span>
-                        <input type="hidden" name="course[]" class="input-course-hidden" value="コースを選択">
-                    </div>
-                </div>
-            `;
-            
             addButton.addEventListener('click', () => {
-                const newRow = document.createElement('div');
-                newRow.innerHTML = newRowTemplate.trim();
-                const newRowElement = newRow.firstChild;
-                
+                // 現在の行数を取得してインデックスを決定
+                const currentIndex = tableContainer.querySelectorAll('.table-row').length;
                 const nextId = getNextStudentId();
-                const studentIdInput = newRowElement.querySelector('.column-student-id input');
                 
-                if (studentIdInput) {
-                    studentIdInput.value = nextId; 
-                }
+                const newRow = document.createElement('div');
+                newRow.className = 'table-row';
                 
-                tableContainer.appendChild(newRowElement);
+                // student_addition.php の構造に合わせたHTML
+                newRow.innerHTML = `
+                    <div class="column-check"></div> 
+                    <div class="column-student-id">
+                        <input type="text" 
+                            name="students[${currentIndex}][student_id]" 
+                            value="${nextId}" 
+                            class="input-student-id">
+                    </div> 
+                    <div class="column-name">
+                        <input type="text" 
+                            name="students[${currentIndex}][name]" 
+                            placeholder="氏名" 
+                            class="input-student-name">
+                    </div> 
+                    <div class="column-course">
+                        <a href="#" class="course-display" 
+                        data-course-name-display 
+                        data-dropdown-for="courseDropdownMenu"
+                        data-selected-course-center="7">
+                        1年1組
+                        </a>
+                        <input type="hidden" 
+                            name="students[${currentIndex}][course_id]" 
+                            value="7" 
+                            class="course-hidden-input">
+                    </div>
+                `;
                 
-                // 追加された行のコース表示要素にイベントリスナーを再設定
-                const newCourseInput = newRowElement.querySelector('.course-display[data-dropdown-for]');
-                if (newCourseInput) {
-                    setupCourseDropdown(newCourseInput);
+                tableContainer.appendChild(newRow);
+                
+                // 追加された行のドロップダウン設定
+                const newCourseLink = newRow.querySelector('.course-display');
+                if (newCourseLink) {
+                    setupCourseDropdown(newCourseLink);
                 }
 
                 tableContainer.scrollTop = tableContainer.scrollHeight;
             });
         }
-        
+
         // ---------------------------------
         // 5-2. 複数人数追加モーダルのロジック
         // ---------------------------------
-        const addCountButton = document.querySelector('.button-group .add-button:last-child'); // 追加人数入力ボタン
+        const addCountButton = document.querySelector('.button-group .add-button:last-child');
         const modal = document.getElementById('addCountModal'); 
         const cancelButton = document.getElementById('cancelAddCount'); 
         const confirmButton = document.getElementById('confirmAddCount'); 
         const countInput = document.getElementById('studentCountInput'); 
 
-        // 2. モーダル表示ロジック
         if (addCountButton && modal) {
             addCountButton.addEventListener('click', () => {
                 modal.style.display = 'flex'; 
@@ -602,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 3. モーダル非表示ロジック
         const closeModal = () => {
             if (modal) modal.style.display = 'none';
         };
@@ -611,15 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelButton.addEventListener('click', closeModal);
         }
 
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target.id === 'addCountModal') { 
-                    closeModal();
-                }
-            });
-        }
-
-        // 4. 追加ボタンのロジック (行の追加を実装)
         if (confirmButton && tableContainer) {
             confirmButton.addEventListener('click', () => {
                 const count = parseInt(countInput.value, 10);
@@ -629,36 +631,55 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                let nextId = parseInt(getNextStudentId(), 10);
+                // 開始インデックスと開始IDを取得
+                let startIndex = tableContainer.querySelectorAll('.table-row').length;
+                let nextIdBase = parseInt(getNextStudentId(), 10);
 
                 for(let i = 0; i < count; i++) {
-                    const newRow = document.createElement('div');
-                    const studentId = (nextId + i).toString();
+                    const currentIndex = startIndex + i;
+                    const studentId = (nextIdBase + i).toString();
                     
-                    const rowHTML = `
-                        <div class="table-row">
-                            <div class="column-check"></div> 
-                            <div class="column-student-id"><input type="text" value="${studentId}" name="student_id[]" class="input-student-id"></div> 
-                            <div class="column-name"><input type="text" value="" name="student_name[]" placeholder="氏名を入力" class="input-student-name"></div> 
-                            <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コースを選択</span>
-                                <input type="hidden" name="course[]" class="input-course-hidden" value="コースを選択">
-                            </div>
+                    const newRow = document.createElement('div');
+                    newRow.className = 'table-row';
+                    
+                    newRow.innerHTML = `
+                        <div class="column-check"></div> 
+                        <div class="column-student-id">
+                            <input type="text" 
+                                name="students[${currentIndex}][student_id]" 
+                                value="${studentId}" 
+                                class="input-student-id">
+                        </div> 
+                        <div class="column-name">
+                            <input type="text" 
+                                name="students[${currentIndex}][name]" 
+                                placeholder="氏名" 
+                                class="input-student-name">
+                        </div> 
+                        <div class="column-course">
+                            <a href="#" class="course-display" 
+                            data-course-name-display 
+                            data-dropdown-for="courseDropdownMenu"
+                            data-selected-course-center="7">
+                            1年1組
+                            </a>
+                            <input type="hidden" 
+                                name="students[${currentIndex}][course_id]" 
+                                value="7" 
+                                class="course-hidden-input">
                         </div>
                     `;
-                    newRow.innerHTML = rowHTML.trim();
-                    const newRowElement = newRow.firstChild;
                     
-                    tableContainer.appendChild(newRowElement);
+                    tableContainer.appendChild(newRow);
                     
-                    const newCourseInput = newRowElement.querySelector('.course-display[data-dropdown-for]');
-                    if (newCourseInput) {
-                        setupCourseDropdown(newCourseInput);
+                    const newCourseLink = newRow.querySelector('.course-display');
+                    if (newCourseLink) {
+                        setupCourseDropdown(newCourseLink);
                     }
                 }
                 
                 showCustomAlert(`${count} 名の空のアカウント行を追加しました。`);
-                tableContainer.scrollTop = tableContainer.scrollHeight; // スクロール
+                tableContainer.scrollTop = tableContainer.scrollHeight;
                 closeModal();
             });
         }

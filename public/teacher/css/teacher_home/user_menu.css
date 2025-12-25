@@ -64,3 +64,14 @@
 
 /* ポップアップを画像に近づけるための追加スタイル（省略可） */
 /* ボタンが一つだけなので、画像のようなリスト構造は不要と判断し、シンプルなボタンとして実装しています。 */
+
+.help-button .icon-lightbulb {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 15px;
+    /* 電球のSVGアイコンデータ */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-3-15a6 6 0 0 0-5.907 4.942A5 5 0 0 1 7.5 13.5v1a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1a5 5 0 0 1 2.407-3.558A6 6 0 0 0 12 3Z"/></svg>');
+    background-size: cover;
+    opacity: 0.6;
+}
