@@ -38,6 +38,11 @@ if ($status['backend'] === 'student_addition') {
         $stmt_test_student = $pdo->prepare($status['student_count_sql']);
         $stmt_test_student->execute([$current_year]);
         $student_count = $stmt_test_student->fetchColumn();
+
+        // コース情報の取得
+        $stmt_course = $pdo->prepare($status['course_sql']);
+        $stmt_course->execute();
+        $courses = $stmt_course->fetchAll();
     }
     catch (PDOException $e) {
         // データベース接続/クエリ実行エラー発生時
@@ -119,8 +124,8 @@ else {
 
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
-            <form action="..\..\..\app\teacher\student_account_edit_backend\csv_edit.php" method="POST">
-                <div class="content-area">
+            <div class="content-area">
+                <form action="..\..\..\app\teacher\student_account_edit_backend\csv_edit.php" method="POST">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
@@ -142,12 +147,26 @@ else {
                                     placeholder="氏名">
                             </div> 
                             <div class="column-course">
-                                <span class="course-display" data-course-input data-dropdown-for="courseDropdownMenu">コース</span>
-                                
+                                <span class="course-display" 
+                                    data-course-name-display 
+                                    data-dropdown-for="courseDropdownMenu"
+                                    data-selected-course-center="7">
+                                    1年1組
+                                </span>
                                 <input type="hidden" 
                                     name="students[<?php echo $i; ?>][course_id]" 
-                                    value="" 
-                                    id="course_id_<?php echo $i; ?>">
+                                    value="7"
+                                    class="course-hidden-input">
+                            </div>
+                            <div class="dropdown-menu" id="courseDropdownMenu">
+                                <div class="dropdown-item" data-course-id="1">1年1組</div>
+                                <div class="dropdown-item" data-course-id="2">1年2組</div>
+                                <div class="dropdown-item" data-course-id="3">2年1組</div>
+                                <div class="dropdown-item" data-course-id="4">2年2組</div>
+                                <div class="dropdown-item" data-course-id="5">3年1組</div>
+                                <div class="dropdown-item" data-course-id="6">3年2組</div>
+                                <div class="dropdown-item" data-course-id="7">4年1組</div>
+                                <div class="dropdown-item" data-course-id="8">4年2組</div>
                             </div>
                         </div>
                     </div>
@@ -157,8 +176,8 @@ else {
                         <button class="add-button" type="button">追加人数入力</button>
                     </div>
                     <button class="complete-button" type="submit">完了</button>
-                </div>
-            </form>
+                </form>
+            </div>
 
             <?php $i++; // 1行目が終わったのでカウンタをインクリメント（複数行を扱うJavaScript実装に備えて） ?>
 
