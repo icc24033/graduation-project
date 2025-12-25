@@ -72,6 +72,18 @@ catch (PDOException $e) {
     // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
     // throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
+
+require_once __DIR__ . '/../../../app/classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../../app/classes/helper/dropdown/ViewHelper.php';
+
+try {
+    $courseRepo = RepositoryFactory::getCourseRepository();
+    $courseList = $courseRepo->getAllCourses();
+}
+catch (Exception $e) {
+    error_log("Error fetching courses: " . $e->getMessage());
+    $courseList = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -159,9 +171,12 @@ catch (PDOException $e) {
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
+                    <?php 
+                    $html = ViewHelper::renderSelectOptions($courseList, 'course_id', 'course_name', true);
+                    ?>
                 </ul>
             </nav>
-            
+
             <div class="content-area">
                 <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php" method="post">
                 <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">

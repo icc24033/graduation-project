@@ -13,9 +13,11 @@ class ViewHelper {
      * @param mixed $selectedValue 選択状態にする値（任意）
      * @return string HTML文字列
      */
-    public static function renderSelectOptions(array $items, string $valueKey, string $labelKey, $selectedValue = null): string {
-        $html = '<option value="">選択してください</option>';
-        
+    public static function renderSelectOptions(array $items, string $valueKey, string $labelKey, bool $flg, $selectedValue = null): string {
+        if($flg == true){
+            $html = '<option value="">選択してください</option>';
+        }
+
         foreach ($items as $item) {
             // XSS対策（エスケープ処理）
             $value = htmlspecialchars($item[$valueKey], ENT_QUOTES, 'UTF-8');
