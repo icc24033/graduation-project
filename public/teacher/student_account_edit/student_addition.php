@@ -59,10 +59,6 @@ else if ($status['backend'] === 'csv_upload') {
         //データベース接続
         $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
-        // csv_tableに格納されている今年度の学生の取得
-        $stmt_csv_table = $pdo->prepare($status['csv_table_student_sql']);
-        $stmt_csv_table->execute();
-
         // コース情報の取得
         $stmt_course = $pdo->prepare($status['course_sql']);
         $stmt_course->execute();
@@ -188,7 +184,20 @@ else {
 
 
             
-            <?php elseif ($status['backend'] === 'csv_upload'): ?>
+            <?php elseif ($status['backend'] === 'csv_upload' && $status['success_csv'] === true): 
+                try{
+                    // csv_tableに格納されている今年度の学生の取得
+                    $stmt_csv_table = $pdo->prepare($status['csv_table_student_sql']);
+                    $stmt_csv_table->execute();
+                }
+                catch (PDOException $e) {
+                    // データベース接続/クエリ実行エラー発生時
+                    error_log("DB Error: " . $e->getMessage());
+                    $current_course_name = 'エラー: データベース接続失敗';
+                    // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
+                    // throw new PDOException($e->getMessage(), (int)$e->getCode());
+                }
+            ?>
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
@@ -224,20 +233,39 @@ else {
                     <button class="complete-button">追加完了</button>
                 </form>
                 <?php endif; ?>
+
             </div>
-            <?php else: ?>
+            <?php elseif ($status['backend'] === 'csv_upload' && $status['success_csv'] === false): ?>
+                
+                <div class="content-area">
+                    <div class="empty-state-container" style="text-align: center; padding: 40px; background: #fff; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+                        <span class="material-symbols-outlined" style="font-size: 48px; color: #ccc; vertical-align: middle;">person_off</span>
+                        <p style="margin-top: 15px; color: #666; font-weight: bold;">追加可能な正常データが見つかりませんでした。</p>
+                        <p style="font-size: 0.9em; color: #888;">CSVファイルの内容を確認するか、下部に表示される「エラーデータ編集」から修正を行ってください。</p>
+                    </div>
+                </div>
+
             <?php endif; ?>
         </main>
     </div>
 
     <?php if ($status['error_csv'] === true): 
-        $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
-        $error_stmt->execute();    
+        try {
+            $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
+            $error_stmt->execute();
+        } catch (PDOException $e) {
+            // エラー内容をログに記録
+            error_log("CSV Error Data Fetch Error: " . $e->getMessage());
+            // ユーザーにエラーメッセージを表示
+            echo '<div class="error-message">エラーデータの取得中に問題が発生しました。</div>';
+            // 以降のループ処理を実行しないように null を代入
+            $error_stmt = null;
+        } 
     ?>
 
     <div class="content-area">
         <div class="error-edit-container">
-        <h3>CSVエラーデータ編集</h3>
+        <h3>エラーデータ編集</h3>
         <div>
         <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">

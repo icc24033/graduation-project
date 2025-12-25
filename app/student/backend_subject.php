@@ -3,7 +3,7 @@ session_start();
 
 // ▼▼▼ DB接続設定 ▼▼▼
 $db_host = 'localhost';
-$db_name = 'test';
+$db_name = 'icc_smart_campus';
 $db_user = 'root';
 $db_pass = 'root';
 
