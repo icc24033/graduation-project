@@ -7,21 +7,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. 削除対象の学生IDの配列 (JavaScriptで 'delete_student_id[]' と定義)
     $delete_student_id = $_POST['delete_student_id'] ?? []; 
     
-    $config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-    $config = require $config_path;
-
-    define('DB_HOST', $config['db_host']);
-    define('DB_NAME', $config['db_name']);
-    define('DB_USER', $config['db_user']);
-    define('DB_PASS', $config['db_pass']);
-
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+    
 
     // POSTで受け取った受け取ったdelete_student_idｗも元にテーブル内の学生情報を削除するSQLクエリ
     try {
-        //データベース接続
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+        // RepositoryFactoryを使用してPDOインスタンスを取得
+        require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+        $pdo = RepositoryFactory::getPdo();
+
         
         //studentテーブルの削除
         $student_delete_sql = ("DELETE FROM student WHERE student_id = ?;");
@@ -80,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['student_account'] = [
         'success' => true,
         'before' => 'teacher_home',
-        'database_options' => $options,
         'course_sql' => $course_sql,
         'course_id' => $received_course_id,
         'student_sql' => $student_sql,
@@ -99,12 +91,6 @@ else {
     // $received_current_year の下2桁を取得
     $received_current_year = substr($received_current_year, -2);
 
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
-
     //コース情報取得SQLクエリ
     $course_sql = ("SELECT * FROM course;");
     //テストstudentに格納されている学生情報の取得
@@ -113,7 +99,6 @@ else {
     $_SESSION['student_account'] = [
         'success' => true,
         'before' => 'teacher_home',
-        'database_options' => $options,
         'course_sql' => $course_sql,
         'course_id' => $received_course_id,
         'student_sql' => $student_sql,

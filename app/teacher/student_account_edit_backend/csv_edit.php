@@ -2,18 +2,6 @@
 
 session_start();
 
-//データベース情報
-$config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-$config = require $config_path;
-
-define('DB_HOST', $config['db_host']);
-define('DB_NAME', $config['db_name']);
-define('DB_USER', $config['db_user']);
-define('DB_PASS', $config['db_pass']);
-
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-
 //エラーデータ保存用テーブル作成
 $sql_delete_error_table = "DROP TABLE IF EXISTS error_student_table;";
 //ーーーーーーCSVデータの書式が確定していないので後回しーーーーーーーーーーーーーーーーーーーー
@@ -40,8 +28,10 @@ $sql_error_id_foreign_key =
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        //データベース接続
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+        // RepositoryFactoryを使用してPDOインスタンスを取得
+        require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+        $pdo = RepositoryFactory::getPdo();
+
 
         
         
