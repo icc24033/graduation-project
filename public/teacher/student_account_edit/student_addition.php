@@ -122,6 +122,19 @@ else {
                 </form>
             </nav>
 
+            <ul class="dropdown-menu" id="courseDropdownMenu">
+                <?php if (!empty($courses)): ?>
+                    <?php foreach ($courses as $row): ?>
+                        <li>
+                            <a href="#" 
+                            data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>">
+                            <?php echo htmlspecialchars($row['course_name']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </ul>
+
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
             <div class="content-area">
@@ -146,28 +159,18 @@ else {
                                     name="students[<?php echo $i; ?>][name]" 
                                     placeholder="氏名">
                             </div> 
-                            <div class="column-course">
-                                <span class="course-display" 
-                                    data-course-name-display 
-                                    data-dropdown-for="courseDropdownMenu"
-                                    data-selected-course-center="7">
-                                    1年1組
-                                </span>
+                                <div class="column-course">
+                                    <a href="#" class="course-display" 
+                                        data-course-name-display 
+                                        data-dropdown-for="courseDropdownMenu"
+                                        data-selected-course-center="7">
+                                        1年1組
+                                    </a>
                                 <input type="hidden" 
                                     name="students[<?php echo $i; ?>][course_id]" 
                                     value="7"
                                     class="course-hidden-input">
-                            </div>
-                            <div class="dropdown-menu" id="courseDropdownMenu">
-                                <div class="dropdown-item" data-course-id="1">1年1組</div>
-                                <div class="dropdown-item" data-course-id="2">1年2組</div>
-                                <div class="dropdown-item" data-course-id="3">2年1組</div>
-                                <div class="dropdown-item" data-course-id="4">2年2組</div>
-                                <div class="dropdown-item" data-course-id="5">3年1組</div>
-                                <div class="dropdown-item" data-course-id="6">3年2組</div>
-                                <div class="dropdown-item" data-course-id="7">4年1組</div>
-                                <div class="dropdown-item" data-course-id="8">4年2組</div>
-                            </div>
+                                </div>
                         </div>
                     </div>
 
