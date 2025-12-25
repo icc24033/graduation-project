@@ -14,7 +14,7 @@ class TeacherRepository extends BaseRepository {
      */
     public function getAllTeachers() {
         try {
-            $sql = "SELECT teacher_id, teacher_name FROM teachers ORDER BY teacher_id ASC";
+            $sql = "SELECT teacher_id, teacher_name FROM teacher ORDER BY teacher_id ASC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
 

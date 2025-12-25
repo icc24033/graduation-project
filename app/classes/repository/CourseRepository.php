@@ -27,4 +27,11 @@ class CourseRepository extends BaseRepository {
             return [];
         }
     }
+
+    public static function getCoursesDropdown() {
+        $html = <<<HTML
+            <li> </li>
+HTML;
+        return $html;
+    }
 }

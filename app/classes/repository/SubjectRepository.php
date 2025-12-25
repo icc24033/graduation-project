@@ -14,7 +14,7 @@ class SubjectRepository extends BaseRepository {
      */
     public function getAllSubjects() {
         try {
-            $sql = "SELECT id, subject_name FROM subjects ORDER BY id ASC";
+            $sql = "SELECT subject_id, subject_name FROM subjects ORDER BY subject_id ASC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
 
