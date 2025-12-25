@@ -1,4 +1,10 @@
 <?php
+
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 //セッション開始
 session_start();
 
@@ -29,24 +35,27 @@ if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
 // POSTで受けとった値を変数に格納
 $selected_student = $_POST['students'] ?? [];
 
-$config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-$config = require $config_path;
+// $config_path = __DIR__ . '/../../../config/secrets_local.php';
 
-define('DB_HOST', $config['db_host']);
-define('DB_NAME', $config['db_name']);
-define('DB_USER', $config['db_user']);
-define('DB_PASS', $config['db_pass']);
+// $config = require $config_path;
 
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+// define('DB_HOST', $config['db_host']);
+// define('DB_NAME', $config['db_name']);
+// define('DB_USER', $config['db_user']);
+// define('DB_PASS', $config['db_pass']);
+
+// $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
 
 //studentに格納されているcourse_idとcourse_nameの変更
 $update_course_sql = ("UPDATE student SET course_id = ? WHERE student_id = ?");
 
 try {
+    require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+    $pdo = RepositoryFactory::getPdo();
     //データベース接続
-    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    // $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
     //studentテーブルの更新
     $stmt_update = $pdo->prepare($update_course_sql);
@@ -57,6 +66,8 @@ try {
         ////$course_id = (int)$course_id; // コースIDを整数に変換
         $stmt_update->execute([$course_id, $student_id]);
     }
+
+    $pdo = null; // データベース接続を閉じる
 
 }
 catch (PDOException $e) {

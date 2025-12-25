@@ -270,12 +270,17 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
         
         // ★ 処理結果をセッションに格納
         if (isset($pdo)) {
-            // エラー件数を取得 (error_student_tableのレコード数を数える)
+            // エラー件数と正常データ件数を取得 (error_student_tableとcsv_tableのレコード数を数える)
             try {
                 $sql_error_count = "SELECT COUNT(*) AS error_count FROM error_student_table;";
                 $stmt = $pdo->query($sql_error_count);
                 $error_result = $stmt->fetch();
                 $error_count = $error_result['error_count'];
+
+                $sql_success_count = "SELECT COUNT(*) AS success_count FROM csv_table;";
+                $stmt = $pdo->query($sql_success_count);
+                $success_result = $stmt->fetch();
+                $success_count = $success_result['success_count'];
             }
             catch (PDOException $e) {
                 echo "エラー件数の取得に失敗しました: " . $e->getMessage();
@@ -287,6 +292,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             $error_count = -1; 
         }
 
+        // エラー件数に応じてフラグとSQLクエリを設定
         if ($error_count > 0) {
             $error_count_flag = true;
             $csv_error_table_sql = "SELECT * FROM error_student_table;";
@@ -295,6 +301,17 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             $error_count_flag = false;
             $csv_error_table_sql = null;
         }
+
+        // 正常データ件数に応じてフラグとSQLクエリを設定
+        if ($success_count > 0) {
+            $success_count_flag = true;
+            $csv_table_student_sql = "SELECT * FROM csv_table;";
+        }
+        else {
+            $success_count_flag = false;
+            $csv_table_student_sql = null;
+        }
+        
 
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -312,11 +329,12 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'success' => true,
             'backend' => 'csv_upload',
             'error_csv' => $error_count_flag,
+            'csv_error_table_sql' => $csv_error_table_sql,
             'before' => 'teacher_home',
             'database_options' => $options, 
+            'success_csv' => $success_count_flag,
             'csv_table_student_sql' => $csv_table_student_sql,
             'course_sql' => $course_sql,
-            'csv_error_table_sql' => $csv_error_table_sql
         ];
 
 
