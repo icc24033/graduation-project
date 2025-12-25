@@ -30,6 +30,7 @@ else {
     $school_year = [ $current_year, $current_year - 1 ];
 }
 
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 try {
     
@@ -95,47 +96,49 @@ catch (PDOException $e) {
             <nav class="sidebar">
             <ul>
                 <li class="nav-item is-group-label">年度</li> 
-                    <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                            <span class="current-value">20<?php echo $status['current_year']?>年度</span>
-                        </button>
-                        <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <?php foreach ($school_year as $year): ?>
-                                <li>
-                                    <a href="#" 
-                                       data-current-year="<?php echo htmlspecialchars($year);?>" 
-                                       data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
-                                       data-current-page="student_delete">
-                                       20<?php echo htmlspecialchars($year); ?>年度
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </li>
+                <li class="nav-item has-dropdown">
+                    <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" 
+                            data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>">
+                        <span class="current-value">
+                            20<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>年度
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu" id="yearDropdownMenu">
+                        <?php foreach ($school_year as $year): ?>
+                            <li>
+                                <a href="#" 
+                                data-current-year="<?php echo SecurityHelper::escapeHtml((string)$year); ?>" 
+                                data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
+                                data-current-page="student_delete">
+                                20<?php echo SecurityHelper::escapeHtml((string)$year); ?>年度
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </li>
 
                     <li class="nav-item is-group-label">コース</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" 
                                 id="courseDropdownToggle" 
                                 aria-expanded="false" 
-                                data-current-course="<?php echo htmlspecialchars($current_course_id); ?>"
-                                data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>">
-                            <span class="current-value"><?php echo htmlspecialchars($current_course_name); ?></span>
+                                data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
+                                data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>">
+                            <span class="current-value"><?php echo SecurityHelper::escapeHtml((string)$current_course_name); ?></span>
                         </button>
                         <ul class="dropdown-menu" id="courseDropdownMenu">
                             <?php if (!empty($course)): ?>
                                 <?php foreach ($course as $row): ?>
                                     <li>
                                         <a href="#" 
-                                           data-current-course="<?php echo htmlspecialchars($row['course_id']);?>" 
-                                           data-current-year="<?php echo htmlspecialchars($status['current_year']); ?>"
-                                           data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>"
-                                           data-current-page="student_delete">
-                                           <?php echo htmlspecialchars($row['course_name']); ?>
+                                        data-current-course="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>" 
+                                        data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>"
+                                        data-selected-course-center="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>"
+                                        data-current-page="student_delete">
+                                        <?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>
                                         </a>
                                     </li>
                                 <?php endforeach; ?>
-                                <!-- ---------------------------------------------------------------------------------- -->
                             <?php else: ?>
                                 <li><a href="#">コース情報が見つかりません</a></li>
                             <?php endif; ?>
@@ -174,17 +177,17 @@ catch (PDOException $e) {
                                 <div class="column-check">
                                     <input type="checkbox" 
                                         class="row-checkbox" 
-                                        data-student-id="<?php echo htmlspecialchars($student_row['student_id']); ?>" 
+                                        data-student-id="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>" 
                                     >
                                 </div>
                                 <div class="column-student-id">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_id']); ?>" disabled>
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>" disabled>
                                 </div>
                                 <div class="column-name">
-                                    <input type="text" value="<?php echo htmlspecialchars($student_row['student_name']); ?>" disabled>
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_name']); ?>" disabled>
                                 </div>
                                 <div class="column-course">
-                                    <input type="text" value="<?php echo htmlspecialchars($current_course_name); ?>" disabled>
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$current_course_name); ?>" disabled>
                                 </div>
                             </div>
 
