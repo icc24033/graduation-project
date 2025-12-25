@@ -110,7 +110,7 @@ if ($user_object instanceof User_MasAndTeach) {
                     </a>
                     <!-- リンク先わかりません -->
                     <a href="" class="help-button">
-                        ヘルプ
+                        <span class="icon-lightbulb"></span> ヘルプ
                     </a>
                 </div>
             <!--  ICCスマートキャンパスロゴ -->
