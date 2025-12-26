@@ -2,3 +2,20 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+
+<?php if (!empty($course)): ?>
+                                <?php foreach ($course as $row): ?>
+                                    <li>
+                                        <a href="#" 
+                                        data-current-course="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>" 
+                                        data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>"
+                                        data-selected-course-center="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>"
+                                        data-current-page="student_delete">
+                                        <?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li><a href="#">コース情報が見つかりません</a></li>
+                            <?php endif; ?>

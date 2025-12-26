@@ -13,12 +13,6 @@ define('DB_PASS', $config['db_pass']);
 
 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
 //error_student_tableの情報を更新するためのSQL文
 $sql_update_error_student = "UPDATE 
                                 error_student_table
@@ -181,7 +175,6 @@ try {
             'backend' => 'csv_upload',
             'error_csv' => $error_count_flag,
             'before' => 'teacher_home',
-            'database_options' => $options, 
             'csv_table_student_sql' => $csv_table_student_sql,
             'course_sql' => $course_sql,
             'csv_error_table_sql' => $csv_error_table_sql

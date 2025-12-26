@@ -26,12 +26,6 @@ if (isset($_GET['course_id']) && isset($_GET['current_year'])) {
     $received_current_year = substr($received_current_year, -2);
 }
 
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
 //コース情報取得SQLクエリ
 $course_sql = ("SELECT * FROM course;");
 //studentテーブルに格納されている学生情報の取得
@@ -55,7 +49,6 @@ $student_sql = ("SELECT
 $_SESSION['student_account'] = [
     'success' => true,
     'before' => 'teacher_home',
-    'database_options' => $options,
     'course_sql' => $course_sql,
     'course_id' => $received_course_id,
     'student_sql' => $student_sql,
