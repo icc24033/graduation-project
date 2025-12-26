@@ -21,6 +21,8 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
     <style>
+
+        /* 非表示の日時入力フィールド */
         #hiddenDateInput { display: none; }
         .no-schedule, .error-msg {
             text-align: center;
@@ -30,6 +32,7 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
         }
         .search { cursor: pointer; }
 
+        /* ドロップダウンメニューのスタイル */
         .dropdown-content {
             display: none;
             width: 100%;
@@ -41,6 +44,7 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
             border-radius: 0 0 8px 8px;
         }
         
+        /* ドロップダウンメニューの表示アニメーション */
         .dropdown-content.show {
             display: block;
             animation: fadeIn 0.3s ease;
@@ -50,19 +54,29 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        /* 持ってくるものリストのスタイル */
         .item-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
+        /* リストアイテムのスタイル */
         .item-list li {
             padding: 8px 0;
             border-bottom: 1px solid #ddd;
         }
+
+        /* 最後のリストアイテムのボーダーを削除 */
         .item-list li:last-child {
             border-bottom: none;
         }
+        /* 日付ボタンの文字色を強制的に変える */
+#dateTriggerBtn.date-btn {
+    color: #ffffff !important;   /* ゴールド（黄色系） */
+    background-color: #495666;   /* 背景色 */
+    font-weight: bold !important; /* 太字 */
+}
     </style>
 </head>
 <body>
@@ -154,15 +168,14 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
         <?php echo $course_label; ?> の時間割
     </p>
 
-    <main class="main-content" id="schedule-container">
+   <main class="main-content" id="schedule-container">
     <div class="schedule-list">
         <?php
         try {
-            // --- ここをご自身の環境に合わせて書き換えてください ---
+            // データベース接続設定
             $dsn  = 'mysql:host=localhost;dbname=icc_smart_campus;charset=utf8';
-            $user = 'root'; // ユーザー名（通常は root）
-            $pass = 'root';     // パスワード（空でダメなら 'root' やご自身で設定したものを入力）
-            // --------------------------------------------------
+            $user = 'root';
+            $pass = 'root'; 
 
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -171,62 +184,100 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
 
             $db = new PDO($dsn, $user, $pass, $options);
 
-            // 1. 曜日を数値に変換（画像のカラム day_of_week が 1, 2, 3... のため）
+            // 曜日とコースIDの変換
             $day_to_num = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
             $target_day_num = $day_to_num[$display_day_jp] ?? 1;
 
-            // 2. コースを subject_id に変換
             $course_to_id = [
                 'system' => 1, 'web' => 2, 'multi' => 3, 
                 'ouyou' => 4, 'kihon' => 5, 'itikumi' => 6, 'nikumi' => 7
             ];
-            $target_subject_id = $course_to_id[$selected_course] ?? 1;
+            $target_timetable_id = $course_to_id[$selected_course] ?? 1;
 
-            // 3. SQLの実行（画像通りのテーブル名・カラム名）
-            $sql = "SELECT * FROM timetable_details 
-                    WHERE day_of_week = :day 
-                    AND subject_id = :sid 
-                    ORDER BY period ASC";
+            // ★ SQLの変更: subjectsテーブルを結合して科目名(subject_name)を取得
+            $sql = "SELECT td.*, s.subject_name 
+                    FROM timetable_details td
+                    LEFT JOIN subjects s ON td.subject_id = s.subject_id
+                    WHERE td.day_of_week = :day 
+                    AND td.timetable_id = :tid 
+                    ORDER BY td.period ASC";
             
             $stmt = $db->prepare($sql);
             $stmt->execute([
                 ':day' => $target_day_num,
-                ':sid' => $target_subject_id
+                ':tid' => $target_timetable_id
             ]);
-            $all_schedule = $stmt->fetchAll();
+            $fetched_data = $stmt->fetchAll();
 
-            if (empty($all_schedule)) {
-                echo "<div class='no-schedule'>授業データがありません（{$display_day_jp}曜日）</div>";
-            } else {
-                foreach($all_schedule as $item) {
-                    $period = (int)$item["period"];
-                    // 画像にある class_detail（授業名(先生)）と bring_object（教室）を取得
-                    $s_name = htmlspecialchars($item["class_detail"] ?? '未設定');
-                    $room = htmlspecialchars($item["bring_object"] ?? '');
-                    
-                    $time_str = $time_schedule[$period] ?? "時間未定";
-                    ?>
-                    <section class="card">
-                        <div class="info">
-                            <div class="subject-details">
-                                <h2 class="subject"><?php echo $s_name; ?></h2>
-                                <p class="room-name">教室: <?php echo $room; ?></p>
-                            </div>
-                            <div class="period-details">
-                                <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
-                                <div class="button-container">
-                                    <div class="dropdown-wrapper detail-dropdown-wrapper">
-                                        <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>" aria-expanded="false">
-                                            <p>授業詳細</p>
-                                        </button>
+            // 取得データを時限ごとに整理
+            $schedule_by_period = [];
+            foreach ($fetched_data as $row) {
+                $schedule_by_period[$row['period']] = $row;
+            }
+
+            for ($period = 1; $period <= 4; $period++) {
+                $item = $schedule_by_period[$period] ?? null;
+                
+                // データ準備
+                $subject_name = htmlspecialchars($item["subject_name"] ?? '');
+                $class_detail = htmlspecialchars($item["class_detail"] ?? '詳細情報はありません。');
+                $bring_object = htmlspecialchars($item["bring_object"] ?? '特になし');
+                $room         = htmlspecialchars($item["room_name"] ?? '-'); // DBの列名に合わせて調整してください
+                $teacher      = htmlspecialchars($item["teacher_name"] ?? '未設定'); // DBにある場合
+                
+                $display_title = $subject_name ?: '（授業なし）';
+                $time_str = $time_schedule[$period] ?? "時間未定";
+            
+                // 「持ってくるもの」をカンマで分割して配列にする
+                $item_list = preg_split('/[、,，]+/', $bring_object, -1, PREG_SPLIT_NO_EMPTY);
+            ?>
+            
+            <section class="card">
+                <div class="info">
+                    <div class="subject-details">
+                        <h2 class="subject"><?php echo $display_title; ?></h2>
+                        <p class="room-name">教室: <?php echo $room; ?></p>
+                    </div>
+                    <div class="period-details">
+                        <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
+                        
+                        <div class="button-container">
+                            <div class="dropdown-wrapper detail-dropdown-wrapper">
+                                <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>" aria-expanded="false">
+                                    <p>授業詳細</p>
+                                    <img class="button-icon detail-icon" src="images/arrow_right.svg" alt="">
+                                </button>
+                                <div class="dropdown-content detail-content" id="detail-content-<?php echo $period; ?>">
+                                    <div class="detail-box">
+                                        <div class="detail-title">内容</div>
+                                        <p class="detail-text"><?php echo $class_detail; ?></p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </section> 
-                    <?php
-                } 
+            
+                            <div class="dropdown-wrapper item-dropdown-wrapper">
+                                <button type="button" class="button dropdown-toggle item-toggle" id="item-toggle-button-<?php echo $period; ?>" aria-expanded="false">
+                                    <p>持ってくるもの</p>
+                                    <img class="button-icon item-icon" src="images/arrow_right.svg" alt="">
+                                </button>
+                                <div class="dropdown-content item-content" id="item-content-<?php echo $period; ?>">
+                                    <ul class="item-list">
+                                        <?php foreach($item_list as $idx => $val): ?>
+                                            <?php $chkId = "item-chk-{$period}-{$idx}"; ?>
+                                            <li>
+                                                <input type="checkbox" id="<?php echo $chkId; ?>">
+                                                <label for="<?php echo $chkId; ?>"><?php echo trim($val); ?></label>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div> </div>
+                </div>
+            </section>
+                <?php
             } 
+
         } catch(Exception $e) {
             echo "<div class='error-msg'>エラー: " . htmlspecialchars($e->getMessage()) . "</div>";
         }

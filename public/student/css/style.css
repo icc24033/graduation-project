@@ -57,7 +57,13 @@ body {
   align-items: center;
 }
 
+/* 日付ボタンのスタイル */
 .date-btn {
+  color: #ffffff;
+  letter-spacing: 8%;
+  text-align: center;
+  font-weight: 400;
+  margin: 0;
   height: 40px;
   padding: 10px 15px; /* パディングを調整 */
   background-color: #495666;
@@ -66,14 +72,8 @@ body {
   border: none;
 }
 
-.date-btn p {
-  color: #ffffff;
-  letter-spacing: 8%;
-  text-align: center;
-  font-weight: 400;
-  margin: 0;
-}
 
+/* コース選択ボタンのスタイル */
 .course-select {
   display: flex;
   background-color: #495666;
@@ -113,6 +113,7 @@ body {
   border: none;
 }
 
+/* 検索アイコンのスタイル */
 .search-img {
   width: 20px;
   height: 20px;
@@ -216,6 +217,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   background-color: #CFD5DF;
 }
 
+/* 授業名のスタイル */
 .subject {
   font-size: 32px;
   line-height: 1.1;
@@ -225,6 +227,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   word-break: break-word;
 }
 
+/* 教室名のスタイル */
 .room-name {
   text-align: center;
   font-size: 13px;
@@ -240,6 +243,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   align-items: flex-start;
 }
 
+/* 時限と時間表示のスタイル */
 .period-time {
   letter-spacing: 0.08em;
   margin-bottom: 0;
@@ -249,6 +253,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   font-weight: 500;
 }
 
+/* ボタンコンテナ（授業詳細、持ち物ボタンを縦に並べる） */
 .button-container {
   display: flex;
   flex-direction: column;
@@ -280,6 +285,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   justify-content: space-between; /* 両端寄せ */
 }
 
+/* ボタン内のテキストスタイル */
 .dropdown-toggle p {
   color: #ffffff;
 }
@@ -315,6 +321,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   transition: transform 0.3s ease;
 }
 
+/* ドロップダウンラッパーの共通スタイル */
 .dropdown-wrapper {
   margin-bottom: 0;
   width: 100%; /* 親要素 (period-details) の幅いっぱいを使う */
@@ -377,6 +384,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   align-items: center;
 }
 
+/* 授業詳細タイトルテキストのスタイル */
 .detail-content.show > .detail-box:first-child .detail-title {
   font-size: 16px;
   font-weight: 700;
@@ -393,10 +401,12 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   border-radius: 0;
 }
 
+/* 授業詳細コンテンツの最後の.detail-boxの下側の角丸 */
 .detail-content.show > .detail-box:last-child {
     border-radius: 0 0 20px 20px; /* 下側の角丸 */
 }
 
+/* 持ち物ドロップダウンコンテンツのスタイル */
 .dropdown-content.item-content {
   height: auto; 
   border-radius: 20px;
@@ -417,6 +427,7 @@ body > p { /* bodyの直下にある日付表示のpタグ */
   box-sizing: border-box;
 }
 
+/* 持ち物リストのタイトル部分のスタイル */
 .mono-title {
   background-color: #C0DEFF; /* タイトルの背景色 (水色) */
   padding: 10px; /* 内側の余白 */
