@@ -74,12 +74,6 @@ if (session_status() === PHP_SESSION_NONE) {
                         <!-- JSでリスト項目を追加 -->
                     </ul>
                 </div>
-                <select id="courseSelect" name="course_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border">
-                <?php 
-                // Helperを使ってHTMLを出力
-                echo ViewHelper::renderSelectOptions($courseList, 'course_id', 'course_name'); 
-                ?>
-            </select>
             </nav>
 
             <!-- メインコンテンツ -->

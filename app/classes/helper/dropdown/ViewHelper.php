@@ -52,7 +52,7 @@ class ViewHelper {
             
             // aタグを使用せず、liタグに直接スタイルとデータを設定
             // cursor-pointerクラスでクリック可能であることを視覚的に示します
-            $html .= "<li data-value=\"{$value}\" class=\"px-4 py-2 hover:bg-gray-100 cursor-pointer\">{$label}</li>";
+            $html .= "<li data-value=\"{$value}\" class=\"px-4 py-2 hover:bg-gray-100 cursor-pointer\"><a href=\"#\">{$label}</a></li>";
         }
         return $html;
     }
