@@ -1,8 +1,9 @@
 <?php
-// require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
-
+// student_addition.php
 // セッション開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
@@ -18,7 +19,7 @@ define('DB_PASS', $config['db_pass']);
 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
 // セッションから処理結果を取得
-$status = $_SESSION['student_account'] ?? null;
+$status = $basic_data?? null;
 
 if ($status['backend'] === 'student_addition') {
     // 現在の年度の取得
@@ -35,9 +36,10 @@ if ($status['backend'] === 'student_addition') {
         $student_count = $stmt_test_student->fetchColumn();
 
         // コース情報の取得
-        $stmt_course = $pdo->prepare($status['course_sql']);
-        $stmt_course->execute();
-        $courses = $stmt_course->fetchAll();
+        // $stmt_course = $pdo->prepare($status['course_sql']);
+        // $stmt_course->execute();
+        // $courses = $stmt_course->fetchAll();
+        $courses = $courseList;
     }
     catch (PDOException $e) {
         // データベース接続/クエリ実行エラー発生時
@@ -71,9 +73,7 @@ else {
     exit();
 
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>

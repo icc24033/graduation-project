@@ -1,6 +1,4 @@
 <?php
-//セッション開始
-session_start();
 
 //studentに格納されている学生情報の数の取得
 $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
@@ -19,7 +17,8 @@ $_SESSION['student_account'] = [
 
 
 // ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+//header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+require_once __DIR__'../../../public/teacher/student_account_edit/student_addition.php';
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>

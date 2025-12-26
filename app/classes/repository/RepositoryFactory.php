@@ -47,6 +47,14 @@ class RepositoryFactory {
     }
 
     /**
+     * データベース接続を終了する
+     * 必要なデータをすべて取得した後に呼び出す
+     */
+    public static function closePdo() {
+        self::$pdo = null;
+    }
+
+    /**
      * コースリポジトリのインスタンスを取得
      */
     public static function getCourseRepository() {

@@ -1,5 +1,5 @@
 <?php
-// app/classes/controllers/TimetableController.php
+// TimetableController.php
 
 // 必要なリポジトリやヘルパーを読み込む
 // ディレクトリ構成図に基づき、相対パスを調整
@@ -22,9 +22,8 @@ class TimetableController {
             $courseRepo = RepositoryFactory::getCourseRepository();
             $data['courseList'] = $courseRepo->getAllCourses();
             
-            // 必要に応じて他のデータも取得
-            // $subjectRepo = RepositoryFactory::getSubjectRepository();
-            // $data['subjectList'] = $subjectRepo->getAllSubjects();
+            // データ取得後にDB接続を閉じる
+            RepositoryFactory::closePdo();
 
         } catch (Exception $e) {
             error_log("TimetableController Error: " . $e->getMessage());
