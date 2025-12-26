@@ -25,6 +25,7 @@ if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
 
 //studentに格納されているgradeの変更
 $update_grade_sql = ("UPDATE student SET grade = ? WHERE student_id = ?");
+
 try {
     // RepositoryFactoryを使用してPDOインスタンスを取得
     require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';

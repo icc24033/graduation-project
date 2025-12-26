@@ -311,13 +311,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             $success_count_flag = false;
             $csv_table_student_sql = null;
         }
-        
-
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
 
         //csv_tableに格納されている学生情報の取得
         $csv_table_student_sql = ("SELECT * FROM csv_table;");
@@ -331,7 +324,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             'error_csv' => $error_count_flag,
             'csv_error_table_sql' => $csv_error_table_sql,
             'before' => 'teacher_home',
-            'database_options' => $options, 
             'success_csv' => $success_count_flag,
             'csv_table_student_sql' => $csv_table_student_sql,
             'course_sql' => $course_sql,
