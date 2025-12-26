@@ -3,7 +3,7 @@
 
 // 必要なリポジトリやヘルパーを読み込む
 // ディレクトリ構成図に基づき、相対パスを調整
-require_once __DIR__ . '/../repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
 
 class TimetableController {
     

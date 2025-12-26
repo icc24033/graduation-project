@@ -1,9 +1,4 @@
 <?php
-// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // edit_timetable_control.php
 // ブラウザがアクセスする際のコントローラーを呼び出すファイル
 
@@ -18,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. コントローラーとヘルパーの読み込み
 require_once '../../../app/controllers/teacher/timetable_change/TimetableController.php';
 // ViewHelperはビューで使用する
-require_once '../../../app/classes/helpers/ViewHelper.php';
+require_once '../../../app/classes/helper/dropdown/ViewHelper.php';
 
 // 3. コントローラーを起動してデータを取得する
 $controller = new TimetableController();
