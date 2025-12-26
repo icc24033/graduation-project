@@ -23,22 +23,14 @@ if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
     $received_current_year = substr($received_current_year, -2);
 }
 
-$config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-$config = require $config_path;
-
-define('DB_HOST', $config['db_host']);
-define('DB_NAME', $config['db_name']);
-define('DB_USER', $config['db_user']);
-define('DB_PASS', $config['db_pass']);
-
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-
 //studentに格納されているgradeの変更
 $update_grade_sql = ("UPDATE student SET grade = ? WHERE student_id = ?");
+
 try {
-    //データベース接続
-    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    // RepositoryFactoryを使用してPDOインスタンスを取得
+    require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+    $pdo = RepositoryFactory::getPdo();
+
     //studentテーブルの更新
     $stmt_update = $pdo->prepare($update_grade_sql);
 
@@ -48,8 +40,11 @@ try {
         //$new_grade = (int)$new_grade; // 学年を整数に変換
         $stmt_update->execute([$new_grade, $student_id]);
     }
+    // データベース接続を閉じる
+    $pdo = null;
 
-} catch (PDOException $e) {
+} 
+catch (PDOException $e) {
     throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
 

@@ -13,7 +13,7 @@ class RepositoryFactory {
      * データベース接続を取得（シングルトンパターン）
      * 初回のみ接続し、2回目以降は使い回す
      */
-    private static function getPdo() {
+    public static function getPdo() {
         // まだ接続が確立されていない場合のみ接続を作成
         if (self::$pdo === null) {
             // 設定ファイルの読み込み

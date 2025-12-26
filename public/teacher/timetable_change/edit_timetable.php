@@ -10,6 +10,7 @@ SecurityHelper::applySecureHeaders();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -52,10 +53,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </button>
                                 <!-- コースドロップダウンメニュー -->
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
-                                    <li><a href="#">システムデザインコース</a></li>
-                                    <li><a href="#">Webクリエイタコース</a></li>
-                                    <li><a href="#">マルチメディアOAコース</a></li>
-                                    <li><a href="#">応用情報コース</a></li>
+                                <?php 
+                                // ViewHelperを使用してliタグを生成
+                                echo ViewHelper::renderDropdownList($courseList, 'course_id', 'course_name'); 
+                                ?>
                                 </ul>
                             </div>
                         </div>
