@@ -14,12 +14,6 @@ define('DB_PASS', $config['db_pass']);
 
 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
 //今の月を取得し、4月より前か後かで学年を決定
 $current_month = date('n');
 if ($current_month >= 4) {
@@ -129,7 +123,6 @@ $_SESSION['student_account'] = [
     'backend' => $backend,
     'error_csv' => false,
     'before' => 'teacher_home',
-    'database_options' => $options, 
     'csv_table_student_sql' => $csv_table_student_sql,
     'course_sql' => $course_sql,
     'csv_error_table_sql' => $csv_error_table_sql,
