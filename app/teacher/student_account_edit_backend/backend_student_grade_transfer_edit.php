@@ -2,11 +2,6 @@
 
 $grade_changes = $_POST['grade_changes'] ?? [];
 
-
-// $grade_changes をvar_dumpで確認
-var_dump($grade_changes);
-//array(2) { [24002]=> string(1) "2" [24003]=> string(1) "2" }
-
 // 2. デコードが成功し、かつ 'course_id' と'current_year'が存在するかチェック
 if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
     // コースIDを取得
@@ -69,7 +64,6 @@ $student_sql = ("SELECT
 $_SESSION['student_account'] = [
     'success' => true,
     'before' => 'teacher_home',
-    'database_options' => $options,
     'course_sql' => $course_sql,
     'course_id' => $received_course_id,
     'student_sql' => $student_sql,

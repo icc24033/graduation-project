@@ -33,28 +33,17 @@ else {
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 try {
-    
-    $config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-    $config = require $config_path;
-
-    define('DB_HOST', $config['db_host']);
-    define('DB_NAME', $config['db_name']);
-    define('DB_USER', $config['db_user']);
-    define('DB_PASS', $config['db_pass']);
-
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-    
-    //データベース接続
-    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    // RepositoryFactoryを使用してPDOインスタンスを取得
+    require_once __DIR__ . '/../../../app/classes/repository/RepositoryFactory.php';
+    $pdo = RepositoryFactory::getPdo();
 
     //　リストに表示するコース情報を取得
     $stmt_course = $pdo->query($status['course_sql']);
     $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
 
-    // 　テストstudentに格納されている学生情報の取得
-    $stmt_test_student = $pdo->prepare($status['student_sql']);
-    $stmt_test_student->execute([$status['course_id']]);
+    // studentに格納されている学生情報の取得
+    $stmt_student = $pdo->prepare($status['student_sql']);
+    $stmt_student->execute([$status['course_id']]);
 
     // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
     if (!empty($course)) {
@@ -161,11 +150,11 @@ catch (PDOException $e) {
                         <div class="column-course">コース</div>
                     </div>
                     <?php 
-                        // $stmt_test_studentが有効な場合のみループ
-                        if ($stmt_test_student): 
+                        // $stmt_studentが有効な場合のみループ
+                        if ($stmt_student): 
                             $has_students = false; // データが存在したかどうかのフラグ
 
-                            while ($student_row = $stmt_test_student->fetch()): 
+                            while ($student_row = $stmt_student->fetch()): 
             
                                 // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
                                 $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
