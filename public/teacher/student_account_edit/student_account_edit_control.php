@@ -13,16 +13,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../../../app/controllers/teacher/student_account_editers/StudentAccountEditController.php';
-// ViewHelperはビューで使用する
+// 2. 必要なクラスを読み込む
+// アカウント作成コントローラーの読み込み
+require_once '../../../app/controllers/master/student_account_editers/StudentAccountEditController.php';
+// 表示機能ヘルパーの読み込み
 require_once '../../../app/classes/helper/dropdown/ViewHelper.php';
-
+// データベース操作用リポジトリファクトリーの読み込み
 require_once '../../../app/classes/repository/RepositoryFactory.php';
 
 // 3. コントローラーを起動してデータを取得する
 $controller = new StudentAccountEditController();
-$viewData = $controller->edit();
-$basic_data = $controller->basic_info();
+$viewData = $controller->edit(); // リストの取得
+$basic_data = $controller->basic_info(); // 基本情報の取得
 
 // 4. 配列を展開して変数にする ($courseList, $error_message 等の生成)
 extract($viewData);
