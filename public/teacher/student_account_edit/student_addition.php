@@ -6,19 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
 
-$config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-$config = require $config_path;
-
-define('DB_HOST', $config['db_host']);
-define('DB_NAME', $config['db_name']);
-define('DB_USER', $config['db_user']);
-define('DB_PASS', $config['db_pass']);
-
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-
-// セッションから処理結果を取得
 $status = $basic_data?? null;
 
 if ($status['backend'] === 'student_addition') {
@@ -28,8 +17,8 @@ if ($status['backend'] === 'student_addition') {
 
     try {
         //データベース接続
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
-
+        $pdo = RepositoryFactory::getPdo();
+ 
         // 　テストstudentに格納されている今年度の学生数の取得
         $stmt_test_student = $pdo->prepare($status['student_count_sql']);
         $stmt_test_student->execute([$current_year]);
@@ -49,7 +38,8 @@ if ($status['backend'] === 'student_addition') {
 else if ($status['backend'] === 'csv_upload') {
     try {
         //データベース接続
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+        // $pdo = new PDO($dsn, DB_USER, DB_PASS);
+        $pdo = RepositoryFactory::getPdo();
 
         // コース情報の取得
         $courses = $courseList;

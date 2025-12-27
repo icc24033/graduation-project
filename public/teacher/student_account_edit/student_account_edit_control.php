@@ -17,6 +17,8 @@ require_once '../../../app/controllers/teacher/student_account_editers/StudentAc
 // ViewHelperはビューで使用する
 require_once '../../../app/classes/helper/dropdown/ViewHelper.php';
 
+require_once '../../../app/classes/repository/RepositoryFactory.php';
+
 // 3. コントローラーを起動してデータを取得する
 $controller = new StudentAccountEditController();
 $viewData = $controller->edit();
