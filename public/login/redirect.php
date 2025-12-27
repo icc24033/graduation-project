@@ -29,7 +29,12 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
     </style>
     <script>
         // ページ読み込み完了を待たずに即座にリダイレクト開始
-        window.location.replace("../teacher/teacher_home.php");
+        <?php if($_SESSION['user_grade'] === 'teacher@icc_ac.jp'): ?>
+            window.location.replace("../teacher/teacher_home.php");
+        <?php elseif($_SESSION['user_grade'] === 'master@icc_ac.jp'): ?>
+            window.location.replace("../master/master_home_control.php");
+        <?php else: ?>
+            window.location.replace("../login/login_error.html");
     </script>
 </head>
 <body>
