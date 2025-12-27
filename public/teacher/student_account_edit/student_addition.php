@@ -36,9 +36,6 @@ if ($status['backend'] === 'student_addition') {
         $student_count = $stmt_test_student->fetchColumn();
 
         // コース情報の取得
-        // $stmt_course = $pdo->prepare($status['course_sql']);
-        // $stmt_course->execute();
-        // $courses = $stmt_course->fetchAll();
         $courses = $courseList;
     }
     catch (PDOException $e) {
@@ -55,9 +52,7 @@ else if ($status['backend'] === 'csv_upload') {
         $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // コース情報の取得
-        $stmt_course = $pdo->prepare($status['course_sql']);
-        $stmt_course->execute();
-        $courses = $stmt_course->fetchAll();
+        $courses = $courseList;
     }
     catch (PDOException $e) {
         // データベース接続/クエリ実行エラー発生時
