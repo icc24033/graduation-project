@@ -3,10 +3,14 @@
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
 // セッション開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// セッションから処理結果を取得
-$status = $_SESSION['student_account'] ?? null;
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
+
+$status = $basic_data ?? null;
 
 // セッションデータを取得したらすぐに削除 (二重表示防止のため)
 ////unset($_SESSION['student_account']);
@@ -30,7 +34,6 @@ else {
     $school_year = [ $current_year, $current_year - 1 ];
 }
 
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 try {
     // RepositoryFactoryを使用してPDOインスタンスを取得

@@ -6,8 +6,6 @@ session_start();
 // 【重要】JavaScriptから送信されたコースIDを取得する処理
 // ----------------------------------------------------
 
-$received_course_id = null;
-
 // 2. デコードが成功し、かつ 'course_id' と'current_year'が存在するかチェック
 if (isset($_GET['course_id']) && isset($_GET['current_year'])) {
     // コースIDを取得
