@@ -11,10 +11,7 @@ SecurityHelper::applySecureHeaders();
 
 $status = $basic_data ?? null;
 
-// セッションデータを取得したらすぐに削除 (二重表示防止のため)
-////unset($_SESSION['student_account']);
-
-// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
+// コースIDの取得
 $current_course_id = $status['course_id']; 
 
 // 現在の年度の取得
@@ -117,7 +114,7 @@ if (!empty($courseList)) {
                     <li class="nav-item"><a href="student_account_edit_control.php">アカウントの作成</a></li>
                     <li class="nav-item is-active"><a href="student_account_delete_control.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
+                    <li class="nav-item"><a href="student_account_course_control.php">コースの編集</a></li>
                 </ul>
             </nav>
 

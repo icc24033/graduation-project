@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let url = '';
 
         if (page === 'student_edit_course') {
-            url = baseUrl + 'backend_student_course.php'; 
+            url = '../controls/student_account_course_control.php';
         }
         else if (page === 'student_delete') {
             url = '../controls/student_account_delete_control.php';

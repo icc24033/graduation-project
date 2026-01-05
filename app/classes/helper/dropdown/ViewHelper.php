@@ -30,7 +30,7 @@ class ViewHelper {
             
             $selected = ((string)$item[$valueKey] === (string)$selectedValue) ? 'selected' : '';
             
-            $html .= "<option value=\"{$value}\"{$selectedAttr}>{$label}</option>";
+            $html .= "<option value=\"{$value}\"{$selected}>{$label}</option>";
         }
         
         return $html;

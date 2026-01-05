@@ -80,4 +80,33 @@ class StudentAccountEditController {
     return $data;
     }
 
+    /**
+     * コース編集画面の基本情報を取得する
+     * @return array 基本情報の配列
+     */
+    public function student_course_basic_info($received_course_id, $received_current_year) {
+        
+        if (empty($received_course_id) || empty($received_current_year)) {
+            $course_id = 1; // デフォルト値を設定
+            $current_year = date("Y");
+            $current_year = substr($current_year, -2);
+        }
+        else {
+            $course_id = $received_course_id;
+            $current_year = $received_current_year;
+        }
+
+        $studentRepo = RepositoryFactory::getStudentRepository();
+        $students_in_course = $studentRepo->getStudentsByCourse($course_id);
+
+        $data = [
+            'success' => true,
+            'before' => 'teacher_home',
+            'course_id' => $course_id,
+            'current_year' => $current_year,
+            'students_in_course' => $students_in_course
+        ];
+    
+    return $data;
+    }
 }
