@@ -206,16 +206,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let url = '';
 
         if (page === 'student_edit_course') {
-            url = baseUrl + 'backend_student_course.php'; 
+            url = '../controls/student_account_course_control.php';
         }
         else if (page === 'student_delete') {
-            url = baseUrl + 'backend_student_delete.php'; 
+            url = '../controls/student_account_delete_control.php';
         }
         else if (page === 'student_grade_transfer') {
-            url = baseUrl + 'backend_student_grade_transfer.php'; 
+            url = '../controls/studnet_account_transfer_control.php'; 
         }
-        else {
-            url = baseUrl + 'backend_student_grade_csv_edit.php';
+        else if (page === 'student_addition') {
+            url = '../controls/student_account_edit_control.php';
         }
 
         window.location.href = `${url}?course_id=${encodeURIComponent(courseId)}&current_year=${encodeURIComponent(year)}`;

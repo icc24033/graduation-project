@@ -34,6 +34,10 @@ class StudentAccountEditController {
         return $data;
     }
 
+    /**
+     * 学生追加画面の基本情報を取得する
+     * @return array 基本情報の配列
+     */
     public function student_addittion_basic_info() {
         $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
         $data = [
@@ -46,6 +50,10 @@ class StudentAccountEditController {
         return $data;
     }
 
+    /**
+     * 学生削除画面の基本情報を取得する
+     * @return array 基本情報の配列
+     */
     public function student_delete_basic_info($received_course_id, $received_current_year) {
 
         if (empty($received_course_id) || empty($received_current_year)) {
@@ -58,30 +66,77 @@ class StudentAccountEditController {
             $current_year = $received_current_year;
         }
 
-        $student_sql = ("SELECT 
-                            S.student_id,
-                            S.student_name,
-                            S.course_id,
-                            S.grade,
-                            C.course_name 
-                        FROM
-                            student AS S 
-                        INNER JOIN 
-                            course AS C 
-                        ON 
-                            S.course_id = C.course_id 
-                        WHERE 
-                            S.course_id = ?;"
-                        );
+        $studentRepo = RepositoryFactory::getStudentRepository();
+        $students_in_course = $studentRepo->getStudentsByCourse($course_id);
+
         $data = [
             'success' => true,
             'before' => 'teacher_home',
-            'student_sql' => $student_sql,
             'course_id' => $course_id,
-            'current_year' => $current_year
+            'current_year' => $current_year,
+            'students_in_course' => $students_in_course
         ];
-        
+
     return $data;
     }
 
+    /**
+     * コース編集画面の基本情報を取得する
+     * @return array 基本情報の配列
+     */
+    public function student_course_basic_info($received_course_id, $received_current_year) {
+        
+        if (empty($received_course_id) || empty($received_current_year)) {
+            $course_id = 1; // デフォルト値を設定
+            $current_year = date("Y");
+            $current_year = substr($current_year, -2);
+        }
+        else {
+            $course_id = $received_course_id;
+            $current_year = $received_current_year;
+        }
+
+        $studentRepo = RepositoryFactory::getStudentRepository();
+        $students_in_course = $studentRepo->getStudentsByCourse($course_id);
+
+        $data = [
+            'success' => true,
+            'before' => 'teacher_home',
+            'course_id' => $course_id,
+            'current_year' => $current_year,
+            'students_in_course' => $students_in_course
+        ];
+    
+    return $data;
+    }
+
+    /**
+     * 学年移動画面の基本情報を取得する
+     * @return array 基本情報の配列
+     */
+    public function student_grade_basic_info($received_course_id, $received_current_year) {
+            
+        if (empty($received_course_id) || empty($received_current_year)) {
+            $course_id = 1; // デフォルト値を設定
+            $current_year = date("Y");
+            $current_year = substr($current_year, -2);
+        }
+        else {
+            $course_id = $received_course_id;
+            $current_year = $received_current_year;
+        }
+
+        $studentRepo = RepositoryFactory::getStudentRepository();
+        $students_in_course = $studentRepo->getStudentsByCourse($course_id);
+
+        $data = [
+            'success' => true,
+            'before' => 'teacher_home',
+            'course_id' => $course_id,
+            'current_year' => $current_year,
+            'students_in_course' => $students_in_course
+        ];
+    
+    return $data;
+    }
 }

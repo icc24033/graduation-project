@@ -3,17 +3,14 @@
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
 // セッション開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// セッションから処理結果を取得
-$status = $_SESSION['student_account'] ?? null;
+$status = $basic_data ?? null;
 
-// セッションデータを取得したらすぐに削除 (二重表示防止のため)
-////unset($_SESSION['student_account']);
-
-// コース名変数の初期化 (DB接続失敗時でもエラーを防ぐため)
+// コースIDの取得
 $current_course_id = $status['course_id']; 
-$course = []; // コースデータを格納する配列を初期化
 
 // 現在の年度の取得
 $current_year = date("Y");
@@ -35,37 +32,15 @@ else {
 
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
-try {
-    
-    // RepositoryFactoryを使用してPDOインスタンスを取得
-    require_once __DIR__ . '/../../../app/classes/repository/RepositoryFactory.php';
-    $pdo = RepositoryFactory::getPdo();
-
-    //　リストに表示するコース情報を取得
-    $stmt_course = $pdo->query($status['course_sql']);
-    $course = $stmt_course->fetchAll(); // ここで取得されるのは連想配列の配列
-
-    // 　テストstudentに格納されている学生情報の取得
-    $stmt_test_student = $pdo->prepare($status['student_sql']);
-    $stmt_test_student->execute([$status['course_id']]);
-
-    // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
-    if (!empty($course)) {
-        // 連想配列のキーを指定して値を取得
-        $current_course_name = $course[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
-    } else {
-        $current_course_name = 'コース情報が見つかりません';
-    }
-    // データべース接続切断
-    $pdo = null;
+// 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
+if (!empty($courseList)) {
+    // 連想配列のキーを指定して値を取得
+    $current_course_name = $courseList[$status['course_id'] - 1]['course_name'];// コースIDは1からなので、配列インデックス用に-1する
+} else {
+    $current_course_name = 'コース情報が見つかりません';
 }
-catch (PDOException $e) {
-    // データベース接続/クエリ実行エラー発生時
-    error_log("DB Error: " . $e->getMessage());
-    $current_course_name = 'エラー: データベース接続失敗';
-    // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
-    // throw new PDOException($e->getMessage(), (int)$e->getCode());
-}
+// データべース接続切断
+$pdo = null;
 ?>
 
 
@@ -77,15 +52,15 @@ catch (PDOException $e) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <link rel="stylesheet" href="css/style.css"> 
-    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="../css/style.css"> 
+    <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="grade_transfar">
     <div class="app-container">
         <header class="app-header">
             <h1>生徒アカウント作成編集</h1>
-            <img class="user_icon" src="images/user_icon.png"alt="ユーザーアイコン">
+            <img class="user_icon" src="../images/user_icon.png"alt="ユーザーアイコン">
         </header>
 
         <main class="main-content">
@@ -136,8 +111,8 @@ catch (PDOException $e) {
                             </span>
                         </button>
                         <ul class="dropdown-menu" id="courseDropdownMenu">
-                            <?php if (!empty($course)): ?>
-                                <?php foreach ($course as $row): ?>
+                            <?php if (!empty($courseList)): ?>
+                                <?php foreach ($courseList as $row): ?>
                                     <li>
                                         <a href="#" 
                                         data-current-course="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>" 
@@ -155,10 +130,10 @@ catch (PDOException $e) {
                     </li>
 
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
-                    <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course_edit.php">コースの編集</a></li>
+                    <li class="nav-item"><a href="student_account_edit_control.php">アカウントの作成</a></li>
+                    <li class="nav-item"><a href="student_account_delete_control.php">アカウントの削除</a></li>
+                    <li class="nav-item is-active"><a href="studnet_account_transfer_control.php">学年の移動</a></li>
+                    <li class="nav-item"><a href="student_account_course_control.php">コースの編集</a></li>
                 </ul>
                 
             </nav>
@@ -176,10 +151,10 @@ catch (PDOException $e) {
                         
                         <?php 
                         // $stmt_test_studentが有効な場合のみループ
-                        if ($stmt_test_student): 
+                        if (!empty($status['students_in_course']) && is_array($status['students_in_course'])): 
                             $has_students = false; // データが存在したかどうかのフラグ
 
-                            while ($student_row = $stmt_test_student->fetch()): 
+                            foreach ($status['students_in_course'] as $student_row): 
             
                                 // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
                                 $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
@@ -225,7 +200,7 @@ catch (PDOException $e) {
 
                         <?php 
                                 endif; // if ($student_year_prefix === $current_year_short) 終了
-                            endwhile; // whileループ終了
+                            endforeach; // foreach 終了
                             
                             // ループ後にデータがなかった場合のエラー表示
                             if (!$has_students):
@@ -251,7 +226,7 @@ catch (PDOException $e) {
 
                     </div>
                     <?php 
-                        // $courseが空ではない、つまりコース情報が見つかった場合のみ表示
+                        // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
                         if ($has_students): 
                     ?>
                         <button class="add-button" type="submit">学年移動</button>
@@ -262,6 +237,6 @@ catch (PDOException $e) {
             </div>
         </main>
     </div>
-    <script src="js/script.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 </html>

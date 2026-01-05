@@ -3,6 +3,7 @@
 require_once __DIR__ . '/CourseRepository.php';
 require_once __DIR__ . '/SubjectRepository.php';
 require_once __DIR__ . '/TeacherRepository.php';
+require_once __DIR__ . '/StudentRepository.php';
 
 // 新しいリポジトリができたらここに追加する
 class RepositoryFactory {
@@ -73,5 +74,12 @@ class RepositoryFactory {
      */
     public static function getTeacherRepository() {
         return new TeacherRepository(self::getPdo());
+    }
+
+    /**
+     * 生徒リポジトリのインスタンスを取得
+     */
+    public static function getStudentRepository() {
+        return new StudentRepository(self::getPdo());
     }
 }
