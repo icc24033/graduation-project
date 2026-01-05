@@ -1,4 +1,9 @@
 <?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // 1. セキュリティ設定
 require_once '../../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
@@ -24,4 +29,4 @@ $basic_data = $controller->student_addittion_basic_info(); // 基本情報の取
 extract($viewData);
 extract($basic_data);
 
-require_once '../student_addition.php';
+require_once '../student_delete.php';
