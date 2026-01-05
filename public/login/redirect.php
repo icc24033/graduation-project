@@ -14,7 +14,7 @@ $grade = $_SESSION['user_grade'] ?? '';
 
 switch ($grade) {
     case 'teacher@icc_ac.jp':
-        header('Location: ../teacher/teacher_home.php');
+        header('Location: ../teacher/teacher_home_control.php');
         exit();
         
     case 'master@icc_ac.jp':

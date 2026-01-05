@@ -43,7 +43,8 @@ class HomeRepository {
             'smartcampus_picture' => ''
         ];
 
-        $data['user_grade'] = $_SESSION['user_grade'] ?? 'student'; 
+        $raw_grade = $_SESSION['user_grade'] ?? 'student';
+        $data['user_grade'] = trim($raw_grade);
         $data['current_user_id'] = $_SESSION['user_id'] ?? '';
         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         $data['smartcampus_picture'] = 'images/smartcampus.png'; // ICCスマートキャンパスのロゴ画像パス
@@ -55,17 +56,17 @@ class HomeRepository {
     * Userインスタンスを生成するメソッド
     * @param string $user_grade ユーザーの権限レベル
     */
-    public function create_user_instance($user_grade) {
+    public function create_user_instance($user_grade, $current_user_id) {
         $base_path = __DIR__ . '/../../user/';
         require_once $base_path . 'User_class.php';
 
         if ($user_grade === 'master@icc_ac.jp') {
             require_once $base_path . 'Master_class.php';
-            return new Master($_SESSION['user_id'] ?? '');
+            return new Master($current_user_id);
         }
         elseif ($user_grade === 'teacher@icc_ac.jp') {
             require_once $base_path . 'Teacher_class.php';
-            return new Teacher($_SESSION['user_id'] ?? '');
+            return new Teacher($current_user_id);
         }
         else {
             return null; // 不明な権限レベルの場合はnullを返す
