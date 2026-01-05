@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             url = baseUrl + 'backend_student_course.php'; 
         }
         else if (page === 'student_delete') {
-            url = baseUrl + 'backend_student_delete.php'; 
+            url = '../controls/student_account_delete_control.php';
         }
         else if (page === 'student_grade_transfer') {
             url = baseUrl + 'backend_student_grade_transfer.php'; 
