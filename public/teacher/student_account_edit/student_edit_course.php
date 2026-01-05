@@ -119,7 +119,7 @@ if (!empty($courseList)) {
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item"><a href="student_account_edit_control.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_account_delete_control.php">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
+                    <li class="nav-item"><a href="studnet_account_transfer_control.php">学年の移動</a></li>
                     <li class="nav-item is-active"><a href="student_account_course_control.php">コースの編集</a></li>
                     <?php 
                         $html = ViewHelper::renderSelectOptions($courseList, 'course_id', 'course_name', true);
