@@ -1,27 +1,24 @@
 <?php
+// session_config.php
 
-// 0.サーバーのセッションの有効期限とクライアント側Cookieの有効期限を設定
+// 既にセッションが開始されている場合は何もしない（二重起動防止）
+if (session_status() === PHP_SESSION_ACTIVE) {
+    return;
+}
 
-// 7日間SSOを維持するための設定 (session_start() より前) 
-$session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
+// 7日間SSOを維持するための設定
+$session_duration = 604800; // 7日間
 
-// 0.1. サーバー側GCの有効期限を設定
-ini_set('session.gc_maxlifetime', $session_duration);
+// サーバー側GCの有効期限
+ini_set('session.gc_maxlifetime', (string)$session_duration);
 
-// 0.2. クライアント側（ブラウザ）のCookie有効期限を設定
-// 'lifetime' に $session_duration を設定することで、7日間はログイン状態を保持する
-// secure => true: 本番環境で HTTPS でのみCookieを送信
-// httponly => true: JavaScriptからのアクセスを禁止
+// クライアント側（ブラウザ）のCookie有効期限
 session_set_cookie_params([
     'lifetime' => $session_duration,
-    'path' => '/',
-    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', // HTTPSならtrue
+    'path'     => '/', // 全ディレクトリで有効化
+    'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
 
-// // セッションの破棄
-//     session_unset();
-//     session_destroy();
-// // Cookieの削除
-//     setcookie(session_name(), '', time() - 3600, '/');
+session_start();

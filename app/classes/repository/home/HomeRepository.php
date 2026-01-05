@@ -50,7 +50,7 @@ class HomeRepository {
     * @param string $user_grade ユーザーの権限レベル
     */
     public function create_user_instance($user_grade) {
-        $base_path = __DIR__ . '/../user/';
+        $base_path = __DIR__ . '/../../user/';
         require_once $base_path . 'User_class.php'; 
 
         switch ($user_grade) {

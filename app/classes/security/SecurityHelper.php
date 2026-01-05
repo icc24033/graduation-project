@@ -51,7 +51,14 @@ class SecurityHelper {
      */
     public static function requireLogin(): void {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            $configPath = __DIR__ . '/../../session/session_config.php';
+            
+            if (file_exists($configPath)) {
+                require_once $configPath; 
+            } else {
+                // 設定ファイルがない場合のバックアップ
+                session_start();
+            }
         }
 
         if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
