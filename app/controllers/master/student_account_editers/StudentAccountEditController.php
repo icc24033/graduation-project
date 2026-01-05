@@ -34,7 +34,7 @@ class StudentAccountEditController {
         return $data;
     }
 
-    public function basic_info() {
+    public function student_addittion_basic_info() {
         $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
         $data = [
             'success' => true,

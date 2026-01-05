@@ -1,4 +1,8 @@
 <?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // student_addition.php
 // セッション開始
 if (session_status() === PHP_SESSION_NONE) {
@@ -8,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
 
-$status = $basic_data?? null;
+$status = $basic_data ?? null;
 
 if ($status['backend'] === 'student_addition') {
     // 現在の年度の取得
@@ -83,9 +87,9 @@ else {
                 <ul>
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item is-active"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_addition.php">アカウントの作成</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
-                    <li class="nav-item"><a href="..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
+                    <li class="nav-item"><a href="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_delete.php">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer.php">学年の移動</a></li>
+                    <li class="nav-item"><a href="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_course.php">コースの編集</a></li>
                 </ul>
                 
                 <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
@@ -114,7 +118,7 @@ else {
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\csv_edit.php" method="POST">
+                <form action="..\..\..\..\app\teacher\student_account_edit_backend\csv_edit.php" method="POST">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
