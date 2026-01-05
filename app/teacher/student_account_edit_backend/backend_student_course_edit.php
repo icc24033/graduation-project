@@ -1,10 +1,5 @@
 <?php
 
-// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 //セッション開始
 session_start();
 
@@ -61,36 +56,7 @@ catch (PDOException $e) {
     throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
 
-//コース情報取得SQLクエリ
-$course_sql = ("SELECT * FROM course;");
-//studentに格納されている学生情報の取得
-$student_sql = ("SELECT 
-                    S.student_id,
-                    S.student_name,
-                    S.course_id,
-                    S.grade,
-                    C.course_name 
-                FROM
-                    student AS S 
-                INNER JOIN 
-                    course AS C 
-                ON 
-                    S.course_id = C.course_id 
-                WHERE 
-                    S.course_id = ?;"
-                );
-
-$_SESSION['student_account'] = [
-    'success' => true,
-    'before' => 'teacher_home',
-    'course_sql' => $course_sql,
-    'course_id' => $received_course_id,
-    'student_sql' => $student_sql,
-    'current_year' => $received_current_year
-];
-
-// ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_edit_course.php");
+// ★ student_account_course_control.php にリダイレクトして処理を終了
+header("Location: ../../../public/teacher/student_account_edit/controls/student_account_course_control.php");
 exit(); // リダイレクト後は必ず処理を終了
-
 ?>

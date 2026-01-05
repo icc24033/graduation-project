@@ -139,7 +139,7 @@ $pdo = null;
             </nav>
 
             <div class="content-area">
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
+                <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
                 <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
                 <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">

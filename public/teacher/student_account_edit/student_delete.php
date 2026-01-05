@@ -193,7 +193,7 @@ if (!empty($courseList)) {
                             <div class="modal-footer">
                                 <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
 
-                                <form method="POST" action="../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
+                                <form method="POST" action="../../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
                                     <div id="hiddenInputsContainer" style="display: none;"></div>
                                 
                                     <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>

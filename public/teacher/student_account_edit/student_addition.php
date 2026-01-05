@@ -93,7 +93,7 @@ else {
                     <li class="nav-item"><a href="student_account_course_control.php">コースの編集</a></li>
                 </ul>
                 
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
+                <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
                         <label for="csvFile" class="download-button">
@@ -212,7 +212,7 @@ else {
                 </div>
                 
                 <?php if ($status['error_csv'] === false): ?>
-                <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csvdata_upload.php" method="post">
+                <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_csvdata_upload.php" method="post">
                     <button class="complete-button">追加完了</button>
                 </form>
                 <?php endif; ?>
@@ -250,7 +250,7 @@ else {
         <div class="error-edit-container">
         <h3>エラーデータ編集</h3>
         <div>
-        <form action="..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
         <div class="account-table-container">
             <div class="table-header">
                 <div class="column-check"></div> 
