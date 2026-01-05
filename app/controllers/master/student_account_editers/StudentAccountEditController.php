@@ -1,6 +1,6 @@
 <?php
 // StudentAccountEditController.php
-require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';    // データベース接続
 
 class StudentAccountEditController {
 

@@ -66,8 +66,8 @@ else {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/style.css"> 
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="student_addition">
@@ -75,7 +75,7 @@ else {
     <div class="app-container">
         <header class="app-header">
             <h1>生徒アカウント作成編集</h1>
-            <img class="user_icon" src="images/user_icon.png"alt="ユーザーアイコン">
+            <img class="user_icon" src="../images/user_icon.png"alt="ユーザーアイコン">
         </header>
 
         <main class="main-content">
