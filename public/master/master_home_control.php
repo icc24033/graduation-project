@@ -1,4 +1,9 @@
 <?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // master_home_control.php
 // ブラウザがアクセスする際のコントローラーを呼び出すファイル
 // セッション開始とログイン判定を一括で行う
@@ -28,6 +33,8 @@ catch (Exception $e) {
 if($user_data['user_grade'] === 'master@icc_ac.jp') {
     $links = $controller->html_links();
     $function_cards_html = $controller->generate_function_cards_html($user_instance, $links);
+    extract($links);
+    extract($user_data);
     require_once 'master_home.php';
 }
 else {
