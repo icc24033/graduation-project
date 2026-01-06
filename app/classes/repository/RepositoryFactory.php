@@ -4,6 +4,9 @@ require_once __DIR__ . '/CourseRepository.php';
 require_once __DIR__ . '/SubjectRepository.php';
 require_once __DIR__ . '/TeacherRepository.php';
 require_once __DIR__ . '/StudentRepository.php';
+require_once __DIR__ . '/CsvRepository.php';
+require_once __DIR__ . '/errorStudentRepository.php';
+
 
 // 新しいリポジトリができたらここに追加する
 class RepositoryFactory {
@@ -81,5 +84,19 @@ class RepositoryFactory {
      */
     public static function getStudentRepository() {
         return new StudentRepository(self::getPdo());
+    }
+
+    /**
+     * CSVリポジトリのインスタンスを取得
+     */
+    public static function getCsvRepository() {
+        return new CsvRepository(self::getPdo());
+    }
+
+    /**
+     * エラーデータリポジトリのインスタンスを取得
+     */
+    public static function getErrorStudentRepository() {
+        return new errorStudentRepository(self::getPdo());
     }
 }

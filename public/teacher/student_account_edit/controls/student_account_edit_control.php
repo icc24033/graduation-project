@@ -1,4 +1,9 @@
 <?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // 1. セキュリティ設定
 require_once '../../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
@@ -18,7 +23,7 @@ require_once '../../../../app/classes/repository/RepositoryFactory.php';
 // 3. コントローラーを起動してデータを取得する
 $controller = new StudentAccountEditController();
 $viewData = $controller->edit(); // コースリストの取得
-$basic_data = $controller->student_addittion_basic_info(); // 基本情報の取得
+$basic_data = $controller->student_addittion_basic_info($_GET['backend'] ?? null); // 基本情報の取得
 
 // 4. 配列を展開して変数にする ($courseList, $error_message 等の生成)
 extract($viewData);

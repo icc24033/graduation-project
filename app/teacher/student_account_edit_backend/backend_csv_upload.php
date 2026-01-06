@@ -292,43 +292,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             $error_count = -1; 
         }
 
-        // エラー件数に応じてフラグとSQLクエリを設定
-        if ($error_count > 0) {
-            $error_count_flag = true;
-            $csv_error_table_sql = "SELECT * FROM error_student_table;";
-        }
-        else {
-            $error_count_flag = false;
-            $csv_error_table_sql = null;
-        }
-
-        // 正常データ件数に応じてフラグとSQLクエリを設定
-        if ($success_count > 0) {
-            $success_count_flag = true;
-            $csv_table_student_sql = "SELECT * FROM csv_table;";
-        }
-        else {
-            $success_count_flag = false;
-            $csv_table_student_sql = null;
-        }
-
-        //csv_tableに格納されている学生情報の取得
-        $csv_table_student_sql = ("SELECT * FROM csv_table;");
-        
-        //コース情報取得SQLクエリ
-        $course_sql = ("SELECT * FROM course;");
-
-        $_SESSION['student_account'] = [
-            'success' => true,
-            'backend' => 'csv_upload',
-            'error_csv' => $error_count_flag,
-            'csv_error_table_sql' => $csv_error_table_sql,
-            'before' => 'teacher_home',
-            'success_csv' => $success_count_flag,
-            'csv_table_student_sql' => $csv_table_student_sql,
-            'course_sql' => $course_sql,
-        ];
-
 
     }
     else {
@@ -344,7 +307,7 @@ else {
 
 
 // ★ CSV_edit.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=csv_upload");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>
