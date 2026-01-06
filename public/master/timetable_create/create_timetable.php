@@ -1,4 +1,8 @@
 <?php
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // create_timetable.php
 // 時間割り作成画面
 
@@ -14,21 +18,9 @@ SecurityHelper::applySecureHeaders();
 // ----------------------------------------------------
 // 1. セッション設定（SSO維持のための設定）
 // ----------------------------------------------------
-// teacher_home.php と同様の設定を適用し、セッション切れを防ぎます
-$session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
-
-// サーバー側GCの有効期限を設定
-ini_set('session.gc_maxlifetime', $session_duration);
-
-// クライアント側（ブラウザ）のCookie有効期限を設定
-session_set_cookie_params([
-    'lifetime' => $session_duration,
-    'path' => '/',
-    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', // HTTPSならtrue
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-
+// HomeRepositoryのsession_resettingメソッドを使用してセッション設定を行う
+require_once __DIR__ . '/../../../app/classes/repository/home/HomeRepository.php';
+HomeRepository::session_resetting();
 // ----------------------------------------------------
 // 2. ログインチェック（セッション開始含む）
 // ----------------------------------------------------
