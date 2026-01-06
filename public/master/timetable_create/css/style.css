@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Noto Sans JP', sans-serif;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     color: #222;
     font-size: 16px;
     font-weight: 400;
@@ -17,19 +17,17 @@ a {
     color: inherit;
 }
 
-ul,
-ol {
+ul, ol {
     list-style: none;
 }
 
-/* スクロールバー */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f9f9f9;
+    background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -41,7 +39,6 @@ ol {
     background: #94a3b8;
 }
 
-/* --- メイン画面用スタイル --- */
 .app-container {
     display: flex;
     flex-direction: column;
@@ -75,6 +72,11 @@ ol {
 
 .header_icon{
     width: 28px;
+}
+
+.user_icon {
+    font-size: 24px;
+    color: #333;
 }
 
 .main-section {
@@ -120,21 +122,13 @@ ol {
     color: #222;
 }
 
-.sidebar-new-button:disabled {
-    background-color: #94a3b8;
-    cursor: not-allowed;
-    opacity: 0.7;
-    box-shadow: none;
-    color: #fff;
-}
-
 .dropdown-toggle {
     display: flex;
     width: 240px;
     padding: 8px 15px;
     text-align: left;
     border: 1px solid #CFD5DF;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     cursor: pointer;
     transition: background-color 0.3s;
     position: relative;
@@ -175,7 +169,7 @@ ol {
 .dropdown-menu {
     position: fixed;
     width: 250px;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
     z-index: 1001;
     display: none;
@@ -197,7 +191,6 @@ ol {
         opacity: 0;
         transform: translateX(-5px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
@@ -258,14 +251,8 @@ ol {
     background-color: #cbd5e1;
     font-weight: bold;
     color: #0f172a;
-    border-left: 4px solid #495666;
+    border-left: 4px solid #3b82f6;
     border-radius: 0 6px 6px 0;
-}
-
-.saved-meta {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-left: auto;
 }
 
 .radio-group-label {
@@ -283,7 +270,7 @@ ol {
 
 .radio-group-label input[type="radio"] {
     margin-right: 8px;
-    accent-color: #495666;
+    accent-color: #3b82f6;
     cursor: pointer;
 }
 
@@ -291,7 +278,7 @@ ol {
     flex: 1;
     padding: 2.5rem;
     overflow: auto;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     position: relative;
     margin-left: 300px;
     width: calc(100% - 300px);
@@ -310,7 +297,7 @@ ol {
     border: 1px solid #CFD5DF;
     border-radius: 0.5rem;
     padding: 1rem;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     position: relative;
 }
 
@@ -318,7 +305,7 @@ ol {
     position: absolute;
     top: -0.75rem;
     left: 1rem;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     padding: 0 0.5rem;
     font-weight: 700;
     font-size: 0.875rem;
@@ -336,15 +323,54 @@ ol {
     padding: 0.25rem 0.5rem;
     color: #495666;
     outline: none;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
 }
 
 .date-input:focus {
     border-color: #CFD5DF;
 }
 
+.reset-button {
+    background-color: #64748b;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reset-button:hover {
+    background-color: #475569;
+}
+
 .course-display {
     text-align: right;
+    position: relative;
+}
+
+.active-badge {
+    position: absolute;
+    top: -30px;
+    right: 0px;
+    display: inline-block;
+    background-color: #10b981;
+    color: white;
+    font-size: 0.75rem;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+#mainCourseDisplay {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .timetable-container {
@@ -424,7 +450,7 @@ ol {
 }
 
 .timetable-cell {
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     transition: background-color 0.2s;
     cursor: pointer;
     padding: 0.5rem;
@@ -495,11 +521,11 @@ ol {
 .complete-button {
     background-color: #495666;
     color: #fff;
-    width: 180px;
-    padding: 15px 30px;
+    width: 140px;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    font-size: 25px;
+    font-size: 16px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     transition: background-color 0.5s;
@@ -511,13 +537,13 @@ ol {
 }
 
 .delete-button {
-    background-color: #FF5F5F;
+    background-color: #ef4444;
     color: #fff;
-    width: 180px;
-    padding: 15px 30px;
+    width: 140px;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    font-size: 25px;
+    font-size: 16px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     transition: background-color 0.5s;
@@ -527,7 +553,6 @@ ol {
     background-color: #dc2626;
 }
 
-/* --- 共通モーダルスタイル --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -549,9 +574,8 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* 編集モーダル */
 .modal-content {
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     border-radius: 0.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     width: 500px;
@@ -559,9 +583,8 @@ body.modal-open {
     animation: fadeInUp 0.3s ease-out;
 }
 
-/* 新規作成モーダル */
 .create-modal-content {
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     border-radius: 0.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     width: 600px;
@@ -574,7 +597,6 @@ body.modal-open {
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -621,7 +643,7 @@ body.modal-open {
     border-radius: 0.25rem;
     padding: 0.5rem 0.75rem;
     outline: none;
-    background-color: #f9f9f9;
+    background-color: #f3f3f3;
     appearance: none;
     cursor: pointer;
     color: #333;
@@ -663,7 +685,6 @@ body.modal-open {
     background-color: #CFD5DF;
 }
 
-/* 新規作成モーダル固有のスタイル */
 .create-form-group {
     margin-bottom: 20px;
 }
@@ -696,7 +717,7 @@ body.modal-open {
     margin-right: 10px;
     width: 18px;
     height: 18px;
-    accent-color: #495666;
+    accent-color: #3b82f6;
     cursor: pointer;
 }
 

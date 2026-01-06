@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../classes/repository/home/HomeRepository.php';
 class MasterHomeController extends HomeRepository {
     // HomeRepositoryの__constructを呼び出す
     public function __construct() {
-        parent::__construct();
+        parent::session_resetting();
     }
 
     /**

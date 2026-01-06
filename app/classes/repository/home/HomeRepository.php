@@ -5,22 +5,20 @@
 
 class HomeRepository {
 
-    public function __construct() {
-        // コンストラクタ（必要に応じて初期化処理を追加）
-        $session_duration = 604800; // 7日間 (秒単位: 7 * 24 * 60 * 60)
-
+    public static function session_resetting() {
         // 0.1. サーバー側GCの有効期限を設定
         // すでに session_start() が呼ばれている場合は設定できないため、注意が必要
         // セッションが開始されている場合は設定(ini_set('session.gc_maxlifetime', $session_duration);)をスキップする   
         if (session_status() === PHP_SESSION_NONE) {
+            $session_duration = 7 * 24 * 60 * 60; // 7日間を秒数で設定
             ini_set('session.gc_maxlifetime', (string)$session_duration);
 
-        // 0.2. クライアント側（ブラウザ）のCookie有効期限を設定
-        // 'lifetime' に $session_duration を設定することで、7日間はログイン状態を保持する
-        // secure => true: 本番環境で HTTPS でのみCookieを送信
-        // httponly => true: JavaScriptからのアクセスを禁止
-        // samesite => 'Lax': クロスサイトリクエストフォージェリ（CSRF）対策
-        // すでに session_start() が呼ばれている場合は設定できないため、注意が必要
+            // 0.2. クライアント側（ブラウザ）のCookie有効期限を設定
+            // 'lifetime' に $session_duration を設定することで、7日間はログイン状態を保持する
+            // secure => true: 本番環境で HTTPS でのみCookieを送信
+            // httponly => true: JavaScriptからのアクセスを禁止
+            // samesite => 'Lax': クロスサイトリクエストフォージェリ（CSRF）対策
+            // すでに session_start() が呼ばれている場合は設定できないため、注意が必要
             session_set_cookie_params([
                 'lifetime' => $session_duration,
                 'path' => '/',
