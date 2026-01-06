@@ -3,7 +3,7 @@
 // ホーム画面に関するデータ操作を担当するリポジトリクラス
 // MasterとTeacherで共通する処理を記述し、両方のホームコントローラーで継承される
 
-class HomeRepository {
+abstract class  HomeRepository {
 
     public static function session_resetting() {
         // 0.1. サーバー側GCの有効期限を設定
@@ -82,5 +82,14 @@ class HomeRepository {
         }
         // UserインスタンスのgetFunctionCardsHtmlメソッドを呼び出してHTMLを取得
         return $user_instance->getFunctionCardsHtml($links);
+    }
+
+    // 抽象メソッド
+        /**
+     * 管理者ホーム画面の初期表示データを取得する
+     * @return array ビューに渡すリンク先情報データの配列
+     */
+    public function html_links() {
+        return [];
     }
 }

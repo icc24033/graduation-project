@@ -4,9 +4,9 @@
 require_once __DIR__ . '/../../../classes/repository/home/HomeRepository.php';
 
 class TeacherHomeController extends HomeRepository {
-    // HomeRepositoryの__constructを呼び出す
+    // HomeRepositoryのsession_resettingを呼び出す
     public function __construct() {
-        parent::__construct();
+        parent::session_resetting();
     }
 
     /**
@@ -25,5 +25,44 @@ class TeacherHomeController extends HomeRepository {
         ];
 
         return $links;
+    }
+    /**
+     * メイン処理
+     */
+    public function index() {
+        // 1. ログインチェック
+        SecurityHelper::requireLogin();
+
+        // 2. データの取得
+        // 【重要】クラス内のメソッドを呼ぶときは必ず $this-> をつけます
+        $user_data = $this->getHomeDataByUserdate();
+
+        // ユーザーインスタンス生成
+        $user_instance = $this->create_user_instance($user_data['user_grade'], $user_data['current_user_id']);
+
+        // 3. 権限チェックと表示準備
+        // Masterクラスのインスタンスかチェック（instanceof を使うとより確実です）
+        if ($user_instance !== null && is_a($user_instance, 'Teacher')) {
+            
+            // リンク情報の取得
+            $links = $this->html_links();
+
+            // 関数カード（HTMLパーツ）の生成
+            $function_cards_html = $this->generate_function_cards_html($user_instance, $links);
+
+            // 4. Viewに変数を渡す
+            extract($links);
+            extract($user_data);
+
+            // 5. Viewの読み込み
+            // パスはコントローラーからの相対パスになるので注意
+            require_once __DIR__ . '/../../../../public/teacher/teacher_home.php';
+        
+        } else {
+            // 権限がない、またはユーザーが取得できない場合
+            // ログインエラー画面などへ
+            require_once __DIR__ . '/../../../../public/login/login_error.html';
+            exit();
+        }
     }
 }
