@@ -35,17 +35,16 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="nofollow, noindex">
-    <title>時間割り作成</title>
-    <!-- Tailwind CSS -->
+    <title>時間割り作成（作成済み時間割り入り）</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
+
 <body>
     <header class="app-header">
         <h1>時間割り作成</h1>
@@ -54,28 +53,37 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
 
     <div class="app-container">
         <div class="main-section">
-
-            <!-- サイドバー -->
             <nav class="sidebar" style="z-index: 50;">
-                <!-- 新規作成ボタン -->
                 <div class="pt-6 pb-4 border-b border-gray-200">
-                    <button id="mainCreateNewBtn" class="sidebar-new-button">
-                        <i class="fa-solid fa-plus mr-2"></i>
-                        新規作成
-                    </button>
-                    <p class="text-xs text-center text-slate-500 mt-2">※適用期間を入力してください</p>
+                    <div id="defaultNewBtnArea">
+                        <button id="mainCreateNewBtn" class="sidebar-new-button">
+                            <i class="fa-solid fa-plus mr-2"></i>
+                            新規作成
+                        </button>
+                    </div>
+
+                    <div id="creatingItemArea" class="hidden px-4 mt-2 mb-4">
+                        <p class="text-xs font-bold text-blue-600 mb-2">現在作成中</p>
+                        <div class="bg-white border border-blue-300 rounded-lg overflow-hidden shadow-sm cursor-pointer hover:bg-blue-50 transition-colors" id="creatingItemCard">
+                            <div class="flex items-start gap-3 px-3 py-3">
+                                <i class="fa-solid fa-pen-to-square text-blue-500 mt-1 flex-shrink-0"></i>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="truncate font-bold text-sm text-slate-700" id="creatingCourseName"></span>
+                                    <span class="text-xs text-slate-500 truncate" id="creatingPeriod"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-slate-400 mt-1">クリックで作成中に戻る</p>
+                    </div>
                 </div>
 
-                <!-- 作成済み時間割エリア -->
                 <div class="px-4 py-4 space-y-4">
-                    <!-- ラジオボタン群 -->
                     <div>
                         <div class="mb-3">
                             <label class="radio-group-label">
                                 <input type="radio" name="displayMode" value="select" checked onchange="changeDisplayMode('select')">
                                 <span class="font-bold">選択</span>
                             </label>
-                            <!-- コース選択ドロップダウン -->
                             <div class="ml-6 mt-1 relative">
                                 <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
                                     <span class="current-value">システムデザインコース</span>
@@ -101,7 +109,7 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                         <div class="mb-2">
                             <label class="radio-group-label">
                                 <input type="radio" name="displayMode" value="next" onchange="changeDisplayMode('next')">
-                                <span>次の期間で反映される時間割り</span>
+                                <span>次回以降で反映される時間割り</span>
                             </label>
                         </div>
                     </div>
@@ -113,22 +121,24 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                 </div>
             </nav>
 
-            <!-- メインコンテンツ -->
             <main class="main-content">
                 <div class="control-area">
-                    <div class="period-box">
+                    <div class="period-box flex items-center">
                         <span class="period-label">適用期間</span>
                         <div class="period-inputs">
                             <input type="date" class="date-input" id="mainStartDate">
                             <span class="date-separator">～</span>
                             <input type="date" class="date-input" id="mainEndDate">
                         </div>
+                        
+                        <button id="resetViewBtn" class="hidden reset-button">
+                            表示を解除 (新規入力)
+                        </button>
                     </div>
 
-                    <!-- コース表示エリア -->
                     <div class="course-display">
-                        <h2 id="mainCourseDisplay" class="text-2xl font-bold text-slate-700 border-b-2 border-blue-200 px-2 inline-block">
-                            システムデザインコース
+                        <h2 id="mainCourseDisplay" class="text-2xl font-bold text-slate-700 border-b-2 border-[#C0DEFF] px-2 inline-block">
+                            （未選択）
                         </h2>
                     </div>
                 </div>
@@ -147,7 +157,6 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                                 </tr>
                             </thead>
                             <tbody id="timetable-body">
-                                <!-- 1-5限のループ -->
                                 <script>
                                     for(let i=1; i<=5; i++) {
                                         const times = [{s:'9:10',e:'10:40'}, {s:'10:50',e:'12:20'}, {s:'13:10',e:'14:40'}, {s:'14:50',e:'16:20'}, {s:'16:30',e:'17:50'}];
@@ -171,15 +180,14 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                     </div>
                 </div>
 
-                <div class="footer-button-area">
-                    <button id="deleteButton" class="delete-button">削除</button>
+                <div id="footerArea" class="footer-button-area" style="display: none;">
+                    <button id="cancelCreationBtn" class="delete-button">キャンセル</button>
                     <button id="completeButton" class="complete-button">完了</button>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- 授業編集モーダル -->
     <div id="classModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 id="modalTitle" class="modal-title">○曜日 ○限</h2>
@@ -195,14 +203,11 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         </div>
     </div>
 
-    <!-- 新規作成モーダル -->
     <div id="createModal" class="modal-overlay hidden">
         <div class="create-modal-content">
             <h2 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2 border-slate-300">新規作成</h2>
             
-            <p id="createPeriodDisplay" class="text-slate-600 mb-6 font-medium text-center bg-blue-50 py-2 rounded">
-                <!-- JSで期間を表示 -->
-            </p>
+            <p id="createPeriodDisplay" class="text-slate-600 mb-6 font-medium text-center bg-blue-50 py-2 rounded"></p>
 
             <div class="create-form-group">
                 <label class="create-form-label">学年 <span class="text-red-500 text-xs ml-1">必須</span></label>
@@ -249,14 +254,117 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
     </div>
 
     <script>
-        // --- 共通変数 ---
         let savedTimetables = [];
+        let isCreatingMode = false;
+        let isViewOnly = false;
+        let currentRecord = null;
+        let tempCreatingData = null;
+        let originalRecordData = null; // 編集前のオリジナルデータ
         
-        // --- 要素取得 ---
+        // デモデータの初期化
+        function initializeDemoData() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // 過去の日付（先月）
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            const lastMonthStr = lastMonth.toISOString().split('T')[0];
+            
+            // 未来の日付（来月）
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            const nextMonthStr = nextMonth.toISOString().split('T')[0];
+            
+            // 未来の日付（2ヶ月後）
+            const twoMonthsLater = new Date(today);
+            twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
+            const twoMonthsLaterStr = twoMonthsLater.toISOString().split('T')[0];
+
+            savedTimetables = [
+                {
+                    id: 1001,
+                    course: "システムデザインコース",
+                    startDate: lastMonthStr,
+                    endDate: twoMonthsLaterStr,
+                    data: [
+                        {day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
+                        {day: "月", period: "2", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
+                        {day: "火", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
+                        {day: "水", period: "1", className: "ネットワーク構築", teacherName: "田中 優子", roomName: "301演習室"},
+                        {day: "木", period: "1", className: "セキュリティ概論", teacherName: "渡辺 剛", roomName: "4F大講義室"},
+                        {day: "金", period: "1", className: "HR", teacherName: "伊藤 直人", roomName: "202教室"}
+                    ]
+                },
+                {
+                    id: 1002,
+                    course: "Webクリエイタコース",
+                    startDate: lastMonthStr,
+                    endDate: nextMonthStr,
+                    data: [
+                        {day: "月", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
+                        {day: "月", period: "2", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
+                        {day: "火", period: "1", className: "プロジェクト管理", teacherName: "山本 さくら", roomName: "202教室"},
+                        {day: "水", period: "1", className: "キャリアデザイン", teacherName: "伊藤 直人", roomName: "4F大講義室"}
+                    ]
+                },
+                {
+                    id: 1003,
+                    course: "１年１組",
+                    startDate: nextMonthStr,
+                    endDate: twoMonthsLaterStr,
+                    data: [
+                        {day: "月", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
+                        {day: "火", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
+                        {day: "水", period: "1", className: "HR", teacherName: "田中 優子", roomName: "201教室"}
+                    ]
+                }
+            ];
+        }
+        
+        // 優先度順にコースをチェック
+        function selectInitialTimetable() {
+            const priorityCourses = [
+                "システムデザインコース",
+                "Webクリエイタコース", 
+                "マルチメディアOAコース",
+                "応用情報コース",
+                "基本情報コース",
+                "ITパスポートコース",
+                "１年１組",
+                "１年２組"
+            ];
+            
+            for (const courseName of priorityCourses) {
+                const record = savedTimetables.find(r => r.course === courseName);
+                if (record) {
+                    // ドロップダウンをそのコースに設定
+                    document.querySelector('#courseDropdownToggle .current-value').textContent = courseName;
+                    
+                    // リストを描画
+                    renderSavedList('select');
+                    
+                    // そのレコードを選択
+                    setTimeout(() => {
+                        const targetItem = document.querySelector(`.saved-item[data-id="${record.id}"]`);
+                        if (targetItem) {
+                            targetItem.click();
+                        }
+                    }, 100);
+                    
+                    return;
+                }
+            }
+        }
+        
         const mainCreateNewBtn = document.getElementById('mainCreateNewBtn');
+        const defaultNewBtnArea = document.getElementById('defaultNewBtnArea');
+        const creatingItemArea = document.getElementById('creatingItemArea');
+        const creatingCourseName = document.getElementById('creatingCourseName');
+        const creatingPeriod = document.getElementById('creatingPeriod');
         const mainStartDate = document.getElementById('mainStartDate');
         const mainEndDate = document.getElementById('mainEndDate');
-        
+        const resetViewBtn = document.getElementById('resetViewBtn');
         const createModal = document.getElementById('createModal');
         const createPeriodDisplay = document.getElementById('createPeriodDisplay');
         const createGradeSelect = document.getElementById('createGradeSelect');
@@ -265,35 +373,162 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         const csvInputArea = document.getElementById('csvInputArea');
         const createSubmitBtn = document.getElementById('createSubmitBtn');
         const createCancelBtn = document.getElementById('createCancelBtn');
+        const footerArea = document.getElementById('footerArea');
+        const completeButton = document.getElementById('completeButton');
+        const cancelCreationBtn = document.getElementById('cancelCreationBtn');
 
-        // --- データ定義 ---
+        document.getElementById('creatingItemCard').addEventListener('click', () => {
+            if (!isCreatingMode) return;
+            
+            // 作成中に戻る = 閲覧モード解除
+            isViewOnly = false;
+            currentRecord = null;
+            originalRecordData = null;
+            
+            if (tempCreatingData) {
+                document.querySelectorAll('.timetable-cell').forEach(cell => {
+                    cell.innerHTML = '';
+                    cell.classList.remove('is-filled');
+                });
+                
+                tempCreatingData.gridData.forEach(item => {
+                    const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+                    if (targetCell) {
+                        targetCell.innerHTML = `
+                        <div class="class-content">
+                            <div class="class-name">${item.className}</div>
+                            <div class="class-detail">
+                                ${item.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${item.teacherName}</span></div>` : ''}
+                                ${item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : ''}
+                            </div>
+                        </div>`;
+                        targetCell.classList.add('is-filled');
+                    }
+                });
+                
+                document.getElementById('mainCourseDisplay').innerHTML = tempCreatingData.courseName;
+                mainStartDate.value = tempCreatingData.startDate;
+                mainEndDate.value = tempCreatingData.endDate;
+            }
+            
+            resetViewBtn.classList.add('hidden');
+            footerArea.style.display = 'flex';
+            completeButton.textContent = '完了';
+            cancelCreationBtn.textContent = 'キャンセル';
+            mainStartDate.disabled = true;
+            mainEndDate.disabled = true;
+            
+            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+        });
+
         const courseData = {
             "1": ["１年１組", "１年２組", "基本情報コース", "応用情報コース"],
             "2": ["システムデザインコース", "Webクリエイタコース", "マルチメディアOAコース"],
             "all": ["１年１組", "１年２組", "基本情報コース", "応用情報コース", "システムデザインコース", "Webクリエイタコース", "マルチメディアOAコース"]
         };
 
-        // ==========================
-        //  メイン画面ロジック
-        // ==========================
+        // 適用期間の変更を監視
+        mainStartDate.addEventListener('input', () => {
+            if (!isCreatingMode && currentRecord && originalRecordData) {
+                if (mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate) {
+                    cancelCreationBtn.textContent = '変更を破棄';
+                    cancelCreationBtn.disabled = false;
+                    cancelCreationBtn.style.opacity = '1';
+                    cancelCreationBtn.style.cursor = 'pointer';
+                } else {
+                    // 元の値に戻った場合
+                    if (isRecordActive(currentRecord)) {
+                        cancelCreationBtn.textContent = '削除不可（適用中）';
+                        cancelCreationBtn.disabled = true;
+                        cancelCreationBtn.style.opacity = '0.5';
+                        cancelCreationBtn.style.cursor = 'not-allowed';
+                    } else {
+                        cancelCreationBtn.textContent = '削除';
+                        cancelCreationBtn.disabled = false;
+                        cancelCreationBtn.style.opacity = '1';
+                        cancelCreationBtn.style.cursor = 'pointer';
+                    }
+                }
+            }
+        });
+        
+        mainEndDate.addEventListener('input', () => {
+            if (!isCreatingMode && currentRecord && originalRecordData) {
+                if (mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate) {
+                    cancelCreationBtn.textContent = '変更を破棄';
+                    cancelCreationBtn.disabled = false;
+                    cancelCreationBtn.style.opacity = '1';
+                    cancelCreationBtn.style.cursor = 'pointer';
+                } else {
+                    // 元の値に戻った場合
+                    if (isRecordActive(currentRecord)) {
+                        cancelCreationBtn.textContent = '削除不可（適用中）';
+                        cancelCreationBtn.disabled = true;
+                        cancelCreationBtn.style.opacity = '0.5';
+                        cancelCreationBtn.style.cursor = 'not-allowed';
+                    } else {
+                        cancelCreationBtn.textContent = '削除';
+                        cancelCreationBtn.disabled = false;
+                        cancelCreationBtn.style.opacity = '1';
+                        cancelCreationBtn.style.cursor = 'pointer';
+                    }
+                }
+            }
+        });
 
-        // 日付入力監視 -> 新規作成ボタン有効化
-        function checkMainDateInputs() {
-            mainCreateNewBtn.disabled = !(mainStartDate.value && mainEndDate.value);
-        }
-        mainStartDate.addEventListener('input', checkMainDateInputs);
-        mainEndDate.addEventListener('input', checkMainDateInputs);
+        resetViewBtn.addEventListener('click', () => {
+            // 作成中モードでのみ使用（作成中に戻る）
+            if (isCreatingMode) {
+                document.getElementById('creatingItemCard').click();
+                return;
+            }
+        });
 
-        // 新規作成ボタンクリック -> モーダル表示
         mainCreateNewBtn.addEventListener('click', () => {
-            if (mainCreateNewBtn.disabled) return;
+            // 編集中の時間割がある場合は確認
+            if (currentRecord && originalRecordData) {
+                if (!confirm('編集中の内容は保存されていません。\n新規作成を開始しますか？')) {
+                    return;
+                }
+            }
             
-            // モーダル表示
-            createPeriodDisplay.textContent = `適用期間: ${mainStartDate.value} ～ ${mainEndDate.value}`;
+            // モーダルに表示する期間を先に取得
+            const sVal = mainStartDate.value;
+            const eVal = mainEndDate.value;
+            
+            // 作成済み時間割を参照していた場合のみ期間をクリア
+            if (currentRecord) {
+                mainStartDate.value = '';
+                mainEndDate.value = '';
+            }
+            
+            // 既存の選択をクリアして新規入力可能な状態に
+            currentRecord = null;
+            originalRecordData = null;
+            isViewOnly = false;
+            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+            footerArea.style.display = 'none';
+            
+            // 適用期間フィールドを有効化
+            mainStartDate.disabled = false;
+            mainEndDate.disabled = false;
+            
+            // グリッドをクリア
+            document.querySelectorAll('.timetable-cell').forEach(cell => {
+                cell.innerHTML = '';
+                cell.classList.remove('is-filled');
+            });
+            document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
+            
+            // モーダルに適用期間を表示
+            if(sVal && eVal) {
+                createPeriodDisplay.textContent = `適用期間: ${sVal} ～ ${eVal}`;
+            } else {
+                createPeriodDisplay.textContent = "適用期間: 未設定（メイン画面で入力してください）";
+            }
+            
             createModal.classList.remove('hidden');
             document.body.classList.add('modal-open');
-            
-            // 初期化　要検討事項として処理
             createGradeSelect.value = "";
             createCourseSelect.innerHTML = '<option value="">先に学年を選択してください</option>';
             createCourseSelect.disabled = true;
@@ -302,21 +537,20 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             checkCreateValidation();
         });
 
-        // モーダル閉じる (キャンセル)
         createCancelBtn.addEventListener('click', () => {
             createModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
+            
+            // 作成モーダルをキャンセルした場合、何も選択していない状態に戻す
+            if (!isCreatingMode && !currentRecord) {
+                mainStartDate.disabled = false;
+                mainEndDate.disabled = false;
+            }
         });
 
-        // ==========================
-        //  新規作成モーダルロジック
-        // ==========================
-        
-        // 学年選択 -> コース絞り込み 要検討事項として処理
         createGradeSelect.addEventListener('change', function() {
             const grade = this.value;
             createCourseSelect.innerHTML = '<option value="">コースを選択してください</option>';
-            
             if (grade && courseData[grade]) {
                 courseData[grade].forEach(c => {
                     const op = document.createElement('option');
@@ -330,18 +564,15 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             checkCreateValidation();
         });
 
-        // バリデーションチェック
         function checkCreateValidation() {
             const grade = createGradeSelect.value;
             const course = createCourseSelect.value;
             const isCsv = checkCsv.checked;
             const hasFile = document.getElementById('csvFile').files.length > 0;
 
-            // 必須項目のバリデーションチェック
             let isValid = grade !== "" && course !== "";
             if (isCsv && !hasFile) isValid = false;
 
-            // isValidが上の条件式と合致していたら、disable(押すことができません)となる
             createSubmitBtn.disabled = !isValid;
         }
         
@@ -353,14 +584,59 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         });
         document.getElementById('csvFile').addEventListener('change', checkCreateValidation);
 
-        // 作成開始ボタンクリック -> 処理 & モーダル閉じる
+        function toggleCreatingMode(isCreating, courseName = '', sDate = '', eDate = '') {
+            isCreatingMode = isCreating;
+            if (isCreating) {
+                isViewOnly = false; 
+                resetViewBtn.classList.add('hidden'); 
+
+                defaultNewBtnArea.classList.add('hidden');
+                creatingItemArea.classList.remove('hidden');
+                
+                creatingCourseName.textContent = courseName;
+                creatingPeriod.textContent = (sDate && eDate) ? `${getFormattedDate(sDate)}〜${getFormattedDate(eDate)}` : "(期間未設定)";
+                
+                mainStartDate.disabled = true;
+                mainEndDate.disabled = true;
+                
+                footerArea.style.display = 'flex';
+                completeButton.textContent = '完了';
+                cancelCreationBtn.textContent = 'キャンセル';
+            } else {
+                defaultNewBtnArea.classList.remove('hidden');
+                creatingItemArea.classList.add('hidden');
+                
+                // 作成モード終了時は期間フィールドを有効化
+                mainStartDate.disabled = false;
+                mainEndDate.disabled = false;
+                mainStartDate.value = '';
+                mainEndDate.value = '';
+                
+                // グリッドもクリア
+                document.querySelectorAll('.timetable-cell').forEach(cell => {
+                    cell.innerHTML = '';
+                    cell.classList.remove('is-filled');
+                });
+                document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
+                
+                tempCreatingData = null;
+                currentRecord = null;
+                originalRecordData = null;
+                footerArea.style.display = 'none';
+            }
+        }
+
         createSubmitBtn.addEventListener('click', () => {
             const selectedCourse = createCourseSelect.value;
-            const isTest = document.getElementById('checkTestMode').checked;
-            
-            // --- ★追加: 重複チェック ---
             const sDate = mainStartDate.value;
             const eDate = mainEndDate.value;
+            if (!sDate || !eDate) {
+                alert("適用期間が入力されていません。\nメイン画面で期間を入力してから作成を開始してください。");
+                createModal.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+                setTimeout(() => mainStartDate.focus(), 100);
+                return;
+            }
             
             const hasOverlap = savedTimetables.some(record => {
                 if (record.course !== selectedCourse) return false;
@@ -370,49 +646,36 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
 
             if (hasOverlap) {
                 alert('指定された適用期間は、同じコースの既存の時間割と重複しています。\n別の期間を指定するか、既存の時間割を削除してください。');
-                return;  //処理中断
+                return;
             }
-            // ---------------------------
-
-            // メイン画面反映（コース名）
-            const toggle = document.querySelector('#courseDropdownToggle .current-value');
-            toggle.textContent = selectedCourse;
-            document.getElementById('mainCourseDisplay').textContent = selectedCourse;
             
-            // モードを「選択」に強制切り替え（編集可能にするため）
+            // 既存の選択をクリア
+            currentRecord = null;
+            originalRecordData = null;
+            isViewOnly = false;
+            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+            
+            // 作成モード開始
+            toggleCreatingMode(true, selectedCourse, sDate, eDate);
+
+            document.getElementById('mainCourseDisplay').innerHTML = selectedCourse;
+            
             const selectRadio = document.querySelector('input[value="select"]');
             if (!selectRadio.checked) {
                 selectRadio.checked = true;
-                changeDisplayMode('select'); 
-            } else {
-                renderSavedList('select');
             }
+            renderSavedList('select');
 
-            // テーブルクリア（新規作成なので）
             document.querySelectorAll('.timetable-cell').forEach(cell => {
                 cell.innerHTML = '';
                 cell.classList.remove('is-filled');
             });
-            
-            // 保存リストの選択状態解除
-            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
 
-            // モーダルを閉じる
             createModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
             
-            let msg = `「${selectedCourse}」の作成を開始します。`;
-            if (isTest) msg += "\n(テスト時間割モード)";
-            
-            setTimeout(() => alert(msg), 10);
+            setTimeout(() => alert(`「${selectedCourse}」の作成を開始します。`), 10);
         });
-
-
-        // ==========================
-        //  既存ロジック
-        // ==========================
-
-        let courseToggle = document.getElementById('courseDropdownToggle');
 
         function changeDisplayMode(mode) {
             const toggleBtn = document.getElementById('courseDropdownToggle');
@@ -424,20 +687,52 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             renderSavedList(mode);
         }
 
+        function isRecordActive(record) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isStarted = record.startDate <= todayStr;
+            const isNotEnded = !record.endDate || record.endDate >= todayStr;
+            return isStarted && isNotEnded;
+        }
+
+        function updateHeaderDisplay(record) {
+            const displayEl = document.getElementById('mainCourseDisplay');
+            if(!displayEl) return;
+            
+            let badgeHtml = '';
+            if(isRecordActive(record)) {
+                badgeHtml = '<span class="active-badge">適用中</span>';
+            }
+            displayEl.innerHTML = record.course + badgeHtml;
+        }
+
+        function getFormattedDate(inputVal) {
+            if (!inputVal) return '';
+            const parts = inputVal.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[1]}/${parts[2]}~`;
+        }
+
         function renderSavedList(mode) {
             const container = document.getElementById('savedListContainer');
             const divider = document.getElementById('savedListDivider');
             const items = container.querySelectorAll('li:not(.is-group-label)');
             items.forEach(item => item.remove());
 
+            let filteredRecords = savedTimetables;
+
+            if (mode === 'select') {
+                const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
+                filteredRecords = filteredRecords.filter(item => item.course === currentCourse);
+            }
+
             const todayStr = new Date().toISOString().split('T')[0];
-            const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
-            let filteredRecords = savedTimetables.filter(item => item.course === currentCourse);
 
             if (mode === 'current') {
                 filteredRecords = filteredRecords.filter(item => {
                     if (!item.startDate) return false;
-                    return item.startDate <= todayStr && (!item.endDate || item.endDate >= todayStr);
+                    const isStarted = item.startDate <= todayStr;
+                    const isNotEnded = !item.endDate || item.endDate >= todayStr;
+                    return isStarted && isNotEnded;
                 });
             } else if (mode === 'next') {
                 filteredRecords = filteredRecords.filter(item => {
@@ -449,26 +744,38 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             if (filteredRecords.length > 0) {
                 container.classList.remove('hidden');
                 divider.classList.remove('hidden');
-            } else {
-                // データなし
             }
 
             filteredRecords.forEach(record => {
                 const dateLabel = getFormattedDate(record.startDate);
+                let statusText = "";
+                let statusClass = "text-slate-500";
+                
+                if (isRecordActive(record)) {
+                    statusText = "適用中：";
+                    statusClass = "text-emerald-600 font-bold";
+                } else if (record.startDate > todayStr) {
+                    statusText = "次回：";
+                    statusClass = "text-blue-600 font-bold";
+                }
+
                 const newItem = document.createElement('li');
                 newItem.className = 'nav-item saved-item';
                 newItem.setAttribute('data-id', record.id);
-                newItem.innerHTML = `<a href="#"><i class="fa-regular fa-file-lines text-blue-500"></i><span>${record.course}</span><span class="saved-meta">${dateLabel}</span></a>`;
+                newItem.innerHTML = `
+                    <a href="#">
+                        <i class="fa-regular fa-file-lines text-blue-500 flex-shrink-0 mt-1"></i>
+                        <div class="flex flex-col min-w-0 flex-1">
+                            <span class="truncate font-bold text-sm">${record.course}</span>
+                            <span class="text-xs truncate ${statusClass}">
+                                ${statusText}${dateLabel}
+                            </span>
+                        </div>
+                    </a>
+                `;
                 newItem.addEventListener('click', handleSavedItemClick);
                 container.appendChild(newItem);
             });
-        }
-
-        function getFormattedDate(inputVal) {
-            if (!inputVal) return '';
-            const parts = inputVal.split('-');
-            if (parts.length !== 3) return '';
-            return `${parts[1]}/${parts[2]}~`;
         }
 
         function setupDropdown(toggleId, menuId, onChangeCallback) {
@@ -510,12 +817,13 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             }
         }
         
-        setupDropdown('courseDropdownToggle', 'courseDropdownMenu', refreshTimetableDisplay);
+        setupDropdown('courseDropdownToggle', 'courseDropdownMenu', () => {
+            const mode = document.querySelector('input[name="displayMode"]:checked').value;
+            renderSavedList(mode);
+        });
 
         document.addEventListener('click', (e) => {
-            // モーダル内クリックなら閉じない
             if (e.target.closest('.modal-content') || e.target.closest('.create-modal-content')) return;
-            
             document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
                 if (menu.contains(e.target)) return;
                 menu.classList.remove('is-open');
@@ -524,6 +832,7 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                 if(btn) btn.setAttribute('aria-expanded', 'false');
             });
         });
+        
         document.querySelector('.sidebar').addEventListener('scroll', () => {
             document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
                 menu.classList.remove('is-open');
@@ -533,7 +842,6 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             });
         });
 
-        // 授業編集モーダル
         const editModal = document.getElementById('classModal');
         const modalTitle = document.getElementById('modalTitle');
         const inputClassName = document.getElementById('inputClassName');
@@ -543,13 +851,20 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         const btnSave = document.getElementById('btnSave');
         let currentCell = null;
 
-        
         document.querySelectorAll('.timetable-cell').forEach(cell => {
             cell.addEventListener('click', function() {
-                if (!document.querySelector('input[value="select"]').checked) {
-                    alert('編集は「選択」モードで行ってください。');
+                // 閲覧専用モードの場合のみ編集不可
+                if (isViewOnly) {
+                    alert('編集するには「作成中」エリアをクリックして作成中の時間割に戻ってください。');
                     return;
                 }
+
+                // 作成中でもなく、選択もしていない場合は編集不可
+                if (!isCreatingMode && !currentRecord) {
+                    alert('リストから編集する時間割を選択するか、新規作成を行ってください。');
+                    return;
+                }
+
                 currentCell = this;
                 const day = this.dataset.day;
                 const period = this.dataset.period;
@@ -557,7 +872,13 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                 
                 const setVal = (sel, val) => {
                     let found = false;
-                    for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === val) { sel.selectedIndex = i; found = true; break; } }
+                    for(let i=0; i<sel.options.length; i++) { 
+                        if(sel.options[i].value === val) { 
+                            sel.selectedIndex = i; 
+                            found = true; 
+                            break; 
+                        } 
+                    }
                     if(!found) sel.value = "";
                 };
 
@@ -597,121 +918,296 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                 currentCell.innerHTML = '';
                 currentCell.classList.remove('is-filled');
             }
+            
+            // 編集があった場合、キャンセルボタンのラベルを変更
+            if (!isCreatingMode && currentRecord && originalRecordData) {
+                const hasGridChanges = JSON.stringify(getCurrentGridData()) !== JSON.stringify(originalRecordData.data);
+                const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
+                if (hasGridChanges || hasDateChanges) {
+                    cancelCreationBtn.textContent = '変更を破棄';
+                    cancelCreationBtn.disabled = false;
+                    cancelCreationBtn.style.opacity = '1';
+                    cancelCreationBtn.style.cursor = 'pointer';
+                } else {
+                    // 変更がない状態に戻った場合
+                    if (isRecordActive(currentRecord)) {
+                        cancelCreationBtn.textContent = '削除不可（適用中）';
+                        cancelCreationBtn.disabled = true;
+                        cancelCreationBtn.style.opacity = '0.5';
+                        cancelCreationBtn.style.cursor = 'not-allowed';
+                    } else {
+                        cancelCreationBtn.textContent = '削除';
+                        cancelCreationBtn.disabled = false;
+                        cancelCreationBtn.style.opacity = '1';
+                        cancelCreationBtn.style.cursor = 'pointer';
+                    }
+                }
+            }
+            
             editModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
             currentCell = null;
         });
 
-        // 完了・削除ボタン
-        const completeButton = document.getElementById('completeButton');
-        const deleteButton = document.getElementById('deleteButton');
-        const currentCourseEl = document.querySelector('#courseDropdownToggle .current-value');
-
-        function refreshTimetableDisplay() {
-            const mode = document.querySelector('input[name="displayMode"]:checked').value;
-            if (mode !== 'select') return;
-            const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
-            const displayEl = document.getElementById('mainCourseDisplay');
-            if(displayEl) displayEl.textContent = currentCourse;
-            renderSavedList('select');
-            const record = savedTimetables.slice().reverse().find(item => item.course === currentCourse);
-            document.querySelectorAll('.timetable-cell').forEach(cell => {
-                cell.innerHTML = ''; cell.classList.remove('is-filled');
-            });
-            document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
-            if (record) {
-                record.data.forEach(item => {
-                    const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
-                    if (targetCell) {
-                        targetCell.innerHTML = `
-                        <div class="class-content">
-                            <div class="class-name">${item.className}</div>
-                            <div class="class-detail">
-                                ${item.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${item.teacherName}</span></div>` : ''}
-                                ${item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : ''}
-                            </div>
-                        </div>`;
-                        targetCell.classList.add('is-filled');
-                    }
-                });
-                const listItem = document.querySelector(`.saved-item[data-id="${record.id}"]`);
-                if (listItem) listItem.classList.add('active');
-            }
-        }
-
-        completeButton.addEventListener('click', () => {
-            if (!document.querySelector('input[value="select"]').checked) { alert('「選択」モードでのみ保存可能です。'); return; }
-            if (!mainStartDate.value) { alert('適用期間を入力してください。'); return; }
-            
-            const courseText = courseToggle.querySelector('.current-value').textContent;
-            const currentGridData = [];
+        // グリッドデータを取得するヘルパー関数
+        function getCurrentGridData() {
+            const gridData = [];
             document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
-                currentGridData.push({
-                    day: cell.dataset.day, period: cell.dataset.period,
+                gridData.push({
+                    day: cell.dataset.day, 
+                    period: cell.dataset.period,
                     className: cell.querySelector('.class-name')?.textContent || '',
                     teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
                     roomName: cell.querySelector('.room-name span')?.textContent || ''
                 });
             });
+            return gridData;
+        }
 
-            const newRecord = {
-                id: Date.now(), course: courseText,
-                startDate: mainStartDate.value, endDate: mainEndDate.value,
-                data: currentGridData
-            };
-            savedTimetables.push(newRecord);
-            renderSavedList(document.querySelector('input[name="displayMode"]:checked').value);
+        completeButton.addEventListener('click', () => {
+            if (!mainStartDate.value) { 
+                alert('適用期間を入力してください。'); 
+                return; 
+            }
             
-            // 今保存したものをアクティブに
-            setTimeout(() => {
-                const item = document.querySelector(`.saved-item[data-id="${newRecord.id}"]`);
-                if(item) item.classList.add('active');
-            }, 0);
+            const currentGridData = getCurrentGridData();
 
-            alert('保存しました。');
-        });
+            if (isCreatingMode) {
+                // 新規作成の完了
+                const courseText = document.getElementById('creatingCourseName').textContent;
 
-        // 削除ボタン
-        deleteButton.addEventListener('click', () => {
-            if (!document.querySelector('input[value="select"]').checked) { alert('削除は「選択」モードで行ってください。'); return; }
-            const activeItem = document.querySelector('.saved-item.active');
-            if (!activeItem) { alert('削除する時間割を選択してください。'); return; }
+                const newRecord = {
+                    id: Date.now(),
+                    course: courseText,
+                    startDate: mainStartDate.value,
+                    endDate: mainEndDate.value,
+                    data: currentGridData
+                };
+                savedTimetables.push(newRecord);
+                
+                toggleCreatingMode(false);
+                
+                const mode = document.querySelector('input[name="displayMode"]:checked').value;
+                renderSavedList(mode);
+                
+                handleSavedItemClick({
+                    preventDefault: () => {},
+                    currentTarget: { getAttribute: () => newRecord.id }
+                });
 
-            const id = parseInt(activeItem.getAttribute('data-id'));
-            const record = savedTimetables.find(item => item.id === id);
-            
-            if (record) {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const isStarted = record.startDate <= todayStr;
-                const isNotEnded = !record.endDate || record.endDate >= todayStr;
+                alert('保存しました。');
+            } else if (currentRecord) {
+                // 既存の編集の保存
+                
+                // 適用期間の重複チェック（自分以外のレコードとの重複）
+                const sDate = mainStartDate.value;
+                const eDate = mainEndDate.value;
+                const hasOverlap = savedTimetables.some(record => {
+                    if (record.id === currentRecord.id) return false; // 自分自身は除外
+                    if (record.course !== currentRecord.course) return false;
+                    const recEnd = record.endDate || record.startDate;
+                    return (sDate <= recEnd) && (eDate >= record.startDate);
+                });
 
-                if (isStarted && isNotEnded) {
-                    alert('現在適用されている期間の時間割は削除できません。');
+                if (hasOverlap) {
+                    alert('指定された適用期間は、同じコースの既存の時間割と重複しています。\n別の期間を指定してください。');
                     return;
                 }
+                
+                // データと期間を更新
+                currentRecord.data = currentGridData;
+                currentRecord.startDate = mainStartDate.value;
+                currentRecord.endDate = mainEndDate.value;
+                originalRecordData = null;
+                
+                // ボタンラベルをリセット
+                completeButton.textContent = '保存';
+                
+                // 更新後の適用期間状態に応じてボタンを設定
+                if (isRecordActive(currentRecord)) {
+                    cancelCreationBtn.textContent = '削除不可（適用中）';
+                    cancelCreationBtn.disabled = true;
+                    cancelCreationBtn.style.opacity = '0.5';
+                    cancelCreationBtn.style.cursor = 'not-allowed';
+                } else {
+                    cancelCreationBtn.textContent = '削除';
+                    cancelCreationBtn.disabled = false;
+                    cancelCreationBtn.style.opacity = '1';
+                    cancelCreationBtn.style.cursor = 'pointer';
+                }
+                
+                // リストを更新
+                const mode = document.querySelector('input[name="displayMode"]:checked').value;
+                renderSavedList(mode);
+                
+                // 選択状態を維持
+                const targetItem = document.querySelector(`.saved-item[data-id="${currentRecord.id}"]`);
+                if(targetItem) targetItem.classList.add('active');
+                
+                alert('変更を保存しました。');
             }
+        });
 
-            if(!confirm('本当に削除しますか？')) return;
+        cancelCreationBtn.addEventListener('click', () => {
+            // ボタンが無効化されている場合は処理しない
+            if (cancelCreationBtn.disabled) {
+                alert('現在適用期間中の時間割は削除できません。');
+                return;
+            }
+            
+            if(isCreatingMode) {
+                // 作成中のキャンセル
+                if(!confirm('作成中の内容を破棄してキャンセルしますか？')) return;
 
-            const index = savedTimetables.findIndex(item => item.id === id);
-            if (index !== -1) savedTimetables.splice(index, 1);
+                document.querySelectorAll('.timetable-cell').forEach(cell => { 
+                    cell.innerHTML = ''; 
+                    cell.classList.remove('is-filled'); 
+                });
+                document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
+                document.querySelector('#courseDropdownToggle .current-value').textContent = "システムデザインコース";
+                document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+                
+                toggleCreatingMode(false);
 
-            activeItem.remove();
+                setTimeout(() => alert('キャンセルしました。'), 10);
+                return;
+            }
             
-            const currentMode = document.querySelector('input[name="displayMode"]:checked').value;
-            renderSavedList(currentMode);
-            
-            document.querySelectorAll('.timetable-cell').forEach(cell => { cell.innerHTML = ''; cell.classList.remove('is-filled'); });
-            document.getElementById('mainCourseDisplay').textContent = "（未選択）";
-            
-            setTimeout(() => alert('削除しました。'), 10);
+            if (currentRecord) {
+                // 削除または変更破棄
+                const hasChanges = originalRecordData !== null;
+                
+                if (hasChanges) {
+                    // 適用期間の変更チェック
+                    const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
+                    const hasGridChanges = JSON.stringify(getCurrentGridData()) !== JSON.stringify(originalRecordData.data);
+                    
+                    if (hasDateChanges || hasGridChanges) {
+                        // 変更がある場合は破棄確認
+                        if(!confirm('変更を破棄しますか？')) return;
+                        
+                        // オリジナルデータに戻す
+                        currentRecord.data = JSON.parse(JSON.stringify(originalRecordData.data));
+                        currentRecord.startDate = originalRecordData.startDate;
+                        currentRecord.endDate = originalRecordData.endDate;
+                        originalRecordData = null;
+                        
+                        // ボタンラベルをリセット
+                        completeButton.textContent = '保存';
+                        if (isRecordActive(currentRecord)) {
+                            cancelCreationBtn.textContent = '削除不可（適用中）';
+                            cancelCreationBtn.disabled = true;
+                            cancelCreationBtn.style.opacity = '0.5';
+                            cancelCreationBtn.style.cursor = 'not-allowed';
+                        } else {
+                            cancelCreationBtn.textContent = '削除';
+                            cancelCreationBtn.disabled = false;
+                            cancelCreationBtn.style.opacity = '1';
+                            cancelCreationBtn.style.cursor = 'pointer';
+                        }
+                        
+                        // 適用期間を復元
+                        mainStartDate.value = currentRecord.startDate;
+                        mainEndDate.value = currentRecord.endDate;
+                        
+                        // リストを更新
+                        const mode = document.querySelector('input[name="displayMode"]:checked').value;
+                        renderSavedList(mode);
+                        const targetItem = document.querySelector(`.saved-item[data-id="${currentRecord.id}"]`);
+                        if(targetItem) targetItem.classList.add('active');
+                        
+                        // 画面を再描画
+                        document.querySelectorAll('.timetable-cell').forEach(cell => { 
+                            cell.innerHTML = ''; 
+                            cell.classList.remove('is-filled'); 
+                        });
+                        currentRecord.data.forEach(item => {
+                            const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+                            if (targetCell) {
+                                targetCell.innerHTML = `
+                                <div class="class-content">
+                                    <div class="class-name">${item.className}</div>
+                                    <div class="class-detail">
+                                        ${item.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${item.teacherName}</span></div>` : ''}
+                                        ${item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : ''}
+                                    </div>
+                                </div>`;
+                                targetCell.classList.add('is-filled');
+                            }
+                        });
+                        
+                        alert('変更を破棄しました。');
+                        return;
+                    }
+                }
+                
+                // 変更がない場合は削除
+                // 適用期間中チェック（念のため再度チェック）
+                if (isRecordActive(currentRecord)) {
+                    alert('現在適用期間中の時間割は削除できません。');
+                    return;
+                }
+                
+                if(!confirm('この時間割を削除しますか？')) return;
+
+                const index = savedTimetables.findIndex(item => item.id === currentRecord.id);
+                if (index !== -1) savedTimetables.splice(index, 1);
+                
+                const activeItem = document.querySelector('.saved-item.active');
+                if (activeItem) activeItem.remove();
+                
+                const mode = document.querySelector('input[name="displayMode"]:checked').value;
+                renderSavedList(mode);
+                
+                currentRecord = null;
+                originalRecordData = null;
+                footerArea.style.display = 'none';
+                mainStartDate.disabled = false;
+                mainEndDate.disabled = false;
+                mainStartDate.value = '';
+                mainEndDate.value = '';
+                document.querySelectorAll('.timetable-cell').forEach(cell => { 
+                    cell.innerHTML = ''; 
+                    cell.classList.remove('is-filled'); 
+                });
+                document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
+                
+                document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+
+                setTimeout(() => alert('削除しました。'), 10);
+            }
         });
 
         function handleSavedItemClick(e) {
-            e.preventDefault();
-            const id = parseInt(e.currentTarget.getAttribute('data-id'));
+            if(e.preventDefault) e.preventDefault();
+            
+            let id;
+            if(e.currentTarget && e.currentTarget.getAttribute) {
+                id = parseInt(e.currentTarget.getAttribute('data-id'));
+            } else {
+                id = parseInt(e.currentTarget.getAttribute('data-id'));
+            }
+
+            // 作成中モードで他の時間割を見る場合は閲覧専用
+            if (isCreatingMode && !isViewOnly) {
+                tempCreatingData = {
+                    courseName: document.getElementById('creatingCourseName').textContent,
+                    startDate: mainStartDate.value,
+                    endDate: mainEndDate.value,
+                    gridData: getCurrentGridData()
+                };
+                
+                // 作成中から他の時間割を見る = 閲覧専用
+                isViewOnly = true;
+            } else {
+                // 通常は編集可能
+                isViewOnly = false;
+            }
+
             const selectRadio = document.querySelector('input[value="select"]');
-            if(!selectRadio.checked) { selectRadio.checked = true; changeDisplayMode('select'); }
+            if(!selectRadio.checked) {
+                selectRadio.checked = true;
+            }
             
             document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
             const targetItem = document.querySelector(`.saved-item[data-id="${id}"]`);
@@ -719,13 +1215,58 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
 
             const record = savedTimetables.find(item => item.id === id);
             if (record) {
-                const toggle = document.querySelector('#courseDropdownToggle .current-value');
-                toggle.textContent = record.course;
-                document.getElementById('mainCourseDisplay').textContent = record.course;
+                currentRecord = record;
+                
+                // オリジナルデータを保存（編集用）
+                if (!isViewOnly) {
+                    originalRecordData = {
+                        data: JSON.parse(JSON.stringify(record.data)),
+                        startDate: record.startDate,
+                        endDate: record.endDate
+                    };
+                    completeButton.textContent = '保存';
+                    
+                    // 適用期間中かチェック
+                    if (isRecordActive(record)) {
+                        cancelCreationBtn.textContent = '削除不可（適用中）';
+                        cancelCreationBtn.disabled = true;
+                        cancelCreationBtn.style.opacity = '0.5';
+                        cancelCreationBtn.style.cursor = 'not-allowed';
+                    } else {
+                        cancelCreationBtn.textContent = '削除';
+                        cancelCreationBtn.disabled = false;
+                        cancelCreationBtn.style.opacity = '1';
+                        cancelCreationBtn.style.cursor = 'pointer';
+                    }
+                }
+                
+                // UIの更新
+                if (isCreatingMode && isViewOnly) {
+                    // 作成中から閲覧
+                    resetViewBtn.textContent = '作成中に戻る';
+                    resetViewBtn.classList.remove('hidden');
+                    footerArea.style.display = 'none';
+                    mainStartDate.disabled = true;
+                    mainEndDate.disabled = true;
+                } else {
+                    // 通常の編集（期間も編集可能）
+                    resetViewBtn.classList.add('hidden');
+                    footerArea.style.display = 'flex';
+                    completeButton.textContent = '保存';
+                    cancelCreationBtn.textContent = '削除';
+                    mainStartDate.disabled = false;
+                    mainEndDate.disabled = false;
+                }
+
+                updateHeaderDisplay(record);
+                
                 mainStartDate.value = record.startDate;
                 mainEndDate.value = record.endDate;
                 
-                document.querySelectorAll('.timetable-cell').forEach(cell => { cell.innerHTML = ''; cell.classList.remove('is-filled'); });
+                document.querySelectorAll('.timetable-cell').forEach(cell => { 
+                    cell.innerHTML = ''; 
+                    cell.classList.remove('is-filled'); 
+                });
                 record.data.forEach(item => {
                     const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
                     if (targetCell) {
@@ -742,6 +1283,12 @@ $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
                 });
             }
         }
+        
+        // ページ読み込み時の初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeDemoData();
+            selectInitialTimetable();
+        });
     </script>
 </body>
 </html>
