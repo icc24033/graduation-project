@@ -43,13 +43,27 @@ if ($status['backend'] === 'student_addition') {
             <img class="user_icon" src="../images/user_icon.png"alt="ユーザーアイコン">
         </header>
 
+        <ul class="dropdown-menu" id="courseDropdownMenu">
+            <?php if (!empty($courseList)): ?>
+                <?php foreach ($courseList as $row): ?>
+                    <li>
+                        <a href="#" 
+                        data-course-id="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>"
+                        data-course-name="<?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>">
+                            <?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </ul>
+
         <main class="main-content">
             <nav class="sidebar">
                 <ul>
                     <li class="nav-item is-group-label">アカウント作成・編集</li>
                     <li class="nav-item is-active"><a href="student_account_edit_control.php">アカウントの作成</a></li>
                     <li class="nav-item"><a href="student_account_delete_control.php">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="studnet_account_transfer_control.php">学年の移動</a></li>
+                    <li class="nav-item"><a href="student_account_transfer_control.php">学年の移動</a></li>
                     <li class="nav-item"><a href="student_account_course_control.php">コースの編集</a></li>
                 </ul>
                 
@@ -63,18 +77,6 @@ if ($status['backend'] === 'student_addition') {
                 </form>
             </nav>
 
-            <ul class="dropdown-menu" id="courseDropdownMenu">
-                <?php if (!empty($courseList)): ?>
-                    <?php foreach ($courseList as $row): ?>
-                        <li>
-                            <a href="#" 
-                            data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>">
-                            <?php echo htmlspecialchars($row['course_name']); ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </ul>
 
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
@@ -182,9 +184,8 @@ if ($status['backend'] === 'student_addition') {
     </div>
 
     <?php 
-        if ($status['error_csv'] === true): 
+        if ($status['error_csv'] === true && $status['backend'] === 'csv_upload'): 
     ?>
-
     <div class="content-area">
         <div class="error-edit-container">
         <h3>エラーデータ編集</h3>
@@ -196,6 +197,60 @@ if ($status['backend'] === 'student_addition') {
                 <div class="column-student-id">学生番号</div>
                 <div class="column-name">氏名</div>
                 <div class="column-course">メールアドレス</div>
+            </div>
+            
+            <?php foreach ($status['error_data'] as $error_row): ?>
+            <div class="table-row">
+                <div class="column-check">
+                </div> 
+                
+                <div class="column-student-id">
+                    <input type="text" 
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][student_id]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['student_id']); ?>">
+                </div> 
+                
+                <div class="column-name">
+                    <input type="text" 
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][name]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['name']); ?>">
+                </div> 
+                
+                <div class="column-course">
+                    <input type="text" 
+                        name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][approvalUserAddress]" 
+                        value="<?php echo SecurityHelper::escapeHtml((string)$error_row['approvalUserAddress']); ?>">
+                </div>
+
+                <input type="hidden" 
+                    name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][id]" 
+                    value="<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>">
+                    
+                <input type="hidden" 
+                    name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][course_id]" 
+                    value="<?php echo SecurityHelper::escapeHtml((string)$error_row['course_id']); ?>">
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <button class="add-button" id="deleteActionButton">編集完了</button>
+        </form>
+
+    </div>
+
+    <?php 
+        elseif ($status['error_csv'] === true && $status['backend'] === 'student_addition'):
+    ?>
+    <div class="content-area">
+        <div class="error-edit-container">
+        <h3>エラーデータ編集</h3>
+        <div>
+        <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <div class="account-table-container">
+            <div class="table-header">
+                <div class="column-check"></div> 
+                <div class="column-student-id">学生番号</div>
+                <div class="column-name">氏名</div>
+                <div class="column-course">ちょっと違いますよ</div>
             </div>
             
             <?php foreach ($status['error_data'] as $error_row): ?>
@@ -254,6 +309,6 @@ if ($status['backend'] === 'student_addition') {
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 </html>

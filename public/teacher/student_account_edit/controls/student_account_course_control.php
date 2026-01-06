@@ -1,30 +1,15 @@
 <?php
-// 1. セキュリティ設定
+// student_account_course_control.php
+
 require_once '../../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// 2. 必要なクラスを読み込む
-// アカウント作成コントローラーの読み込み
-require_once '../../../../app/controllers/master/student_account_editers/StudentAccountEditController.php';
-// 表示機能ヘルパーの読み込み
+// --- 修正箇所: ViewHelper を読み込む ---
 require_once '../../../../app/classes/helper/dropdown/ViewHelper.php';
-// データベース操作用リポジトリファクトリーの読み込み
-require_once '../../../../app/classes/repository/RepositoryFactory.php';
 
-// 3. コントローラーを起動してデータを取得する
+require_once '../../../../app/controllers/master/student_account_editers/StudentAccountEditController.php';
+
 $controller = new StudentAccountEditController();
-$viewData = $controller->edit(); // コースリストの取得
-$basic_data = $controller->student_course_basic_info(   // 基本情報の取得
-    $_GET['course_id'] ?? null,
-    $_GET['current_year'] ?? null
-);
-
-// 4. 配列を展開して変数にする ($courseList, $error_message 等の生成)
-extract($viewData);
-extract($basic_data);
-
-require_once '../student_edit_course.php';
+// index_course を呼び出す
+$controller->index_course($_GET['course_id'] ?? null, $_GET['current_year'] ?? null);

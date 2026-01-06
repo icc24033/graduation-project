@@ -234,39 +234,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
     }
-
-    // エラー件数に応じてフラグとSQLクエリを設定
-    if ($error_count > 0) {
-        $error_count_flag = true;
-        $csv_error_table_sql = "SELECT * FROM error_student_table;";
-    }
-    else {
-        $error_count_flag = false;
-        $csv_error_table_sql = null;
-    }
-
-    //コース情報取得SQLクエリ
-    $course_sql = ("SELECT * FROM course;");
-
-    //studentに格納されている学生情報の数の取得
-    $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");  
-
-    $_SESSION['student_account'] = [
-        'success' => true,
-        'backend' => 'student_addition',
-        'error_csv' => $error_count_flag,
-        'csv_error_table_sql' => $csv_error_table_sql,
-        'before' => 'teacher_home',
-        'course_sql' => $course_sql,
-        'student_count_sql' => $student_count_sql
-    ];
-
     // データベース接続を閉じる
     $pdo = null;
 }
 
-// ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+// ★ CSV_edit.php にリダイレクトして処理を終了
+header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=student_addition");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>
