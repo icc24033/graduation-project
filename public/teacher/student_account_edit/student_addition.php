@@ -20,50 +20,10 @@ if ($status['backend'] === 'student_addition') {
     $current_year = date("Y");
     $current_year = (int)substr($current_year, -2); // 下2桁を取得
 
-    try {
-        //データベース接続
-        $pdo = RepositoryFactory::getPdo();
- 
-        // 　テストstudentに格納されている今年度の学生数の取得
-        $stmt_test_student = $pdo->prepare($status['student_count_sql']);
-        $stmt_test_student->execute([$current_year]);
-        $student_count = $stmt_test_student->fetchColumn();
-
-        // コース情報の取得
-        $courses = $courseList;
-    }
-    catch (PDOException $e) {
-        // データベース接続/クエリ実行エラー発生時
-        error_log("DB Error: " . $e->getMessage());
-        $current_course_name = 'エラー: データベース接続失敗';
-        // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
-        // throw new PDOException($e->getMessage(), (int)$e->getCode());
-    }
 } 
-else if ($status['backend'] === 'csv_upload') {
-    try {
-        //データベース接続
-        // $pdo = new PDO($dsn, DB_USER, DB_PASS);
-        $pdo = RepositoryFactory::getPdo();
-
-        // コース情報の取得
-        $courses = $courseList;
-    }
-    catch (PDOException $e) {
-        // データベース接続/クエリ実行エラー発生時
-        error_log("DB Error: " . $e->getMessage());
-        $current_course_name = 'エラー: データベース接続失敗';
-        // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
-        // throw new PDOException($e->getMessage(), (int)$e->getCode());
-    }
-} 
-else {
-    // 不正なアクセスの場合、エラーメッセージを表示して終了
-    echo "不正なアクセスです。";
-    exit();
-
-}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -104,8 +64,8 @@ else {
             </nav>
 
             <ul class="dropdown-menu" id="courseDropdownMenu">
-                <?php if (!empty($courses)): ?>
-                    <?php foreach ($courses as $row): ?>
+                <?php if (!empty($courseList)): ?>
+                    <?php foreach ($courseList as $row): ?>
                         <li>
                             <a href="#" 
                             data-selected-course-center="<?php echo htmlspecialchars($row['course_id']); ?>">
@@ -119,7 +79,7 @@ else {
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
             <div class="content-area">
-                <form action="..\..\..\..\app\teacher\student_account_edit_backend\csv_edit.php" method="POST">
+                <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_addition_edit.php" method="POST">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
@@ -133,7 +93,7 @@ else {
                             <div class="column-student-id">
                                 <input type="text" 
                                     name="students[<?php echo SecurityHelper::escapeHtml((string)$i); ?>][student_id]" 
-                                    value="<?php echo SecurityHelper::escapeHtml((string)($student_count + 1 + $i + ($current_year * 1000))); ?>">
+                                    value="<?php echo SecurityHelper::escapeHtml((string)($status['student_count'] + 1 + $i + ($current_year * 1000))); ?>">
                             </div> 
                             <div class="column-name">
                                 <input type="text" 
@@ -167,19 +127,8 @@ else {
 
 
             
-            <?php elseif ($status['backend'] === 'csv_upload' && $status['success_csv'] === true): 
-                try{
-                    // csv_tableに格納されている今年度の学生の取得
-                    $stmt_csv_table = $pdo->prepare($status['csv_table_student_sql']);
-                    $stmt_csv_table->execute();
-                }
-                catch (PDOException $e) {
-                    // データベース接続/クエリ実行エラー発生時
-                    error_log("DB Error: " . $e->getMessage());
-                    $current_course_name = 'エラー: データベース接続失敗';
-                    // 本番環境ではエラーを投げず、安全なメッセージを表示することが推奨されます
-                    // throw new PDOException($e->getMessage(), (int)$e->getCode());
-                }
+            <?php 
+                elseif ($status['backend'] === 'csv_upload' && $status['success_csv'] === true): 
             ?>
             <div class="content-area">
                 <div class="account-table-container">
@@ -190,7 +139,7 @@ else {
                         <div class="column-course">コース</div>
                     </div>
                     
-                    <?php while ($row = $stmt_csv_table->fetch()): ?>
+                    <?php foreach ($status['csv_data'] as $row): ?>
                     <div class="table-row">
                         <div class="column-check">
                         </div>
@@ -203,12 +152,12 @@ else {
                         <div class="column-course">
                             <?php 
                                 // コース名を取得。配列のインデックス調整ロジックはそのまま維持
-                                $course_name = $courses[$row['course_id'] - 1]['course_name'] ?? '不明なコース';
+                                $course_name = $courseList[$row['course_id'] - 1]['course_name'] ?? '不明なコース';
                             ?>
                             <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$course_name); ?>" disabled>
                         </div>
                     </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </div>
                 
                 <?php if ($status['error_csv'] === false): ?>
@@ -232,18 +181,8 @@ else {
         </main>
     </div>
 
-    <?php if ($status['error_csv'] === true): 
-        try {
-            $error_stmt = $pdo->prepare($status['csv_error_table_sql']);
-            $error_stmt->execute();
-        } catch (PDOException $e) {
-            // エラー内容をログに記録
-            error_log("CSV Error Data Fetch Error: " . $e->getMessage());
-            // ユーザーにエラーメッセージを表示
-            echo '<div class="error-message">エラーデータの取得中に問題が発生しました。</div>';
-            // 以降のループ処理を実行しないように null を代入
-            $error_stmt = null;
-        } 
+    <?php 
+        if ($status['error_csv'] === true): 
     ?>
 
     <div class="content-area">
@@ -259,7 +198,7 @@ else {
                 <div class="column-course">メールアドレス</div>
             </div>
             
-            <?php while ($error_row = $error_stmt->fetch()): ?>
+            <?php foreach ($status['error_data'] as $error_row): ?>
             <div class="table-row">
                 <div class="column-check">
                 </div> 
@@ -290,7 +229,7 @@ else {
                     name="students[<?php echo SecurityHelper::escapeHtml((string)$error_row['id']); ?>][course_id]" 
                     value="<?php echo SecurityHelper::escapeHtml((string)$error_row['course_id']); ?>">
             </div>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
         </div>
         <button class="add-button" id="deleteActionButton">編集完了</button>
         </form>

@@ -156,30 +156,6 @@ try {
         // DB接続を閉じる
         $pdo = null;
 
-        if ($error_count > 0) {
-            $error_count_flag = true;
-            $csv_error_table_sql = "SELECT * FROM error_student_table;";
-        }
-        else {
-            $error_count_flag = false;
-            $csv_error_table_sql = null;
-        }
-        //csv_tableに格納されている学生情報の取得
-        $csv_table_student_sql = ("SELECT * FROM csv_table;");
-        
-        //コース情報取得SQLクエリ
-        $course_sql = ("SELECT * FROM course;");
-
-        $_SESSION['student_account'] = [
-            'success' => true,
-            'backend' => 'csv_upload',
-            'error_csv' => $error_count_flag,
-            'before' => 'teacher_home',
-            'csv_table_student_sql' => $csv_table_student_sql,
-            'course_sql' => $course_sql,
-            'csv_error_table_sql' => $csv_error_table_sql
-        ];
-
     }
     else {
         // 不正なアクセスの場合
@@ -189,7 +165,7 @@ try {
         ];
     }
 // ★ CSV_edit.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=csv_upload");
 exit(); // リダイレクト後は必ず処理を終了
 } 
 catch (PDOException $e) {

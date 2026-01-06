@@ -38,14 +38,66 @@ class StudentAccountEditController {
      * 学生追加画面の基本情報を取得する
      * @return array 基本情報の配列
      */
-    public function student_addittion_basic_info() {
-        $student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
+    public function student_addittion_basic_info($backend) {
+        
+        // data送信に必要な変数を初期化
+        $student_count = 0;
+        $csv_count = 0;
+        $csv_count_flag = false;
+        $csv_data = [];
+        $error_count = 0;
+        $error_count_flag = false;
+        $error_data = [];
+
+        if (empty($backend)) {
+            $backend = 'student_addition'; // デフォルト値を設定
+        }
+
+        if ($backend === 'student_addition') {
+            $studentRepo = RepositoryFactory::getStudentRepository();
+            $student_count = $studentRepo->countStudentsByYear();
+        }
+        else if ($backend === 'csv_upload') {
+            $csvRepo = RepositoryFactory::getCsvRepository();
+            $csv_count = $csvRepo->countCsvData(); 
+
+            $errorStudentRepo = RepositoryFactory::getErrorStudentRepository();
+            $error_count = $errorStudentRepo->countErrorData();
+
+            // csv_tableにデータが存在した場合の処理
+            if ($csv_count > 0) {
+                $csv_count_flag = true;
+                $csv_data = $csvRepo->getAllCsvData();
+            }
+            else {
+                $csv_count_flag = false;
+                $csv_data = [];
+            }
+
+            // error_student_tableにデータが存在した場合の処理
+            if ($error_count > 0) {
+                $error_count_flag = true;
+                $error_data = $errorStudentRepo->getAllErrorData();
+            }
+            else {
+                $error_count_flag = false;
+                $error_data = [];
+            }
+        }
+                
+
+
+            
+
         $data = [
             'success' => true,
-            'backend' => 'student_addition',
-            'error_csv' => false,
+            'backend' => $backend,
+            'error_csv' => $error_count_flag,
+            'error_data' => $error_data,
             'before' => 'teacher_home',
-            'student_count_sql' => $student_count_sql
+            'success_csv' => $csv_count_flag,
+            'csv_data' => $csv_data,
+            'student_count' => $student_count
         ];
         return $data;
     }

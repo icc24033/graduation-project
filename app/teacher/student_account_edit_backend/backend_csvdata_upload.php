@@ -109,28 +109,8 @@ else {
     $csv_error_table_sql = null;
 }
 
-//csv_tableに格納されている学生情報の取得
-$csv_table_student_sql = ("SELECT * FROM csv_table;");
-        
-//コース情報取得SQLクエリ
-$course_sql = ("SELECT * FROM course;");
-
-//studentに格納されている学生情報の数の取得
-$student_count_sql = ("SELECT COUNT(*)  FROM student WHERE LEFT(student_id, 2) = ?;");
-
-$_SESSION['student_account'] = [
-    'success' => true,
-    'backend' => $backend,
-    'error_csv' => false,
-    'before' => 'teacher_home',
-    'csv_table_student_sql' => $csv_table_student_sql,
-    'course_sql' => $course_sql,
-    'csv_error_table_sql' => $csv_error_table_sql,
-    'student_count_sql' => $student_count_sql
-];
-
 // ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/student_addition.php");
+header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend={$backend}");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>

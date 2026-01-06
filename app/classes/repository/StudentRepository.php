@@ -57,4 +57,28 @@ class StudentRepository extends BaseRepository {
             return [];
         }
     }
+
+    /**
+     * 今の年に基づいて学生数をカウントする
+     * @return int 学生数
+     */
+    public function countStudentsByYear() {
+        try {
+            $sql = "SELECT COUNT(*) FROM student WHERE LEFT(student_id, 2) = ?;";
+
+            // 現在の年の下2桁を取得
+            $current_year = date("Y");
+            $current_year = substr($current_year, -2);
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$current_year]);
+
+            $result = $stmt->fetch();
+            return (int)$result['COUNT(*)'];
+
+        } catch (PDOException $e) {
+            error_log("StudentRepository Error: " . $e->getMessage());
+            return 0;
+        }
+    }
 }
