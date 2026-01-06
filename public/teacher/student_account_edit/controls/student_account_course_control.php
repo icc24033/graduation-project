@@ -7,7 +7,6 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 // --- 修正箇所: ViewHelper を読み込む ---
 require_once '../../../../app/classes/helper/dropdown/ViewHelper.php';
-
 require_once '../../../../app/controllers/master/student_account_editers/StudentAccountEditController.php';
 
 $controller = new StudentAccountEditController();
