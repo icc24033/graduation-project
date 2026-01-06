@@ -18,7 +18,7 @@ class MasterHomeController extends HomeRepository {
         // 遷移先ファイルの定義（クラスに渡すため配列化）
         $links = [
             // 時間割り作成へのリンク
-            'link_time_table_create' => "../master/timetable_create/create_timetable.php",
+            'link_time_table_create' => "../master/timetable_create/create_timetable_control.php",
             // 時間割り変更へのリンク
             'link_time_table_edit'   => "timetable_change/edit_timetable_control.php",
             // アカウント編集へのリンク
