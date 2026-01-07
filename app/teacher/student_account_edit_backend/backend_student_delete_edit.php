@@ -4,15 +4,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // 1. 削除対象の学生IDの配列 (JavaScriptで 'delete_student_id[]' と定義)
     $delete_student_id = $_POST['delete_student_id'] ?? []; 
-    
-    
 
     // POSTで受け取った受け取ったdelete_student_idｗも元にテーブル内の学生情報を削除するSQLクエリ
     try {
         // RepositoryFactoryを使用してPDOインスタンスを取得
         require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
         $pdo = RepositoryFactory::getPdo();
-
         
         //studentテーブルの削除
         $student_delete_sql = ("DELETE FROM student WHERE student_id = ?;");
@@ -33,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (PDOException $e) {
         throw new PDOException($e->getMessage(), (int)$e->getCode());
     }
-
 
     if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
         // コースIDを取得

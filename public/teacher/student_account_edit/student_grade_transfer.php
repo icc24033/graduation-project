@@ -39,6 +39,10 @@ if (!empty($courseList)) {
 } else {
     $current_course_name = 'コース情報が見つかりません';
 }
+
+var_dump($gradeList);
+exit;
+
 // データべース接続切断
 $pdo = null;
 ?>

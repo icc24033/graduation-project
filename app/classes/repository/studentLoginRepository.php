@@ -1,5 +1,5 @@
 <?php
-// studentLoginRepository.php
+// StudentLoginRepository.php
 // 生徒のログイン情報を管理するリポジトリ
 
 // 自動的にBaseRepositoryを継承し、DB接続を確立する

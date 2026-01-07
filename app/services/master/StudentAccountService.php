@@ -5,16 +5,30 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 class StudentAccountService {
 
     /**
-     * 初期表示用データの取得 (旧 edit)
+     * コースリストの取得
      */
     public function getEditData() {
         $data = ['courseList' => [], 'error_message' => ''];
         try {
             $courseRepo = RepositoryFactory::getCourseRepository();
             $data['courseList'] = $courseRepo->getAllCourses();
-            RepositoryFactory::closePdo();
         } catch (Exception $e) {
             error_log("StudentAccountService Error (getEditData): " . $e->getMessage());
+            $data['error_message'] = "データの読み込みに失敗しました。";
+        }
+        return $data;
+    }
+
+    /**
+     * 学年リストの取得
+     */
+    public function getGradeData() {
+        $data = ['gradeList' => [], 'error_message' => ''];
+        try {
+            $studentGradeRepo = RepositoryFactory::getStudentGradeRepository();
+            $data['gradeList'] = $studentGradeRepo->getAllGrades();
+        } catch (Exception $e) {
+            error_log("StudentAccountService Error (getGradeData): " . $e->getMessage());
             $data['error_message'] = "データの読み込みに失敗しました。";
         }
         return $data;
