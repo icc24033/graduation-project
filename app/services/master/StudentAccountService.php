@@ -92,17 +92,18 @@ class StudentAccountService {
      * 各種画面共通の学生リスト取得ロジック
      */
     public function getStudentsInCourse($received_course_id, $received_current_year) {
-        if (empty($received_course_id) || empty($received_current_year)) {
+        // empty() は 0 を真と判定してしまうため、明示的に null と空文字をチェックする
+        if (($received_course_id === null || $received_current_year === null)) {
             $course_id = 1;
-            $current_year = substr(date("Y"), -2);
+            $current_year = 2;
         } else {
             $course_id = $received_course_id;
             $current_year = $received_current_year;
         }
-
+    
         $studentRepo = RepositoryFactory::getStudentRepository();
         $students_in_course = $studentRepo->getStudentsByCourse($course_id);
-
+    
         return [
             'success' => true,
             'before' => 'teacher_home',
