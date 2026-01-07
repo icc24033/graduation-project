@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $student_address,
                 $column_name,
                 $student_data['course_id'],
-                1 ///////////////////////後から変更
+                1 ///////////////////////後から変更　　　こここここここここここここここ
             ]);
 
             //student_login_tableに学生情報を挿入

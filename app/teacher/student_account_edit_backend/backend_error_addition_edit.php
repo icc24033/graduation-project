@@ -82,7 +82,7 @@ if (isset($_POST['students']) && is_array($_POST['students'])) {
             $column_email,
             $name,
             $course_id,
-            1 
+            1               ///// 仮：学年は1年生で固定（必要に応じて調整してください）ここここここここここここここここここここここここここここここ
         );
 
         // ② student_login_tableへ保存

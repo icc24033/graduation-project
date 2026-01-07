@@ -23,10 +23,14 @@ $current_month = date('n');
 
 // 学年度の配列を作成
 if ($current_month < 4) {
-    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+    unset($gradeList[3]); // 卒業生を表示させない         
+}
+else if ($current_month < 5) {
+    unset($gradeList[0]); // 入学予定者を表示させない
 }
 else {
-    $school_year = [ $current_year, $current_year - 1 ];
+    unset($gradeList[0]); // 入学予定者を表示させない
+    unset($gradeList[3]); // 卒業生を表示させない         
 }
 
 // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
@@ -60,22 +64,22 @@ if (!empty($courseList)) {
         <main class="main-content">
             <nav class="sidebar">
             <ul>
-                <li class="nav-item is-group-label">年度</li> 
+                <li class="nav-item is-group-label">学年</li> 
                 <li class="nav-item has-dropdown">
                     <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" 
                             data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>">
                         <span class="current-value">
-                            20<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>年度
+                            <?php echo SecurityHelper::escapeHtml((string)$gradeList[$status['current_year']]['grade_name']); ?>
                         </span>
                     </button>
                     <ul class="dropdown-menu" id="yearDropdownMenu">
-                        <?php foreach ($school_year as $year): ?>
+                        <?php foreach ($gradeList as $year => $gradeInfo): ?>
                             <li>
                                 <a href="#" 
-                                data-current-year="<?php echo SecurityHelper::escapeHtml((string)$year); ?>" 
+                                ddata-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
                                 data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
                                 data-current-page="student_delete">
-                                20<?php echo SecurityHelper::escapeHtml((string)$year); ?>年度
+                                <?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade_name']); ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
@@ -121,7 +125,7 @@ if (!empty($courseList)) {
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                        <div class="column-check"></div> <div class="column-student-id">学年</div>
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
@@ -133,11 +137,10 @@ if (!empty($courseList)) {
                         // ★修正箇所: while (...) -> fetch() を foreach (...) に変更
                         foreach ($status['students_in_course'] as $student_row): 
 
-                            // student_idの頭2文字を取得し、現在の年度と比較
-                            $student_year_prefix = substr($student_row['student_id'], 0, 2);
-
-                            if ($student_year_prefix == $status['current_year']): 
-                                $has_students = true;
+                            // 今選択されている学年と生徒の学年を比較
+                            $student_year_prefix = $student_row['grade'];
+                            if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
+                            $has_students = true;
                     ?>
                         <div class="table-row">
                             <div class="column-check">
@@ -146,7 +149,7 @@ if (!empty($courseList)) {
                                     data-student-id="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>">
                             </div>
                             <div class="column-student-id">
-                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>" disabled>
+                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$gradeList[$status['current_year']]['grade_name']); ?>" disabled>
                             </div>
                             <div class="column-name">
                                 <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_name']); ?>" disabled>
