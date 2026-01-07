@@ -91,7 +91,7 @@ ul, ol {
     left: 0;
     bottom: 0;
     top: 70px;
-    z-index: 999;
+    z-index: 50;
     width: 300px;
     background-color: #F3F8FF;
     padding: 0 0 150px 10px;
@@ -166,6 +166,11 @@ ul, ol {
     border-color: #cbd5e1;
 }
 
+.dropdown-toggle:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
 .dropdown-menu {
     position: fixed;
     width: 250px;
@@ -227,6 +232,10 @@ ul, ol {
     font-weight: bold;
     color: #666;
     font-size: 0.9rem;
+}
+
+.nav-item {
+    list-style: none;
 }
 
 .saved-item a {
@@ -327,7 +336,9 @@ ul, ol {
 }
 
 .date-input:focus {
-    border-color: #CFD5DF;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
 .reset-button {
@@ -352,19 +363,26 @@ ul, ol {
 
 .active-badge {
     position: absolute;
-    top: -30px;
+    top: -40px;
     right: 0px;
     display: inline-block;
-    background-color: #10b981;
     color: white;
     font-size: 0.75rem;
-    padding: 3px 12px;
+    padding: 4px 12px;
     border-radius: 9999px;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     white-space: nowrap;
     margin-left: 12px;
     vertical-align: middle;
+}
+
+.active-badge.current {
+    background-color: #10b981; /* emerald-500 */
+}
+
+.active-badge.next {
+    background-color: #3b82f6; /* blue-500 */
 }
 
 #mainCourseDisplay {
@@ -468,6 +486,15 @@ ul, ol {
     background-color: #F3F8FF;
 }
 
+.timetable-cell.is-edited {
+    background-color: #fef08a;
+    border: 2px solid #eab308;
+}
+
+.timetable-cell.is-edited:hover {
+    background-color: #fde047;
+}
+
 .class-content {
     display: flex;
     flex-direction: column;
@@ -514,7 +541,7 @@ ul, ol {
     position: absolute;
     bottom: 1.5rem;
     right: 2.5rem;
-    display: flex;
+    display: none;
     gap: 1rem;
 }
 
@@ -536,6 +563,11 @@ ul, ol {
     color: #222;
 }
 
+.complete-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
 .delete-button {
     background-color: #ef4444;
     color: #fff;
@@ -551,6 +583,11 @@ ul, ol {
 
 .delete-button:hover {
     background-color: #dc2626;
+}
+
+.delete-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 .modal-overlay {
@@ -650,8 +687,9 @@ body.modal-open {
 }
 
 .modal-select:focus {
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
-    border-color: transparent;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
 .select-arrow {
@@ -676,6 +714,8 @@ body.modal-open {
     border-radius: 0.25rem;
     background-color: #495666;
     color: #fff;
+    border: none;
+    cursor: pointer;
     transition: 0.2s;
 }
 
@@ -683,6 +723,12 @@ body.modal-open {
 .modal-save-button:hover {
     color: #222;
     background-color: #CFD5DF;
+}
+
+.modal-cancel-button:focus,
+.modal-save-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 .create-form-group {
@@ -740,4 +786,24 @@ body.modal-open {
     background-color: #fff;
     color: #64748b;
     cursor: pointer;
+}
+
+.date-separator {
+    color: #495666;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.footer-button-area.show {
+    display: flex !important;
+}
+
+input:disabled,
+button:disabled,
+select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

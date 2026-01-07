@@ -1,37 +1,29 @@
 <?php
 // create_timetable.php
-// 時間割り作成画面
-
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-
-// セキュリティヘッダーの適用
-SecurityHelper::applySecureHeaders();
-
-// セッション開始とログイン判定を一括で行う
-SecurityHelper::requireLogin();
-
-// セキュリティヘッダーを適用
-SecurityHelper::applySecureHeaders();
+// ビュー（画面）部分のコード
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="nofollow, noindex">
-    <title>時間割り作成</title>
+    <title>時間割り作成（作成済み時間割り入り）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
+
 </head>
 
 <body>
     <header class="app-header">
         <h1>時間割り作成</h1>
-        <img class="header_icon" src="./images/calendar-plus.png" alt="icon">
+        <img class="header_icon" src="./images/calendar-plus.png">
     </header>
 
     <div class="app-container">
@@ -63,35 +55,34 @@ SecurityHelper::applySecureHeaders();
                     <div>
                         <div class="mb-3">
                             <label class="radio-group-label">
-                                <input type="radio" name="displayMode" value="select" checked>
+                                <input type="radio" name="displayMode" value="select" checked onchange="changeDisplayMode('select')">
                                 <span class="font-bold">選択</span>
                             </label>
                             <div class="ml-6 mt-1 relative">
                                 <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
                                     <span class="current-value">システムデザインコース</span>
-                                    <i class="fa-solid fa-chevron-down text-xs ml-auto"></i>
                                 </button>
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
-                                    <li><a href="#" data-course="システムデザインコース">システムデザインコース</a></li>
-                                    <li><a href="#" data-course="Webクリエイタコース">Webクリエイタコース</a></li>
-                                    <li><a href="#" data-course="マルチメディアOAコース">マルチメディアOAコース</a></li>
-                                    <li><a href="#" data-course="応用情報コース">応用情報コース</a></li>
-                                    <li><a href="#" data-course="基本情報コース">基本情報コース</a></li>
-                                    <li><a href="#" data-course="ITパスポートコース">ITパスポートコース</a></li>
-                                    <li><a href="#" data-course="１年１組">１年１組</a></li>
-                                    <li><a href="#" data-course="１年２組">１年２組</a></li>
+                                    <li><a href="#">システムデザインコース</a></li>
+                                    <li><a href="#">Webクリエイタコース</a></li>
+                                    <li><a href="#">マルチメディアOAコース</a></li>
+                                    <li><a href="#">応用情報コース</a></li>
+                                    <li><a href="#">基本情報コース</a></li>
+                                    <li><a href="#">ITパスポートコース</a></li>
+                                    <li><a href="#">１年１組</a></li>
+                                    <li><a href="#">１年２組</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="mb-2">
                             <label class="radio-group-label">
-                                <input type="radio" name="displayMode" value="current">
+                                <input type="radio" name="displayMode" value="current" onchange="changeDisplayMode('current')">
                                 <span>現在反映されている時間割り</span>
                             </label>
                         </div>
                         <div class="mb-2">
                             <label class="radio-group-label">
-                                <input type="radio" name="displayMode" value="next">
+                                <input type="radio" name="displayMode" value="next" onchange="changeDisplayMode('next')">
                                 <span>次回以降で反映される時間割り</span>
                             </label>
                         </div>
@@ -140,29 +131,24 @@ SecurityHelper::applySecureHeaders();
                                 </tr>
                             </thead>
                             <tbody id="timetable-body">
-                                <?php
-                                $times = [
-                                    ['s'=>'9:10', 'e'=>'10:40'],
-                                    ['s'=>'10:50', 'e'=>'12:20'],
-                                    ['s'=>'13:10', 'e'=>'14:40'],
-                                    ['s'=>'14:50', 'e'=>'16:20'],
-                                    ['s'=>'16:30', 'e'=>'17:50']
-                                ];
-                                for($i=1; $i<=5; $i++):
-                                ?>
-                                <tr>
-                                    <td class="period-cell">
-                                        <div class="period-number"><?php echo $i; ?></div>
-                                        <div class="period-time"><?php echo $times[$i-1]['s']; ?>~</div>
-                                        <div class="period-time"><?php echo $times[$i-1]['e']; ?></div>
-                                    </td>
-                                    <td class="timetable-cell" data-day="月" data-period="<?php echo $i; ?>"></td>
-                                    <td class="timetable-cell" data-day="火" data-period="<?php echo $i; ?>"></td>
-                                    <td class="timetable-cell" data-day="水" data-period="<?php echo $i; ?>"></td>
-                                    <td class="timetable-cell" data-day="木" data-period="<?php echo $i; ?>"></td>
-                                    <td class="timetable-cell" data-day="金" data-period="<?php echo $i; ?>"></td>
-                                </tr>
-                                <?php endfor; ?>
+                                <script>
+                                    for(let i=1; i<=5; i++) {
+                                        const times = [{s:'9:10',e:'10:40'}, {s:'10:50',e:'12:20'}, {s:'13:10',e:'14:40'}, {s:'14:50',e:'16:20'}, {s:'16:30',e:'17:50'}];
+                                        document.write(`
+                                        <tr>
+                                            <td class="period-cell">
+                                                <div class="period-number">${i}</div>
+                                                <div class="period-time">${times[i-1].s}~</div>
+                                                <div class="period-time">${times[i-1].e}</div>
+                                            </td>
+                                            <td class="timetable-cell" data-day="月" data-period="${i}"></td>
+                                            <td class="timetable-cell" data-day="火" data-period="${i}"></td>
+                                            <td class="timetable-cell" data-day="水" data-period="${i}"></td>
+                                            <td class="timetable-cell" data-day="木" data-period="${i}"></td>
+                                            <td class="timetable-cell" data-day="金" data-period="${i}"></td>
+                                        </tr>`);
+                                    }
+                                </script>
                             </tbody>
                         </table>
                     </div>
@@ -180,55 +166,9 @@ SecurityHelper::applySecureHeaders();
         <div class="modal-content">
             <h2 id="modalTitle" class="modal-title">○曜日 ○限</h2>
             <div class="modal-form-area">
-                <div class="modal-form-item">
-                    <label class="modal-label">授業名：</label>
-                    <div class="modal-select-wrapper">
-                        <select id="inputClassName" class="modal-select">
-                            <option value="">(選択してください)</option>
-                            <option value="Javaプログラミング">Javaプログラミング</option>
-                            <option value="Webデザイン演習">Webデザイン演習</option>
-                            <option value="データベース基礎">データベース基礎</option>
-                            <option value="ネットワーク構築">ネットワーク構築</option>
-                            <option value="セキュリティ概論">セキュリティ概論</option>
-                            <option value="プロジェクト管理">プロジェクト管理</option>
-                            <option value="キャリアデザイン">キャリアデザイン</option>
-                            <option value="HR">HR</option>
-                        </select>
-                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
-                    </div>
-                </div>
-                <div class="modal-form-item">
-                    <label class="modal-label">担当先生：</label>
-                    <div class="modal-select-wrapper">
-                        <select id="inputTeacherName" class="modal-select">
-                            <option value="">(選択してください)</option>
-                            <option value="佐藤 健一">佐藤 健一</option>
-                            <option value="鈴木 花子">鈴木 花子</option>
-                            <option value="高橋 誠">高橋 誠</option>
-                            <option value="田中 優子">田中 優子</option>
-                            <option value="渡辺 剛">渡辺 剛</option>
-                            <option value="伊藤 直人">伊藤 直人</option>
-                            <option value="山本 さくら">山本 さくら</option>
-                        </select>
-                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
-                    </div>
-                </div>
-                <div class="modal-form-item">
-                    <label class="modal-label">教室場所：</label>
-                    <div class="modal-select-wrapper">
-                        <select id="inputRoomName" class="modal-select">
-                            <option value="">(選択してください)</option>
-                            <option value="201教室">201教室</option>
-                            <option value="202教室">202教室</option>
-                            <option value="301演習室">301演習室</option>
-                            <option value="302演習室">302演習室</option>
-                            <option value="4F大講義室">4F大講義室</option>
-                            <option value="別館Lab A">別館Lab A</option>
-                            <option value="別館Lab B">別館Lab B</option>
-                        </select>
-                        <div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div>
-                    </div>
-                </div>
+                <div class="modal-form-item"><label class="modal-label">授業名：</label><div class="modal-select-wrapper"><select id="inputClassName" class="modal-select"><option value="">(選択してください)</option><option value="Javaプログラミング">Javaプログラミング</option><option value="Webデザイン演習">Webデザイン演習</option><option value="データベース基礎">データベース基礎</option><option value="ネットワーク構築">ネットワーク構築</option><option value="セキュリティ概論">セキュリティ概論</option><option value="プロジェクト管理">プロジェクト管理</option><option value="キャリアデザイン">キャリアデザイン</option><option value="HR">HR</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
+                <div class="modal-form-item"><label class="modal-label">担当先生：</label><div class="modal-select-wrapper"><select id="inputTeacherName" class="modal-select"><option value="">(選択してください)</option><option value="佐藤 健一">佐藤 健一</option><option value="鈴木 花子">鈴木 花子</option><option value="高橋 誠">高橋 誠</option><option value="田中 優子">田中 優子</option><option value="渡辺 剛">渡辺 剛</option><option value="伊藤 直人">伊藤 直人</option><option value="山本 さくら">山本 さくら</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
+                <div class="modal-form-item"><label class="modal-label">教室場所：</label><div class="modal-select-wrapper"><select id="inputRoomName" class="modal-select"><option value="">(選択してください)</option><option value="201教室">201教室</option><option value="202教室">202教室</option><option value="301演習室">301演習室</option><option value="302演習室">302演習室</option><option value="4F大講義室">4F大講義室</option><option value="別館Lab A">別館Lab A</option><option value="別館Lab B">別館Lab B</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
             </div>
             <div class="modal-button-area">
                 <button id="btnCancel" class="modal-cancel-button">キャンセル</button>
@@ -284,6 +224,7 @@ SecurityHelper::applySecureHeaders();
             </div>
         </div>
     </div>
-    <script src="js/create_timetable.js"></script>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
