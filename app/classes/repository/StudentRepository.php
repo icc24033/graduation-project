@@ -12,7 +12,7 @@ class StudentRepository extends BaseRepository {
      */
     public function getAllStudents() {
         try {
-            $sql = "SELECT student_id, student_name FROM students ORDER BY student_id ASC";
+            $sql = "SELECT student_id, student_name FROM student ORDER BY student_id ASC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
 
@@ -79,6 +79,23 @@ class StudentRepository extends BaseRepository {
         } catch (PDOException $e) {
             error_log("StudentRepository Error: " . $e->getMessage());
             return 0;
+        }
+    }
+
+    /**
+     * 新しい学生を追加する
+     */
+    public function addStudent($student_id, $student_mail, $student_name, $course_id, $grade) {
+        try {
+            $sql = 
+                "INSERT IGNORE INTO 
+                    student (student_id, student_mail, student_name, course_id, grade) 
+                 VALUES 
+                    (?, ?, ?, ?, ?);";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$student_id, $student_mail, $student_name, $course_id, $grade]);
+        } catch (PDOException $e) {
+            error_log("StudentRepository Error: " . $e->getMessage());
         }
     }
 }

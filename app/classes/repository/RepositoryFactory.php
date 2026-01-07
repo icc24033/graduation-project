@@ -6,6 +6,7 @@ require_once __DIR__ . '/TeacherRepository.php';
 require_once __DIR__ . '/StudentRepository.php';
 require_once __DIR__ . '/CsvRepository.php';
 require_once __DIR__ . '/errorStudentRepository.php';
+require_once __DIR__ . '/StudentLoginRepository.php';
 
 
 // 新しいリポジトリができたらここに追加する
@@ -98,5 +99,12 @@ class RepositoryFactory {
      */
     public static function getErrorStudentRepository() {
         return new errorStudentRepository(self::getPdo());
+    }
+
+    /**
+     * 学生ログインリポジトリのインスタンスを取得
+     */
+    public static function getStudentLoginRepository() {
+        return new StudentLoginRepository(self::getPdo());
     }
 }

@@ -111,4 +111,42 @@ class errorStudentRepository extends BaseRepository {
             return [];
         }
     }
+
+    /**
+     * エラーデータ保存用テーブルを更新する
+     */
+    public function updataErrorDataTable($student_id, $name, $approvalUserAddress, $error_id, $id) {
+        try {
+            // error_student_tableの内容を更新
+            $update_error_data_sql = 
+                "UPDATE error_student_table
+                 SET student_id = ?, name = ?, approvalUserAddress = ?, error_id = ?
+                 WHERE id = ?;";
+            $stmt = $this->pdo->prepare($update_error_data_sql);
+            $stmt->execute([
+                $student_id,
+                $name,
+                $approvalUserAddress,
+                $error_id,
+                $id
+            ]);
+        } catch (PDOException $e) {
+            error_log("errorStudentRepository Error: " . $e->getMessage());
+            throw new PDOException($e->getMessage(), (int)$e->getCode());
+        }
+    }
+
+    /**
+     * エラーデータ保存用テーブルに格納されているデータをIDで削除する
+     */
+    public function deleteErrorDataById($id) {
+        try {
+            $delete_error_data_sql = "DELETE FROM error_student_table WHERE id = ?;";
+            $stmt = $this->pdo->prepare($delete_error_data_sql);
+            $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            error_log("errorStudentRepository Error: " . $e->getMessage());
+            throw new PDOException($e->getMessage(), (int)$e->getCode());
+        }
+    }
 }
