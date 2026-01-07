@@ -31,6 +31,6 @@ class StudentLogin implements LoginUser {
     }
 
     public function getHomeUrl(): string {
-        return '../student/student_home_dummy.html';
+        return '../student/student_home.php';
     }
 }
