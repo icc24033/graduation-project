@@ -24,6 +24,9 @@ class CreateTimetableController extends HomeRepository
         // 本来はここでRepositoryを使ってDBからデータを取ってきます。
         // 今はセッションからアイコンを取得する処理のみ記述します。
         $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
-        
+
+        // ビュー（画面）の読み込み
+        // create_timetable.php を読み込む
+        require_once __DIR__ . '/../../../../public/master/timetable_create/create_timetable.php';
     }
 }
