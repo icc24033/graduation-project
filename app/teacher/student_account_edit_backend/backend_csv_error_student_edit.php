@@ -2,17 +2,6 @@
 
 session_start();
 
-$config_path = __DIR__ . '/../../../config/secrets_local.php';
-
-$config = require $config_path;
-
-define('DB_HOST', $config['db_host']);
-define('DB_NAME', $config['db_name']);
-define('DB_USER', $config['db_user']);
-define('DB_PASS', $config['db_pass']);
-
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-
 //error_student_tableの情報を更新するためのSQL文
 $sql_update_error_student = "UPDATE 
                                 error_student_table
@@ -32,14 +21,11 @@ $sql_delete_csv_error_id = "DELETE FROM error_student_table WHERE id = ?;";
 
 
 try {
-    //データベース接続
-    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    // RepositoryFactoryを使用してPDOインスタンスを取得
+    require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+    $pdo = RepositoryFactory::getPdo();
 
     if (isset($_POST['students']) && is_array($_POST['students'])) {
-        
-        //データ件数を取得する変数
-        $insert_count = 0;
-        $column_number = 0;
  
         // 現在の年を取得
         $current_year = date('Y');
@@ -133,8 +119,7 @@ try {
                 $stmt_csv = $pdo->prepare($sql_insert_csv_table);
                 //SQL文を実行
                 $stmt_csv->execute([$student_id, $name, $email, $course_id]);
-                $insert_count++;
-                // csv_error_tableから該当するcsv_idのレコードを削除
+                               // csv_error_tableから該当するcsv_idのレコードを削除
                 $stmt_delete_error = $pdo->prepare($sql_delete_csv_error_id);
                 $stmt_delete_error->execute([$id]);
             }

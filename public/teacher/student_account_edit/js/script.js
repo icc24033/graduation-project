@@ -576,8 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <a href="#" class="course-display" 
                         data-course-name-display 
                         data-dropdown-for="courseDropdownMenu"
-                        data-selected-course-center="7">
-                        1年1組
+                        data-selected-course-center="7">  1年1組
                         </a>
                         <input type="hidden" 
                             name="students[${currentIndex}][course_id]" 
@@ -660,8 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <a href="#" class="course-display" 
                             data-course-name-display 
                             data-dropdown-for="courseDropdownMenu"
-                            data-selected-course-center="7">
-                            1年1組
+                            data-selected-course-center="7">  1年1組
                             </a>
                             <input type="hidden" 
                                 name="students[${currentIndex}][course_id]" 

@@ -16,15 +16,12 @@ $insert_student_sql = ("INSERT IGNORE INTO
 
 // POSTから取得した学生情報をstudent_login_tableに格納するSQLクエリ
 $insert_student_login_sql = ("INSERT INTO 
-                                student_login_table (id, student_id, user_grade) 
+                                student_login_table (student_id, user_grade) 
                               SELECT 
-                                ?, ?, 'student@icc_ac.jp' 
+                                ?, 'student@icc_ac.jp' 
                               WHERE NOT EXISTS 
                                 (SELECT 1 FROM student_login_table WHERE student_id = ?);"
                             );
-
-//student_login_tableに格納してある値の数を取得するSQLクエリ
-$student_login_count_sql = ("SELECT COUNT(*) FROM student_login_table;");
 
 //エラーデータ保存用テーブル作成
 $sql_delete_error_table = "DROP TABLE IF EXISTS error_student_table;";
@@ -200,13 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /////////////////////////////////
 
         try {
-            // student_login_tableに格納してある値の数を取得
-            $stmt_login_count = $pdo->prepare($student_login_count_sql);
-            $stmt_login_count->execute();
-            $login_count_result = $stmt_login_count->fetch();
-
-            $total_login_users = $login_count_result['COUNT(*)'] + 1; // 新しいIDの開始点のために1を加算
-
             // studentテーブルに学生情報を挿入
             $stmt_insert_student = $pdo->prepare($insert_student_sql);
             // student_emailの生成
@@ -222,7 +212,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             //student_login_tableに学生情報を挿入
             $stmt_insert_login = $pdo->prepare($insert_student_login_sql);
             $stmt_insert_login->execute([   
-                $total_login_users,
                 $column_student_id,
                 $column_student_id
             ]);

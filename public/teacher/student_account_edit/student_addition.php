@@ -48,7 +48,7 @@ if ($status['backend'] === 'student_addition') {
                 <?php foreach ($courseList as $row): ?>
                     <li>
                         <a href="#" 
-                        data-course-id="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>"
+                        data-selected-course-center="<?php echo SecurityHelper::escapeHtml((string)$row['course_id']); ?>"
                         data-course-name="<?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>">
                             <?php echo SecurityHelper::escapeHtml((string)$row['course_name']); ?>
                         </a>
@@ -121,7 +121,13 @@ if ($status['backend'] === 'student_addition') {
                         <button class="add-button" type="button">追加</button> 
                         <button class="add-button" type="button">追加人数入力</button>
                     </div>
-                    <button class="complete-button" type="submit">完了</button>
+                    <?php 
+                        if ($status['error_csv'] === false):
+                    ?>
+                        <button class="complete-button" type="submit">作成完了</button>
+                    <?php 
+                        endif;
+                    ?>
                 </form>
             </div>
 
@@ -244,13 +250,13 @@ if ($status['backend'] === 'student_addition') {
         <div class="error-edit-container">
         <h3>エラーデータ編集</h3>
         <div>
-        <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_error_addition_edit.php" method="post">
         <div class="account-table-container">
             <div class="table-header">
                 <div class="column-check"></div> 
                 <div class="column-student-id">学生番号</div>
                 <div class="column-name">氏名</div>
-                <div class="column-course">ちょっと違いますよ</div>
+                <div class="column-course">メールアドレス</div>
             </div>
             
             <?php foreach ($status['error_data'] as $error_row): ?>

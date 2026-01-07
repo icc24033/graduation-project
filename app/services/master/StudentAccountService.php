@@ -38,8 +38,8 @@ class StudentAccountService {
             $backend = 'student_addition';
             $errorStudentRepo = RepositoryFactory::getErrorStudentRepository();
             // 注意: エラーが出ていた箇所。リポジトリにこのメソッドがあるか確認してください
-            if (method_exists($errorStudentRepo, 'clearErrorDataTable')) {
-                $errorStudentRepo->clearErrorDataTable();
+            if (method_exists($errorStudentRepo, 'createErrorDataTable')) {
+                $errorStudentRepo->createErrorDataTable();
             }
         }
 
