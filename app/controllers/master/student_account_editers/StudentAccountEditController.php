@@ -2,6 +2,9 @@
 // StudentAccountEditController.php
 require_once __DIR__ . '/../../../services/master/StudentAccountService.php';
 
+// RepositoryFactoryの読み込み
+require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
+
 class StudentAccountEditController {
     private $service;
 
@@ -14,10 +17,14 @@ class StudentAccountEditController {
      */
     public function index_addition() {
         $viewData = $this->service->getEditData();
+        $gradeData = $this->service->getGradeData();
         $basic_data = $this->service->getAdditionBasicInfo($_GET['backend'] ?? null);
+        
+        RepositoryFactory::closePdo();
         
         extract($viewData);
         extract($basic_data);
+        extract($gradeData);
         require_once '../student_addition.php';
     }
 
@@ -26,10 +33,14 @@ class StudentAccountEditController {
      */
     public function index_course($course_id, $year) {
         $viewData = $this->service->getEditData();
+        $gradeData = $this->service->getGradeData();
         $basic_data = $this->service->getStudentsInCourse($course_id, $year);
+        
+        RepositoryFactory::closePdo();
 
         extract($viewData);
         extract($basic_data);
+        extract($gradeData);
         require_once '../student_edit_course.php';
     }
 
@@ -38,10 +49,14 @@ class StudentAccountEditController {
      */
     public function index_transfer($course_id, $year) {
         $viewData = $this->service->getEditData();
+        $gradeData = $this->service->getGradeData();
         $basic_data = $this->service->getStudentsInCourse($course_id, $year);
+        
+        RepositoryFactory::closePdo();
 
         extract($viewData);
         extract($basic_data);
+        extract($gradeData);
         require_once '../student_grade_transfer.php';
     }
 
@@ -50,10 +65,14 @@ class StudentAccountEditController {
      */
     public function index_delete($course_id, $year) {
         $viewData = $this->service->getEditData();
+        $gradeData = $this->service->getGradeData();
         $basic_data = $this->service->getStudentsInCourse($course_id, $year);
+        
+        RepositoryFactory::closePdo();
 
         extract($viewData);
         extract($basic_data);
+        extract($gradeData);
         require_once '../student_delete.php';
     }
 }

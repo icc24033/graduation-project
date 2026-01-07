@@ -201,8 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('コースIDまたは年度が未定義です。');
             return;
         }
-
-        const baseUrl = '../../../app/teacher/student_account_edit_backend/';
         let url = '';
 
         if (page === 'student_edit_course') {
@@ -212,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             url = '../controls/student_account_delete_control.php';
         }
         else if (page === 'student_grade_transfer') {
-            url = '../controls/studnet_account_transfer_control.php'; 
+            url = '../controls/student_account_transfer_control.php'; 
         }
         else if (page === 'student_addition') {
             url = '../controls/student_account_edit_control.php';

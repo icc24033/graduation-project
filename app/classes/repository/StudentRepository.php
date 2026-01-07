@@ -98,4 +98,22 @@ class StudentRepository extends BaseRepository {
             error_log("StudentRepository Error: " . $e->getMessage());
         }
     }
+
+    /**
+     * 学生の学年を元に学生情報を取得する
+     * @return array 学生情報の配列
+     */
+    public function getStudentsByGrade($grade) {
+        try {
+            $sql = "SELECT * FROM student WHERE grade = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$grade]);  
+
+            return $stmt->fetchAll();
+
+        } catch (PDOException $e) {
+            error_log("StudentRepository Error: " . $e->getMessage());
+            return [];
+        }
+    }
 }

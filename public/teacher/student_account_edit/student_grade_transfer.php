@@ -1,5 +1,8 @@
 <?php
-
+// --- デバッグ用：エラーを表示させる設定 ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
 // セッション開始
@@ -24,10 +27,14 @@ $current_month = date('n');
 
 // 学年度の配列を作成
 if ($current_month < 4) {
-    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+    unset($gradeList[3]); // 卒業生を表示させない         
+}
+else if ($current_month < 5) {
+    unset($gradeList[0]); // 入学予定者を表示させない
 }
 else {
-    $school_year = [ $current_year, $current_year - 1 ];
+    unset($gradeList[0]); // 入学予定者を表示させない
+    unset($gradeList[3]); // 卒業生を表示させない         
 }
 
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
@@ -39,6 +46,7 @@ if (!empty($courseList)) {
 } else {
     $current_course_name = 'コース情報が見つかりません';
 }
+
 // データべース接続切断
 $pdo = null;
 ?>
@@ -66,36 +74,36 @@ $pdo = null;
         <main class="main-content">
             <nav class="sidebar">
                 <ul>
-                    <li class="nav-item is-group-label">年度</li> 
+                    <li class="nav-item is-group-label">学年</li> 
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="yearDropdownToggle" aria-expanded="false" 
                                 data-current-year="<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>">
                             <span class="current-value">
-                                20<?php echo SecurityHelper::escapeHtml((string)$status['current_year']); ?>年度
+                                <?php echo SecurityHelper::escapeHtml((string)$gradeList[$status['current_year']]['grade_name']); ?>
                             </span>
                         </button>
                         
                         <ul class="dropdown-menu" id="yearDropdownMenu">
-                            <?php foreach ($school_year as $year): ?>
+                            <?php foreach ($gradeList as $year => $gradeInfo): ?>
                                 <li>
                                     <a href="#" 
-                                    data-current-year="<?php echo SecurityHelper::escapeHtml((string)$year); ?>" 
+                                    data-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
                                     data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
                                     data-current-page="student_grade_transfer">
-                                    20<?php echo SecurityHelper::escapeHtml((string)$year); ?>年度
+                                    <?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade_name']); ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
 
                         <ul class="dropdown-menu" id="gradeDropdownMenu">
-                            <?php for ($grade = 1; $grade <= 2; $grade++): ?>
+                            <?php foreach($gradeList as $yaer => $gradeInfo): ?>
                                 <li>
-                                    <a href="#" data-selected-grade-center="<?php echo SecurityHelper::escapeHtml((string)$grade); ?>">
-                                        <?php echo SecurityHelper::escapeHtml((string)$grade); ?>年
+                                    <a href="#" data-selected-grade-center="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>">
+                                        <?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade_name']); ?>
                                     </a>
                                 </li>
-                            <?php endfor; ?>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
             
@@ -144,7 +152,7 @@ $pdo = null;
                 <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">
                         <div class="table-header">
-                            <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                            <div class="column-check"></div> <div class="column-student-id">学年</div>
                             <div class="column-name">氏名</div>
                             <div class="column-course">コース</div>
                         </div>
@@ -157,8 +165,7 @@ $pdo = null;
                             foreach ($status['students_in_course'] as $student_row): 
             
                                 // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
-                                $student_year_prefix = substr($student_row['student_id'], 0, 2); // 学生IDの頭2文字を取得
-
+                                $student_year_prefix = $student_row['grade'];
                                 if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
                                 $has_students = true;
                         ?>
@@ -167,16 +174,8 @@ $pdo = null;
                                 </div>
                                 <div class="column-student-id">
                                     <?php 
-                                        // 現在の学年を計算
-                                        $current_grade = $student_row['grade'];
-                                        $initial_display = $current_grade . '年'; 
-                                        $max_grade = 2; 
-
-                                        // 初期値が範囲外の場合、表示を調整する
-                                        if ($current_grade < 1 || $current_grade > $max_grade) {
-                                            $initial_display = '学年不明'; 
-                                            $current_grade = 0; // 送信しない値
-                                        }
+                                        // 現在の学年を表示するロジック
+                                        $initial_display = $gradeList[$student_row['grade']]['grade_name'] ?? '不明';
                                     ?>
                                     <a href="#" class="course-display" 
                                         data-grade-display
