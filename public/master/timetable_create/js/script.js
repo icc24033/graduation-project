@@ -11,12 +11,12 @@
     これらを含むすべてのロジックをここに貼り付けてください。
 */
 
-let savedTimetables = [];
-let isCreatingMode = false;
-let isViewOnly = false;
-let currentRecord = null;
-let tempCreatingData = null;
-let originalRecordData = null; // 編集前のオリジナルデータ
+let savedTimetables = []; // 保存された時間割データの配列
+let isCreatingMode = false; // 現在作成中モードかどうかのフラグ
+let isViewOnly = false; // 閲覧モードかどうかのフラグ
+let currentRecord = null; // 現在選択されている時間割レコード
+let tempCreatingData = null; // 作成中の一時データ
+let originalRecordData = null; // 編集前のデータ
 let previousState = null; // 新規作成前の状態を保存
 
 /*
@@ -168,25 +168,42 @@ const footerArea = document.getElementById('footerArea'); // フッターエリ�
 const completeButton = document.getElementById('completeButton'); // 完了ボタン(作成フォーム内の完了ボタンに関する参照)
 const cancelCreationBtn = document.getElementById('cancelCreationBtn'); // キャンセルボタン(作成フォーム内のキャンセルボタンに関する参照)
 
+// 使用場所：新規時間割り作成モード
 // 現在作成中の時間割りに戻るクリックイベント
+// 「作成中の時間割に戻る」など(creatingItemCard)の項目がクリックされたときの一連の処理
 document.getElementById('creatingItemCard').addEventListener('click', () => {
+
+    // 新規作成フローに入っていない状態でここをクリックしても動作しないように制御する
     if (!isCreatingMode) return;
     
     // 作成中に戻る = 閲覧モード解除
-    isViewOnly = false;
-    currentRecord = null;
-    originalRecordData = null;
+    isViewOnly = false; // 閲覧モードを解除することで、編集を可能にする
+    currentRecord = null; // 作成中の時間割りを表示するために、選択中のレコードはクリアする（閲覧モードから作成中モードに切り替えるために、表示しているデータをクリアする）
+    originalRecordData = null; // 変更を加える前のバックアップデータをクリアする
     
+    // 新規作成中の一時データをメモリから取得して、時間割表に描画していく一連の処理
+    // 関数化することを要検討事項として保留（モードによって動作を一部変更しなければならない）
     if (tempCreatingData) {
+        // 1. 既存のグリッドをクリアする
         document.querySelectorAll('.timetable-cell').forEach(cell => {
             cell.innerHTML = '';
-            cell.classList.remove('is-filled');
-            cell.classList.remove('is-edited');
+            cell.classList.remove('is-filled'); // 授業項目が入力されているセルのフラグもクリア
+            cell.classList.remove('is-edited'); // 編集済みフラグ(編集した箇所はセルが黄色になる)もクリア
         });
         
+        // 2. 一時データを時間割表に描画する
+        // 対応するセルの情報をforEachで取得して、内容を描画する
         tempCreatingData.gridData.forEach(item => {
             const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+            // セルが存在する場合に内容を描画
             if (targetCell) {
+                // セルの内容をinnerHTMLで設定
+                /**
+                 * 設定項目
+                 * ・修行名 className
+                 * ・担当教員名 teacherName
+                 * ・教室名 roomName
+                 */
                 targetCell.innerHTML = `
                 <div class="class-content">
                     <div class="class-name">${item.className}</div>
@@ -195,10 +212,11 @@ document.getElementById('creatingItemCard').addEventListener('click', () => {
                         ${item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : ''}
                     </div>
                 </div>`;
-                targetCell.classList.add('is-filled');
+                targetCell.classList.add('is-filled'); // 授業項目が入力されているセルとしてフラグを設定
             }
         });
         
+        // 3. ヘッダーのコース名と適用期間を、一時データから復元して表示する
         document.getElementById('mainCourseDisplay').innerHTML = tempCreatingData.courseName;
         mainStartDate.value = tempCreatingData.startDate;
         mainEndDate.value = tempCreatingData.endDate;

@@ -20,13 +20,13 @@ class MasterHomeController extends HomeRepository {
             // 時間割り作成へのリンク
             'link_time_table_create' => "../master/timetable_create/create_timetable_control.php",
             // 時間割り変更へのリンク
-            'link_time_table_edit'   => "timetable_change/edit_timetable_control.php",
+            'link_time_table_edit'   => "../teacher/timetable_change/edit_timetable_control.php",
             // アカウント編集へのリンク
             'link_account_edit'      => "../master/user-round/user-round.html",
             // 授業科目編集へのリンク
             'link_notification_edit' => "notification_edit.php",
             // 授業詳細編集へのリンク
-            'link_subject_edit'      => "subject_edit.php",
+            'link_subject_edit'      => "../teacher/class_detail_edit/class_detail_edit_control.php",
             // 時間割り閲覧へのリンク
             'link_time_table_view'   => "time_table_view.php",
         ];

@@ -19,7 +19,7 @@ class TeacherHomeController extends HomeRepository {
             // 時間割り変更へのリンク
             'link_time_table_edit'   => "timetable_change/edit_timetable_control.php",
             // 授業詳細編集へのリンク
-            'link_subject_edit'      => "subject_edit.php",
+            'link_subject_edit'      => "class_detail_edit/class_detail_edit_control.php",
             // 時間割り閲覧へのリンク
             'link_time_table_view'   => "time_table_view.php",
         ];
