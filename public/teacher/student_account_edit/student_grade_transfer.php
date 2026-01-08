@@ -26,7 +26,6 @@ $selected_year = substr($selected_year, -2); // 下2桁を取得
 $current_month = date('n');
 
 // 学年度の配列を作成
-/*
 if ($current_month < 4) {
     unset($gradeList[3]); // 卒業生を表示させない         
 }
@@ -36,7 +35,7 @@ else if ($current_month < 5) {
 else {
     unset($gradeList[0]); // 入学予定者を表示させない
     unset($gradeList[3]); // 卒業生を表示させない         
-}*/
+}
 
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 

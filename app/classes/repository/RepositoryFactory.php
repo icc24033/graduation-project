@@ -8,7 +8,7 @@ require_once __DIR__ . '/CsvRepository.php';
 require_once __DIR__ . '/ErrorStudentRepository.php';
 require_once __DIR__ . '/StudentLoginRepository.php';
 require_once __DIR__ . '/StudentGradeRepository.php';
-require_once __DIR__ . '/GraduateDeleteHistoryRepository.php';
+require_once __DIR__ . '/MaintenanceRepository.php';
 
 
 // 新しいリポジトリができたらここに追加する
@@ -118,9 +118,9 @@ class RepositoryFactory {
     }
 
     /**
-     * 卒業生削除リポジトリのインスタンスを取得
+     * 自動処理履歴リポジトリのインスタンスを取得
      */
-    public static function getGraduateDeleteHistoryRepository() {
-        return new GraduateDeleteHistoryRepository(self::getPdo());
+    public static function getMaintenanceRepository() {
+        return new MaintenanceRepository(self::getPdo());
     }
 }

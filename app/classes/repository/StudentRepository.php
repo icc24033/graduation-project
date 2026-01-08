@@ -129,4 +129,17 @@ class StudentRepository extends BaseRepository {
             error_log("StudentRepository Error: " . $e->getMessage());
         }
     }
+
+    /**
+     * 学年を更新する
+     */
+    public function incrementAllGrades() {
+        try {
+            $sql = "UPDATE student SET grade = grade + 1 WHERE grade < 3;";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("StudentRepository Error: " . $e->getMessage());
+        }
+    }
 }

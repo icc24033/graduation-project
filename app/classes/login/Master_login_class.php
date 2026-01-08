@@ -12,8 +12,12 @@ class MasterLogin implements LoginUser {
         $this->masterId = $masterId;
         $this->gradeName = $gradeName;
 
-        // 5月なら卒業生を削除するかどうかの判断をする
-        if (date('n') === '5') {
+        $month = date('n');
+        if ($month === '4') {
+            // 4月は進級処理
+            require_once __DIR__ . '/../../functions/master/grade_increment.php';
+        } elseif ($month === '5') {
+            // 5月は卒業生削除処理
             require_once __DIR__ . '/../../functions/master/graduate_delete.php';
         }
     }
