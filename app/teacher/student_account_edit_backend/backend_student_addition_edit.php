@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ★ CSV_edit.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=student_addition");
+header("Location: ../../../public/master/student_account_edit/controls/student_account_edit_control.php?backend=student_addition");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>

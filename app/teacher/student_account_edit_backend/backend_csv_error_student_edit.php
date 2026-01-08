@@ -150,7 +150,7 @@ try {
         ];
     }
 // ★ CSV_edit.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=csv_upload");
+header("Location: ../../../public/master/student_account_edit/controls/student_account_edit_control.php?backend=csv_upload");
 exit(); // リダイレクト後は必ず処理を終了
 } 
 catch (PDOException $e) {

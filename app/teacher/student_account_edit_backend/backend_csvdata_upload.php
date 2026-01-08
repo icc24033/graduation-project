@@ -112,7 +112,7 @@ else {
 }
 
 // ★ student_addition.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend={$backend}");
+header("Location: ../../../public/master/student_account_edit/controls/student_account_edit_control.php?backend={$backend}");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>

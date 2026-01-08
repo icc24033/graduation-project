@@ -49,7 +49,7 @@ catch (PDOException $e) {
 }
 
 // ★ student_account_transfer_control.php にリダイレクトして処理を終了
-header("Location: ../../../public/teacher/student_account_edit/controls/student_account_transfer_control.php");
+header("Location: ../../../public/master/student_account_edit/controls/student_account_transfer_control.php");
 exit(); // リダイレクト後は必ず処理を終了
 
 ?>

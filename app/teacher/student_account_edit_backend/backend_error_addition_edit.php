@@ -103,7 +103,7 @@ if (isset($_POST['students']) && is_array($_POST['students'])) {
 
     echo "<h3>すべてのデータの処理が完了しました。</h3>";
     
-    header("Location: ../../../public/teacher/student_account_edit/controls/student_account_edit_control.php?backend=student_addition");
+    header("Location: ../../../public/master/student_account_edit/controls/student_account_edit_control.php?backend=student_addition");
     exit();
 
 } else {
