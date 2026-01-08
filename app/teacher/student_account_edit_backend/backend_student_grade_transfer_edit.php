@@ -1,5 +1,10 @@
 <?php
 
+// --- デバッグ用：エラーを表示させる設定 ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 $grade_changes = $_POST['grade_changes'] ?? [];
 
 // 2. デコードが成功し、かつ 'course_id' と'current_year'が存在するかチェック

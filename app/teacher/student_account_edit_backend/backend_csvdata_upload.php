@@ -2,12 +2,25 @@
 // セッション開始
 session_start();
 
+// 現在の年度の取得
+$current_year = date("Y");
+$current_year = substr($current_year, -2); // 下2桁を取得
+
 //今の月を取得し、4月より前か後かで学年を決定　　　　　こここここここここここここここ
 $current_month = date('n');
+
 if ($current_month >= 4) {
     $grade = 1; // 4月以降は1年生
 } else {
     $grade = 0; // 3月以前は2年生
+}
+
+// 学年度の配列を作成
+if ($current_month < 4) {
+    $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
+}
+else {
+    $school_year = [ $current_year, $current_year - 1 ];
 }
 
 //csv_tableに格納されている学生の取得

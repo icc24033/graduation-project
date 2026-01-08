@@ -11,6 +11,8 @@ class MasterLogin implements LoginUser {
     public function __construct(string $masterId, string $gradeName) {
         $this->masterId = $masterId;
         $this->gradeName = $gradeName;
+
+        //　if () 追加予定
     }
 
     public function getUserId(): string {

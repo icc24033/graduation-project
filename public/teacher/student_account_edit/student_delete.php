@@ -76,7 +76,7 @@ if (!empty($courseList)) {
                         <?php foreach ($gradeList as $year => $gradeInfo): ?>
                             <li>
                                 <a href="#" 
-                                ddata-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
+                                data-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
                                 data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
                                 data-current-page="student_delete">
                                 <?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade_name']); ?>
@@ -123,88 +123,90 @@ if (!empty($courseList)) {
             </nav>
 
             <div class="content-area">
-                <div class="account-table-container">
-                    <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学年</div>
-                        <div class="column-name">氏名</div>
-                        <div class="column-course">コース</div>
-                    </div>
-                    <?php 
-                    // $status['students_in_course']が有効な場合のみループ
-                    if (!empty($status['students_in_course']) && is_array($status['students_in_course'])): 
-                        $has_students = false; // データが存在したかどうかのフラグ
-
-                        // ★修正箇所: while (...) -> fetch() を foreach (...) に変更
-                        foreach ($status['students_in_course'] as $student_row): 
-
-                            // 今選択されている学年と生徒の学年を比較
-                            $student_year_prefix = $student_row['grade'];
-                            if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
-                            $has_students = true;
-                    ?>
-                        <div class="table-row">
-                            <div class="column-check">
-                                <input type="checkbox" 
-                                    class="row-checkbox" 
-                                    data-student-id="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>">
-                            </div>
-                            <div class="column-student-id">
-                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$gradeList[$status['current_year']]['grade_name']); ?>" disabled>
-                            </div>
-                            <div class="column-name">
-                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_name']); ?>" disabled>
-                            </div>
-                            <div class="column-course">
-                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$current_course_name); ?>" disabled>
-                            </div>
+                <form>
+                    <div class="account-table-container">
+                        <div class="table-header">
+                            <div class="column-check"></div> <div class="column-student-id">学生番号</div>
+                            <div class="column-name">氏名</div>
+                            <div class="column-course">コース</div>
                         </div>
-                    <?php 
-                            endif; 
-                        endforeach; // ★修正箇所: endwhile を endforeach に変更
+                        <?php 
+                        // $status['students_in_course']が有効な場合のみループ
+                        if (!empty($status['students_in_course']) && is_array($status['students_in_course'])): 
+                            $has_students = false; // データが存在したかどうかのフラグ
 
-                        // ループ後に表示対象がなかった場合
-                        if (!$has_students):
-                    ?>
-                        <div class="table-row">
-                            <div class="column-name">学生情報が見つかりません。</div> 
-                        </div>
-                    <?php 
-                        endif;
-                    else:
-                    ?>
-                        <div class="table-row">
-                            <div class="column-name">表示できる学生情報がありません。</div> 
-                        </div>
-                    <?php endif; ?>
-                </div>
-                <?php 
-                    // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
-                    if ($has_students): 
-                ?>
-                    <button class="add-button" id="deleteActionButton">削除</button>
-                    <div class="modal-overlay" id="deleteModal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h2>アカウント削除確認</h2>
-                            </div>
-                            <div class="modal-body">
-                                <p>以下の0件のアカウントを削除してもよろしいですか？</p>
-                                <div class="delete-list-container">
-                                    <div id="selectedStudentList"></div>
+                            // ★修正箇所: while (...) -> fetch() を foreach (...) に変更
+                            foreach ($status['students_in_course'] as $student_row): 
+
+                                // 今選択されている学年と生徒の学年を比較
+                                $student_year_prefix = $student_row['grade'];
+                                if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
+                                $has_students = true;
+                        ?>
+                            <div class="table-row">
+                                <div class="column-check">
+                                    <input type="checkbox" 
+                                        class="row-checkbox" 
+                                        data-student-id="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>">
+                                </div>
+                                <div class="column-student-id">
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>" disabled>
+                                </div>
+                                <div class="column-name">
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_name']); ?>" disabled>
+                                </div>
+                                <div class="column-course">
+                                    <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$current_course_name); ?>" disabled>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
+                        <?php 
+                                endif; 
+                            endforeach; // ★修正箇所: endwhile を endforeach に変更
 
-                                <form method="POST" action="../../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
-                                    <div id="hiddenInputsContainer" style="display: none;"></div>
-                                
-                                    <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
-                                </form>
+                            // ループ後に表示対象がなかった場合
+                            if (!$has_students):
+                        ?>
+                            <div class="table-row">
+                                <div class="column-name">学生情報が見つかりません。</div> 
+                            </div>
+                        <?php 
+                            endif;
+                        else:
+                        ?>
+                            <div class="table-row">
+                                <div class="column-name">表示できる学生情報がありません。</div> 
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php 
+                        // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
+                        if ($has_students): 
+                    ?>
+                        <button class="add-button" id="deleteActionButton">削除</button>
+                        <div class="modal-overlay" id="deleteModal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>アカウント削除確認</h2>
+                                </div>
+                                <div class="modal-body">
+                                    <p>以下の0件のアカウントを削除してもよろしいですか？</p>
+                                    <div class="delete-list-container">
+                                        <div id="selectedStudentList"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
+
+                                    <form method="POST" action="../../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
+                                        <div id="hiddenInputsContainer" style="display: none;"></div>
+                                    
+                                        <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </form>
             </div>
         </main>
     </div>

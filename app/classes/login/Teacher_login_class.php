@@ -11,6 +11,8 @@ class TeacherLogin implements LoginUser {
     public function __construct(string $teacherId, string $gradeName) {
         $this->teacherId = $teacherId;
         $this->gradeName = $gradeName;
+
+        //　if () 追加予定
     }
 
     public function getUserId(): string {

@@ -185,7 +185,7 @@ $pdo = null;
                                     </a>
                                     <input type="hidden" 
                                         name="grade_changes[<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>]" 
-                                        value="<?php echo SecurityHelper::escapeHtml((string)$current_grade); ?>"
+                                        value="<?php echo SecurityHelper::escapeHtml((string)$student_row['grade']); ?>"
                                         class="grade-hidden-input">
                                 </div>
 

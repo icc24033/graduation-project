@@ -116,4 +116,17 @@ class StudentRepository extends BaseRepository {
             return [];
         }
     }
+
+    /**
+     * 卒業生を削除する
+     */
+    public function deleteGraduatedStudents() {
+        try {
+            $sql = "DELETE FROM student WHERE grade = 3;";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("StudentRepository Error: " . $e->getMessage());
+        }
+    }
 }
