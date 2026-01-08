@@ -164,7 +164,7 @@ $pdo = null;
 
                             foreach ($status['students_in_course'] as $student_row): 
             
-                                // ★ 変更点: student_idの頭2文字を取得し、現在の年度と比較
+                                // 今選択されている学年と生徒の学年を比較
                                 $student_year_prefix = $student_row['grade'];
                                 if ($student_year_prefix == $status['current_year']): // 値が一致するか比較
                                 $has_students = true;
