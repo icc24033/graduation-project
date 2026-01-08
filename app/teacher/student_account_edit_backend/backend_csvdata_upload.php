@@ -6,13 +6,13 @@ session_start();
 $current_year = date("Y");
 $current_year = substr($current_year, -2); // 下2桁を取得
 
-//今の月を取得し、4月より前か後かで学年を決定　　　　　こここここここここここここここ
+//今の月を取得し、4月より前か後かで学年を決定
 $current_month = date('n');
 
 if ($current_month >= 4) {
     $grade = 1; // 4月以降は1年生
 } else {
-    $grade = 0; // 3月以前は2年生
+    $grade = 0; // 3月以前は0年生
 }
 
 // 学年度の配列を作成

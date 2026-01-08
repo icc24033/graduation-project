@@ -92,6 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $school_year = [ $current_year, $current_year - 1 ];
     }
 
+    //今の月を取得し、4月より前か後かで学年を決定
+    if ($current_month >= 4) {
+        $grade = 1; // 4月以降は1年生
+    } else {
+        $grade = 0; // 3月以前は0年生
+    }
+
     foreach ($_POST['students'] as $index => $student_data) {
 
         /////////////////////////////
@@ -206,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $student_address,
                 $column_name,
                 $student_data['course_id'],
-                1 ///////////////////////後から変更　　　こここここここここここここここ
+                $grade
             ]);
 
             //student_login_tableに学生情報を挿入

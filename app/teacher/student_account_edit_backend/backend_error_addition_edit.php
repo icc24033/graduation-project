@@ -1,9 +1,4 @@
 <?php
-// --- デバッグ用：エラーを表示させる設定 ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 echo "<h1>CSV編集データ受信テスト</h1>";
 
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
@@ -17,6 +12,13 @@ if (isset($_POST['students']) && is_array($_POST['students'])) {
     // --- 年度判定ロジック ---
     $current_year = (int)date('y'); // 下2桁 (例: 26)
     $current_month = (int)date('n');
+
+    //今の月を取得し、4月より前か後かで学年を決定
+    if ($current_month >= 4) {
+        $grade = 1; // 4月以降は1年生
+    } else {
+        $grade = 0; // 3月以前は0年生
+    }
 
     if ($current_month < 4) {
         $school_year = [ $current_year, $current_year - 1, $current_year - 2 ];             
@@ -82,7 +84,7 @@ if (isset($_POST['students']) && is_array($_POST['students'])) {
             $column_email,
             $name,
             $course_id,
-            1               ///// 仮：学年は1年生で固定（必要に応じて調整してください）ここここここここここここここここここここここここここここここ
+            $grade
         );
 
         // ② student_login_tableへ保存
