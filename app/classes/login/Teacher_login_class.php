@@ -12,7 +12,10 @@ class TeacherLogin implements LoginUser {
         $this->teacherId = $teacherId;
         $this->gradeName = $gradeName;
 
-        //　if () 追加予定
+        // 5月なら卒業生を削除するかどうかの判断をする
+        if (date('n') === '5') {
+            require_once __DIR__ . '/../../functions/master/graduate_delete.php';
+        }
     }
 
     public function getUserId(): string {
