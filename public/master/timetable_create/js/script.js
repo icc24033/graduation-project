@@ -103,9 +103,13 @@ function initializeDemoData() {
 }
 
 /*
-    * 概要: 優先度順に既存の時間割から初期選択を行う。
-    * 使用方法: データ読み込み後に呼び出すと、優先コースがあれば自動で選択して表示します。
-    */
+* 関数名: selectInitialTimetable
+* 概要: 優先コースリストに基づき、保存された時間割データから最初に見つかった優先コースを自動選択して表示する。
+* 実装理由: 存在している時間割りデータの中で、特定のコースを優先的に表示したい場合に使用します。
+* 使用方法: データ読み込み後に呼び出すと、優先コースがあれば自動で選択して表示します。
+* 引数: なし
+* 戻り値: なし
+*/
 function selectInitialTimetable() {
     const priorityCourses = [
         "システムデザインコース",
@@ -118,17 +122,21 @@ function selectInitialTimetable() {
         "１年２組"
     ];
     
+    // 優先コース順に存在をチェックして最初に見つかったものを選択
     for (const courseName of priorityCourses) {
+        // 該当コースの時間割が存在するか確認
         const record = savedTimetables.find(r => r.course === courseName);
         if (record) {
-            // ドロップダウンをそのコースに設定
+            // ドロップダウンの表示を該当コース名に更新する
             document.querySelector('#courseDropdownToggle .current-value').textContent = courseName;
             
-            // リストを描画
+            // リストを再描画して該当コースのみ表示する
+            // モードは 'select' に設定
             renderSavedList('select');
             
-            // そのレコードを選択
+            // 該当アイテムをクリックして選択状態にするための遅延処理
             setTimeout(() => {
+                // 少し遅延させてからクリックイベントを実行する
                 const targetItem = document.querySelector(`.saved-item[data-id="${record.id}"]`);
                 if (targetItem) {
                     targetItem.click();
@@ -140,24 +148,27 @@ function selectInitialTimetable() {
     }
 }
 
-const mainCreateNewBtn = document.getElementById('mainCreateNewBtn');
-const defaultNewBtnArea = document.getElementById('defaultNewBtnArea');
-const creatingItemArea = document.getElementById('creatingItemArea');
-const creatingCourseName = document.getElementById('creatingCourseName');
-const mainStartDate = document.getElementById('mainStartDate');
-const mainEndDate = document.getElementById('mainEndDate');
-const resetViewBtn = document.getElementById('resetViewBtn');
-const createModal = document.getElementById('createModal');
-const createGradeSelect = document.getElementById('createGradeSelect');
-const createCourseSelect = document.getElementById('createCourseSelect');
-const checkCsv = document.getElementById('checkCsv');
-const csvInputArea = document.getElementById('csvInputArea');
-const createSubmitBtn = document.getElementById('createSubmitBtn');
-const createCancelBtn = document.getElementById('createCancelBtn');
-const footerArea = document.getElementById('footerArea');
-const completeButton = document.getElementById('completeButton');
-const cancelCreationBtn = document.getElementById('cancelCreationBtn');
+// イベント要素の参照の取得
+// 各要素のIDに基づいて参照を取得します
+const mainCreateNewBtn = document.getElementById('mainCreateNewBtn'); // 新規作成ボタンの参照
+const defaultNewBtnArea = document.getElementById('defaultNewBtnArea'); // 新規ボタンエリア
+const creatingItemArea = document.getElementById('creatingItemArea'); // 作成中アイコンの表示エリア
+const creatingCourseName = document.getElementById('creatingCourseName'); // 作成中コース名表示要素
+const mainStartDate = document.getElementById('mainStartDate'); // 適用開始日フィールド
+const mainEndDate = document.getElementById('mainEndDate'); // 適用終了日フィールド
+const resetViewBtn = document.getElementById('resetViewBtn'); // 表示リセットボタン
+const createModal = document.getElementById('createModal'); // 作成モーダル
+const createGradeSelect = document.getElementById('createGradeSelect'); // 学年選択ドロップダウン
+const createCourseSelect = document.getElementById('createCourseSelect'); // コース選択ドロップダウン
+const checkCsv = document.getElementById('checkCsv'); // CSVチェックボックス
+const csvInputArea = document.getElementById('csvInputArea'); // CSV入力エリア
+const createSubmitBtn = document.getElementById('createSubmitBtn'); // 作成送信ボタン（新規作成ボタンクリック後に表示されるポップアップ内の作成ボタンに関する参照）
+const createCancelBtn = document.getElementById('createCancelBtn'); // 作成キャンセルボタン（新規作成ボタンクリック後に表示されるポップアップ内のキャンセルボタンに関する参照）
+const footerArea = document.getElementById('footerArea'); // フッターエリア
+const completeButton = document.getElementById('completeButton'); // 完了ボタン(作成フォーム内の完了ボタンに関する参照)
+const cancelCreationBtn = document.getElementById('cancelCreationBtn'); // キャンセルボタン(作成フォーム内のキャンセルボタンに関する参照)
 
+// 現在作成中の時間割りに戻るクリックイベント
 document.getElementById('creatingItemCard').addEventListener('click', () => {
     if (!isCreatingMode) return;
     
