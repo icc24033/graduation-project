@@ -25,7 +25,7 @@ SecurityHelper::applySecureHeaders();
             <nav class="sidebar">
                 <ul>
                     <li class="nav-item is-group-label"><a href="#">編集</a></li>
-                    <li class="nav-item"><a href="teacher_addition.php">アカウントの追加</a></li>
+                    <li class="nav-item"><a href="teacher_addition_control.php">アカウントの追加</a></li>
                     <li class="nav-item"><a href="teacher_delete_control.php" class="is-active">アカウントの削除</a></li>
                     <li class="nav-item"><a href="teacher_Information.php">アカウント情報変更</a></li>
                     <li class="nav-item"><a href="master_edit_control.php">マスタの付与</a></li>

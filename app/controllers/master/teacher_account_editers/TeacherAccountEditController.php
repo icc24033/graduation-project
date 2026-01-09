@@ -37,4 +37,11 @@ class TeacherAccountEditController {
         extract($viewData);
         require_once '../teacher_delete.php';
     }
+
+    /**
+     * 教員追加画面
+     */
+    public function index_addition() {
+        require_once '../teacher_addition.php';
+    }   
 }
