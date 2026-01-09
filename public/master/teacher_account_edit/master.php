@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -50,54 +51,9 @@
                         <div class="column-name"><span>田中 花子</span></div>
                         <div class="column-check"><input type="checkbox"></div>
                     </div>
-             <div class="table-row">
+                    <div class="table-row">
                         <div class="avatar-placeholder"></div>
                         <div class="column-name"><span>山本 一郎</span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
-                        <div class="column-check"><input type="checkbox"></div>
-                    </div>
-                    <div class="table-row">
-                        <div class="avatar-placeholder"></div>
-                        <div class="column-name"><span></span></div>
                         <div class="column-check"><input type="checkbox"></div>
                     </div>
                     <div class="table-row">
