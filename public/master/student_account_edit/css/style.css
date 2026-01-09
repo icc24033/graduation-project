@@ -310,6 +310,19 @@
     transition: background-color 0.3s; /* スムーズな色変更 */
 }
 
+/* --- データがない時のスタイル --- */
+.table-row.no-data {
+    justify-content: center; /* 左右中央寄せ */
+    align-items: center;     /* 上下中央寄せ */
+    padding: 40px 20px;      /* 上下に広めの余白 */
+    color: #888;             /* 文字色を少し薄くして「情報がない感」を出す */
+    font-size: 15px;
+    background-color: #fafafa; /* ほんの少し背景色をつけて、中身がないことを強調 */
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+    display: flex;           /* 確実に中央寄せを効かせる */
+}
+
 .table-row:last-of-type {
     border-bottom: none;
 }
