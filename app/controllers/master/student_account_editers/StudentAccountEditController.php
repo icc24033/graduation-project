@@ -16,6 +16,12 @@ class StudentAccountEditController {
      * 学生追加画面（index_addition）
      */
     public function index_addition() {
+
+        // 5月なら卒業生を削除しているか確認する処理を追加
+        if (date('n') == 5) {
+            $this->service->deleteGraduatedStudents();
+        }
+
         $viewData = $this->service->getEditData();
         $gradeData = $this->service->getGradeData();
         $basic_data = $this->service->getAdditionBasicInfo($_GET['backend'] ?? null);

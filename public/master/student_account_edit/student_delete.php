@@ -76,7 +76,7 @@ if (!empty($courseList)) {
                         <?php foreach ($gradeList as $year => $gradeInfo): ?>
                             <li>
                                 <a href="#" 
-                                ddata-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
+                                data-current-year="<?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade']); ?>"
                                 data-current-course="<?php echo SecurityHelper::escapeHtml((string)$current_course_id); ?>"
                                 data-current-page="student_delete">
                                 <?php echo SecurityHelper::escapeHtml((string)$gradeInfo['grade_name']); ?>
@@ -125,7 +125,7 @@ if (!empty($courseList)) {
             <div class="content-area">
                 <div class="account-table-container">
                     <div class="table-header">
-                        <div class="column-check"></div> <div class="column-student-id">学年</div>
+                        <div class="column-check"></div> <div class="column-student-id">学生番号</div>
                         <div class="column-name">氏名</div>
                         <div class="column-course">コース</div>
                     </div>
@@ -149,7 +149,7 @@ if (!empty($courseList)) {
                                     data-student-id="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>">
                             </div>
                             <div class="column-student-id">
-                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$gradeList[$status['current_year']]['grade_name']); ?>" disabled>
+                                <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_id']); ?>" disabled>
                             </div>
                             <div class="column-name">
                                 <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$student_row['student_name']); ?>" disabled>
@@ -184,7 +184,7 @@ if (!empty($courseList)) {
                     <button class="add-button" id="deleteActionButton">削除</button>
                     <div class="modal-overlay" id="deleteModal">
                         <div class="modal-content">
-                            <div class="modal-header">
+                             <div class="modal-header">
                                 <h2>アカウント削除確認</h2>
                             </div>
                             <div class="modal-body">
@@ -198,7 +198,7 @@ if (!empty($courseList)) {
 
                                 <form method="POST" action="../../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
                                     <div id="hiddenInputsContainer" style="display: none;"></div>
-                                
+                                    
                                     <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
                                 </form>
                             </div>

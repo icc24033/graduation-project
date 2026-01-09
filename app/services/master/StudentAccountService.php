@@ -112,4 +112,62 @@ class StudentAccountService {
             'students_in_course' => $students_in_course
         ];
     }
+
+    /**
+     * 5月に卒業生を削除したかを確認し、未削除なら削除する
+     * ※DBには初期データとして前年以前の年度が必ず1件登録されている前提
+     */
+    public function deleteGraduatedStudents() {
+        // 現在の西暦を取得 (例: "2026")
+        $current_year = date("Y");
+        
+        try {
+            // 履歴管理用のリポジトリを取得
+            $historyRepo = RepositoryFactory::getGraduateDeleteHistoryRepository();
+            
+            // 1. DBから「最後に削除処理を行った年」を取得
+            // (初期データが入っているため、必ず "2025" などの文字列が返ってくる)
+            $last_executed_year = $historyRepo->getLatestDeleteYear();
+
+            // 2. 実行が必要か判定
+            // 記録されている年が「今年よりも前」であれば実行する
+            if ($last_executed_year < $current_year) {
+                
+                // 3. 必要なリポジトリの準備
+                $studentRepo = RepositoryFactory::getStudentRepository();
+                
+                // 4. トランザクションの開始
+                // 削除と履歴更新を「一塊の処理」として扱う
+                $pdo = RepositoryFactory::getPdo();
+                $pdo->beginTransaction();
+
+                try {
+                    /**
+                     * 5. 実際の削除ロジックの実行
+                     * ---------------------------------------------------------
+                     * ここで卒業対象の生徒（例：3年生など）を削除します
+                     * $studentRepo->deleteGraduates(); 
+                     * ---------------------------------------------------------
+                     */
+
+                    // 6. 履歴を「今年の年」に更新
+                    // これにより、次に誰かがアクセスした時は if 文の条件が false になり実行されない
+                    $historyRepo->updateDeleteYear($current_year);
+
+                    // 変更を確定
+                    $pdo->commit();
+                    
+                    error_log("{$current_year}年度の卒業生データ一括削除を正常に完了しました。");
+
+                } catch (Exception $e) {
+                    // エラー時はロールバックして、削除も履歴更新も「なかったこと」にする
+                    $pdo->rollBack();
+                    throw $e;
+                }
+            }
+        } catch (Exception $e) {
+            // 画面表示を止めないよう、例外はログ出力のみに留める
+            error_log("StudentAccountService Error (deleteGraduatedStudents): " . $e->getMessage());
+        }
+    }
 }
