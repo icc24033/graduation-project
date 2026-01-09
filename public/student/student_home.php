@@ -116,7 +116,9 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     $today_date_value = $display_date_obj->format('Y-m-d'); 
     $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_jp . ")"; 
 
-    $selected_course = $_POST['selected_course'] ?? 'system';
+    // コース選択の取得
+    $selected_course = $_POST['selected_course'] ?? 'user_course';
+    // コースラベルのマッピング
     $course_labels = [
         'system' => 'システム', 'web' => 'Web', 'multi' => 'マルチ',
         'ouyou' => '応用情報', 'kihon' => '基本情報',
