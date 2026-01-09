@@ -32,7 +32,7 @@ SecurityHelper::applySecureHeaders();
                     <li class="nav-item"><a href="teacher_addition.html">アカウントの追加</a></li>
                     <li class="nav-item"><a href="teacher_delete.html">アカウントの削除</a></li>
                     <li class="nav-item"><a href="teacher_Information.html">アカウント情報変更</a></li>
-                    <li class="nav-item"><a href="master.html" class="is-active">マスタの付与</a></li>
+                    <li class="nav-item"><a href="master_edit_control.php" class="is-active">マスタの付与</a></li>
                     <li class="nav-item"><a href="class.html">担当授業確認</a></li>
                 </ul>
             </nav>
