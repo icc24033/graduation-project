@@ -147,7 +147,7 @@ $pdo = null;
             </nav>
 
             <div class="content-area">
-                <form action="..\..\..\..\app\teacher\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
+                <form action="..\..\..\..\app\master\student_account_edit_backend\backend_student_grade_transfer_edit.php" method="post">
                 <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($status['course_id']); ?>">
                 <input type="hidden" name="current_year" value="<?php echo htmlspecialchars($status['current_year']); ?>">
                     <div class="account-table-container">
@@ -159,8 +159,8 @@ $pdo = null;
                         
                         <?php 
                         // $stmt_test_studentが有効な場合のみループ
+                        $has_students = false; // データが存在したかどうかのフラグ
                         if (!empty($status['students_in_course']) && is_array($status['students_in_course'])): 
-                            $has_students = false; // データが存在したかどうかのフラグ
 
                             foreach ($status['students_in_course'] as $student_row): 
             
@@ -204,22 +204,16 @@ $pdo = null;
                             // ループ後にデータがなかった場合のエラー表示
                             if (!$has_students):
                         ?>
-                                <div class="table-row">
-                                    <div class="column-check"></div> 
-                                    <div class="column-student-id"></div> 
-                                    <div class="column-name">学生情報が見つかりません。</div> 
-                                    <div class="column-course"></div>
-                                </div>
+                            <div class="table-row no-data">
+                                表示できる学生情報がありません。
+                            </div>
                         <?php 
                             endif;
                             // DB接続エラーなどで$stmt_test_studentがnullの場合
                         else:
                         ?>
-                            <div class="table-row">
-                                <div class="column-check"></div> 
-                                <div class="column-student-id"></div> 
-                                <div class="column-name">データベースエラーのため、学生情報を表示できません。</div> 
-                                <div class="column-course"></div>
+                            <div class="table-row no-data">
+                                表示できる学生情報がありません。
                             </div>
                         <?php endif; ?>
 
@@ -228,7 +222,7 @@ $pdo = null;
                         // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
                         if ($has_students): 
                     ?>
-                        <button class="add-button" type="submit">学年移動</button>
+                        <button class="complete-button" type="submit">学年移動</button>
                     <?php 
                     endif; 
                     ?>

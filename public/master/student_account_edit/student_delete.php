@@ -165,15 +165,15 @@ if (!empty($courseList)) {
                         // ループ後に表示対象がなかった場合
                         if (!$has_students):
                     ?>
-                        <div class="table-row">
-                            <div class="column-name">学生情報が見つかりません。</div> 
+                        <div class="table-row no-data">
+                            表示できる学生情報がありません。
                         </div>
                     <?php 
                         endif;
                     else:
                     ?>
-                        <div class="table-row">
-                            <div class="column-name">表示できる学生情報がありません。</div> 
+                        <div class="table-row no-data">
+                            表示できる学生情報がありません。
                         </div>
                     <?php endif; ?>
                 </div>
@@ -181,7 +181,7 @@ if (!empty($courseList)) {
                     // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
                     if ($has_students): 
                 ?>
-                    <button class="add-button" id="deleteActionButton">削除</button>
+                    <button class="complete-button" id="deleteActionButton">削除</button>
                     <div class="modal-overlay" id="deleteModal">
                         <div class="modal-content">
                              <div class="modal-header">
@@ -196,7 +196,7 @@ if (!empty($courseList)) {
                             <div class="modal-footer">
                                 <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
 
-                                <form method="POST" action="../../../../app/teacher/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
+                                <form method="POST" action="../../../../app/master/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
                                     <div id="hiddenInputsContainer" style="display: none;"></div>
                                     
                                     <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>

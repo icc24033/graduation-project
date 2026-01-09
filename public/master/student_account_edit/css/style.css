@@ -276,6 +276,15 @@
     align-items: center; 
 }
 
+/* --- content-area の直下の要素を幅いっぱいに広げる --- */
+.content-area > form,
+.content-area > .account-table-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 子要素を中央に寄せる */
+}
+
 .account-table-container {
     width: 100%;
     max-width: 800px;
@@ -308,6 +317,19 @@
     align-items: center;
     padding: 5px 0;
     transition: background-color 0.3s; /* スムーズな色変更 */
+}
+
+/* --- データがない時のスタイル --- */
+.table-row.no-data {
+    justify-content: center; /* 左右中央寄せ */
+    align-items: center;     /* 上下中央寄せ */
+    padding: 40px 20px;      /* 上下に広めの余白 */
+    color: #888;             /* 文字色を少し薄くして「情報がない感」を出す */
+    font-size: 15px;
+    background-color: #fafafa; /* ほんの少し背景色をつけて、中身がないことを強調 */
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+    display: flex;           /* 確実に中央寄せを効かせる */
 }
 
 .table-row:last-of-type {
@@ -432,6 +454,12 @@
 .add-button:hover,.complete-button:hover {
     background-color: #CFD5DF;/* ホバー色変更 */
     color: #222;
+}
+
+/* 削除用ボタンが完了ボタンのクラスを継承した場合のホバー色調整 */
+#deleteActionButton.complete-button:hover {
+    background-color: #ff5e5e; /* 削除らしく赤色にする場合 */
+    color: #fff;
 }
 
 /* テキスト入力フィールドがクリック・入力されている行の背景色をホバーと同じにする */
@@ -613,6 +641,12 @@
 /* --- レイアウトのコンテナ --- */
     .app-container {
         padding-top: 70px; /* ヘッダーの高さ */
+    }
+
+    /* 編集画面の form がレスポンシブ時に邪魔をしないように調整 */
+    .content-area > form {
+        padding: 0;
+        margin: 0;
     }
 
     /* --- ヘッダー --- */
