@@ -1,5 +1,5 @@
 <?php
-// master_edit_control.php
+// teacher_delete_control.php
 
 // --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
 ini_set('display_errors', 1);
@@ -13,4 +13,4 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../../../../app/controllers/master/teacher_account_editers/TeacherAccountEditController.php';
 
 $controller = new TeacherAccountEditController();
-$controller->index_master();
+$controller->index_delete();

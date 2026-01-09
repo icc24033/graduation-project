@@ -25,4 +25,16 @@ class TeacherAccountEditController {
         extract($viewData);
         require_once '../master.php';
     }
+
+    /**
+     * 教員削除処理
+     */
+    public function index_delete() {
+
+        $viewData = $this->service->getTeachers();
+        RepositoryFactory::closePdo();
+
+        extract($viewData);
+        require_once '../teacher_delete.php';
+    }
 }
