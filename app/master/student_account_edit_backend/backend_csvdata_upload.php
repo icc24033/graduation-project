@@ -52,11 +52,11 @@ try {
     $pdo = RepositoryFactory::getPdo();
 
     //csv_tableに格納されている学生の取得
-    $stmt_select = $db->prepare($csv_table_student_sql);
+    $stmt_select = $pdo->prepare($csv_table_student_sql);
     $stmt_select->execute();
 
     //student_login_tableに格納してある値の数を取得
-    $stmt_login_count = $db->prepare($student_login_count_sql);
+    $stmt_login_count = $pdo->prepare($student_login_count_sql);
     $stmt_login_count->execute();
     $login_count_result = $stmt_login_count->fetch();
 
@@ -65,7 +65,7 @@ try {
     //csv_tableから取得した学生情報を1行ずつ処理
     while ($row = $stmt_select->fetch()) {
         //studentテーブルに学生情報を挿入
-        $stmt_insert_student = $db->prepare($insert_student_sql);
+        $stmt_insert_student = $pdo->prepare($insert_student_sql);
         $stmt_insert_student->execute([
             $row['student_id'],
             $row['approvalUserAddress'],
@@ -75,7 +75,7 @@ try {
         ]);
 
         //student_login_tableに学生情報を挿入
-        $stmt_insert_login = $db->prepare($insert_student_login_sql);
+        $stmt_insert_login = $pdo->prepare($insert_student_login_sql);
         $stmt_insert_login->execute([
             $total_login_users,
             $row['student_id'],
@@ -85,13 +85,13 @@ try {
         $total_login_users++; // 次のユーザーIDにインクリメント
         
         //csv_tableから取得した学生情報を1行ずつ削除
-        $stmt_delete = $db->prepare($delete_csv_table_sql);
+        $stmt_delete = $pdo->prepare($delete_csv_table_sql);
         $stmt_delete->execute([$row['student_id']]);
 
     }
 
     // csv_tableに値が格納されているか確認
-    $stmt_count = $db->prepare($count_csv_table_sql);
+    $stmt_count = $pdo->prepare($count_csv_table_sql);
     $stmt_count->execute();
     $count_result = $stmt_count->fetch();
 

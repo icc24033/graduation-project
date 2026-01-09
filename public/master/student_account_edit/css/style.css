@@ -276,15 +276,6 @@
     align-items: center; 
 }
 
-/* --- content-area の直下の要素を幅いっぱいに広げる --- */
-.content-area > form,
-.content-area > .account-table-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* 子要素を中央に寄せる */
-}
-
 .account-table-container {
     width: 100%;
     max-width: 800px;
@@ -454,12 +445,6 @@
 .add-button:hover,.complete-button:hover {
     background-color: #CFD5DF;/* ホバー色変更 */
     color: #222;
-}
-
-/* 削除用ボタンが完了ボタンのクラスを継承した場合のホバー色調整 */
-#deleteActionButton.complete-button:hover {
-    background-color: #ff5e5e; /* 削除らしく赤色にする場合 */
-    color: #fff;
 }
 
 /* テキスト入力フィールドがクリック・入力されている行の背景色をホバーと同じにする */
@@ -641,12 +626,6 @@
 /* --- レイアウトのコンテナ --- */
     .app-container {
         padding-top: 70px; /* ヘッダーの高さ */
-    }
-
-    /* 編集画面の form がレスポンシブ時に邪魔をしないように調整 */
-    .content-area > form {
-        padding: 0;
-        margin: 0;
     }
 
     /* --- ヘッダー --- */

@@ -181,7 +181,7 @@ if (!empty($courseList)) {
                     // $courseListが空ではない、つまりコース情報が見つかった場合のみ表示
                     if ($has_students): 
                 ?>
-                    <button class="complete-button" id="deleteActionButton">削除</button>
+                    <button class="add-button" id="deleteActionButton">削除</button>
                     <div class="modal-overlay" id="deleteModal">
                         <div class="modal-content">
                              <div class="modal-header">
