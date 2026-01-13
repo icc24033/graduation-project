@@ -13,4 +13,4 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../../../../app/controllers/master/teacher_account_editers/TeacherAccountEditController.php';
 
 $controller = new TeacherAccountEditController();
-$controller->index_master();
+$controller->index_addition();

@@ -19,10 +19,40 @@ class TeacherAccountEditController {
     public function index_master() {
 
         $viewData = $this->service->getTeachers();
-        
         RepositoryFactory::closePdo();
         
         extract($viewData);
         require_once '../master.php';
+    }
+
+    /**
+     * 教員削除処理
+     */
+    public function index_delete() {
+
+        $viewData = $this->service->getTeachers();
+        RepositoryFactory::closePdo();
+
+        extract($viewData);
+        require_once '../teacher_delete.php';
+    }
+
+    /**
+     * 教員追加画面
+     */
+    public function index_addition() {
+        require_once '../teacher_addition.php';
+    }   
+
+    /**
+     * 教員情報編集画面
+     */
+    public function index_information() {
+
+        $viewData = $this->service->getTeachers();
+        RepositoryFactory::closePdo();
+        
+        extract($viewData);
+        require_once '../teacher_Information.php';
     }
 }

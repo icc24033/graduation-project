@@ -19,11 +19,11 @@
             <nav class="sidebar">
                 <li class="nav-item is-group-label"><a href="#">編集</a></li>
                 <ul>
-                    <li class="nav-item"><a href="teacher_addition.html">アカウントの追加</a></li>
-                    <li class="nav-item"><a href="teacher_delete.html">アカウントの削除</a></li>
-                    <li class="nav-item"><a href="teacher_Information.html">アカウント情報変更</a></li>
-                    <li class="nav-item"><a href="master.html">マスタの付与</a></li>
-                    <li class="nav-item"><a href="class.html" class="is-active">担当授業確認</a></li>
+                    <li class="nav-item"><a href="teacher_addition.php">アカウントの追加</a></li>
+                    <li class="nav-item"><a href="teacher_delete.php">アカウントの削除</a></li>
+                    <li class="nav-item"><a href="teacher_Information.php">アカウント情報変更</a></li>
+                    <li class="nav-item"><a href="master.php">マスタの付与</a></li>
+                    <li class="nav-item"><a href="class.php" class="is-active">担当授業確認</a></li>
                 </ul>
             </nav>
             
@@ -144,5 +144,5 @@
         </div>
     </div>
     <script src="js/script.js"></script>
-    </body>
-    </html>
+</body>
+</html>

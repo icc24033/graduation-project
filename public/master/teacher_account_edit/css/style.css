@@ -224,6 +224,15 @@
     width: 280px;
 }
 
+/* --- 237行目付近、.column-mail の後に追加 --- */
+.column-action {
+    width: 60px; /* 削除ボタン用の幅 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* 幅が縮まないように固定 */
+}
+
 /* 入力フィールドのスタイル */
 .table-row input[type="text"] {
     width: calc(100% - 15px); /* パディングを考慮して調整 */
@@ -305,6 +314,28 @@
     margin-top: auto; 
 }
 
+/* --- 371行目付近、.add-button:hover の前に追加 --- */
+/* 削除ボタン本体のスタイル */
+.remove-row-button {
+    background: none;
+    border: none;
+    color: #ff5e5e; /* モーダルの削除ボタンと合わせた赤色 */
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.remove-row-button:hover {
+    color: #ff0000;
+    transform: scale(1.1); /* 少し大きくして押しやすく */
+}
+
+.remove-row-button .material-symbols-outlined {
+    font-size: 24px;
+}
+
 /* 追加ボタン・完了ボタンホバー */
 .add-button:hover,.complete-button:hover {
     background-color: #CFD5DF;/* ホバー色変更 */
@@ -313,13 +344,33 @@
 
 /* --- マスタ付与画面専用のテーブル調整 --- */
 
-/* テーブル内の配置調整 */
+/* 1. 行とヘッダーの幅を100%にする */
 .master-grant-table .table-row,
 .master-grant-table .table-header {
     display: flex;
-    justify-content: space-between; /* 両端揃え */
-    align-items: center; /* 垂直方向中央揃え */
-    padding: 10px 20px; /* 左右の余白を広めに */
+    justify-content: flex-start; /* 左から並べる */
+    align-items: center;
+    padding: 10px 20px;
+    width: 100%;
+    box-sizing: border-box; /* パディングを含めて100%にする */
+}
+
+/* 2. 講師名が余ったスペースをすべて使うようにする */
+.master-grant-table .column-name {
+    flex-grow: 1; /* 以前の width: auto よりも安定します */
+    text-align: left;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+/* 3. チェックボックスを右端に固定する */
+.master-grant-table .column-check {
+    width: 40px;
+    flex-shrink: 0; /* 幅を維持 */
+    display: flex;
+    justify-content: flex-end;
+    padding: 0;
 }
 
 .master-grant-table .table-header {
@@ -854,6 +905,11 @@
         width: 220px;
     }
 
+    /* --- 563行目付近、メディアクエリ内の .column-mail の後に追加 --- */
+    .column-action {
+        width: 40px; /* 狭い画面では少し小さく */
+    }
+
     /* --- ボタン群 --- */
 
     .add-button {
@@ -873,7 +929,54 @@
         margin-right: 0;
     }
 
-    .account-table-container{
-        max-width: 300px;
+    /* 525行目付近 */
+    .account-table-container {
+        max-width: 500px; /* 元のサイズ（144行目の設定）に合わせます */
     }
+}
+
+/* formタグをレイアウト計算から除外する（中身を直下要素のように扱う） */
+.content-area form {
+    display: contents;
+}
+
+/* 講師の顔写真アイコンのスタイル */
+.teacher-avatar {
+    width: 50px;          /* 幅を50pxに固定 */
+    height: 50px;         /* 高さを50pxに固定 */
+    border-radius: 50%;    /* 正方形の画像を丸く切り抜く */
+    object-fit: cover;    /* 画像が歪まないように枠いっぱいに収める */
+    flex-shrink: 0;       /* 画面が狭くなっても画像が潰れないようにする */
+    margin-right: 20px;   /* 名前との間に余白を作る */
+    border: 1px solid #CFD5DF; /* 必要であれば薄い枠線を追加 */
+}
+
+/* ヘッダー部分のアイコンも画像にする場合 */
+.header-avatar {
+    /* プレースホルダー用の背景色を消す */
+    background-color: transparent !important;
+}
+
+/* アラートメッセージの基本スタイル */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* 成功時（青/緑系） */
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* エラー時（赤系） */
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
