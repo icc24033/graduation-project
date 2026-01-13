@@ -10,6 +10,7 @@ require_once __DIR__ . '/StudentLoginRepository.php';
 require_once __DIR__ . '/StudentGradeRepository.php';
 require_once __DIR__ . '/MaintenanceRepository.php';
 require_once __DIR__ . '/TeacherLoginRepository.php';
+require_once __DIR__ . '/timetable/TimetableRepository.php';
 
 
 // 新しいリポジトリができたらここに追加する
