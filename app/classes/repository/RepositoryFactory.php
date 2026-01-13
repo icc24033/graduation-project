@@ -123,4 +123,11 @@ class RepositoryFactory {
     public static function getMaintenanceRepository() {
         return new MaintenanceRepository(self::getPdo());
     }
+
+    /**
+     * 時間割リポジトリのインスタンスを取得
+     */
+    public static function getTimetableRepository() {
+        return new TimetableRepository(self::getPdo());
+    }
 }
