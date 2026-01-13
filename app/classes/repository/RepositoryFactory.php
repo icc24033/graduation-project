@@ -9,6 +9,7 @@ require_once __DIR__ . '/ErrorStudentRepository.php';
 require_once __DIR__ . '/StudentLoginRepository.php';
 require_once __DIR__ . '/StudentGradeRepository.php';
 require_once __DIR__ . '/MaintenanceRepository.php';
+require_once __DIR__ . '/TeacherLoginRepository.php';
 
 
 // 新しいリポジトリができたらここに追加する
@@ -125,9 +126,16 @@ class RepositoryFactory {
     }
 
     /**
+<<<<<<< HEAD
      * 時間割リポジトリのインスタンスを取得
      */
     public static function getTimetableRepository() {
         return new TimetableRepository(self::getPdo());
+=======
+     * 先生ログインリポジトリのインスタンスを取得
+     */
+    public static function getTeacherLoginRepository() {
+        return new TeacherLoginRepository(self::getPdo());
+>>>>>>> 8b1d26fc7d07e008923226bb560502f47d598785
     }
 }

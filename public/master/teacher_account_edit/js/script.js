@@ -270,8 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     teacherListContainer.appendChild(item);
                 });
                 
-                deleteCountDisplay.innerHTML = `以下の**${selectedTeachers.length}件**のアカウントを削除してもよろしいですか？`;
-
+                deleteCountDisplay.textContent = `以下の ${selectedTeachers.length} 件のアカウントを削除してもよろしいですか？`;
+                
                 modal.style.display = 'flex';
             });
         }
@@ -290,12 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        if (confirmDeleteButton && modal) {
-            confirmDeleteButton.addEventListener('click', () => {
-                alert('削除を実行しました。 (※実際にはこの後にサーバー処理が必要です)');
-                modal.style.display = 'none';
-            });
-        }
     }
     
     // ----------------------------------------------------------------------
