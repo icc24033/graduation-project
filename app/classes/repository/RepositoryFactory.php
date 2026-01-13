@@ -132,10 +132,7 @@ class RepositoryFactory {
     public static function getTimetableRepository() {
         return new TimetableRepository(self::getPdo());
     }
-<<<<<<< HEAD
-=======
     
->>>>>>> 2e465c7cb8860633fe012f68aedea7acf91cb9ec
     /**
      * 先生ログインリポジトリのインスタンスを取得
      */
