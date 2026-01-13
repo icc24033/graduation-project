@@ -77,6 +77,45 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     background-color: #495666;   /* 背景色 */
     font-weight: bold !important; /* 太字 */
 }
+/* 授業詳細ボックスの改善 */
+.detail-box {
+    display: flex;
+    align-items: stretch; /* 高さを揃える */
+    background-color: #d1e7ff; /* 画像に近い薄い青色 */
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.detail-title {
+    display: flex;
+    align-items: center;  /* 「内容」を垂直中央に */
+    justify-content: center;
+    flex-shrink: 0;       /* 幅を固定 */
+    width: 60px;          /* 「内容」ラベルの幅 */
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9em;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.detail-text {
+    flex-grow: 1;         /* 残りの幅をすべて使う */
+    padding: 15px;        /* 文章の周りに余裕を持たせる */
+    margin: 0;
+    line-height: 1.6;     /* 行間を広くして読みやすく */
+    font-size: 0.95em;
+    color: #333;
+    white-space: pre-wrap; /* 改行を有効にする */
+    text-align: left;     /* 左寄せを強制 */
+}
+
+/* ドロップダウンメニュー内の余白調整 */
+.dropdown-content.detail-content {
+    background-color: #ffffff; /* 背景を白にして読みやすく */
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
     </style>
 </head>
 <body>
@@ -230,8 +269,8 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
                 $display_title = $subject_name ?: '（授業なし）';
                 $time_str = $time_schedule[$period] ?? "時間未定";
             
-                // 「持ってくるもの」をカンマで分割して配列にする
-                $item_list = preg_split('/[、,，]+/', $bring_object, -1, PREG_SPLIT_NO_EMPTY);
+                // カンマ、読点、および「スペース（全角・半角）」で分割するように修正
+                $item_list = preg_split('/[、,，\s\x{3000}]+/u', $bring_object, -1, PREG_SPLIT_NO_EMPTY);
             ?>
             
             <section class="card">
