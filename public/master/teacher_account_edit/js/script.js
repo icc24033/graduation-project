@@ -407,4 +407,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
     }
+    // ----------------------------------------------------------------------
+    // 5. teacher_addition.php 固有の行追加・削除処理
+    // ----------------------------------------------------------------------
+    if (document.body.id === 'teacher_addition') {
+        const addRowButton = document.getElementById('addRowButton');
+        const container = document.getElementById('teacherInputContainer');
+
+        if (addRowButton && container) {
+            // --- 行の追加処理 ---
+            addRowButton.addEventListener('click', () => {
+                const newRow = document.createElement('div');
+                newRow.classList.add('table-row');
+
+                // 削除ボタンを含めたHTMLを生成
+                newRow.innerHTML = `
+                    <div class="column-name">
+                        <input type="text" name="teacher_names[]" placeholder="氏名" required>
+                    </div>
+                    <div class="column-mail">
+                        <input type="email" name="teacher_emails[]" placeholder="メールアドレス" required>
+                    </div>
+                    <div class="column-action">
+                        <button type="button" class="remove-row-button">
+                            <span class="material-symbols-outlined">remove_circle</span>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(newRow);
+            });
+
+            // --- 行の削除処理 (イベント委譲) ---
+            // コンテナ全体でクリックを監視し、削除ボタンが押された時だけ反応させる
+            container.addEventListener('click', (event) => {
+                const removeBtn = event.target.closest('.remove-row-button');
+                if (removeBtn) {
+                    const row = removeBtn.closest('.table-row');
+                    
+                    // 全ての行を消してしまうと困る場合は、件数をチェックする
+                    const rowCount = container.querySelectorAll('.table-row').length;
+                    if (rowCount > 1) {
+                        row.remove();
+                    } else {
+                        alert('少なくとも1つの入力欄が必要です。');
+                    }
+                }
+            });
+        }
+    }
 });
