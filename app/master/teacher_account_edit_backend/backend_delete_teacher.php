@@ -33,11 +33,23 @@ if (empty($targetIds)) {
 $targetIds = array_map('intval', $targetIds);
 
 try {
-    // 3. DB接続
     $pdo = RepositoryFactory::getPdo();
 
-    // 4. 削除実行
-    // 効率化のため WHERE IN を使用して一括削除
+    // 1. 現在のマスタ権限保持者のIDをすべて取得
+    $stmtMaster = $pdo->query("SELECT teacher_id FROM teacher WHERE master_flg = 1");
+    $allMasterIds = $stmtMaster->fetchAll(PDO::FETCH_COLUMN, 0);
+
+    // 2. 削除対象の中にマスタが何人含まれているか確認
+    $mastersToBeDeleted = array_intersect($allMasterIds, $targetIds);
+
+    // 3. もし「全員」または「マスタ全員」を消そうとしていたらブロック
+    if (count($mastersToBeDeleted) >= count($allMasterIds)) {
+        // エラーメッセージ付きでリダイレクト（あるいはdie）
+        header("Location: ../../../public/master/teacher_account_edit/controls/teacher_delete_control.php?status=error_master");
+        exit;
+    }
+
+    // 4. 削除実行 (既存の処理)
     $placeholders = implode(',', array_fill(0, count($targetIds), '?'));
     $sql = "DELETE FROM teacher WHERE teacher_id IN ($placeholders)";
     
@@ -45,9 +57,9 @@ try {
     $stmt->execute($targetIds);
 
     // 5. 完了後に元のページへ戻る
-    header("Location: ../../../public/master/teacher_account_edit/controls/teacher_delete_control.php");
+    header("Location: ../../../public/master/teacher_account_edit/controls/teacher_delete_control.php?status=success");
     exit;
-
+    
 } catch (PDOException $e) {
     // ログ出力などを行うのが望ましい
     die("データベースエラーが発生しました。");

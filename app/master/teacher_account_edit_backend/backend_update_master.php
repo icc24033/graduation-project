@@ -49,7 +49,7 @@ try {
     }
 
     // 5. 完了後に元のページへ戻る（パラメータなし）
-    header("Location: ../../../public/master/teacher_account_edit/controls/master_edit_control.php");
+    header("Location: ../../../public/master/teacher_account_edit/controls/master_edit_control.php?status=success");
     exit;
 
 } catch (PDOException $e) {

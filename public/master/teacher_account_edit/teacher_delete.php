@@ -29,12 +29,8 @@ SecurityHelper::applySecureHeaders();
                     <li class="nav-item"><a href="teacher_delete_control.php" class="is-active">アカウントの削除</a></li>
                     <li class="nav-item"><a href="teacher_info_control.php">アカウント情報変更</a></li>
                     <li class="nav-item"><a href="master_edit_control.php">マスタの付与</a></li>
-                    <li class="nav-item"><a href="class.php">担当授業確認</a></li>
+                    <!-- <li class="nav-item"><a href="class.html">担当授業確認</a></li> -->
                 </ul>
-                <button class="download-button">
-                    <span class="material-symbols-outlined download-icon">download</span>
-                    名簿ダウンロード
-                </button>
             </nav>
             
             <div class="content-area">
@@ -53,11 +49,15 @@ SecurityHelper::applySecureHeaders();
                             <?php foreach ($teacherList as $teacher): ?>
                                 <div class="table-row">
                                     <div class="column-check">
-                                        <input type="checkbox" name="teacher_ids[]" value="<?php echo SecurityHelper::escapeHtml((string)$teacher['teacher_id']); ?>">
+                                        <input type="checkbox" name="teacher_ids[]" 
+                                            value="<?php echo SecurityHelper::escapeHtml((string)$teacher['teacher_id']); ?>"
+                                            data-is-master="<?php echo (int)$teacher['master_flg']; ?>"> 
                                     </div> 
+
                                     <div class="column-name">
                                         <input type="text" value="<?php echo SecurityHelper::escapeHtml((string)$teacher['teacher_name']); ?>" readonly>
                                     </div>
+
                                     <div class="column-mail">
                                         <input type="email" value="<?php echo SecurityHelper::escapeHtml((string)$teacher['teacher_mail']); ?>" readonly>
                                     </div>
@@ -68,8 +68,7 @@ SecurityHelper::applySecureHeaders();
                         <?php endif; ?>
                     </div>
                     
-                    <button type="button" class="add-button" id="deleteActionButton">削除</button>
-                    <button type="button" class="complete-button" onclick="location.href='index.php'">完了</button>
+                    <button type="button" class="complete-button" id="deleteActionButton">削除</button>
 
                     <div class="modal-overlay" id="deleteModal">
                         <div class="modal-content">
