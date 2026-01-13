@@ -456,4 +456,61 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // ----------------------------------------------------------------------
+    // 6. teacher_info 固有のバリデーション処理 (ドメインチェック)
+    // ----------------------------------------------------------------------
+    if (document.body.id === 'teacher_info') {
+        const updateForm = document.getElementById('updateForm');
+        const allowedDomain = '@isahaya-cc.ac.jp';
+
+        if (updateForm) {
+            updateForm.addEventListener('submit', (event) => {
+                // チェックされている行のチェックボックスを取得
+                const checkedIndices = document.querySelectorAll('input[name="update_indices[]"]:checked');
+
+                // 1. 何も選択されていない場合のチェック
+                if (checkedIndices.length === 0) {
+                    alert('変更するアカウントを左側のチェックボックスで選択してください。');
+                    event.preventDefault();
+                    return;
+                }
+
+                // 2. ドメインのチェック
+                for (let checkbox of checkedIndices) {
+                    const index = checkbox.value; // 行のインデックスを取得
+                    // インデックスを元に対象行のメールアドレス入力欄を特定
+                    const mailInput = document.querySelector(`input[name="teacher_data[${index}][mail]"]`);
+                    
+                    if (mailInput) {
+                        const emailValue = mailInput.value.trim();
+
+                        // ドメインが一致するか確認
+                        if (!emailValue.endsWith(allowedDomain)) {
+                            alert(`エラー: 「${emailValue}」は許可されていないドメインです。\nメールアドレスは ${allowedDomain} である必要があります。`);
+                            mailInput.focus(); // エラー箇所にフォーカス
+                            mailInput.style.backgroundColor = '#fff0f0'; // 視覚的に警告
+                            
+                            event.preventDefault(); // 送信を中止
+                            return; // 最初の1件で見つかれば終了
+                        }
+                    }
+                }
+
+                // 全てOKなら確認ダイアログ
+                if (!confirm(`${checkedIndices.length} 件のアカウント情報を更新します。よろしいですか？`)) {
+                    event.preventDefault();
+                }
+            });
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'success') {
+                // アラートを表示
+                alert('アカウント情報の更新が完了しました。');
+                
+                // URLからパラメータを消去（リロードした時に何度も出ないようにする）
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+    }
 });
