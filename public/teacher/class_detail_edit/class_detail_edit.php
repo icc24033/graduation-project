@@ -137,7 +137,7 @@
                         </div>
                         
                         <div class="form-section">
-                            <h2 class="form-title">持ち物・準備物</h2>
+                            <h2 class="form-title">課題・持ち物</h2>
                             
                             <div class="common-items-area">
                                 <h3 class="sub-title" id="template-title">よく使う持ち物テンプレート</h3>

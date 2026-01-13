@@ -1,4 +1,6 @@
 <?php
+// backend_delete_teacher.php
+
 // --- デバッグ用：エラーを表示させる設定（本番公開時は削除または 0 にしてください） ---
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
