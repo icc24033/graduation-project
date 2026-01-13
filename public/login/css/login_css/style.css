@@ -1,120 +1,147 @@
+@charset "UTF-8";
+
 body {
-    background-color: #F3F8FF; 
     font-family: 'Noto Sans JP', 'Meiryo', sans-serif; 
     color: #222;
     margin: 0;
     padding: 0;
-    /* bodyが縦方向にも中央揃えになるように調整 */
+    width: 100%;
+    height: 100vh; /* 全画面表示 */
+    overflow: hidden; /* スクロール防止 */
     display: flex;
     justify-content: center;
+    align-items: center;
+    background-color: #222; /* 動画読み込み前の背景色 */
 }
 
-.container {
-    max-width: 1100px;
+/* --- 背景動画 --- */
+.bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: center; /* コンテンツ全体のテキストを中央寄せ */
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    /* 動画の明るさを落として文字を読みやすくする */
+    filter: brightness(0.6) blur(2px); 
 }
 
-/* アプリケーション名 */
+/* --- メインコンテナ（グラスモーフィズム風カード） --- */
+.container {
+    width: 90%;
+    max-width: 1000px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.85); /* 半透明の白 */
+    backdrop-filter: blur(10px); /* すりガラス効果 */
+    padding: 60px 40px;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* 深みのある影 */
+    
+    /* 画面からはみ出さないようにスクロール制御（必要であれば） */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* --- テキスト設定 --- */
 .app-name {
-    font-size: 48px;
+    font-size: 40px; /* 少し調整 */
     font-weight: 700;
-    margin-top: 50px;
-    margin-bottom: 70px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
 }
 
-/* キャッチフレーズ */
 .tagline {
-    font-size: 100px;
+    font-size: 60px; /* 動画背景だと大きすぎる場合があるため調整 */
     font-weight: 700; 
-    line-height: 1.2; /* 行間を調整して見やすく */
+    line-height: 1.2;
+    margin-bottom: 50px;
+}
+
+/* --- ボタン --- */
+.action-area {
     margin-bottom: 70px;
 }
 
-/* 始めるボタン */
 .start-button {
     background-color: #222; 
     color: #fff;
     width: 300px;
     border: none;
-    padding: 10px 20px;
-    font-size: 35px;
+    padding: 15px 20px;
+    font-size: 28px;
     font-weight: 700;
-    border-radius: 20px;
+    border-radius: 50px; /* 丸みを強くしてモダンに */
     cursor: pointer;
-    transition: background-color 0.4s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
-    margin-bottom: 90px; /* 次のセクションとの間に余白を追加 */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
 }
 
 .start-button:hover {
-    background-color: #CFD5DF; 
-    color: #222;
+    background-color: #4a90e2; /* アクセントカラーに変更（お好みで） */
+    transform: translateY(-3px); /* 浮き上がる動き */
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
 }
 
-/* 特徴のタイトル */
+/* --- 特徴セクション --- */
 .feature-title {
-    max-width: 890px;
-    font-size: 50px; 
+    font-size: 28px; 
     font-weight: 700;
-    margin: 0 auto 20px auto; /* 修正: 左右のマージンを auto にして中央揃え */
+    margin-bottom: 15px;
+    color: #444;
 }
 
-/* 特徴の説明文 */
 .feature-text {
-    max-width: 890px;
-    font-size: 35px;
-    color: #666;
-    font-weight: 700;
-    text-align: left; 
-    line-height: 1.2; /* 行間を調整して見やすく */
-    margin: 0 auto; /* 左右のマージンを auto にして中央揃え */
-    padding: 0 20px; /* 画面端に近すぎないように左右にパディングを追加 */
+    font-size: 20px;
+    color: #555;
+    font-weight: 500;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-/* --- モバイル対応 (画面幅 599px 以下) --- */
+/* --- アニメーション用クラス（JSで制御） --- */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px); /* 下から上に */
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* JSで付与されるクラス */
+.fade-in.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- モバイル対応 --- */
 @media (max-width: 599px) {
-    
     .container {
-        /* スマートフォンでは左右の余白を少し広げる */
-        padding: 0 20px; 
+        padding: 40px 20px;
+        width: 85%;
     }
     
     .app-name {
-        /* アプリ名のサイズを縮小 */
-        font-size: 30px;
-        margin-top: 30px;
-        margin-bottom: 70px;
+        font-size: 24px;
+        margin-bottom: 20px;
     }
 
     .tagline {
-        /* キャッチフレーズのサイズを大幅に縮小 */
-        font-size: 50px; 
-        line-height: 1.4;
-        margin-bottom: 50px;
+        font-size: 32px;
+        margin-bottom: 40px;
     }
 
     .start-button {
-        /* ボタンのサイズを調整 */
-        width: 100%; /* 親要素の幅いっぱいに広げる */
-        max-width: 250px; /* 広がりすぎないように最大幅を設定 */
-        font-size: 35px; 
-        padding: 10px 20px;
-        border-radius: 20px;
-        margin-bottom: 80px;
+        width: 100%;
+        font-size: 22px;
+        padding: 12px;
     }
 
     .feature-title {
-        /* 特徴のタイトルを縮小 */
-        font-size: 30px;
-        margin-bottom: 50px;
+        font-size: 20px;
     }
 
     .feature-text {
-        /* 説明文を縮小 */
-        font-size: 20px;
-        line-height: 1.2;
-        padding: 0; /* モバイルでは container のパディングを使うためリセット */
-        text-align: center; /* モバイルでは中央揃えの方が読みやすい */
+        font-size: 16px;
     }
 }
