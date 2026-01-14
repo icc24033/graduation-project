@@ -16,6 +16,8 @@ try {
     // 画面から送られてきた修正データ（teachers配列）をループ処理
     if (isset($_POST['teachers']) && is_array($_POST['teachers'])) {
         
+        var_dump($_POST['teachers']); // デバッグ用出力
+
         foreach ($_POST['teachers'] as $id => $data) {
             $name = trim($data['name'] ?? '');
             $email = trim($data['email'] ?? '');
