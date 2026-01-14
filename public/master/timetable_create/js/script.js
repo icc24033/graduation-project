@@ -22,6 +22,8 @@ let previousState = null; // 新規作成前の状態を保存
 /*
 * 概要: デモ用の時間割データを初期化する（ページロード時に呼ばれる）。
 * 使用方法: ページ読み込み時に一度呼び出してください（内部で savedTimetables を設定します）。
+* 引数: なし
+* 戻り値: なし
 */
 function initializeDemoData() {
     const today = new Date();

@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
 
 // セキュリティヘッダーの適用
-//SecurityHelper::applySecureHeaders();
+SecurityHelper::applySecureHeaders();
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -20,6 +20,8 @@ require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
         <source src="video/login.mp4" type="video/mp4">
         お使いのブラウザは動画タグに対応していません。
     </video>
+
+    <div id="transition-overlay"></div>
 
     <div class="container">   
         <h1 class="app-name fade-in">ICCスマートキャンパス</h1>
