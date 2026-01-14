@@ -41,6 +41,10 @@ class TeacherAccountEditController {
      * 教員追加画面
      */
     public function index_addition() {
+        $basicInfo = $this->service->getAdditionBasicInfo($_GET['backend'] ?? '');
+        
+        extract($basicInfo);
+
         require_once '../teacher_addition.php';
     }   
 

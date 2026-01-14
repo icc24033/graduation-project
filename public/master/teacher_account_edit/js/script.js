@@ -235,24 +235,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const teacherListContainer = document.getElementById('selectedTeacherList'); 
         
         const deleteCountDisplay = modal ? modal.querySelector('.modal-body p') : null;
-        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-
+    
+        // teacher_delete.html 固有の処理セクション
         if (openButton && modal && deleteCountDisplay) {
             openButton.addEventListener('click', () => {
                 const selectedTeachers = [];
+                const allCheckboxes = document.querySelectorAll('.table-row .column-check input[type="checkbox"]');
                 
-                allRowCheckboxes.forEach(checkbox => {
+                let totalMasters = 0;
+                let selectedMasters = 0;
+
+                allCheckboxes.forEach(checkbox => {
+                    const isMaster = checkbox.dataset.isMaster === "1";
+                    if (isMaster) totalMasters++;
+
                     if (checkbox.checked) {
+                        if (isMaster) selectedMasters++;
+                        
                         const row = checkbox.closest('.table-row');
-                        if (row) {
-                            const nameInput = row.querySelector('.column-name input');
-                            const mailInput = row.querySelector('.column-mail input');
-                            
-                            const nameValue = nameInput ? nameInput.value.trim() : '氏名不明';
-                            const mailValue = mailInput ? mailInput.value.trim() : 'メールアドレス不明';
-                            
-                            selectedTeachers.push({ name: nameValue, mail: mailValue });
-                        }
+                        const nameInput = row.querySelector('.column-name input');
+                        const mailInput = row.querySelector('.column-mail input');
+                        selectedTeachers.push({ 
+                            name: nameInput ? nameInput.value.trim() : '氏名不明', 
+                            mail: mailInput ? mailInput.value.trim() : 'メールアドレス不明' 
+                        });
                     }
                 });
 
@@ -260,9 +266,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('削除するアカウントを選択してください。');
                     return;
                 }
+
+                // --- マスタ0人防止ロジック ---
+                // 削除後のマスタ数 = 全マスタ数 - 削除されるマスタ数
+                if (totalMasters - selectedMasters <= 0) {
+                    alert('エラー：システムに最低1人のマスタ権限保持者が必要です。\nマスタ権限を持つユーザーを全員削除することはできません。');
+                    return;
+                }
+                // --------------------------
                 
+                // モーダルの表示処理（既存通り）
                 teacherListContainer.innerHTML = '';
-                
                 selectedTeachers.forEach(teacher => {
                     const item = document.createElement('div');
                     item.classList.add('deleted-item');
@@ -271,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 deleteCountDisplay.textContent = `以下の ${selectedTeachers.length} 件のアカウントを削除してもよろしいですか？`;
-                
                 modal.style.display = 'flex';
             });
         }
@@ -407,6 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
     }
+
     // ----------------------------------------------------------------------
     // 5. teacher_addition.php 固有の行追加・削除処理
     // ----------------------------------------------------------------------
@@ -511,6 +525,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
             }
+        }
+    }
+    
+    // ----------------------------------------------------------------------
+    // 7. teacher_delete 固有の完了通知処理
+    // ----------------------------------------------------------------------
+    if (document.body.id === 'teacher_delete') {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status') === 'success') {
+            // アラートを表示
+            alert('アカウントの削除が完了しました。');
+            
+            // URLからパラメータを消去（リロード対策）
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // 8. teacher_addition (master.php) 固有の完了通知処理
+    // ----------------------------------------------------------------------
+    if (document.body.id === 'teacher_addition') {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status') === 'success') {
+            // アラートを表示
+            alert('マスタ権限の更新が完了しました。');
+            
+            // URLからパラメータを消去（リロード対策）
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // 9. master.php (マスタ付与画面) 固有のバリデーション
+    // ----------------------------------------------------------------------
+    if (document.body.id === 'teacher_addition') {
+        // マスタ付与画面のフォームを特定（action属性などで判定）
+        const masterForm = document.querySelector('form[action*="backend_update_master.php"]');
+
+        if (masterForm) {
+            masterForm.addEventListener('submit', (event) => {
+                // チェックされている「マスタ権限」の数をカウント
+                const checkedMasters = masterForm.querySelectorAll('input[name="teacher_ids[]"]:checked');
+
+                // 1人もチェックされていない場合
+                if (checkedMasters.length === 0) {
+                    alert('エラー：マスタ権限を持つユーザーを0人にすることはできません。\n少なくとも1人以上を選択してください。');
+                    event.preventDefault(); // 送信を中止
+                    return;
+                }
+
+                // 送信確認
+                if (!confirm(`選択した ${checkedMasters.length} 名にマスタ権限を付与します。よろしいですか？`)) {
+                    event.preventDefault();
+                }
+            });
         }
     }
 });

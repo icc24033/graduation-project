@@ -11,6 +11,9 @@ require_once __DIR__ . '/StudentGradeRepository.php';
 require_once __DIR__ . '/MaintenanceRepository.php';
 require_once __DIR__ . '/TeacherLoginRepository.php';
 require_once __DIR__ . '/timetable/TimetableRepository.php';
+require_once __DIR__ . '/TempTeacherCsvRepository.php';
+require_once __DIR__ . '/ErrorTeacherTableRepository.php';
+
 
 
 // 新しいリポジトリができたらここに追加する
@@ -138,5 +141,19 @@ class RepositoryFactory {
      */
     public static function getTeacherLoginRepository() {
         return new TeacherLoginRepository(self::getPdo());
+    }
+
+    /**
+     * 一時教員CSVリポジトリのインスタンスを取得
+     */
+    public static function getTempTeacherCsvRepository() {
+        return new TempTeacherCsvRepository(self::getPdo());
+    }
+
+    /**
+     * エラー教員テーブルリポジトリのインスタンスを取得
+     */
+    public static function getErrorTeacherTableRepository() {
+        return new ErrorTeacherTableRepository(self::getPdo());
     }
 }

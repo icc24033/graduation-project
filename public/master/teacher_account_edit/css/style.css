@@ -933,7 +933,9 @@
     .account-table-container {
         max-width: 500px; /* 元のサイズ（144行目の設定）に合わせます */
     }
-}
+} /* ★ここがメディアクエリの閉じカッコ。1000pxレスポンシブの範囲をここで終了させる */
+
+/* 以下、メディアクエリの外（全画面共通設定） */
 
 /* formタグをレイアウト計算から除外する（中身を直下要素のように扱う） */
 .content-area form {
@@ -979,4 +981,32 @@
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+/* ファイル入力本体を隠す */
+#csvFile {
+    display: none;
+}
+
+/* ------------------------------------------------------------- */
+/* CSVエラーデータ編集エリアのスタイル調整 */
+/* ------------------------------------------------------------- */
+
+/* CSVエラーデータ編集エリアのラッパーに追加 */
+.error-edit-container {
+    /* メインテーブルと同じ最大幅を適用 */
+    width: 100%;
+    max-width: 800px; 
+    margin: 20px auto; /* 中央寄せと上下余白 */
+    padding: 0 50px; /* 左右の余白を確保 */
+    box-sizing: border-box;
+}
+
+/* CSVエラーデータ編集の見出し */
+.error-edit-container h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #495666;
+    text-align: left;
+    display: block;
 }
