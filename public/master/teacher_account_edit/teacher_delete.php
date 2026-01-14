@@ -23,8 +23,8 @@ SecurityHelper::applySecureHeaders();
 
         <main class="main-content">
             <nav class="sidebar">
+                <li class="nav-item is-group-label"><a href="#">アカウント作成・編集</a></li>
                 <ul>
-                    <li class="nav-item is-group-label"><a href="#">編集</a></li>
                     <li class="nav-item"><a href="teacher_addition_control.php">アカウントの追加</a></li>
                     <li class="nav-item"><a href="teacher_delete_control.php" class="is-active">アカウントの削除</a></li>
                     <li class="nav-item"><a href="teacher_info_control.php">アカウント情報変更</a></li>
