@@ -980,3 +980,8 @@
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+/* ファイル入力本体を隠す */
+#csvFile {
+    display: none;
+}

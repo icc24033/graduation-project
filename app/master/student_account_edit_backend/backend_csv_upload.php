@@ -1,4 +1,6 @@
 <?php
+// 生徒用のbackend_csv_upload.php
+
 session_start();
 
 /////////////////////////////////////
