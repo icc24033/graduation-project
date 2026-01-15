@@ -784,3 +784,101 @@
 .sidebar-add-btn:hover {
     background-color: #394652;
 }
+
+/* --- 既存の style.css 内容 --- */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   z-index: 1000;
+   background-color: #C0DEFF;
+   height: 70px; 
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   text-align: center;
+   gap: 10px;
+}
+
+.header h1 { font-size: 20px; font-weight: bold; text-align: center; }
+.user_icon { font-size: 24px; }
+
+.main-content { padding-top: 70px; display: block; }
+
+.sidebar {
+    position: fixed; 
+    left: 0;
+    bottom: 0;
+    top: 70px; 
+    z-index: 999;
+    width: 300px; 
+    background-color: #F3F8FF;
+    padding: 0 0 0 10px;
+    flex-shrink: 0; 
+    border-right: solid 1px #CFD5DF;
+}
+
+/* --- (中略：既存の他スタイル) --- */
+
+.subject-list {
+    top: 100px;
+    margin-left: 350px; 
+    margin-right: 300px;
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px 20px;
+    padding: 50px 0;
+}
+
+/* --- 追加：sakuzyo.php 専用スタイル (ピンク基調) --- */
+body.sakuzyo-page { background-color: #f7f9fb; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; margin: 0; }
+body.sakuzyo-page .header { background-color: #ffc6c6; height: 60px; position: static; border-bottom: 1px solid #e9d0d0; box-shadow: none; flex-shrink: 0; }
+body.sakuzyo-page .container { display: flex; flex: 1; overflow: hidden; flex-direction: row; min-height: 0; }
+body.sakuzyo-page .sidebar { width: 220px; background-color: #fff0f0; border-right: 1px solid #ede0e0; padding: 20px 0; overflow-y: auto; position: static; top: auto; z-index: auto; }
+body.sakuzyo-page .sidebar-section { padding: 0 20px; margin-bottom: 25px; }
+body.sakuzyo-page .sidebar-title { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; }
+body.sakuzyo-page .sidebar-select { width: 100%; padding: 8px; border: 1px solid #e9d0d0; border-radius: 4px; }
+body.sakuzyo-page .sidebar-nav { list-style: none; padding: 0; }
+body.sakuzyo-page .sidebar-nav a { text-decoration: none; color: #333; font-size: 14px; padding: 10px 20px; display: block; }
+body.sakuzyo-page .sidebar-nav a.active { background-color: #ffcfcf; font-weight: bold; }
+body.sakuzyo-page .subject-list { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; padding: 20px; align-content: flex-start; overflow-y: auto; margin: 0; top: auto; }
+body.sakuzyo-page .subject-card { background: white; border-radius: 12px; border: 1px solid #f0e2e2; display: flex; flex-direction: column; aspect-ratio: 1/1.1; cursor: pointer; transition: 0.2s; width: auto; height: auto; text-align: left; }
+body.sakuzyo-page .subject-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+body.sakuzyo-page .card-header { background-color: #fff5f5; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 12px 12px 0 0; }
+body.sakuzyo-page .card-body { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; text-align: center; }
+body.sakuzyo-page .card-title { font-size: 16px; color: #333; font-weight: bold; }
+body.sakuzyo-page .card-footer { padding: 10px 15px; border-top: 1px solid #fcf2f2; font-size: 12px; color: #888; background: #fffafb; border-radius: 0 0 12px 12px; overflow: hidden; text-overflow: ellipsis; }
+body.sakuzyo-page .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+body.sakuzyo-page .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
+body.sakuzyo-page .btn-delete { background: #ff5e5e; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
+body.sakuzyo-page .btn-cancel { background: #f0f0f0; color: #666; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; }
+
+/* --- 追加：tuika.php 専用スタイル (青基調) --- */
+body.tuika-page { background-color: #f8fbff; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; margin: 0; }
+body.tuika-page .header { background-color: #c6e2ff; height: 60px; position: static; border-bottom: 1px solid #d0dbe9; box-shadow: none; flex-shrink: 0; }
+body.tuika-page .container { display: flex; flex: 1; overflow: hidden; flex-direction: row; min-height: 0; }
+body.tuika-page .sidebar { width: 220px; background-color: #f0f5ff; border-right: 1px solid #e0e6ed; padding: 20px 0; overflow-y: auto; position: static; top: auto; z-index: auto; }
+body.tuika-page .sidebar-section { padding: 0 20px; margin-bottom: 25px; }
+body.tuika-page .sidebar-title { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; }
+body.tuika-page .sidebar-select { width: 100%; padding: 8px; border: 1px solid #d0dbe9; border-radius: 4px; }
+body.tuika-page .sidebar-nav { list-style: none; padding: 0; }
+body.tuika-page .sidebar-nav a { text-decoration: none; color: #333; font-size: 14px; padding: 10px 20px; display: block; }
+body.tuika-page .sidebar-nav a.active { background-color: #d1e3ff; font-weight: bold; }
+body.tuika-page .sidebar-add-btn { display: block; width: 180px; margin: 10px auto; background-color: #4e5d6c; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+body.tuika-page .subject-list { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; padding: 20px; align-content: flex-start; overflow-y: auto; margin: 0; top: auto; }
+body.tuika-page .subject-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; aspect-ratio: 1/1.1; cursor: pointer; transition: 0.2s; width: auto; height: auto; text-align: left; }
+body.tuika-page .subject-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+body.tuika-page .card-header { background-color: #edf5ff; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 12px 12px 0 0; }
+body.tuika-page .card-body { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; text-align: center; }
+body.tuika-page .card-title { font-size: 16px; color: #333; font-weight: bold; }
+body.tuika-page .card-footer { padding: 10px 15px; border-top: 1px solid #f0f4f8; font-size: 12px; color: #888; background: #f9fbff; border-radius: 0 0 12px 12px; overflow: hidden; text-overflow: ellipsis; }
+body.tuika-page .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+body.tuika-page .modal-content { background: white; padding: 25px; border-radius: 12px; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
