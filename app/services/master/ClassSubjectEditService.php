@@ -7,20 +7,25 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 class ClassSubjectEditService {
 
     /**
-     * コースリストの取得
+     * 授業科目一覧の取得
      */
-    public function getEditData() {
-        $data = ['courseList' => [], 'error_message' => ''];
+    public function getClassSubjectData() {
+        $data = ['classSubjectList' => [], 'error_message' => ''];
         try {
-            $courseRepo = RepositoryFactory::getCourseRepository();
-            $data['courseList'] = $courseRepo->getAllCourses();
+            $subjectInChargesRepo = RepositoryFactory::getSubjectInChargesRepository();
+            $data['classSubjectList'] = $subjectInChargesRepo->getAllClassSubjects();
         } catch (Exception $e) {
-            error_log("StudentAccountService Error (getEditData): " . $e->getMessage());
+            error_log("ClassSubjectEditService Error (getClassSubjectData): " . $e->getMessage());
             $data['error_message'] = "データの読み込みに失敗しました。";
         }
         return $data;
     }
 
+
+
+
+
+    
     /**
      * 学年リストの取得
      */

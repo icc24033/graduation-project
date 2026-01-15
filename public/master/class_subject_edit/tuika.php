@@ -1,52 +1,49 @@
 <?php
+// tuika.php
+
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // 1. データベース接続
 $host = 'localhost'; $dbname = 'itira'; $user = 'root'; $password = 'root'; 
 try {
+    // DSN（Data Source Name）の設定：MySQL接続、文字コードはutf8mb4を指定
     $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
     $pdo = new PDO($dsn, $user, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,      // エラー時に例外を投げる
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 結果を連想配列で取得
     ]);
 } catch (PDOException $e) { die("DB接続エラー: " . $e->getMessage()); }
 
-// 2. コース設定
-$courseInfo = [   
-    'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組', 'grade' => 1],
-    'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組', 'grade' => 1],
-    'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報', 'grade' => 1],
-    'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報', 'grade' => 1],
-    'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディア', 'grade' => 2],
-    'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザイン', 'grade' => 2],
-    'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイター', 'grade' => 2]
-];
-
-$masterLists = [
-    'teacher' => ['松野', '山本', '小田原', '永田', '渡辺', '内田', '川場','田川','森嵜','松浦','山田','船津'],
-    'room'    => ['総合実習室', 'プログラム実習室1', 'プログラム実習室2', 'システム設計室2','マルチメディア室1','マルチメディア室2','マルチメディア室3','オープンシステム室','CR1','CR2', '未設定'],
-];
-
-// 3. AJAX・フォーム処理
+// 3. AJAX・フォーム処理（POSTリクエスト時の処理）
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
+    // 送信元によって異なるキー名に対応
     $title = $_POST['subject_name'] ?? $_POST['title'] ?? '';
     $raw_grade = $_POST['grade'] ?? '';
 
     try {
+        // フィールド（講師・教室）の更新処理
         if ($action === 'update_field') {
             $field = $_POST['field']; 
             $new_val = $_POST['value'];
             $grade_int = (int)$raw_grade;
             $mode = $_POST['mode'] ?? 'overwrite'; // 追加モードか上書きモードか
 
+            // 定義されている全コースのテーブルに対して更新を試みる
             foreach ($courseInfo as $info) {
                 $final_val = $new_val;
 
-                // 講師の追加処理ロジック
+                // 講師の追加処理ロジック：既存の講師名にカンマ区切りで追加する
                 if ($field === 'teacher' && $mode === 'add') {
+                    // 現在の値を一度取得
                     $stmt = $pdo->prepare("SELECT teacher FROM `{$info['table']}` WHERE `subject_name` = ? AND `grade` = ?");
                     $stmt->execute([$title, $grade_int]);
                     $current = $stmt->fetchColumn();
 
+                    // 「未設定」以外で既存値がある場合、重複チェックをして連結
                     if ($current && $current !== '未設定') {
                         $existing = explode('、', $current);
                         if (!in_array($new_val, $existing)) {
@@ -57,13 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     }
                 }
 
+                // 該当するコーステーブルのレコードをUPDATE
                 $sql = "UPDATE `{$info['table']}` SET `$field` = :val WHERE `subject_name` = :name AND `grade` = :grade";
                 $pdo->prepare($sql)->execute([':val' => $final_val, ':name' => $title, ':grade' => $grade_int]);
             }
             echo json_encode(['success' => true]); exit;
         } 
+        // 新規科目の追加、または特定コースへの科目紐付け
         elseif ($action === 'insert_new' || $action === 'add_course') {
             $targets = [];
+            // 学年指定（全体、1年全体、2年全体、または個別コース）に応じた対象コースの選別
             if ($raw_grade === 'all') {
                 $targets = $courseInfo;
             } elseif ($raw_grade === '1_all') {
@@ -75,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if(isset($courseInfo[$course_key])) $targets[$course_key] = $courseInfo[$course_key];
             }
 
+            // 選別された対象テーブルすべてにINSERT実行
             foreach ($targets as $info) {
                 $table = $info['table'];
                 $course_name = $info['name'];
@@ -83,9 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $pdo->prepare($sql)->execute([$course_name, $grade_val, $title]);
             }
 
+            // 通常のフォーム投稿ならリダイレクト、AJAXならJSONを返す
             if ($action === 'insert_new') { header("Location: tuika.php"); exit; }
             echo json_encode(['success' => true]); exit;
         }
+        // 特定のコースから科目を削除
         elseif ($action === 'remove_course') {
             $table = $courseInfo[$_POST['course_key']]['table'];
             $grade_int = (int)$raw_grade;
@@ -99,43 +102,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// 4. データ取得ロジック
+// 4. データ取得ロジック（表示用のリスト作成）
 $search_grade = $_GET['search_grade'] ?? 'all';
 $search_course = $_GET['search_course'] ?? 'all';
 $grade_val = ($search_grade === '1年生') ? 1 : (($search_grade === '2年生') ? 2 : null);
 
-$subjects = [];
+$subjects = []; // 科目名ごとに集約するための配列
 $total_course_count = count($courseInfo);
 
-foreach ($courseInfo as $key => $info) {
-    if ($search_course !== 'all' && $search_course !== $key) continue;
-    $sql = "SELECT couse, grade, subject_name, teacher, room FROM `{$info['table']}`";
-    if ($grade_val) {
-        $stmt = $pdo->prepare($sql . " WHERE grade = ?");
-        $stmt->execute([$grade_val]);
-    } else {
-        $stmt = $pdo->query($sql);
+// 各コースのテーブルを巡回してデータを収集
+// 124行目付近：$stmtへの代入を削除し、直接配列をループさせます
+
+    // 修正：$classSubjectData の中にある 'classSubjectList' をループさせる
+foreach ($classSubjectData['classSubjectList'] as $row) { 
+    $id = $row['subject_name']; 
+        
+    if (!isset($subjects[$id])) {
+        $subjects[$id] = [
+            'grade'   => $row['grade'], 
+            'title'   => $row['subject_name'],
+            'teacher' => $row['teacher_name'], 
+            'room'    => $row['room_name'], 
+            'courses' => [], 
+            'course_keys' => [] 
+        ];
     }
-    while ($row = $stmt->fetch()) {
-        $id = $row['subject_name']; 
-        if (!isset($subjects[$id])) {
-            $subjects[$id] = [
-                'grade' => $row['grade'], 
-                'title' => $row['subject_name'],
-                'teacher' => $row['teacher'], 
-                'room' => $row['room'], 
-                'courses' => [], 
-                'course_keys' => []
-            ];
-        }
-        $subjects[$id]['courses'][] = $row['couse'];
-        $subjects[$id]['course_keys'][] = $key;
+    // すでに配列にそのコース名が含まれていない場合のみ追加する
+    if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+        $subjects[$id]['courses'][] = $row['course_name'];
+    }
+        
+    // course_keysも同様に重複を避けて保持
+    if (!in_array($row['course_name'], $subjects[$id]['course_keys'])) {
+        $subjects[$id]['course_keys'][] = $row['course_name'];
     }
 }
+
+
+// 全コースで実施されているかどうかの判定フラグを追加
 foreach ($subjects as $id => $data) {
     $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -291,7 +301,7 @@ foreach ($subjects as $id => $data) {
     <div class="modal-overlay" id="addModal">
         <div class="modal-content">
             <h2 class="modal-title">新規科目追加</h2>
-            <form action="tuika.php" method="POST">
+            <form action="..\..\..\..\app\master\class_subject_edit_backend\backend_subject_add.php" method="POST">
                 <input type="hidden" name="action" value="insert_new">
                 <div class="info-box">
                     <label class="sidebar-title">学年</label>
