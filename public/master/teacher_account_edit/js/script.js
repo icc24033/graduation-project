@@ -584,4 +584,33 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // ----------------------------------------------------------------------
+    // 10. ページ遷移時の警告（未保存データがある場合）
+    // ----------------------------------------------------------------------
+    let isDirty = false; // 変更があったかどうかを保持するフラグ
+    let isSubmitting = false; // 送信ボタンが押されたかどうか
+
+    // フォーム内の入力要素に変更があったらフラグを立てる
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('input', () => {
+            isDirty = true;
+        });
+
+        // 送信（保存）時は警告を出さないようにフラグを制御
+        form.addEventListener('submit', () => {
+            isSubmitting = true;
+        });
+    });
+
+    // ページを離れようとした時の処理
+    window.addEventListener('beforeunload', (event) => {
+        // 変更があり、かつ送信ボタン経由でない場合に警告
+        if (isDirty && !isSubmitting) {
+            // 標準的なブラウザ警告を表示（メッセージ内容はブラウザに依存します）
+            event.preventDefault();
+            event.returnValue = ''; 
+        }
+    });
 });
