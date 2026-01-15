@@ -590,3 +590,10 @@ lessonModal.style.display = 'flex';
         titleElements[1].textContent = initialSubject;
     }
 });
+
+// モーダルの外側（オーバーレイ部分）をクリックした時に閉じる
+lessonModal.addEventListener('click', function(e) {
+    if (e.target === lessonModal) {
+        lessonModal.style.display = 'none';
+    }
+});
