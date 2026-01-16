@@ -89,6 +89,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             echo json_encode(['success' => true]);
             exit;
         }
+        elseif ($action === 'remove_course') {
+            $course_key = $_POST['course_key'] ?? '';
+            if (!isset($courseInfo[$course_key])) throw new Exception("無効なコースです。");
+            $target_course_id = $courseInfo[$course_key]['id'];
+
+            // subject_in_charges から該当する科目のレコードを削除
+            $sql = "DELETE FROM subject_in_charges 
+                    WHERE subject_id = :sid AND course_id = :cid";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':sid' => $subject_id,
+                ':cid' => $target_course_id
+            ]);
+
+            echo json_encode(['success' => true, 'affected' => $stmt->rowCount()]);
+            exit;
+        }
 
     } catch (Exception $e) {
         http_response_code(500);
