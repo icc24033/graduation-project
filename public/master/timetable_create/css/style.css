@@ -385,6 +385,10 @@ ul, ol {
     background-color: #3b82f6; /* blue-500 */
 }
 
+.active-badge.creating {
+    background-color: #f97316; /* orange-500 */
+}
+
 #mainCourseDisplay {
     display: inline-flex;
     align-items: center;
@@ -618,6 +622,9 @@ body.modal-open {
     width: 500px;
     padding: 2rem;
     animation: fadeInUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .create-modal-content {
@@ -627,6 +634,9 @@ body.modal-open {
     width: 600px;
     padding: 2.5rem;
     animation: fadeInUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 @keyframes fadeInUp {
@@ -709,7 +719,8 @@ body.modal-open {
 }
 
 .modal-cancel-button,
-.modal-save-button {
+.modal-save-button,
+.modal-revert-button {
     padding: 0.5rem 1.5rem;
     border-radius: 0.25rem;
     background-color: #495666;
@@ -720,13 +731,15 @@ body.modal-open {
 }
 
 .modal-cancel-button:hover,
-.modal-save-button:hover {
+.modal-save-button:hover,
+.modal-revert-button:hover {
     color: #222;
     background-color: #CFD5DF;
 }
 
 .modal-cancel-button:focus,
-.modal-save-button:focus {
+.modal-save-button:focus,
+.modal-revert-button:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }

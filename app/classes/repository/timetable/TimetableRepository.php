@@ -14,7 +14,7 @@ class TimetableRepository extends BaseRepository {
     */
     public function getTimetablesByCourseId($courseId) {
         try {
-            // ★修正点1: status_type を取得カラムに追加
+            // status_type を取得カラムに追加
             $sql = "
                 SELECT 
                     t.timetable_id,
@@ -44,6 +44,7 @@ class TimetableRepository extends BaseRepository {
             
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // 取得したデータをJSON形式で構造化して返す
             return $this->structureTimetableData($rows);
 
         } catch (PDOException $e) {
@@ -98,5 +99,62 @@ class TimetableRepository extends BaseRepository {
         }
 
         return array_values($resultMap);
+    }
+
+    /**
+     * createTimetable
+     * 概要：新しい時間割りを作成する
+     * 動作: 新規作成された時間割りに関して、timetablesテーブルに登録予定のレコードを挿入する
+     * 引数：$courseId - コースID, $startDate - 開始日, $endDate - 終了日, $statusType - ステータス（デフォルト1）
+     * 戻り値：新規作成された時間割りのID
+     */
+    public function createTimetable($courseId, $startDate, $endDate, $statusType = 1) {
+        $sql = "INSERT INTO timetables (course_id, start_date, end_date, status_type, created_at, updated_at) 
+                VALUES (:course_id, :start_date, :end_date, :status_type, NOW(), NOW())";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':course_id', $courseId, PDO::PARAM_INT);
+        $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+        $stmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
+        $stmt->bindValue(':status_type', $statusType, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        
+        // 自動採番された timetable_id を返す（これを子テーブルで使う）
+        return $this->pdo->lastInsertId();
+    }
+
+    /**
+     * 
+     */
+    public function createTimetableDetail($timetableId, $dayOfWeek, $period, $subjectId) {
+        $sql = "INSERT INTO timetable_details (timetable_id, day_of_week, period, subject_id) 
+                VALUES (:timetable_id, :day_of_week, :period, :subject_id)";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':timetable_id', $timetableId, PDO::PARAM_INT);
+        $stmt->bindValue(':day_of_week', $dayOfWeek, PDO::PARAM_INT);
+        $stmt->bindValue(':period', $period, PDO::PARAM_INT);
+        $stmt->bindValue(':subject_id', $subjectId, PDO::PARAM_INT); // 空きコマならNULLなどの制御が必要
+        
+        $stmt->execute();
+        
+        // 自動採番された detail_id を返す（これを孫テーブルで使う）
+        return $this->pdo->lastInsertId();
+    }
+
+    /**
+     * 
+     */
+    public function createDetailTeacher($detailId, $teacherId, $roomId = null) {
+        $sql = "INSERT INTO timetable_detail_teachers (detail_id, teacher_id, room_id) 
+                VALUES (:detail_id, :teacher_id, :room_id)";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':detail_id', $detailId, PDO::PARAM_INT);
+        $stmt->bindValue(':teacher_id', $teacherId, PDO::PARAM_INT);
+        $stmt->bindValue(':room_id', $roomId, ($roomId ? PDO::PARAM_INT : PDO::PARAM_NULL));
+        
+        $stmt->execute();
     }
 }

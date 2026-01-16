@@ -1,15 +1,17 @@
 <?php
 // create_timetable.php
-// ビュー（画面）部分のコード
-?>
+// 時間割り作成画面のビュー
 
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="nofollow, noindex">
-    <title>時間割り作成（作成済み時間割り入り）</title>
+    <title>時間割り作成</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,7 +85,7 @@
                         <div class="mb-2">
                             <label class="radio-group-label">
                                 <input type="radio" name="displayMode" value="next" onchange="changeDisplayMode('next')">
-                                <span>次回以降で反映される時間割り</span>
+                                <span>次回反映される時間割り</span>
                             </label>
                         </div>
                     </div>
@@ -167,10 +169,36 @@
             <h2 id="modalTitle" class="modal-title">○曜日 ○限</h2>
             <div class="modal-form-area">
                 <div class="modal-form-item"><label class="modal-label">授業名：</label><div class="modal-select-wrapper"><select id="inputClassName" class="modal-select"><option value="">(選択してください)</option><option value="Javaプログラミング">Javaプログラミング</option><option value="Webデザイン演習">Webデザイン演習</option><option value="データベース基礎">データベース基礎</option><option value="ネットワーク構築">ネットワーク構築</option><option value="セキュリティ概論">セキュリティ概論</option><option value="プロジェクト管理">プロジェクト管理</option><option value="キャリアデザイン">キャリアデザイン</option><option value="HR">HR</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
-                <div class="modal-form-item"><label class="modal-label">担当先生：</label><div class="modal-select-wrapper"><select id="inputTeacherName" class="modal-select"><option value="">(選択してください)</option><option value="佐藤 健一">佐藤 健一</option><option value="鈴木 花子">鈴木 花子</option><option value="高橋 誠">高橋 誠</option><option value="田中 優子">田中 優子</option><option value="渡辺 剛">渡辺 剛</option><option value="伊藤 直人">伊藤 直人</option><option value="山本 さくら">山本 さくら</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
-                <div class="modal-form-item"><label class="modal-label">教室場所：</label><div class="modal-select-wrapper"><select id="inputRoomName" class="modal-select"><option value="">(選択してください)</option><option value="201教室">201教室</option><option value="202教室">202教室</option><option value="301演習室">301演習室</option><option value="302演習室">302演習室</option><option value="4F大講義室">4F大講義室</option><option value="別館Lab A">別館Lab A</option><option value="別館Lab B">別館Lab B</option></select><div class="select-arrow"><i class="fa-solid fa-chevron-down text-xs"></i></div></div></div>
+                <div>
+                    <label class="modal-label">担当先生：</label>
+                    <div id="teacherSelectionArea" style="margin-left: 8rem; display: flex; flex-direction: column; gap: 8px;">
+                        <div class="teacher-input-row" style="display: flex; gap: 8px; align-items: center;">
+                            <select class="teacher-input modal-select" style="flex: 1;"><option value="">(選択してください)</option><option value="佐藤 健一">佐藤 健一</option><option value="鈴木 花子">鈴木 花子</option><option value="高橋 誠">高橋 誠</option><option value="田中 優子">田中 優子</option><option value="渡辺 剛">渡辺 剛</option><option value="伊藤 直人">伊藤 直人</option><option value="山本 さくら">山本 さくら</option></select>
+                            <div class="select-arrow" style="flex-shrink: 0;"><i class="fa-solid fa-chevron-down text-xs"></i></div>
+                            <button class="remove-teacher-btn" style="display: none; padding: 4px 8px; background-color: #f87171; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; flex-shrink: 0;">×</button>
+                        </div>
+                    </div>
+                    <div style="margin-left: 8rem; margin-top: 6px;">
+                        <button id="addTeacherBtn" style="padding: 4px 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">+ 追加</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="modal-label">教室場所：</label>
+                    <div id="roomSelectionArea" style="margin-left: 8rem; display: flex; flex-direction: column; gap: 8px;">
+                        <div class="room-input-row" style="display: flex; gap: 8px; align-items: center;">
+                            <select class="room-input modal-select" style="flex: 1;"><option value="">(選択してください)</option><option value="201教室">201教室</option><option value="202教室">202教室</option><option value="301演習室">301演習室</option><option value="302演習室">302演習室</option><option value="4F大講義室">4F大講義室</option><option value="別館Lab A">別館Lab A</option><option value="別館Lab B">別館Lab B</option></select>
+                            <div class="select-arrow" style="flex-shrink: 0;"><i class="fa-solid fa-chevron-down text-xs"></i></div>
+                            <button class="remove-room-btn" style="display: none; padding: 4px 8px; background-color: #f87171; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; flex-shrink: 0;">×</button>
+                        </div>
+                    </div>
+                    <div style="margin-left: 8rem; margin-top: 6px;">
+                        <button id="addRoomBtn" style="padding: 4px 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">+ 追加</button>
+                    </div>
+                </div>
             </div>
             <div class="modal-button-area">
+                <button id="btnRevert" class="modal-revert-button" style="display: none;">変更を戻す</button>
+                <div style="flex: 1;"></div>
                 <button id="btnCancel" class="modal-cancel-button">キャンセル</button>
                 <button id="btnSave" class="modal-save-button">保存</button>
             </div>
@@ -224,7 +252,16 @@
             </div>
         </div>
     </div>
+    <script>
+        // PHPからデータをJSON形式で受け渡す
+        window.serverData = {
+            // コントローラーから受け取った配列をJSON形式に変換して埋め込む
+            savedTimetables: <?php echo json_encode($savedTimetables, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>,
+            
+            // その他必要なデータがあればここに追加していく
 
-    <script src="js/script.js"></script>
+        };
+    </script>
+    <script src="js/create_timetable.js"></script>
 </body>
 </html>
