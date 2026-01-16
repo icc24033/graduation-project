@@ -13,6 +13,7 @@ require_once __DIR__ . '/TeacherLoginRepository.php';
 require_once __DIR__ . '/timetable/TimetableRepository.php';
 require_once __DIR__ . '/TempTeacherCsvRepository.php';
 require_once __DIR__ . '/ErrorTeacherTableRepository.php';
+require_once __DIR__ . '/class_subject_edit/SubjectInChargesRepository.php';
 
 
 
@@ -155,5 +156,12 @@ class RepositoryFactory {
      */
     public static function getErrorTeacherTableRepository() {
         return new ErrorTeacherTableRepository(self::getPdo());
+    }
+
+    /**
+     * 授業科目担当リポジトリのインスタンスを取得
+     */
+    public static function getSubjectInChargesRepository() {
+        return new SubjectInChargesRepository(self::getPdo());
     }
 }

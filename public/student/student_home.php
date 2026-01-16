@@ -160,7 +160,7 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     // コースラベルのマッピング
     $course_labels = [
         'system' => 'システム', 'web' => 'Web', 'multi' => 'マルチ',
-        'ouyou' => '応用情報', 'kihon' => '基本情報',
+        'ouyou' => '応用情報', 'kihon' => '基本情報', 'ipasu' => 'ITパスポート',
         'itikumi' => '1年1組', 'nikumi' => '1年2組'
     ];
     $course_label = $course_labels[$selected_course] ?? 'システム';

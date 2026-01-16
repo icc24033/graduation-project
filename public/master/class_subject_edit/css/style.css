@@ -1,0 +1,786 @@
+/* メインコンテナ */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー (授業科目一覧 タイトル部分) */
+.header {
+   /* 画面上部に固定 */
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   z-index: 1000; /* 常に最前面に表示 */
+   background-color: #C0DEFF;
+   height: 70px; 
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   text-align: center;
+   gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.user_icon {
+    font-size: 24px;
+}
+
+/* メインコンテンツ (サイドバーと科目一覧を包含) */
+.main-content {
+    padding-top: 70px;
+    display: block; /* FlexやGridを解除し、通常のブロック要素に */
+}
+
+/* --- サイドバー (ナビゲーション) --- */
+.sidebar {
+    /* 画面の左側に固定 */
+    position: fixed; 
+    left: 0;
+    bottom: 0;
+    top: 70px; 
+    /* 常に最前面に表示 */
+    z-index: 999;
+    width: 300px; 
+    background-color: #F3F8FF;
+    padding: 0 0 0 10px;
+    flex-shrink: 0; 
+    border-right: solid 1px #CFD5DF;
+}
+
+.sidebar ul { 
+    padding: 0;
+}
+
+.nav-item {
+    position: relative; /*CSSで要素を元の位置から相対的にずらして配置する*/
+    padding: 5px 0; 
+}
+
+.nav-item a, .dropdown-toggle {
+    display: block;
+    /* --- デフォルトの幅は290pxを維持 --- */
+    width: 290px;
+    padding: 10px 20px;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 通常時にも角丸を設定し、ホバー時のちらつきを防止 */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* グループラベルのスタイル（「編集」など） */
+.is-group-label {
+    pointer-events: none; 
+    border-bottom: none;
+    padding: 15px 0; 
+}
+
+/* 現在の値の表示（年度、コース） */
+.dropdown-toggle .current-value {
+    margin-left: 0;
+}
+
+.nav-item a.is-active {
+    /* ホバー時と同じ背景色を固定で適用 */
+    background-color: #CFD5DF; 
+}
+
+/* ホバー時のスタイル（非アクティブ時） */
+.nav-item a:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+
+/* ドロップダウンボタンが閉じている時のホバー効果 */
+/* コース */
+#courseDropdownToggle[aria-expanded="false"]:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+/* 学年 */
+#gradeDropdownToggle[aria-expanded="false"]:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+/* ドロップダウンボタンアクティブ状態の制御 */
+
+/* 【コースボタン】 閉じている時 -> 透明 */
+#courseDropdownToggle[aria-expanded="false"] {
+    background-color: transparent; 
+}
+
+/* 【コースボタン】 開いた時 -> グレー */
+#courseDropdownToggle[aria-expanded="true"] {
+    background-color: #CFD5DF; 
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* 【学年ボタン】 閉じている時 -> 透明 */
+#gradeDropdownToggle[aria-expanded="false"] {
+    background-color: transparent; 
+}
+
+/* 【学年ボタン】 開いた時 -> グレー */
+#gradeDropdownToggle[aria-expanded="true"] {
+    background-color: #CFD5DF; 
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* --- ドロップダウンメニューのスタイル --- */
+.dropdown-menu {
+    /* 絶対位置指定から、画面全体を基準とした固定位置指定に変更 */
+    position: fixed;
+    width: 250px; 
+    background-color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4); /* 影を強調し、浮いていることを示す */
+    z-index: 1001; /* ヘッダー(1000)より高くし、最前面に表示 */
+    display: none; /* 初期状態で非表示にする */
+    border-radius: 20px;
+}
+
+/* is-openクラスが付いたメニューを表示 */
+.dropdown-menu.is-open {
+    padding: 10px 0 ; 
+    display: block; 
+    width: 250px;
+    border: 1px solid #CFD5DF;
+    top: auto; 
+    left: auto;
+}
+
+/* コースのドロップダウンメニューに高さとスクロールを適用 */
+#courseDropdownMenu {
+    /* サイドバーのスペースを考慮し、画面の高さに合わせて調整 */
+    max-height: 200px; /* 最大高さを指定 */
+    overflow-y: auto; /* 縦方向のスクロールを有効にする */
+    /* 横方向のスクロールを非表示にする */
+    overflow-x: hidden;
+}
+
+.dropdown-menu li a {
+    display: block;
+    /* ホバー範囲をメニュー幅に収めるため230pxに設定 */
+    width: 230px;
+    padding: 9px 10px; /* 画像に合わせてパディングを調整 */
+    text-align: left;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    font-weight: 400;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 左右に10pxの余白を設定 */
+    margin: 0 0 0 10px; 
+}
+
+.dropdown-menu li a:hover {
+    /* widthの再設定を削除し、ちらつきを防止 */
+    background-color: #CFD5DF; /* グレー */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+
+/* --- メインコンテンツ (科目カード) --- */
+.subject-list {
+    top: 100px;
+    margin-left: 350px; 
+    margin-right: 300px;
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px 20px;
+    padding: 50px 0;
+}
+
+.subject-card {
+    text-align: center;
+    width: 240px;
+    height: 220px;
+    background-color: #fff;
+    border-radius: 20px;
+    border: 1px solid #CFD5DF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.subject-card:hover {
+   background-color: #CFD5DF;
+}
+
+/* 授業科目カードクリック */
+.subject-card.is-selected {
+    background-color: #CFD5DF;
+}
+
+.subject-card.is-active {
+    background-color: #CFD5DF; 
+}
+
+.card-grade {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px;
+    text-align: left;
+    width: 240px;
+    background-color: #F3F8FF;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 追加ボタン 削除ボタン*/
+.add-button,.delete-button{
+    background-color: #495666; /* ボタンカラー */
+    color: #fff; 
+    width: 180px;
+    padding: 15px 30px; 
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.5s;
+    /* 画面右下に固定するための設定に変更 */
+    position: fixed; /* 固定位置に設定 */
+    bottom: 50px; /* ダウンロードボタンのbottom: 50pxと合わせる */
+    /* サイドバー(180px)とコンテンツエリアのパディング(200px)を考慮して右端から調整 */
+    right: 50px; /* 画面右端からの距離を設定 */
+    z-index: 998; /* 固定しているのでz-indexも設定 */
+    margin-left: auto; 
+    margin-right: auto;
+    margin-top: auto; 
+}
+
+/* 追加ボタン 削除ボタンホバー */
+.add-button:hover,.delete-button:hover {
+    background-color: #CFD5DF;/* ホバー色変更 */
+    color: #222;
+}
+
+/*　--- 削除モーダル --- */
+/* モーダル背景（薄いグレー） */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* 背景を暗くする */
+    display: none; /* 初期状態では非表示 */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* 他の要素（ヘッダー:z-index:1000など）よりも前面に表示 */
+    padding-top: 50px; /* ヘッダーとの干渉を避けるため、上部に少しスペースを確保 */
+}
+
+/* is-open-modalクラスが付与されたときに表示する */
+.modal-overlay.is-open-modal {
+    display: flex;
+}
+
+/* モーダルウィンドウ本体（白背景のボックス） */
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px; /* 最大幅を指定してデザインを制御 */
+    height: auto;
+    text-align: center;
+    overflow: hidden;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 20px; 
+}
+
+.modal-body {
+    margin-bottom: 30px;
+}
+
+.modal-body p {
+    font-size: 14px;
+    color: #222;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* モーダルウィンドウボタンフッター */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modal-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 550;
+    font-size: 14px;
+    width: 160px; /* 2つのボタンを横並びにする */
+    gap: 0 50px;
+}
+
+/* モーダルウィンドウキャンセルボタン */
+.modal-cancel-button {
+    background-color: #fff;
+    color: #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-cancel-button:hover {
+    background-color: #CFD5DF;
+}
+
+/* モーダルウィンドウ削除確認ボタン */
+.modal-delete-button {
+    background-color: #ff5e5e; /* 赤色 */
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.modal-delete-button:hover {
+    background-color: #CFD5DF;
+    color: #222;
+
+}
+
+/* モーダルウィンドウ削除対象リストのコンテナ */
+.delete-list-container {
+    max-height: 150px; /* スクロール可能にするための高さ制限 */
+    overflow-y: auto;
+    border: 1px solid #CFD5DF;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #F0F8FF;
+    text-align: left;
+}
+
+/* モーダルウィンドウリスト内の個別の授業科目情報 */
+.deleted-item {
+    font-size: 14px;
+    color: #222;
+    padding: 3px 0;
+    border-bottom: 1px solid #CFD5DF;
+}
+.deleted-item:last-child {
+    border-bottom: none;
+}
+
+/* 詳細表示モーダル用のスタイル*/
+.details-modal-content {
+    max-width: 600px; 
+    width: 90%; 
+    height: auto;
+    padding: 0;
+}
+
+/* モーダルのヘッダー */
+.modal-header {
+    padding-bottom: 0;
+    margin-bottom: 0; 
+    padding: 0; 
+    border: none;
+}
+
+/* 授業科目名ヘッダー */
+.subject-name-in-modal {
+    background-color: #C0DEFF;
+    font-size: 24px;
+    font-weight: bold;
+    color: #222;
+    width: 100%; /* 入力欄自体もヘッダー内で横いっぱいに広げる */
+    padding: 15px 30px; 
+    gap: 10px;
+    border: none;
+    text-align: left;
+    outline: none; /* フォーカス時の枠線を消す */
+}
+
+/* モーダルボディのレイアウト */
+.details-modal-body {
+    display: flex; 
+    flex-direction: column;
+    padding: 30px 20px 0 20px; 
+}
+
+/* パネルを全幅にする */
+.modal-panel {
+    border: none; 
+    padding-right: 0;
+    width: auto; 
+    display: flex;
+    flex-direction: column;
+    /*子要素を左寄せにする */
+    align-items: flex-start; /* 'center' から 'flex-start' に変更 */
+    margin: 0;
+}
+
+/* パネル内の共通行 */
+.panel-row {
+    margin-bottom: 0;
+    width: 300px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* 子要素を中央寄せ */
+    border: 1px solid #CFD5DF;
+    overflow: hidden;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.panel-label {
+    border: 1px solid #CFD5DF;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px; 
+    display: block;
+    width: 300px; /* 統一 */
+    font-size: 16px;
+    color: #222; 
+    background-color: #C0DEFF; 
+    padding: 10px 10px;
+    margin-bottom: 0;
+    margin-left: 0; 
+    text-align: center; /* 中央 */
+    box-sizing: border-box; /* パディングを含めたサイズでwidthを計算 */
+}
+
+#modalTeacherist,
+#modalRoomList,
+#modalCourseList {
+    padding-left: 0; /* リストのパディングをリセット（もしli要素を想定している場合） */
+    list-style: none; /* リストマーカーを削除（もしli要素を想定している場合） */
+}
+
+/* style.css: リストスタイル */
+.couses-list,.room-list,.teacher-list {
+    width: 300px; /* 統一 */
+    margin: 0;
+    padding: 0; 
+    list-style: none; 
+    
+}
+
+.couses-item,.room-item,.teacher-item {
+    padding-left: 20px;
+    padding-right: 10px;
+    background-color: #FFF;
+    border-bottom:  1px solid #CFD5DF; 
+    padding: 10px 10px;
+    margin: 0; 
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    position: relative; 
+    color: #222;
+    text-align: left; 
+    box-sizing: border-box; 
+    /* flexで中身を横並びにする */
+    display: flex;
+    justify-content: space-between; /* 内容とボタンを左右に分ける */
+    align-items: center; /* 垂直方向中央揃え */
+    border-bottom-left-radius: 0; 
+    border-bottom-right-radius: 0;
+}
+
+.couses-list .couses-item:last-child,
+.room-list .room-item:last-child,
+.teacher-list .teacher-item:last-child {
+    /* 最後の項目から境界線を削除 */
+    border-bottom: none; 
+    /* 角丸を適用 */
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* 1. ボタンコンテナ全体を調整 */
+.modal-subject-actions {
+    display: flex; /* 内部の + と - ボタンを横並びにする */
+    gap: 10px; /* ボタン間にスペースを空ける */
+    /* リストと同じ左側の位置に合わせるため、必要に応じて調整 */
+    margin-left: 20px; /* リスト項目のインデントに合わせる */
+}
+
+/* リスト追加ボタン(+) リスト削除ボタン(-) のスタイル */
+.add-teacher-button,.delete-teacher-button, 
+.add-room-button,.delete-room-button,
+.add-couses-button,.delete-couses-button{
+    background-color: #fff; 
+    border: 1px solid #CFD5DF; 
+    color: #CFD5DF;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+/* リスト追加・リスト削除ボタンのコンテナ */
+.modal-action-buttons {
+    /* align-self: left; ← leftは無効な値のため削除するか flex-start にします */
+    align-self: flex-start; 
+    width: 300px; 
+    /* margin: 15px auto; ← autoにより全体の中央に寄ってしまっていました */
+    margin: 15px 0; /* 上下15px、左右0 に変更することで左端（リストの真下）に配置されます */
+    display: flex;
+    justify-content: center; /* 300pxの幅の中でボタンを中央寄せにします */
+    gap: 10px; /* ボタン間のスペース */
+}
+
+
+.add-teacher-button:hover,.delete-teacher-button:hover 
+.add-room-button:hover,.delete-room-button:hover
+.add-couses-button:hover,.delete-couses-button:hover{
+    background-color: #CFD5DF;
+    color: #222;  
+}
+
+.teacher-item:hover,
+.room-item:hover,
+.couses-item:hover{
+    background-color: #F3F8FF; 
+}
+
+.teacher-item.is-selected.is-open-course-dropdown,
+.room-item.is-selected.is-open-course-dropdown,
+.couses-item.is-selected.is-open-course-dropdown{
+    background-color: #F3F8FF; 
+}
+
+/* ドロップダウンリストのスタイル調整 */
+/* ドロップダウンメニュー本体 */
+.modal-dropdown-menu {
+    position: absolute; /* 親要素（.modal-panel）が position: relative; の代わりを果たす */
+    width: 250px; 
+    background-color: #fff;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4); 
+    z-index: 1001; 
+    display: none; 
+    border-radius: 10px;
+    max-height: 200px; 
+    overflow-y: auto; 
+    overflow-x: hidden;
+    top: auto; 
+    left: auto;
+}
+
+/* is-openクラスが付いたメニューを表示 */
+.modal-dropdown-menu.is-open {
+    padding: 10px 0 ; 
+    display: block; 
+    width: 250px;
+    border: 1px solid #CFD5DF;
+
+}
+/* ドロップダウンメニュー内のアイテム */
+.modal-dropdown-menu ul li a {
+    display: block;
+    /* ホバー範囲をメニュー幅に収めるため230pxに設定 */
+    width: 230px;
+    padding: 9px 10px; /* 画像に合わせてパディングを調整 */
+    text-align: left;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    font-weight: 400;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 左右に10pxの余白を設定 */
+    margin: 0 0 0 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px; 
+}
+
+/* ドロップダウンメニュー内のアイテム ホバー時のスタイル */
+.modal-dropdown-menu ul li a:hover {
+    background-color: #CFD5DF; /* グレー */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.dropdown-delete-button {
+    background-color: #495666;
+    color: #fff;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100px; 
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* --- 確定ボタンのスタイル --- */
+.confirm-button {
+    background-color: #495666;
+    color: #fff;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 150px; 
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.confirm-button:hover {
+    color: #222;
+    background-color: #CFD5DF; /* グレー */
+}
+
+/* モーダルアクションエリア (確定ボタンを右下に配置) */
+.modal-action-area {
+    width: 100%;
+    padding: 0 20px 10px 20px; 
+    box-sizing: border-box;
+    display: flex;
+    /* ボタンを右寄せにする */
+    justify-content: flex-end; 
+}
+
+@media (max-width:1650px){
+    .subject-list {
+        margin-left: 320px; 
+        grid-template-columns: repeat(3, 1fr);
+    }
+}   
+
+@media (max-width:1500px){
+    .subject-list {
+        margin-left: 200px;
+        grid-template-columns: repeat(3, 1fr);
+        /* --- サイドバー (ナビゲーション) --- */
+    }
+    .sidebar {
+        /* 幅を300pxから180pxに縮小 */
+        width: 180px; 
+        /* 固定位置の top をヘッダーの高さに合わせて修正 */
+        top: 70px; 
+    }
+    
+    /* ナビゲーションアイテムの幅をサイドバーに合わせて調整 */
+    .nav-item a, .dropdown-toggle {
+        width: 170px; 
+        padding: 9px 10px; /* 左右のパディングを減らす */
+    }
+
+    /* ドロップダウンメニューの位置調整 */
+    .dropdown-menu {
+        /* fixed の解除は不要ですが、ここでは一旦元のコードに合わせて absolute にする */
+        position: absolute; 
+        width: 180px; /* メニュー幅を狭くする */
+    }
+    
+    .dropdown-menu.is-open {
+        width: 180px;
+    }
+    
+    .dropdown-menu li a {
+        width: 160px; /* メニュー内のリンク幅を調整 */
+        margin: 0 0 0 10px; 
+    }
+    }
+
+@media (max-width:1200px){
+    .subject-card {
+        width: 192px;
+        height: 176px;
+        border-radius: 16px;
+    }
+    .add-button,.delete-button {
+        left: 200px; /* サイドバー(180px) + content-area左パディング(20px) */
+        right: 15px; /* content-area右パディング(15px) */
+        width: 120px; 
+        font-size: 16px; 
+        padding: 10px 20px;
+        bottom: 20px;
+        margin-right: 0;
+    }
+}   
+
+@media (max-width:950px){
+    .subject-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width:750px){
+    .subject-list {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    
+}
+/* 既存のスタイルの後に追加 */
+.card-room {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* --- 元の .add-button の設定を削除して以下を追加 --- */
+
+.sidebar-add-btn {
+    width: 80%;
+    margin: 10px auto;
+    display: block;
+    background-color: #4e5d6c; /* 元のボタンの色を継承 */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.sidebar-add-btn:hover {
+    background-color: #394652;
+}

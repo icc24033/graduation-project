@@ -680,4 +680,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     } // end student_addition.html 固有の処理
+
+    /**
+     * ページ遷移時の未保存データ警告処理
+     * 先生・生徒共通
+     */
+    (function() {
+        let isDirty = false;
+        let isSubmitting = false;
+
+        // 画面内のすべてのフォームを監視
+        document.addEventListener('change', (event) => {
+            // input, select, textareaなどの変更を検知
+            if (event.target.closest('form')) {
+                isDirty = true;
+            }
+        }, true);
+
+        // 行追加ボタンなどのクリック時も「変更あり」とみなす
+        document.addEventListener('click', (event) => {
+            const target = event.target.closest('#addRowButton, .remove-row-button, .add-button');
+            if (target) {
+                isDirty = true;
+            }
+        });
+
+        // 送信（完了・保存・削除）時は警告を出さない
+        document.addEventListener('submit', (event) => {
+            if (event.target.closest('form')) {
+                isSubmitting = true;
+            }
+        });
+
+        // ページを離れる際のイベント
+        window.addEventListener('beforeunload', (event) => {
+            if (isDirty && !isSubmitting) {
+                // ブラウザ標準の警告を表示
+                event.preventDefault();
+                event.returnValue = ''; 
+            }
+        });
+    })();
 });

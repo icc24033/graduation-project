@@ -192,9 +192,6 @@ SecurityHelper::applySecureHeaders();
                                 value="<?php echo SecurityHelper::escapeHtml($teacher['email']); ?>">
                         </div>
                         <div class="column-action">
-                            <button type="button" class="remove-row-button">
-                                <span class="material-symbols-outlined">remove_circle</span>
-                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
