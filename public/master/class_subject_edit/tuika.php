@@ -17,6 +17,18 @@ try {
     ]);
 } catch (PDOException $e) { die("DB接続エラー: " . $e->getMessage()); }
 
+$courseInfo = [   
+    'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組', 'grade' => 1, 'course_id' => 7],
+    'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組', 'grade' => 1, 'course_id' => 8],
+    'iphasu'        => ['table' => 'iphasu_itiran',   'name' => 'ITパスポートコース', 'grade' => 1, 'course_id' => 6],
+    'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報コース', 'grade' => 1, 'course_id' => 5],
+    'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報コース', 'grade' => 1, 'course_id' => 4],
+    'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
+    'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
+    'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
+];
+
+
 // 3. AJAX・フォーム処理（POSTリクエスト時の処理）
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -103,39 +115,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // 4. データ取得ロジック（表示用のリスト作成）
-$search_grade = $_GET['search_grade'] ?? 'all';
-$search_course = $_GET['search_course'] ?? 'all';
 $grade_val = ($search_grade === '1年生') ? 1 : (($search_grade === '2年生') ? 2 : null);
 
 $subjects = []; // 科目名ごとに集約するための配列
 $total_course_count = count($courseInfo);
 
-// 各コースのテーブルを巡回してデータを収集
-// 124行目付近：$stmtへの代入を削除し、直接配列をループさせます
 
-    // 修正：$classSubjectData の中にある 'classSubjectList' をループさせる
-foreach ($classSubjectData['classSubjectList'] as $row) { 
+foreach ($classSubjectList as $row) {
     $id = $row['subject_name']; 
         
     if (!isset($subjects[$id])) {
         $subjects[$id] = [
             'grade'   => $row['grade'], 
             'title'   => $row['subject_name'],
-            'teacher' => $row['teacher_name'], 
-            'room'    => $row['room_name'], 
+            'teacher' => $row['teacher_name'] ?? '未設定', 
+            'room'    => $row['room_name'] ?? '未設定', 
             'courses' => [], 
             'course_keys' => [] 
         ];
     }
-    // すでに配列にそのコース名が含まれていない場合のみ追加する
+
+    // 表示用のコース名を追加
     if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
         $subjects[$id]['courses'][] = $row['course_name'];
     }
-        
-    // course_keysも同様に重複を避けて保持
-    if (!in_array($row['course_name'], $subjects[$id]['course_keys'])) {
-        $subjects[$id]['course_keys'][] = $row['course_name'];
-    }
+
+   // course_id から 'itikumi' などのキーを逆引き
+   $found_key = '';
+   foreach ($courseInfo as $key => $info) {
+       if ($info['course_id'] == $row['course_id']) {
+           $found_key = $key;
+           break;
+       }
+   }
+
+   if ($found_key && !in_array($found_key, $subjects[$id]['course_keys'])) {
+       $subjects[$id]['course_keys'][] = $found_key; // 数値ではなく識別キーを入れる
+   }
 }
 
 
@@ -193,7 +209,7 @@ foreach ($subjects as $id => $data) {
                 <button class="sidebar-add-btn" onclick="openAddModal()">＋ 新規科目追加</button>
             </div>
             <hr style="border: 0; border-top: 1px solid #e0e6ed; margin: 0 20px 20px 20px;">
-            <form action="tuika.php" method="GET" id="search-form">
+            <form action="addition_control.php" method="GET" id="search-form">
                 <div class="sidebar-section">
                     <label class="sidebar-title">実施学年検索</label>
                     <select class="sidebar-select" name="search_grade" id="search_grade" onchange="this.form.submit()">
@@ -367,10 +383,16 @@ foreach ($subjects as $id => $data) {
             currentData = data;
             document.getElementById('m-title').innerText = data.title;
             
-            // 講師表示：複数対応
-            const tArray = data.teacher.split('、');
-            const tDisplay = data.teacher === '未設定' ? '未設定' : tArray.join(' 先生、') + " 先生";
+            // 講師表示：複数対応（nullチェック追加）
+            let tDisplay = '未設定';
+            if (data.teacher && data.teacher !== '未設定') {
+                const tArray = data.teacher.split('、');
+                tDisplay = tArray.join(' 先生、') + " 先生";
+            }
             document.getElementById('m-teacher').innerText = tDisplay;
+
+            // ついでに room も null の場合に備えて安全策をとっておくと良いです
+            document.getElementById('m-room').innerText = data.room || '未設定';
             
             document.getElementById('m-room').innerText = data.room;
             document.getElementById('m-courses').innerText = data.courses.join(' / ');
@@ -412,10 +434,26 @@ foreach ($subjects as $id => $data) {
             el.style.display = isVisible ? 'none' : 'block';
         }
 
+        // tuika.php の saveField 関数を修正
         function saveField(field, mode) {
             const val = document.getElementById('sel-' + field).value;
             if(!val) return alert("選択してください");
-            ajax({action: 'update_field', field: field, value: val, mode: mode, grade: currentData.grade});
+            
+            // currentData.course_keys 配列の 0番目（最初のコース）を使用する
+            const targetKey = currentData.course_keys && currentData.course_keys.length > 0 
+                            ? currentData.course_keys[0] 
+                            : null;
+
+            if(!targetKey) return alert("コース情報を特定できませんでした");
+
+            ajax({
+                action: 'update_field', 
+                field: field, 
+                value: val, 
+                mode: mode, 
+                grade: currentData.grade,
+                course_key: targetKey // ★ここで正しいキーが送られるようになります
+            });
         }
 
         function clearField(field) {
@@ -435,7 +473,7 @@ foreach ($subjects as $id => $data) {
             const fd = new FormData();
             for(let k in data) fd.append(k, data[k]);
             fd.append('subject_name', currentData.title);
-            fetch('tuika.php', {method: 'POST', body: fd})
+            fetch('test.php', {method: 'POST', body: fd})
             .then(res => res.json())
             .then(res => { if(res.success) location.reload(); })
             .catch(err => alert("通信エラーが発生しました"));
