@@ -18,6 +18,7 @@ class TimetableRepository extends BaseRepository {
             $sql = "
                 SELECT 
                     t.timetable_id,
+                    t.course_id,
                     t.start_date,
                     t.end_date,
                     t.status_type,  -- ★ここに追加
@@ -75,6 +76,7 @@ class TimetableRepository extends BaseRepository {
             if (!isset($resultMap[$tId])) {
                 $resultMap[$tId] = [
                     'id'         => $tId,
+                    'courseId'   => $row['course_id'],
                     'course'     => $row['course_name'],
                     'startDate'  => $row['start_date'],
                     'endDate'    => $row['end_date'],

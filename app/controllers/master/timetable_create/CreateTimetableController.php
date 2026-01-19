@@ -19,8 +19,12 @@ class CreateTimetableController extends HomeRepository
         $timetableService = new TimetableService();
         $savedTimetables = $timetableService->getAllTimetableData();
 
+        // コースのドロップダウンオプションをコース配列として取得
+        $courseList = $timetableService->getCourseDropdownOptions();
+        
         extract([
-            'savedTimetables' => $savedTimetables
+            'savedTimetables' => $savedTimetables,
+            'courseList' => $courseList
         ]);
 
         // Viewにデータを渡す（requireすることで変数がView内で使えるようになります）

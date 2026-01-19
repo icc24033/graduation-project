@@ -1,8 +1,5 @@
 <?php
 // create_timetable.php
-// 時間割り作成画面のビュー
-
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
 ?>
 <!DOCTYPE html>
@@ -62,17 +59,10 @@ SecurityHelper::applySecureHeaders();
                             </label>
                             <div class="ml-6 mt-1 relative">
                                 <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
-                                    <span class="current-value">システムデザインコース</span>
+                                    <span class="current-value">コースを選択してください</span>
                                 </button>
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
-                                    <li><a href="#">システムデザインコース</a></li>
-                                    <li><a href="#">Webクリエイタコース</a></li>
-                                    <li><a href="#">マルチメディアOAコース</a></li>
-                                    <li><a href="#">応用情報コース</a></li>
-                                    <li><a href="#">基本情報コース</a></li>
-                                    <li><a href="#">ITパスポートコース</a></li>
-                                    <li><a href="#">１年１組</a></li>
-                                    <li><a href="#">１年２組</a></li>
+                                    <?php echo $courseList; ?>
                                 </ul>
                             </div>
                         </div>
@@ -252,16 +242,7 @@ SecurityHelper::applySecureHeaders();
             </div>
         </div>
     </div>
-    <script>
-        // PHPからデータをJSON形式で受け渡す
-        window.serverData = {
-            // コントローラーから受け取った配列をJSON形式に変換して埋め込む
-            savedTimetables: <?php echo json_encode($savedTimetables, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>,
-            
-            // その他必要なデータがあればここに追加していく
 
-        };
-    </script>
     <script src="js/create_timetable.js"></script>
 </body>
 </html>
