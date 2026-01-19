@@ -29,11 +29,6 @@ class ClassSubjectEditController {
             'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
             'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
         ];
-        
-        $masterLists = [
-            'teacher' => ['松野', '山本', '小田原', '永田', '渡辺', '内田', '川場','田川','森嵜','松浦','山田','船津'],
-            'room'    => ['総合実習室', 'プログラム実習室1', 'プログラム実習室2', 'システム設計室2','マルチメディア室1','マルチメディア室2','マルチメディア室3','オープンシステム室','CR1','CR2', '未設定'],
-        ];
 
         if ($search_grade === '1年生') {
             $search_grade_val = 1;
@@ -43,11 +38,20 @@ class ClassSubjectEditController {
             $search_grade_val = null;
         }
 
-        $classSubjectData = $this->service->getClassSubjectData();
+        $classSubjectData = $this->service->getClassSubjectData(); // 授業科目一覧データの取得
+        $rawClassSubjectData = $this->service->getRawClassSubjectData(); // 未加工の授業科目一覧データの取得
+        $courseList = $this->service->getCourseList(); // コース一覧データの取得
+        $teacherList = $this->service->getTeacherList(); // 先生一覧データの取得
+        $roomList = $this->service->getRoomList(); // 教室一覧データの取得
+
 
         RepositoryFactory::closePdo();
 
         extract($classSubjectData);
+        extract($rawClassSubjectData);
+        extract($courseList);
+        extract($teacherList);
+        extract($roomList);
 
         // 1. $search_course（文字列）を対応する course_id に変換
         $target_course_id = null;
@@ -83,11 +87,23 @@ class ClassSubjectEditController {
 
         // 3. 配列の添字（0, 1, 2...）を振り直す
         $classSubjectList = array_values($classSubjectList);
-
-        
-
         require_once '../tuika.php';
     }
+
+    /**
+     * 授業科目削除画面
+     */
+    public function index_delete() {
+        $classSubjectData = $this->service->getClassSubjectData();
+        $rawClassSubjectData = $this->service->getRawClassSubjectData();
+
+        RepositoryFactory::closePdo();
+
+        extract($classSubjectData);
+        extract($rawClassSubjectData);
+        require_once '../sakuzyo.php';
+    }
+
 
     /**
      * 学年移動画面

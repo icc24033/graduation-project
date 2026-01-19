@@ -1,4 +1,3 @@
-// script.js
 let savedTimetables = [];
 let isCreatingMode = false;
 let isViewOnly = false;
@@ -66,18 +65,73 @@ function initializeDemoData() {
     month3End.setMonth(month3End.getMonth() + 1, 0);
     const month3EndStr = month3End.toISOString().split('T')[0];
 
-    //時間割りデータ
-    savedTimetables = [];
-
-        // サーバーからデータが渡ってきているか確認して代入
-    if (window.serverData && window.serverData.savedTimetables) {
-        savedTimetables = window.serverData.savedTimetables;
-        console.log("DBからロードした時間割データ:", savedTimetables);
-    } else {
-        // データがない場合のフォールバック（空配列など）
-        console.warn("サーバーからのデータが見つかりません。");
-        savedTimetables = [];
-    }
+    // デモ用の作成済み時間割りデータ
+    savedTimetables = [
+        // ========== システムデザインコース（4つの状態） ==========
+        {
+            id: 1001,
+            course: "システムデザインコース",
+            startDate: pastStartStr,
+            endDate: pastEndStr,
+            data: [
+                {day: "月", period: "1", className: "Python基礎", teacherName: "佐藤 健一", roomName: "301演習室"},
+                {day: "火", period: "1", className: "Webデザイン", teacherName: "鈴木 花子", roomName: "302演習室"},
+                {day: "水", period: "1", className: "システム構築", teacherName: "高橋 誠", roomName: "201教室"}
+            ]
+        },
+        {
+            id: 1002,
+            course: "システムデザインコース",
+            startDate: currentStartStr,
+            endDate: currentEndStr,
+            data: [
+                {day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
+                {day: "月", period: "2", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
+                {day: "火", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
+                {day: "水", period: "1", className: "ネットワーク構築", teacherName: "田中 優子", roomName: "301演習室"},
+                {day: "木", period: "1", className: "セキュリティ概論", teacherName: "渡辺 剛", roomName: "4F大講義室"},
+                {day: "金", period: "1", className: "HR", teacherName: "伊藤 直人", roomName: "202教室"}
+            ]
+        },
+        {
+            id: 1003,
+            course: "システムデザインコース",
+            startDate: nextStartStr,
+            endDate: nextEndStr,
+            data: [
+                {day: "月", period: "1", className: "クラウド基礎", teacherName: "山本 さくら", roomName: "303演習室"},
+                {day: "火", period: "1", className: "IoT入門", teacherName: "佐藤 健一", roomName: "301演習室"},
+                {day: "水", period: "1", className: "AI機械学習", teacherName: "高橋 誠", roomName: "201教室"}
+            ]
+        },
+        
+        // ========== 他のコース ==========
+        {
+            id: 1005,
+            course: "Webクリエイタコース",
+            startDate: month2StartStr,
+            endDate: month2EndStr,
+            data: [
+                {day: "月", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
+                {day: "月", period: "2", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
+                {day: "火", period: "1", className: "プロジェクト管理", teacherName: "山本 さくら", roomName: "202教室"},
+                {day: "水", period: "1", className: "キャリアデザイン", teacherName: "伊藤 直人", roomName: "4F大講義室"}
+            ]
+        },
+        {
+            id: 1006,
+            course: "マルチメディアOAコース",
+            startDate: month3StartStr,
+            endDate: month3EndStr,
+            data: [
+                {day: "月", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
+                {day: "月", period: "2", className: "プロジェクト管理", teacherName: "山本 さくら", roomName: "202教室"},
+                {day: "火", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
+                {day: "水", period: "1", className: "キャリアデザイン", teacherName: "伊藤 直人", roomName: "4F大講義室"},
+                {day: "木", period: "1", className: "HR", teacherName: "田中 優子", roomName: "202教室"}
+            ]
+        }
+    ];
 }
 
 /*

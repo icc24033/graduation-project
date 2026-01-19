@@ -1,8 +1,12 @@
 <?php
+// TimetableService.php
 // クラスの読み込み（パスは環境に合わせて調整してください）
 require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../../classes/helper/dropdown/ViewHelper.php';
 
 class TimetableService {
+
+    private $courses;
 
     /**
      * getAllTimetableData
@@ -18,10 +22,10 @@ class TimetableService {
             $timetableRepo = RepositoryFactory::getTimetableRepository();
 
             // 2. コース全取得
-            $courses = $courseRepo->getAllCourses();
+            $this->courses = $courseRepo->getAllCourses();
 
             // 3. コースごとにループして時間割を取得
-            foreach ($courses as $course) {
+            foreach ($this->courses as $course) {
                 $courseId = $course['course_id'];
                 
                 // 特定のコースの時間割を取得
@@ -44,4 +48,17 @@ class TimetableService {
 
         return $allTimetables;
     }
+
+    /**
+     * 
+     * 概要：コースの情報を返す関数
+     * 戻り値：コース情報が格納された配列
+     */
+    public function getCourseDropdownOptions() {
+        $courseRepo = RepositoryFactory::getCourseRepository();
+        $courses = $courseRepo->getAllCourses();
+        $html = ViewHelper::renderDropdownList($courses, 'course_id', 'course_name');
+        return $html;
+    }
+    
 }
