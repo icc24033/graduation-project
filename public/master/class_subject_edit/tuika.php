@@ -6,119 +6,22 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// 1. データベース接続
-$host = 'localhost'; $dbname = 'itira'; $user = 'root'; $password = 'root'; 
-try {
-    // DSN（Data Source Name）の設定：MySQL接続、文字コードはutf8mb4を指定
-    $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-    $pdo = new PDO($dsn, $user, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,      // エラー時に例外を投げる
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // 結果を連想配列で取得
-    ]);
-} catch (PDOException $e) { die("DB接続エラー: " . $e->getMessage()); }
-
 $courseInfo = [   
-    'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組', 'grade' => 1, 'course_id' => 7],
-    'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組', 'grade' => 1, 'course_id' => 8],
-    'iphasu'        => ['table' => 'iphasu_itiran',   'name' => 'ITパスポートコース', 'grade' => 1, 'course_id' => 6],
-    'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報コース', 'grade' => 1, 'course_id' => 5],
-    'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報コース', 'grade' => 1, 'course_id' => 4],
-    'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
-    'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
-    'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
+    'itikumi'       => ['name' => '1年1組', 'grade' => 1, 'course_id' => 7],
+    'nikumi'        => ['name' => '1年2組', 'grade' => 1, 'course_id' => 8],
+    'iphasu'        => ['name' => 'ITパスポートコース', 'grade' => 1, 'course_id' => 6],
+    'kihon'         => ['name' => '基本情報コース', 'grade' => 1, 'course_id' => 5],
+    'applied-info'  => ['name' => '応用情報コース', 'grade' => 1, 'course_id' => 4],
+    'multimedia'    => ['name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
+    'system-design' => ['name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
+    'web-creator'   => ['name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
 ];
-
-
-// 3. AJAX・フォーム処理（POSTリクエスト時の処理）
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    $action = $_POST['action'];
-    // 送信元によって異なるキー名に対応
-    $title = $_POST['subject_name'] ?? $_POST['title'] ?? '';
-    $raw_grade = $_POST['grade'] ?? '';
-
-    try {
-        // フィールド（講師・教室）の更新処理
-        if ($action === 'update_field') {
-            $field = $_POST['field']; 
-            $new_val = $_POST['value'];
-            $grade_int = (int)$raw_grade;
-            $mode = $_POST['mode'] ?? 'overwrite'; // 追加モードか上書きモードか
-
-            // 定義されている全コースのテーブルに対して更新を試みる
-            foreach ($courseInfo as $info) {
-                $final_val = $new_val;
-
-                // 講師の追加処理ロジック：既存の講師名にカンマ区切りで追加する
-                if ($field === 'teacher' && $mode === 'add') {
-                    // 現在の値を一度取得
-                    $stmt = $pdo->prepare("SELECT teacher FROM `{$info['table']}` WHERE `subject_name` = ? AND `grade` = ?");
-                    $stmt->execute([$title, $grade_int]);
-                    $current = $stmt->fetchColumn();
-
-                    // 「未設定」以外で既存値がある場合、重複チェックをして連結
-                    if ($current && $current !== '未設定') {
-                        $existing = explode('、', $current);
-                        if (!in_array($new_val, $existing)) {
-                            $final_val = $current . '、' . $new_val;
-                        } else {
-                            $final_val = $current;
-                        }
-                    }
-                }
-
-                // 該当するコーステーブルのレコードをUPDATE
-                $sql = "UPDATE `{$info['table']}` SET `$field` = :val WHERE `subject_name` = :name AND `grade` = :grade";
-                $pdo->prepare($sql)->execute([':val' => $final_val, ':name' => $title, ':grade' => $grade_int]);
-            }
-            echo json_encode(['success' => true]); exit;
-        } 
-        // 新規科目の追加、または特定コースへの科目紐付け
-        elseif ($action === 'insert_new' || $action === 'add_course') {
-            $targets = [];
-            // 学年指定（全体、1年全体、2年全体、または個別コース）に応じた対象コースの選別
-            if ($raw_grade === 'all') {
-                $targets = $courseInfo;
-            } elseif ($raw_grade === '1_all') {
-                foreach($courseInfo as $k => $v) if($v['grade'] == 1) $targets[$k] = $v;
-            } elseif ($raw_grade === '2_all') {
-                foreach($courseInfo as $k => $v) if($v['grade'] == 2) $targets[$k] = $v;
-            } else {
-                $course_key = $_POST['course'] ?? $_POST['course_key'];
-                if(isset($courseInfo[$course_key])) $targets[$course_key] = $courseInfo[$course_key];
-            }
-
-            // 選別された対象テーブルすべてにINSERT実行
-            foreach ($targets as $info) {
-                $table = $info['table'];
-                $course_name = $info['name'];
-                $grade_val = $info['grade'];
-                $sql = "INSERT INTO `$table` (couse, grade, subject_name, teacher, room) VALUES (?, ?, ?, '未設定', '未設定')";
-                $pdo->prepare($sql)->execute([$course_name, $grade_val, $title]);
-            }
-
-            // 通常のフォーム投稿ならリダイレクト、AJAXならJSONを返す
-            if ($action === 'insert_new') { header("Location: tuika.php"); exit; }
-            echo json_encode(['success' => true]); exit;
-        }
-        // 特定のコースから科目を削除
-        elseif ($action === 'remove_course') {
-            $table = $courseInfo[$_POST['course_key']]['table'];
-            $grade_int = (int)$raw_grade;
-            $sql = "DELETE FROM `$table` WHERE subject_name = ? AND grade = ?";
-            $pdo->prepare($sql)->execute([$title, $grade_int]);
-            echo json_encode(['success' => true]); exit;
-        }
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]); exit;
-    }
-}
 
 // 4. データ取得ロジック（表示用のリスト作成）
 $grade_val = ($search_grade === '1年生') ? 1 : (($search_grade === '2年生') ? 2 : null);
 
 $subjects = []; // 科目名ごとに集約するための配列
-$total_course_count = count($courseInfo);
+$total_course_count = count($courseList); // 全コース数のカウント
 
 
 foreach ($classSubjectList as $row) {
@@ -128,15 +31,22 @@ foreach ($classSubjectList as $row) {
         $subjects[$id] = [
             'grade'   => $row['grade'], 
             'title'   => $row['subject_name'],
-            'teacher' => $row['teacher_name'] ?? '未設定', 
+            'teachers' => [], // 'teacher' から 'teachers' (配列) に変更
             'room'    => $row['room_name'] ?? '未設定', 
             'courses' => [], 
             'course_keys' => [] 
         ];
     }
 
+    // --- 講師名の追加（重複防止） ---
+    if (!empty($row['teacher_name']) && $row['teacher_name'] !== '未設定') {
+        if (!in_array($row['teacher_name'], $subjects[$id]['teachers'])) {
+            $subjects[$id]['teachers'][] = $row['teacher_name'];
+        }
+    }
+
     // 表示用のコース名を追加
-    if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+    if (!in_array($row['course_name'], $subjects[$id]['courses'])) { // 重複防止
         $subjects[$id]['courses'][] = $row['course_name'];
     }
 
@@ -149,13 +59,13 @@ foreach ($classSubjectList as $row) {
        }
    }
 
-   if ($found_key && !in_array($found_key, $subjects[$id]['course_keys'])) {
+   if ($found_key && !in_array($found_key, $subjects[$id]['course_keys'])) { // 重複防止
        $subjects[$id]['course_keys'][] = $found_key; // 数値ではなく識別キーを入れる
    }
 }
 
 
-// 全コースで実施されているかどうかの判定フラグを追加
+// --- 全コース対象かどうかの判定 ---
 foreach ($subjects as $id => $data) {
     $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
 }
@@ -167,39 +77,7 @@ foreach ($subjects as $id => $data) {
 <head>
     <meta charset="UTF-8">
     <title>授業科目一覧</title>
-    <style>
-        body { background-color: #f7f9fb; font-family: sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        .header { background-color: #c6e2ff; height: 60px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #adcdec; flex-shrink: 0; }
-        .header h1 { font-size: 20px; color: #333; margin: 0; }
-        .container { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 220px; background-color: #f0f5ff; border-right: 1px solid #e0e6ed; padding: 20px 0; overflow-y: auto; }
-        .sidebar-section { padding: 0 20px; margin-bottom: 25px; }
-        .sidebar-title { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; }
-        .sidebar-select { width: 100%; padding: 8px; border: 1px solid #d0dbe9; border-radius: 4px; }
-        .sidebar-nav { list-style: none; padding: 0; margin-bottom: 15px; }
-        .sidebar-nav a { text-decoration: none; color: #333; font-size: 14px; padding: 10px 20px; display: block; }
-        .sidebar-nav a.active { background-color: #d1e3ff; font-weight: bold; }
-        .sidebar-add-btn { display: block; width: 180px; margin: 10px auto; background-color: #4e5d6c; color: #fff; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .subject-list { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; padding: 20px; align-content: flex-start; overflow-y: auto; }
-        .subject-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; aspect-ratio: 1 / 1.1; cursor: pointer; transition: 0.2s; }
-        .subject-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card-header { background-color: #edf5ff; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 12px 12px 0 0; }
-        .card-body { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; text-align: center; }
-        .card-title { font-size: 18px; font-weight: 800; color: #333; margin: 0; }
-        .card-footer { padding: 10px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #f0f0f0; word-break: break-all; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
-        .modal-title { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 25px; }
-        .info-box { margin-bottom: 20px; text-align: center; }
-        .info-header { background-color: #c6e2ff; color: #333; display: block; padding: 8px; font-size: 13px; font-weight: bold; border-radius: 4px 4px 0 0; }
-        .info-value { border: 1px solid #e0e6ed; padding: 12px; border-radius: 0 0 4px 4px; background: #fff; margin-bottom: 8px; font-size: 14px; word-break: break-all; }
-        .circle-btn-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; }
-        .circle-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d0dbe9; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .selector-area { display: none; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px dashed #ccc; margin-top: 5px; }
-        .btn-confirm { background-color: #4e5d6c; color: white; border: none; padding: 12px 40px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .update-btn { margin-top: 8px; padding: 5px 15px; cursor: pointer; background: #4e5d6c; color: white; border: none; border-radius: 4px; }
-        .btn-danger { background:#d9534f !important; }
-    </style>
+    <link rel="stylesheet" href="../css/add_style.css"> 
 </head>
 <body>
     <header class="header"><h1>授業科目一覧</h1></header>
@@ -265,8 +143,8 @@ foreach ($subjects as $id => $data) {
                 </div>
                 <div id="area-teacher-add" class="selector-area">
                     <select id="sel-teacher" class="sidebar-select">
-                        <?php foreach($masterLists['teacher'] as $t): ?>
-                            <option value="<?= $t ?>"><?= $t ?> 先生</option>
+                        <?php foreach($teacherList as $t): ?>
+                            <option value="<?= $t['teacher_name'] ?>"><?= $t['teacher_name'] ?> 先生</option>
                         <?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('teacher', 'add')">講師を追加する</button>
@@ -285,7 +163,7 @@ foreach ($subjects as $id => $data) {
                 </div>
                 <div id="area-room-add" class="selector-area">
                     <select id="sel-room" class="sidebar-select">
-                        <?php foreach($masterLists['room'] as $r): ?><option value="<?= $r ?>"><?= $r ?></option><?php endforeach; ?>
+                        <?php foreach($roomList as $r): ?><option value="<?= $r['room_name'] ?>"><?= $r['room_name'] ?></option><?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('room', 'overwrite')">教室を確定する</button>
                 </div>
@@ -383,26 +261,26 @@ foreach ($subjects as $id => $data) {
             currentData = data;
             document.getElementById('m-title').innerText = data.title;
             
-            // 講師表示：複数対応（nullチェック追加）
+            // 講師表示：配列内の各名前に「 先生」を付与して結合
             let tDisplay = '未設定';
-            if (data.teacher && data.teacher !== '未設定') {
-                const tArray = data.teacher.split('、');
-                tDisplay = tArray.join(' 先生、') + " 先生";
+            if (data.teachers && data.teachers.length > 0 && data.teachers[0] !== '未設定') {
+                tDisplay = data.teachers.map(t => t + " 先生").join(' / ');
             }
             document.getElementById('m-teacher').innerText = tDisplay;
 
-            // ついでに room も null の場合に備えて安全策をとっておくと良いです
+            // 教室・コース表示
             document.getElementById('m-room').innerText = data.room || '未設定';
-            
-            document.getElementById('m-room').innerText = data.room;
             document.getElementById('m-courses').innerText = data.courses.join(' / ');
 
+            // 講師選択セレクトボックスの初期化
             const teacherSel = document.getElementById('sel-teacher');
             teacherSel.selectedIndex = 0;
 
+            // 教室選択セレクトボックスの初期化
             const roomSel = document.getElementById('sel-room');
             roomSel.value = data.room;
 
+            // コース追加用セレクトボックスの生成（その学年で、まだ登録されていないコースを抽出）
             const addSel = document.getElementById('sel-course-add');
             addSel.innerHTML = '<option value="" disabled selected>追加するコースを選択</option>';
             for (let key in allCourseInfo) {
@@ -414,6 +292,7 @@ foreach ($subjects as $id => $data) {
                 }
             }
 
+            // コース削除用セレクトボックスの生成
             const remSel = document.getElementById('sel-course-remove');
             remSel.innerHTML = "";
             data.course_keys.forEach((key, index) => {
@@ -423,6 +302,7 @@ foreach ($subjects as $id => $data) {
                 remSel.appendChild(opt);
             });
 
+            // 編集エリアの非表示初期化とモーダル表示
             document.querySelectorAll('.selector-area').forEach(el => el.style.display = 'none');
             document.getElementById('detailModal').style.display = 'flex';
         }
@@ -456,9 +336,24 @@ foreach ($subjects as $id => $data) {
             });
         }
 
+        // tuika.php 内の clearField 関数を修正
         function clearField(field) {
             if(confirm("解除して『未設定』にしますか？")) {
-                ajax({action: 'update_field', field: field, value: '未設定', mode: 'overwrite', grade: currentData.grade});
+                // 現在表示している科目の最初のコースキーを取得
+                const targetKey = currentData.course_keys && currentData.course_keys.length > 0 
+                                ? currentData.course_keys[0] 
+                                : null;
+
+                if(!targetKey) return alert("コース情報を特定できませんでした");
+
+                ajax({
+                    action: 'update_field', 
+                    field: field, 
+                    value: '未設定', 
+                    mode: 'overwrite', 
+                    grade: currentData.grade,
+                    course_key: targetKey // ★ これを追加
+                });
             }
         }
 
@@ -473,7 +368,7 @@ foreach ($subjects as $id => $data) {
             const fd = new FormData();
             for(let k in data) fd.append(k, data[k]);
             fd.append('subject_name', currentData.title);
-            fetch('test.php', {method: 'POST', body: fd})
+            fetch('..\\..\\..\\..\\app\\master\\class_subject_edit_backend\\json_process.php', {method: 'POST', body: fd})
             .then(res => res.json())
             .then(res => { if(res.success) location.reload(); })
             .catch(err => alert("通信エラーが発生しました"));
