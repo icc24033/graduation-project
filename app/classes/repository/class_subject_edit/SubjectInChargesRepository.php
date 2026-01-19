@@ -14,7 +14,8 @@ class SubjectInChargesRepository extends BaseRepository {
     public function getAllClassSubjects() {
         try {
             // INNER JOIN を使用して全ての関連情報を取得
-            $sql = "SELECT 
+            $sql = "SELECT
+                        c.course_id,       -- ★これを追加
                         c.course_name, 
                         sic.grade, 
                         s.subject_name, 
@@ -23,9 +24,9 @@ class SubjectInChargesRepository extends BaseRepository {
                     FROM subject_in_charges sic
                     JOIN course c ON sic.course_id = c.course_id
                     JOIN subjects s ON sic.subject_id = s.subject_id
-                    JOIN teacher t ON sic.teacher_id = t.teacher_id
-                    JOIN room r ON sic.room_id = r.room_id
-                    ORDER BY c.course_id ASC, sic.grade ASC"; // コースと学年順に並べ替え
+                    LEFT JOIN teacher t ON sic.teacher_id = t.teacher_id
+                    LEFT JOIN room r ON sic.room_id = r.room_id
+                    ORDER BY c.course_id ASC, sic.grade ASC;"; // コースと学年順に並べ替え
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
