@@ -1,3 +1,7 @@
+<?php
+// create_timetable.php
+SecurityHelper::applySecureHeaders();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -55,17 +59,10 @@
                             </label>
                             <div class="ml-6 mt-1 relative">
                                 <button id="courseDropdownToggle" class="dropdown-toggle" aria-expanded="false">
-                                    <span class="current-value">システムデザインコース</span>
+                                    <span class="current-value">コースを選択してください</span>
                                 </button>
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
-                                    <li><a href="#">システムデザインコース</a></li>
-                                    <li><a href="#">Webクリエイタコース</a></li>
-                                    <li><a href="#">マルチメディアOAコース</a></li>
-                                    <li><a href="#">応用情報コース</a></li>
-                                    <li><a href="#">基本情報コース</a></li>
-                                    <li><a href="#">ITパスポートコース</a></li>
-                                    <li><a href="#">１年１組</a></li>
-                                    <li><a href="#">１年２組</a></li>
+                                    <?php echo $courseList; ?>
                                 </ul>
                             </div>
                         </div>
