@@ -1,11 +1,5 @@
 <?php
 // tuika.php
-
-
-// エラー表示設定
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 // ここにあった foreach などのロジックは削除されました
 // すでに $subjects, $grade_val, $courseInfo などがコントローラーから渡されています
 ?>
