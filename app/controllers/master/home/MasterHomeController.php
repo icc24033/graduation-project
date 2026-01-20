@@ -24,7 +24,7 @@ class MasterHomeController extends HomeRepository {
             // アカウント編集へのリンク
             'link_account_edit'      => "../master/user-round/user-round.html",
             // 授業科目編集へのリンク
-            'link_notification_edit' => "notification_edit.php",
+            'link_notification_edit' => "../master/class_subject_edit/controls/addition_control.php",
             // 授業詳細編集へのリンク
             'link_subject_edit'      => "../teacher/class_detail_edit/class_detail_edit_control.php",
             // 時間割り閲覧へのリンク

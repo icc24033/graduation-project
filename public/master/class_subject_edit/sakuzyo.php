@@ -1,78 +1,52 @@
 <?php
-// 1. データベース接続設定
-$host = 'localhost'; $dbname = 'itira'; $user = 'root'; $password = 'root'; 
+// sakuzyo.php 冒頭のデータ整理ロジック
 
-try {
-    $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-    $pdo = new PDO($dsn, $user, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-} catch (PDOException $e) { die("DB接続エラー: " . $e->getMessage()); }
-
-// 有効なコース情報を取得
+// 1. 各コースの ID と名前を定義（subject_in_charges.sql の内容に準拠）
 $courseInfo = [
-    'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報'],
-    'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディア'],
-    'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報'],
-    'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザイン'],
-    'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイター'],
-    'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組'],
-    'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組']
+    'itikumi'       => ['id' => 7, 'name' => '1年1組'],
+    'nikumi'        => ['id' => 8, 'name' => '1年2組'],
+    'kihon'         => ['id' => 5, 'name' => '基本情報'],
+    'applied-info'  => ['id' => 4, 'name' => '応用情報'],
+    'multimedia'    => ['id' => 3, 'name' => 'マルチメディア'],
+    'system-design' => ['id' => 1, 'name' => 'システムデザイン'],
+    'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター']
 ];
 
-// ==========================================
-// 【削除処理】
-// ==========================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    $target_title = $_POST['subject_name'];
-    $target_grade = (int)$_POST['grade'];
-    $action = $_POST['action'];
-
-    try {
-        if ($action === 'delete_single') {
-            $courseKey = $_POST['course_key'];
-            if (isset($courseInfo[$courseKey])) {
-                $table = $courseInfo[$courseKey]['table'];
-                $sql = "DELETE FROM `$table` WHERE subject_name = ? AND grade = ?";
-                $pdo->prepare($sql)->execute([$target_title, $target_grade]);
-            }
-        } elseif ($action === 'delete_all') {
-            foreach ($courseInfo as $info) {
-                $sql = "DELETE FROM `{$info['table']}` WHERE subject_name = ? AND grade = ?";
-                $pdo->prepare($sql)->execute([$target_title, $target_grade]);
-            }
-        }
-        header("Location: sakuzyo.php?" . http_build_query($_GET));
-        exit;
-    } catch (PDOException $e) {
-        $db_error = "削除エラー: " . $e->getMessage();
-    }
-}
-
-
 $subjects = [];
-foreach ($courseInfo as $key => $info) {
-    if ($search_course !== 'all' && $search_course !== $key) continue;
-    
-    $sql = "SELECT grade, subject_name FROM `{$info['table']}`";
-    if ($search_grade !== 'all') {
-        $stmt = $pdo->prepare($sql . " WHERE grade = ?");
-        $stmt->execute([$search_grade]);
-    } else {
-        $stmt = $pdo->query($sql);
+foreach ($classSubjectList as $row) {
+    if ($search_grade !== 'all' && (int)$row['grade'] !== (int)$search_grade) continue;
+
+    $id = $row['grade'] . "_" . $row['subject_name'];
+
+    if (!isset($subjects[$id])) {
+        $subjects[$id] = [
+            'grade'   => $row['grade'], 
+            'title'   => $row['subject_name'],
+            'courses' => [], 
+            'course_keys' => [] 
+        ];
     }
 
-    while ($row = $stmt->fetch()) {
-        $id = $row['grade'] . "_" . $row['subject_name'];
-        if (!isset($subjects[$id])) {
-            $subjects[$id] = [
-                'grade' => $row['grade'], 'title' => $row['subject_name'],
-                'courses' => [], 'course_keys' => []
-            ];
+    if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+        $subjects[$id]['courses'][] = $row['course_name'];
+
+        // 【修正ポイント】ID または 名前で $courseInfo のキーを特定する
+        $foundKey = '';
+        foreach ($courseInfo as $key => $info) {
+            // 数値IDが一致するか、または名前が一致するか確認
+            $isIdMatch = isset($row['course_id']) && (int)$row['course_id'] === $info['id'];
+            $isNameMatch = ($info['name'] === $row['course_name']);
+
+            if ($isIdMatch || $isNameMatch) {
+                $foundKey = $key;
+                break;
+            }
         }
-        $subjects[$id]['courses'][] = $info['name'];
-        $subjects[$id]['course_keys'][] = $key;
+        
+        // キーが見つかった場合のみ追加
+        if ($foundKey !== '') {
+            $subjects[$id]['course_keys'][] = $foundKey;
+        }
     }
 }
 ?>
@@ -136,10 +110,12 @@ foreach ($courseInfo as $key => $info) {
                 <p id="m-grade" style="font-size: 0.9em; color: #666;"></p>
             </div>
 
-            <form id="deleteForm" method="POST" action="sakuzyo.php?<?= http_build_query($_GET) ?>">
+            <form id="deleteForm" method="POST" action="..\..\..\..\app\master\class_subject_edit_backend\backend_subject_delete.php">
                 <input type="hidden" name="subject_name" id="f-title">
                 <input type="hidden" name="grade" id="f-grade">
                 <input type="hidden" name="action" id="f-action" value="delete_single">
+                
+                <input type="hidden" name="query_string" value="<?= htmlspecialchars($_SERVER['QUERY_STRING'] ?? '') ?>">
 
                 <div id="single-delete-area">
                     <p style="font-size: 12px; color: #666;">削除するコースを選択してください：</p>
