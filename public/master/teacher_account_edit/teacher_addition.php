@@ -30,7 +30,6 @@ SecurityHelper::applySecureHeaders();
                     <li class="nav-item"><a href="teacher_delete_control.php">アカウントの削除</a></li>
                     <li class="nav-item"><a href="teacher_info_control.php">アカウント情報変更</a></li>
                     <li class="nav-item"><a href="master_edit_control.php">マスタの付与</a></li>
-                    <!-- <li class="nav-item"><a href="class.html">担当授業確認</a></li> -->
                 </ul>
                 <form action="../../../../app/master/teacher_account_edit_backend/backend_csv_upload.php" method="POST" enctype="multipart/form-data">
     
