@@ -1,54 +1,7 @@
 <?php
-// sakuzyo.php 冒頭のデータ整理ロジック
-
-// 1. 各コースの ID と名前を定義（subject_in_charges.sql の内容に準拠）
-$courseInfo = [
-    'itikumi'       => ['id' => 7, 'name' => '1年1組'],
-    'nikumi'        => ['id' => 8, 'name' => '1年2組'],
-    'kihon'         => ['id' => 5, 'name' => '基本情報'],
-    'applied-info'  => ['id' => 4, 'name' => '応用情報'],
-    'multimedia'    => ['id' => 3, 'name' => 'マルチメディア'],
-    'system-design' => ['id' => 1, 'name' => 'システムデザイン'],
-    'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター']
-];
-
-$subjects = [];
-foreach ($classSubjectList as $row) {
-    if ($search_grade !== 'all' && (int)$row['grade'] !== (int)$search_grade) continue;
-
-    $id = $row['grade'] . "_" . $row['subject_name'];
-
-    if (!isset($subjects[$id])) {
-        $subjects[$id] = [
-            'grade'   => $row['grade'], 
-            'title'   => $row['subject_name'],
-            'courses' => [], 
-            'course_keys' => [] 
-        ];
-    }
-
-    if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
-        $subjects[$id]['courses'][] = $row['course_name'];
-
-        // 【修正ポイント】ID または 名前で $courseInfo のキーを特定する
-        $foundKey = '';
-        foreach ($courseInfo as $key => $info) {
-            // 数値IDが一致するか、または名前が一致するか確認
-            $isIdMatch = isset($row['course_id']) && (int)$row['course_id'] === $info['id'];
-            $isNameMatch = ($info['name'] === $row['course_name']);
-
-            if ($isIdMatch || $isNameMatch) {
-                $foundKey = $key;
-                break;
-            }
-        }
-        
-        // キーが見つかった場合のみ追加
-        if ($foundKey !== '') {
-            $subjects[$id]['course_keys'][] = $foundKey;
-        }
-    }
-}
+// sakuzyo.php 
+// 冒頭のループ処理は削除されました。
+// すでに Controller から $subjects, $courseInfo, $search_grade 等が渡されています。
 ?>
 
 
@@ -131,35 +84,6 @@ foreach ($classSubjectList as $row) {
         </div>
     </div>
 
-    <script>
-        function openDeleteModal(data) {
-            document.getElementById('m-title').innerText = data.title;
-            document.getElementById('m-grade').innerText = data.grade + "年生";
-            document.getElementById('f-title').value = data.title;
-            document.getElementById('f-grade').value = data.grade;
-
-            const sel = document.getElementById('f-course');
-            sel.innerHTML = "";
-            data.course_keys.forEach((key, i) => {
-                let opt = document.createElement('option');
-                opt.value = key;
-                opt.text = data.courses[i];
-                sel.appendChild(opt);
-            });
-
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        function setAction(action) {
-            document.getElementById('f-action').value = action;
-            const confirmMsg = action === 'delete_all' ? '本当にすべてのテーブルからこの科目を消去しますか？' : '選択したコースから削除しますか？';
-            if (!confirm(confirmMsg)) {
-                event.preventDefault();
-            }
-        }
-
-        function closeModal() { document.getElementById('deleteModal').style.display = 'none'; }
-        window.onclick = (e) => { if (e.target.id === 'deleteModal') closeModal(); }
-    </script>
+    <script src="../js/subject_delete.js"></script>
 </body>
 </html>
