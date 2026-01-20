@@ -45,43 +45,29 @@
                     </li>
                     <li class="nav-item has-dropdown">
                         <button class="dropdown-toggle" id="subjectDropdownToggle" aria-expanded="false">
-                            <span class="current-value">テキスト1</span>
+                            <span class="current-value">
+                                <?php echo !empty($subjects) ? htmlspecialchars($subjects[0]['subject_name']) : '教科選択'; ?>
+                            </span>
                         </button>
                         <ul class="dropdown-menu" id="subjectDropdownMenu">
-                            <li><a href="#" data-course="t1">テキスト1</a></li>
-                            <li><a href="#" data-course="t2">テキスト2</a></li>
+                            <?php if (!empty($subjects)): ?>
+                                <?php foreach ($subjects as $subject): ?>
+                                    <li><a href="#" data-subject-id="<?= $subject['teacher_id'] ?>"><?= htmlspecialchars($subject['subject_name']) ?></a></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li><a href="#">担当教科なし</a></li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                     
                     <div class="next-lesson-wrapper">
-                        <li class="is-group-label">次回の授業</li>
+                        <li class="is-group-label">編集済みの授業</li>
                     </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">日付なし</div>
-                        <button class="status-button not-created">未作成</button>
+                    <div id="sidebarLessonList">
                     </div>
                 </ul>
             </nav>
+
             <section class="content-area">
                 <div class="month-selector">
                     <div class="month-search">
@@ -106,7 +92,7 @@
                         <div class="day-header">水</div>
                         <div class="day-header">木</div>
                         <div class="day-header">金</div>
-                        <div class="day-header is-saturday">土</div>
+                        <div class="day-header">土</div>
                     </div>
                 </div>
             </section>
@@ -122,21 +108,18 @@
                     <div class="modal-body">
                         <div class="form-section">
                             <h2 class="form-title">授業詳細</h2>
-                            <textarea class="lesson-details-textarea" placeholder="授業の内容、連絡事項などを入力してください。"></textarea>
+                            <textarea class="lesson-details-textarea" id="lessonContent" placeholder="授業の内容を入力してください。"></textarea>
                             <p class="char-count">0/200文字</p>
                         </div>
                         
                         <div class="form-section">
                             <h2 class="form-title">課題・持ち物</h2>
                             <div class="common-items-area">
-                                <h3 class="sub-title" id="template-title">よく使う持ち物テンプレート</h3>
+                                <h3 class="sub-title">よく使う持ち物テンプレート</h3>
                                 <div class="item-list-wrapper">
                                     <div class="item-tags">
                                         <div class="item-tag-container"><span class="item-tag">ノートパソコン</span></div>
                                         <div class="item-tag-container"><span class="item-tag">筆記用具</span></div>
-                                        <div class="item-tag-container"><span class="item-tag">教科書1</span></div>
-                                        <div class="item-tag-container"><span class="item-tag">教科書2</span></div>
-                                        <div class="item-tag-container"><span class="item-tag">プリント</span></div>
                                     </div>
                                     <div class="item-delete-icon-wrapper">
                                         <img class="delete-icon" src="images/Vector.png" alt="削除">
@@ -148,13 +131,13 @@
                                 </div>
                             </div>
                             <div class="current-items-area">
-                                <textarea id="detailsTextarea" class="details-items-textarea" placeholder="持ち物は入力されていません"></textarea>
+                                <textarea id="belongingsTextarea" class="details-items-textarea" placeholder="持ち物は入力されていません"></textarea>
                             </div>
                         </div>
                     </div>
                     
                     <div class="modal-footer">
-                        <button class="delete-button">削除</button>
+                        <button class="delete-button" id="deleteBtn">削除</button>
                         <div>
                             <button id="tempSaveButton" class="save-button temp-save-button">一時保存</button>
                             <button id="completeButton" class="save-button complete-button">完了</button>
