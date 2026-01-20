@@ -1,74 +1,12 @@
 <?php
 // tuika.php
 
-// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+// エラー表示設定
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$courseInfo = [   
-    'itikumi'       => ['name' => '1年1組', 'grade' => 1, 'course_id' => 7],
-    'nikumi'        => ['name' => '1年2組', 'grade' => 1, 'course_id' => 8],
-    'iphasu'        => ['name' => 'ITパスポートコース', 'grade' => 1, 'course_id' => 6],
-    'kihon'         => ['name' => '基本情報コース', 'grade' => 1, 'course_id' => 5],
-    'applied-info'  => ['name' => '応用情報コース', 'grade' => 1, 'course_id' => 4],
-    'multimedia'    => ['name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
-    'system-design' => ['name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
-    'web-creator'   => ['name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
-];
-
-// 4. データ取得ロジック（表示用のリスト作成）
-$grade_val = ($search_grade === '1年生') ? 1 : (($search_grade === '2年生') ? 2 : null);
-
-$subjects = []; // 科目名ごとに集約するための配列
-$total_course_count = count($courseList); // 全コース数のカウント
-
-
-foreach ($classSubjectList as $row) {
-    $id = $row['subject_name']; 
-        
-    if (!isset($subjects[$id])) {
-        $subjects[$id] = [
-            'grade'   => $row['grade'], 
-            'title'   => $row['subject_name'],
-            'teachers' => [], // 'teacher' から 'teachers' (配列) に変更
-            'room'    => $row['room_name'] ?? '未設定', 
-            'courses' => [], 
-            'course_keys' => [] 
-        ];
-    }
-
-    // --- 講師名の追加（重複防止） ---
-    if (!empty($row['teacher_name']) && $row['teacher_name'] !== '未設定') {
-        if (!in_array($row['teacher_name'], $subjects[$id]['teachers'])) {
-            $subjects[$id]['teachers'][] = $row['teacher_name'];
-        }
-    }
-
-    // 表示用のコース名を追加
-    if (!in_array($row['course_name'], $subjects[$id]['courses'])) { // 重複防止
-        $subjects[$id]['courses'][] = $row['course_name'];
-    }
-
-   // course_id から 'itikumi' などのキーを逆引き
-   $found_key = '';
-   foreach ($courseInfo as $key => $info) {
-       if ($info['course_id'] == $row['course_id']) {
-           $found_key = $key;
-           break;
-       }
-   }
-
-   if ($found_key && !in_array($found_key, $subjects[$id]['course_keys'])) { // 重複防止
-       $subjects[$id]['course_keys'][] = $found_key; // 数値ではなく識別キーを入れる
-   }
-}
-
-
-// --- 全コース対象かどうかの判定 ---
-foreach ($subjects as $id => $data) {
-    $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
-}
+// ここにあった foreach などのロジックは削除されました
+// すでに $subjects, $grade_val, $courseInfo などがコントローラーから渡されています
 ?>
 
 <!DOCTYPE html>
@@ -223,157 +161,10 @@ foreach ($subjects as $id => $data) {
     </div>
 
     <script>
+        // 外部JSで使用するために、PHPからデータを渡す
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
-        let currentData = {};
-
-        function openAddModal() {
-            document.getElementById('addModal').style.display = 'flex';
-            updateAddModalCourses();
-        }
-
-        function updateAddModalCourses() {
-            const gradeVal = document.getElementById('add_grade').value;
-            const courseSelect = document.getElementById('add_course');
-            const courseBox = document.getElementById('course_select_box');
-            courseSelect.innerHTML = '';
-            if (gradeVal.includes('all')) {
-                let opt = document.createElement('option');
-                opt.value = "bulk_target";
-                opt.text = "（対象の全コースに登録されます）";
-                courseSelect.appendChild(opt);
-                courseBox.style.opacity = "0.5";
-            } else {
-                courseBox.style.opacity = "1";
-                const grade = parseInt(gradeVal);
-                for (let key in allCourseInfo) {
-                    if (allCourseInfo[key].grade === grade) {
-                        let opt = document.createElement('option');
-                        opt.value = key;
-                        opt.text = allCourseInfo[key].name;
-                        courseSelect.appendChild(opt);
-                    }
-                }
-            }
-        }
-
-        function openDetail(data) {
-            currentData = data;
-            document.getElementById('m-title').innerText = data.title;
-            
-            // 講師表示：配列内の各名前に「 先生」を付与して結合
-            let tDisplay = '未設定';
-            if (data.teachers && data.teachers.length > 0 && data.teachers[0] !== '未設定') {
-                tDisplay = data.teachers.map(t => t + " 先生").join(' / ');
-            }
-            document.getElementById('m-teacher').innerText = tDisplay;
-
-            // 教室・コース表示
-            document.getElementById('m-room').innerText = data.room || '未設定';
-            document.getElementById('m-courses').innerText = data.courses.join(' / ');
-
-            // 講師選択セレクトボックスの初期化
-            const teacherSel = document.getElementById('sel-teacher');
-            teacherSel.selectedIndex = 0;
-
-            // 教室選択セレクトボックスの初期化
-            const roomSel = document.getElementById('sel-room');
-            roomSel.value = data.room;
-
-            // コース追加用セレクトボックスの生成（その学年で、まだ登録されていないコースを抽出）
-            const addSel = document.getElementById('sel-course-add');
-            addSel.innerHTML = '<option value="" disabled selected>追加するコースを選択</option>';
-            for (let key in allCourseInfo) {
-                if (allCourseInfo[key].grade == data.grade && !data.course_keys.includes(key)) {
-                    let opt = document.createElement('option');
-                    opt.value = key;
-                    opt.text = allCourseInfo[key].name;
-                    addSel.appendChild(opt);
-                }
-            }
-
-            // コース削除用セレクトボックスの生成
-            const remSel = document.getElementById('sel-course-remove');
-            remSel.innerHTML = "";
-            data.course_keys.forEach((key, index) => {
-                let opt = document.createElement('option');
-                opt.value = key;
-                opt.text = data.courses[index];
-                remSel.appendChild(opt);
-            });
-
-            // 編集エリアの非表示初期化とモーダル表示
-            document.querySelectorAll('.selector-area').forEach(el => el.style.display = 'none');
-            document.getElementById('detailModal').style.display = 'flex';
-        }
-
-        function toggleArea(id) {
-            const el = document.getElementById('area-' + id);
-            const isVisible = el.style.display === 'block';
-            document.querySelectorAll('.selector-area').forEach(e => e.style.display = 'none');
-            el.style.display = isVisible ? 'none' : 'block';
-        }
-
-        // tuika.php の saveField 関数を修正
-        function saveField(field, mode) {
-            const val = document.getElementById('sel-' + field).value;
-            if(!val) return alert("選択してください");
-            
-            // currentData.course_keys 配列の 0番目（最初のコース）を使用する
-            const targetKey = currentData.course_keys && currentData.course_keys.length > 0 
-                            ? currentData.course_keys[0] 
-                            : null;
-
-            if(!targetKey) return alert("コース情報を特定できませんでした");
-
-            ajax({
-                action: 'update_field', 
-                field: field, 
-                value: val, 
-                mode: mode, 
-                grade: currentData.grade,
-                course_key: targetKey // ★ここで正しいキーが送られるようになります
-            });
-        }
-
-        // tuika.php 内の clearField 関数を修正
-        function clearField(field) {
-            if(confirm("解除して『未設定』にしますか？")) {
-                // 現在表示している科目の最初のコースキーを取得
-                const targetKey = currentData.course_keys && currentData.course_keys.length > 0 
-                                ? currentData.course_keys[0] 
-                                : null;
-
-                if(!targetKey) return alert("コース情報を特定できませんでした");
-
-                ajax({
-                    action: 'update_field', 
-                    field: field, 
-                    value: '未設定', 
-                    mode: 'overwrite', 
-                    grade: currentData.grade,
-                    course_key: targetKey // ★ これを追加
-                });
-            }
-        }
-
-        function updateCourse(action) {
-            const type = (action === 'add_course') ? 'add' : 'remove';
-            const courseKey = document.getElementById('sel-course-' + type).value;
-            if (!courseKey) return alert("コースを選択してください");
-            ajax({action: action, course_key: courseKey, grade: currentData.grade});
-        }
-
-        function ajax(data) {
-            const fd = new FormData();
-            for(let k in data) fd.append(k, data[k]);
-            fd.append('subject_name', currentData.title);
-            fetch('..\\..\\..\\..\\app\\master\\class_subject_edit_backend\\json_process.php', {method: 'POST', body: fd})
-            .then(res => res.json())
-            .then(res => { if(res.success) location.reload(); })
-            .catch(err => alert("通信エラーが発生しました"));
-        }
-
-        window.onclick = (e) => { if(e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; }
+        let currentData = {}; // 外部JSから参照・更新される
     </script>
+    <script src="../js/subject_edit.js"></script>
 </body>
 </html>
