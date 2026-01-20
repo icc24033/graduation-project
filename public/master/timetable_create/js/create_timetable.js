@@ -1,4 +1,19 @@
+// create_timetable.js
+
+// 1. データ格納用の変数
 let savedTimetables = [];
+
+// 2. PHPからデータが渡ってきているか確認
+if (typeof dbTimetableData !== 'undefined' && Array.isArray(dbTimetableData)) {
+    // PHP (Repository) 側ですでに整形済みなので、そのまま代入するだけでOKです！
+    savedTimetables = dbTimetableData;
+    console.log("DBから読み込んだデータ(PHP整形済み):", savedTimetables);
+} else {
+    // データが無い場合は空配列で初期化
+    console.warn("DBからのデータ読み込みに失敗しました、またはデータがありません。");
+    savedTimetables = [];
+}
+
 let isCreatingMode = false;
 let isViewOnly = false;
 let currentRecord = null;
@@ -7,167 +22,53 @@ let originalRecordData = null; // 編集前のオリジナルデータ
 let previousState = null; // 新規作成前の状態を保存
 
 /*
-    * 概要: デモ用の時間割データを初期化する（ページロード時に呼ばれる）。
-    * 使用方法: ページ読み込み時に一度呼び出してください（内部で savedTimetables を設定します）。
-    */
-function initializeDemoData() {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // ========== システムデザインコース用の4つの期間 ==========
-    // 過去：先々月の期間
-    const pastStart = new Date(today);
-    pastStart.setMonth(pastStart.getMonth() - 2);
-    pastStart.setDate(1);
-    const pastStartStr = pastStart.toISOString().split('T')[0];
-    
-    const pastEnd = new Date(today);
-    pastEnd.setMonth(pastEnd.getMonth() - 1, 0); // 前月の末日
-    const pastEndStr = pastEnd.toISOString().split('T')[0];
-    
-    // 適用中：今月の期間
-    const currentStart = new Date(today);
-    currentStart.setDate(1);
-    const currentStartStr = currentStart.toISOString().split('T')[0];
-    
-    const currentEnd = new Date(today);
-    currentEnd.setMonth(currentEnd.getMonth() + 1, 0); // 今月の末日
-    const currentEndStr = currentEnd.toISOString().split('T')[0];
-    
-    // 次回：来月の期間
-    const nextStart = new Date(today);
-    nextStart.setMonth(nextStart.getMonth() + 1);
-    nextStart.setDate(1);
-    const nextStartStr = nextStart.toISOString().split('T')[0];
-    
-    const nextEnd = new Date(nextStart);
-    nextEnd.setMonth(nextEnd.getMonth() + 1, 0); // 来月の末日
-    const nextEndStr = nextEnd.toISOString().split('T')[0];
-    
-    // ========== 他のコース用の期間 ==========
-    // 現在から2ヶ月後
-    const month2Start = new Date(today);
-    month2Start.setMonth(month2Start.getMonth() + 2);
-    month2Start.setDate(1);
-    const month2StartStr = month2Start.toISOString().split('T')[0];
-    
-    const month2End = new Date(month2Start);
-    month2End.setMonth(month2End.getMonth() + 1, 0);
-    const month2EndStr = month2End.toISOString().split('T')[0];
-    
-    // 現在から3ヶ月後
-    const month3Start = new Date(today);
-    month3Start.setMonth(month3Start.getMonth() + 3);
-    month3Start.setDate(1);
-    const month3StartStr = month3Start.toISOString().split('T')[0];
-    
-    const month3End = new Date(month3Start);
-    month3End.setMonth(month3End.getMonth() + 1, 0);
-    const month3EndStr = month3End.toISOString().split('T')[0];
-
-    // デモ用の作成済み時間割りデータ
-    savedTimetables = [
-        // ========== システムデザインコース（4つの状態） ==========
-        {
-            id: 1001,
-            course: "システムデザインコース",
-            startDate: pastStartStr,
-            endDate: pastEndStr,
-            data: [
-                {day: "月", period: "1", className: "Python基礎", teacherName: "佐藤 健一", roomName: "301演習室"},
-                {day: "火", period: "1", className: "Webデザイン", teacherName: "鈴木 花子", roomName: "302演習室"},
-                {day: "水", period: "1", className: "システム構築", teacherName: "高橋 誠", roomName: "201教室"}
-            ]
-        },
-        {
-            id: 1002,
-            course: "システムデザインコース",
-            startDate: currentStartStr,
-            endDate: currentEndStr,
-            data: [
-                {day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
-                {day: "月", period: "2", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
-                {day: "火", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
-                {day: "水", period: "1", className: "ネットワーク構築", teacherName: "田中 優子", roomName: "301演習室"},
-                {day: "木", period: "1", className: "セキュリティ概論", teacherName: "渡辺 剛", roomName: "4F大講義室"},
-                {day: "金", period: "1", className: "HR", teacherName: "伊藤 直人", roomName: "202教室"}
-            ]
-        },
-        {
-            id: 1003,
-            course: "システムデザインコース",
-            startDate: nextStartStr,
-            endDate: nextEndStr,
-            data: [
-                {day: "月", period: "1", className: "クラウド基礎", teacherName: "山本 さくら", roomName: "303演習室"},
-                {day: "火", period: "1", className: "IoT入門", teacherName: "佐藤 健一", roomName: "301演習室"},
-                {day: "水", period: "1", className: "AI機械学習", teacherName: "高橋 誠", roomName: "201教室"}
-            ]
-        },
-        
-        // ========== 他のコース ==========
-        {
-            id: 1005,
-            course: "Webクリエイタコース",
-            startDate: month2StartStr,
-            endDate: month2EndStr,
-            data: [
-                {day: "月", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
-                {day: "月", period: "2", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "301演習室"},
-                {day: "火", period: "1", className: "プロジェクト管理", teacherName: "山本 さくら", roomName: "202教室"},
-                {day: "水", period: "1", className: "キャリアデザイン", teacherName: "伊藤 直人", roomName: "4F大講義室"}
-            ]
-        },
-        {
-            id: 1006,
-            course: "マルチメディアOAコース",
-            startDate: month3StartStr,
-            endDate: month3EndStr,
-            data: [
-                {day: "月", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "302演習室"},
-                {day: "月", period: "2", className: "プロジェクト管理", teacherName: "山本 さくら", roomName: "202教室"},
-                {day: "火", period: "1", className: "データベース基礎", teacherName: "高橋 誠", roomName: "201教室"},
-                {day: "水", period: "1", className: "キャリアデザイン", teacherName: "伊藤 直人", roomName: "4F大講義室"},
-                {day: "木", period: "1", className: "HR", teacherName: "田中 優子", roomName: "202教室"}
-            ]
-        }
-    ];
-}
-
-/*
-    * 概要: 優先度順に既存の時間割から初期選択を行う。
-    * 使用方法: データ読み込み後に呼び出すと、優先コースがあれば自動で選択して表示します。
-    */
+ * 概要: 優先度順、またはデータが存在する順に初期選択を行う。
+ * 使用方法: データ読み込み後に呼び出すと、適切なコースを自動で選択して表示します。
+ */
 function selectInitialTimetable() {
-    const priorityCourses = [
-        "システムデザインコース",
-        "Webクリエイタコース", 
-        "マルチメディアOAコース",
-        "応用情報コース",
-        "基本情報コース",
-        "ITパスポートコース",
-        "１年１組",
-        "１年２組"
-    ];
-    
-    for (const courseName of priorityCourses) {
-        const record = savedTimetables.find(r => r.course === courseName);
-        if (record) {
-            // ドロップダウンをそのコースに設定
-            document.querySelector('#courseDropdownToggle .current-value').textContent = courseName;
+    // 1. データがない場合は何もしない
+    if (!savedTimetables || savedTimetables.length === 0) {
+        return;
+    }
+
+    // 2. 初期選択する時間割レコードを決める
+    // (A) ステータスが「1:反映中」のものを優先
+    let targetRecord = savedTimetables.find(r => r.statusType === 1);
+
+    // (B) なければ、データの先頭にあるものを使う
+    if (!targetRecord) {
+        targetRecord = savedTimetables[0];
+    }
+
+    const targetCourseId = targetRecord.courseId;
+    const targetTimetableId = targetRecord.id; // 表示したい具体的な時間割のID
+
+    // 3. ドロップダウン（コース選択）をクリックする
+    const dropdownItem = document.querySelector(`li[data-value="${targetCourseId}"]`);
+
+    if (dropdownItem) {
+        console.log(`初期コース(ID:${targetCourseId})を自動選択します`);
+        dropdownItem.click();
+
+        // コースを選択した直後は、サイドバーの描画処理が実行されるため、
+        // その描画が完了するのを待ってから、サイドバーの項目をクリックする
+        setTimeout(() => {
+            // サイドバーに生成されたリスト項目を探す
+            // ※ renderSavedListの実装で class="saved-item" data-id="X" となっている前提です
+            const sidebarItem = document.querySelector(`.saved-item[data-id="${targetTimetableId}"]`);
             
-            // リストを描画（クリックの前に描画を完了させる）
-            renderSavedList('select');
-            
-            // そのレコードを選択
-            setTimeout(() => {
-                const targetItem = document.querySelector(`.saved-item[data-id="${record.id}"]`);
-                if (targetItem) {
-                    targetItem.click();
-                }
-            }, 50);
-            
-            return;
+            if (sidebarItem) {
+                console.log(`初期時間割データ(ID:${targetTimetableId})を自動表示します`);
+                sidebarItem.click();
+            } else {
+                console.warn(`サイドバーの項目(ID:${targetTimetableId})が見つかりませんでした。renderSavedListの描画を確認してください。`);
+            }
+        }, 100); // 100ms待機（描画待ち）
+    } else {
+        // ドロップダウンが見つからない場合の予備処理
+        const toggleText = document.querySelector('#courseDropdownToggle .current-value');
+        if(toggleText) {
+            toggleText.textContent = targetRecord.course;
         }
     }
 }
@@ -1627,6 +1528,33 @@ function handleSavedItemClick(e, forceSelect = false) {
 
 // ページ読み込み時の初期化
 window.addEventListener('DOMContentLoaded', () => {
-    initializeDemoData();
+const dropdownItems = document.querySelectorAll('[data-value]'); // ViewHelperのliを取得
+    const toggleText = document.querySelector('#courseDropdownToggle .current-value');
+    // const dropdownMenu = ... (その他の定義)
+
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault(); // aタグのリンク遷移を無効化
+            
+            // 選択されたテキストとIDを取得
+            const selectedText = this.textContent.trim(); // aタグの中身のテキスト
+            const selectedId = this.getAttribute('data-value');
+
+            // 表示を更新
+            if(toggleText) toggleText.textContent = selectedText;
+
+            // グローバル変数を更新
+            currentCourseId = selectedId;
+
+            // リスト（サイドバー）を再描画
+            if (typeof renderSavedList === 'function') {
+                renderSavedList('select'); 
+            }
+        });
+    });
+
+    // ... その他の初期化処理があればここに記述する ...
+
     selectInitialTimetable();
+
 });
