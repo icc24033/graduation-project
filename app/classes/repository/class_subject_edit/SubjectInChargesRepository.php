@@ -38,4 +38,22 @@ class SubjectInChargesRepository extends BaseRepository {
             return [];
         }
     }
+
+    /**
+     * 授業科目の生データ一覧を取得する
+     * @return array 授業科目の生データ一覧
+     */
+    public function getRawClassSubjectData() {
+        try {
+            $sql = "SELECT * FROM subject_in_charges ORDER BY course_id ASC, grade ASC;";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+
+            return $stmt->fetchAll();
+
+        } catch (PDOException $e) {
+            error_log("ClassSubjectsRepository Error: " . $e->getMessage());
+            return [];
+        }
+    }
 }

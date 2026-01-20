@@ -1,0 +1,63 @@
+/* レイアウトの基盤設定 */
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { background-color: #f7f9fb; font-family: sans-serif; display: flex; flex-direction: column; }
+
+.header { 
+    background-color: #ffc6c6; 
+    height: 60px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    border-bottom: 1px solid #e9d0d0; 
+    flex-shrink: 0; /* 高さを固定 */
+}
+.header h1 { font-size: 20px; color: #333; margin: 0; }
+
+.container { 
+    display: flex; 
+    flex: 1; 
+    overflow: hidden; /* 親要素でのスクロールを禁止 */
+}
+
+/* サイドバー固定 */
+.sidebar { 
+    width: 220px; 
+    background-color: #fff0f0; 
+    border-right: 1px solid #ede0e0; 
+    padding: 20px 0;
+    overflow-y: auto; /* 項目が増えたらサイドバー内でスクロール */
+}
+.sidebar-section { padding: 0 20px; margin-bottom: 25px; }
+.sidebar-title { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; }
+.sidebar-select { width: 100%; padding: 8px; border: 1px solid #e9d0d0; border-radius: 4px; }
+.sidebar-nav { list-style: none; padding: 0; }
+.sidebar-nav a { text-decoration: none; color: #333; font-size: 14px; padding: 10px 20px; display: block; }
+.sidebar-nav a.active { background-color: #ffcfcf; font-weight: bold; }
+
+/* 右側の科目リストだけをスクロール */
+.subject-list { 
+    flex: 1; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 20px; 
+    padding: 5px; 
+    align-content: flex-start;
+    overflow-y: auto; /* ここでスクロールを発生させる */
+    height: 100%;
+}
+
+.subject-card { background: white; border-radius: 12px; border: 1px solid #f0e2e2; display: flex; flex-direction: column; aspect-ratio: 1 / 1.1; cursor: pointer; transition: 0.2s; }
+.subject-card:hover { border-color: #ff9999; transform: translateY(-2px); }
+.card-header { background-color: #fff5f5; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 12px 12px 0 0; }
+.card-body { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; text-align: center; }
+.card-title { font-size: 18px; font-weight: 800; color: #333; }
+.card-footer { padding: 10px; text-align: center; font-size: 11px; color: #b89494; border-top: 1px solid #f9f0f0; }
+
+/* モーダル */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 30px; border-radius: 12px; width: 420px; text-align: center; }
+.info-box { background: #fdf2f2; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #fee2e2; }
+.btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.btn-delete-all { background-color: #e74c3c; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-delete-single { background-color: #f39c12; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-cancel { background-color: #eee; color: #666; border: none; padding: 10px; border-radius: 6px; cursor: pointer; }
