@@ -55,9 +55,15 @@ class ClassSubjectEditController {
         $courseList = $this->service->getCourseList();
         $teacherList = $this->service->getTeacherList();
         $roomList = $this->service->getRoomList();
+        
+        // 削除画面用のマスタ情報を取得
+        $courseInfo = $this->service->getCourseInfoDeleteMaster();
 
-        // 新しいメソッド名で呼び出し（共通利用）
+        // フィルタリングされた生リストを取得
         $classSubjectList = $this->service->getFilteredClassSubjects($search_grade, $search_course);
+
+        // 【移管ポイント】Service側でグルーピング処理を実行
+        $subjects = $this->service->getGroupedSubjectListForDelete($classSubjectList, $courseInfo);
 
         RepositoryFactory::closePdo();
 
@@ -65,7 +71,8 @@ class ClassSubjectEditController {
         extract($courseList);
         extract($teacherList);
         extract($roomList);
-
+        
+        // $subjects と $courseInfo を含めてビューに渡す
         require_once '../sakuzyo.php';
     }
 }

@@ -90,13 +90,12 @@ class ClassSubjectEditService {
         $courseInfo = $this->getCourseInfoMaster();
         
         // 学年の判定
-        if ($search_grade === '1年生') {
+        $search_grade_val = null;
+        if ($search_grade === '1年生' || $search_grade === '1') {
             $search_grade_val = 1;
-        } elseif ($search_grade === '2年生') {
+        } elseif ($search_grade === '2年生' || $search_grade === '2') {
             $search_grade_val = 2;
-        } else {
-            $search_grade_val = null;
-        }
+        } 
 
         // 1. $search_course（文字列キー）を対応する course_id に変換
         $target_course_id = null;
@@ -110,10 +109,10 @@ class ClassSubjectEditService {
 
         // 2. 配列をフィルタリング
         $classSubjectList = array_filter($classSubjectList, function ($item) use ($search_grade_val, $target_course_id, $courseInfo, $search_course) {
-            
             // 条件A: 学年フィルタリング
             if ($search_grade_val !== null) {
-                if ($item['grade'] !== (int)$search_grade_val) {
+                // 型を一致させて比較
+                if ((int)$item['grade'] !== (int)$search_grade_val) {
                     return false;
                 }
             }
@@ -134,7 +133,7 @@ class ClassSubjectEditService {
     }
 
     /**
-     * コースの基本情報を取得（マスタデータ）
+     * 授業科目追加用コースの基本情報を取得（マスタデータ）
      */
     public function getCourseInfoMaster() {
         return [   
@@ -146,6 +145,21 @@ class ClassSubjectEditService {
             'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
             'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
             'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
+        ];
+    }
+
+    /**
+     * 授業科目削除用コースの基本情報を取得（マスタデータ）
+     */
+    public function getCourseInfoDeleteMaster() {
+        return [   
+            'itikumi'       => ['id' => 7, 'name' => '1年1組'],
+            'nikumi'        => ['id' => 8, 'name' => '1年2組'],
+            'kihon'         => ['id' => 5, 'name' => '基本情報'],
+            'applied-info'  => ['id' => 4, 'name' => '応用情報'],
+            'multimedia'    => ['id' => 3, 'name' => 'マルチメディア'],
+            'system-design' => ['id' => 1, 'name' => 'システムデザイン'],
+            'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター']
         ];
     }
 
@@ -198,6 +212,50 @@ class ClassSubjectEditService {
             $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
         }
 
+        return $subjects;
+    }
+
+    /**
+     * 削除画面表示用に科目名でグルーピングしたリストを作成する
+     */
+    public function getGroupedSubjectListForDelete($classSubjectList, $courseInfo) {
+        $subjects = [];
+        foreach ($classSubjectList as $row) {
+            // IDの作成 (学年_科目名)
+            $id = $row['grade'] . "_" . $row['subject_name'];
+
+            if (!isset($subjects[$id])) {
+                $subjects[$id] = [
+                    'grade'   => $row['grade'], 
+                    'title'   => $row['subject_name'],
+                    'courses' => [], 
+                    'course_keys' => [] 
+                ];
+            }
+
+            // コース名の追加（重複チェック）
+            if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+                $subjects[$id]['courses'][] = $row['course_name'];
+
+                // courseInfoのキー(itikumi等)を特定するロジック
+                $foundKey = '';
+                foreach ($courseInfo as $key => $info) {
+                    // getCourseInfoDeleteMasterの構造に合わせて 'id' で比較
+                    $isIdMatch = isset($row['course_id']) && (int)$row['course_id'] === (int)$info['id'];
+                    // 部分一致も含めて名前で比較
+                    $isNameMatch = (strpos($row['course_name'], $info['name']) !== false);
+
+                    if ($isIdMatch || $isNameMatch) {
+                        $foundKey = $key;
+                        break;
+                    }
+                }
+                
+                if ($foundKey !== '') {
+                    $subjects[$id]['course_keys'][] = $foundKey;
+                }
+            }
+        }
         return $subjects;
     }
 }
