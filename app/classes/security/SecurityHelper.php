@@ -87,6 +87,7 @@ class SecurityHelper {
      * 　　　・トークンは、遷移元ページで生成し、セッションに保存しておく必要がある
      *　　　 ・呼び出す場所は遷移先ページの最初
      * 使用方法： SecurityHelper::requireTransitionToken('unique_key');　これを遷移先ページの最初に書く
+     * 目的：不正なページ遷移を防止し、セキュリティを強化する
      * @param string $key 手形の名前
      * @param bool $keepToken trueなら確認後も手形を残し（リロード対策）、falseなら没収（遷移の厳格化）
      * @return void

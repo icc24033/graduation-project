@@ -69,7 +69,6 @@ foreach ($classSubjectList as $row) {
 foreach ($subjects as $id => $data) {
     $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -111,8 +110,8 @@ foreach ($subjects as $id => $data) {
             <div class="sidebar-section">
                 <label class="sidebar-title">メニュー</label>
                 <ul class="sidebar-nav">
-                    <li><a href="tuika.php" class="active">科目の編集</a></li>
-                    <li><a href="sakuzyo.php">科目の削除</a></li>
+                    <li><a href="addition_control.php" class="active">科目の編集</a></li>
+                    <li><a href="delete_control.php">科目の削除</a></li>
                 </ul>
             </div>
         </nav>

@@ -18,7 +18,6 @@ SecurityHelper::applySecureHeaders();
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
 </head>
-
 <body>
     <header class="app-header">
         <h1>時間割り作成</h1>
@@ -242,7 +241,14 @@ SecurityHelper::applySecureHeaders();
             </div>
         </div>
     </div>
-
+    <script>
+        // PHPからデータを渡すが、変数名をJS内の既存変数と被らないように変更する
+        // デフォルトで空配列 [] を入れることでnullエラーを防ぐ
+        const dbTimetableData = <?php echo json_encode($savedTimetables ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        
+        // 現在選択中のコースID
+        let currentCourseId = null;
+    </script>
     <script src="js/create_timetable.js"></script>
 </body>
 </html>

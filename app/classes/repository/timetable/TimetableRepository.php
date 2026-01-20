@@ -127,7 +127,11 @@ class TimetableRepository extends BaseRepository {
     }
 
     /**
-     * 
+     * createTimetableDetail
+     * 概要：新しい時間割り詳細を作成する
+     * 動作: 新規作成された時間割り詳細に関して、timetable_detailsテーブルに登録予定のレコードを挿入する
+     * 引数：$timetableId - 親時間割りID, $dayOfWeek - 曜日, $period - 時限, $subjectId - 科目ID
+     * 戻り値：新規作成された時間割り詳細のID
      */
     public function createTimetableDetail($timetableId, $dayOfWeek, $period, $subjectId) {
         $sql = "INSERT INTO timetable_details (timetable_id, day_of_week, period, subject_id) 

@@ -1,161 +1,70 @@
 <?php
-// 1. データベース接続設定
-$host = 'localhost'; $dbname = 'itira'; $user = 'root'; $password = 'root'; 
+// sakuzyo.php 冒頭のデータ整理ロジック
 
-try {
-    $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-    $pdo = new PDO($dsn, $user, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-} catch (PDOException $e) { die("DB接続エラー: " . $e->getMessage()); }
-
-// 有効なコース情報を取得
+// 1. 各コースの ID と名前を定義（subject_in_charges.sql の内容に準拠）
 $courseInfo = [
-    'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報'],
-    'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディア'],
-    'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報'],
-    'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザイン'],
-    'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイター'],
-    'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組'],
-    'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組']
+    'itikumi'       => ['id' => 7, 'name' => '1年1組'],
+    'nikumi'        => ['id' => 8, 'name' => '1年2組'],
+    'kihon'         => ['id' => 5, 'name' => '基本情報'],
+    'applied-info'  => ['id' => 4, 'name' => '応用情報'],
+    'multimedia'    => ['id' => 3, 'name' => 'マルチメディア'],
+    'system-design' => ['id' => 1, 'name' => 'システムデザイン'],
+    'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター']
 ];
 
-// ==========================================
-// 【削除処理】
-// ==========================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    $target_title = $_POST['subject_name'];
-    $target_grade = (int)$_POST['grade'];
-    $action = $_POST['action'];
-
-    try {
-        if ($action === 'delete_single') {
-            $courseKey = $_POST['course_key'];
-            if (isset($courseInfo[$courseKey])) {
-                $table = $courseInfo[$courseKey]['table'];
-                $sql = "DELETE FROM `$table` WHERE subject_name = ? AND grade = ?";
-                $pdo->prepare($sql)->execute([$target_title, $target_grade]);
-            }
-        } elseif ($action === 'delete_all') {
-            foreach ($courseInfo as $info) {
-                $sql = "DELETE FROM `{$info['table']}` WHERE subject_name = ? AND grade = ?";
-                $pdo->prepare($sql)->execute([$target_title, $target_grade]);
-            }
-        }
-        header("Location: sakuzyo.php?" . http_build_query($_GET));
-        exit;
-    } catch (PDOException $e) {
-        $db_error = "削除エラー: " . $e->getMessage();
-    }
-}
-
-// 2. 検索条件・データ取得
-$search_grade = $_GET['search_grade'] ?? 'all';
-$search_course = $_GET['search_course'] ?? 'all';
-
 $subjects = [];
-foreach ($courseInfo as $key => $info) {
-    if ($search_course !== 'all' && $search_course !== $key) continue;
-    
-    $sql = "SELECT grade, subject_name FROM `{$info['table']}`";
-    if ($search_grade !== 'all') {
-        $stmt = $pdo->prepare($sql . " WHERE grade = ?");
-        $stmt->execute([$search_grade]);
-    } else {
-        $stmt = $pdo->query($sql);
+foreach ($classSubjectList as $row) {
+    if ($search_grade !== 'all' && (int)$row['grade'] !== (int)$search_grade) continue;
+
+    $id = $row['grade'] . "_" . $row['subject_name'];
+
+    if (!isset($subjects[$id])) {
+        $subjects[$id] = [
+            'grade'   => $row['grade'], 
+            'title'   => $row['subject_name'],
+            'courses' => [], 
+            'course_keys' => [] 
+        ];
     }
 
-    while ($row = $stmt->fetch()) {
-        $id = $row['grade'] . "_" . $row['subject_name'];
-        if (!isset($subjects[$id])) {
-            $subjects[$id] = [
-                'grade' => $row['grade'], 'title' => $row['subject_name'],
-                'courses' => [], 'course_keys' => []
-            ];
+    if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+        $subjects[$id]['courses'][] = $row['course_name'];
+
+        // 【修正ポイント】ID または 名前で $courseInfo のキーを特定する
+        $foundKey = '';
+        foreach ($courseInfo as $key => $info) {
+            // 数値IDが一致するか、または名前が一致するか確認
+            $isIdMatch = isset($row['course_id']) && (int)$row['course_id'] === $info['id'];
+            $isNameMatch = ($info['name'] === $row['course_name']);
+
+            if ($isIdMatch || $isNameMatch) {
+                $foundKey = $key;
+                break;
+            }
         }
-        $subjects[$id]['courses'][] = $info['name'];
-        $subjects[$id]['course_keys'][] = $key;
+        
+        // キーが見つかった場合のみ追加
+        if ($foundKey !== '') {
+            $subjects[$id]['course_keys'][] = $foundKey;
+        }
     }
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>授業科目一覧 - 削除</title>
-    <style>
-        /* レイアウトの基盤設定 */
-        html, body { height: 100%; margin: 0; overflow: hidden; }
-        body { background-color: #f7f9fb; font-family: sans-serif; display: flex; flex-direction: column; }
-        
-        .header { 
-            background-color: #ffc6c6; 
-            height: 60px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            border-bottom: 1px solid #e9d0d0; 
-            flex-shrink: 0; /* 高さを固定 */
-        }
-        .header h1 { font-size: 20px; color: #333; margin: 0; }
-
-        .container { 
-            display: flex; 
-            flex: 1; 
-            overflow: hidden; /* 親要素でのスクロールを禁止 */
-        }
-
-        /* サイドバー固定 */
-        .sidebar { 
-            width: 220px; 
-            background-color: #fff0f0; 
-            border-right: 1px solid #ede0e0; 
-            padding: 20px 0;
-            overflow-y: auto; /* 項目が増えたらサイドバー内でスクロール */
-        }
-        .sidebar-section { padding: 0 20px; margin-bottom: 25px; }
-        .sidebar-title { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; }
-        .sidebar-select { width: 100%; padding: 8px; border: 1px solid #e9d0d0; border-radius: 4px; }
-        .sidebar-nav { list-style: none; padding: 0; }
-        .sidebar-nav a { text-decoration: none; color: #333; font-size: 14px; padding: 10px 20px; display: block; }
-        .sidebar-nav a.active { background-color: #ffcfcf; font-weight: bold; }
-
-        /* 右側の科目リストだけをスクロール */
-        .subject-list { 
-            flex: 1; 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 20px; 
-            padding: 5px; 
-            align-content: flex-start;
-            overflow-y: auto; /* ここでスクロールを発生させる */
-            height: 100%;
-        }
-
-        .subject-card { background: white; border-radius: 12px; border: 1px solid #f0e2e2; display: flex; flex-direction: column; aspect-ratio: 1 / 1.1; cursor: pointer; transition: 0.2s; }
-        .subject-card:hover { border-color: #ff9999; transform: translateY(-2px); }
-        .card-header { background-color: #fff5f5; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 12px 12px 0 0; }
-        .card-body { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; text-align: center; }
-        .card-title { font-size: 18px; font-weight: 800; color: #333; }
-        .card-footer { padding: 10px; text-align: center; font-size: 11px; color: #b89494; border-top: 1px solid #f9f0f0; }
-
-        /* モーダル */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 420px; text-align: center; }
-        .info-box { background: #fdf2f2; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #fee2e2; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-delete-all { background-color: #e74c3c; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-delete-single { background-color: #f39c12; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-cancel { background-color: #eee; color: #666; border: none; padding: 10px; border-radius: 6px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="../css/delete_style.css"> 
 </head>
 <body>
     <header class="header"><h1>授業科目一覧 (削除)</h1></header>
 
     <div class="container">
         <nav class="sidebar">
-            <form action="sakuzyo.php" method="GET">
+            <form action="delete_control.php" method="GET">
                 <div class="sidebar-section">
                     <label class="sidebar-title">実施学年検索</label>
                     <select class="sidebar-select" name="search_grade" onchange="this.form.submit()">
@@ -176,8 +85,8 @@ foreach ($courseInfo as $key => $info) {
             </form>
             <div class="sidebar-section">
                 <ul class="sidebar-nav">
-                    <li><a href="tuika.php">科目の編集</a></li>
-                    <li><a href="sakuzyo.php" class="active">科目の削除</a></li>
+                    <li><a href="addition_control.php">科目の編集</a></li>
+                    <li><a href="delete_control.php" class="active">科目の削除</a></li>
                 </ul>
             </div>
         </nav>
@@ -201,10 +110,12 @@ foreach ($courseInfo as $key => $info) {
                 <p id="m-grade" style="font-size: 0.9em; color: #666;"></p>
             </div>
 
-            <form id="deleteForm" method="POST" action="sakuzyo.php?<?= http_build_query($_GET) ?>">
+            <form id="deleteForm" method="POST" action="..\..\..\..\app\master\class_subject_edit_backend\backend_subject_delete.php">
                 <input type="hidden" name="subject_name" id="f-title">
                 <input type="hidden" name="grade" id="f-grade">
                 <input type="hidden" name="action" id="f-action" value="delete_single">
+                
+                <input type="hidden" name="query_string" value="<?= htmlspecialchars($_SERVER['QUERY_STRING'] ?? '') ?>">
 
                 <div id="single-delete-area">
                     <p style="font-size: 12px; color: #666;">削除するコースを選択してください：</p>
