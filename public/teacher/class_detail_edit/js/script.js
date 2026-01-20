@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- 1. 変数・要素の定義 ---
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    
+    // 授業データを保持する変数（初期状態は空。loadDataでDBから取得）
+    let lessonData = {};
+
     const monthElement = document.querySelector('.month');
     const leftArrowButton = document.getElementById('prevBtn');
     const rightArrowButton = document.getElementById('nextBtn');
@@ -14,212 +18,272 @@ document.addEventListener('DOMContentLoaded', function() {
     const addBtn = document.querySelector('.add-button');
     const itemInput = document.querySelector('.add-item-input');
     const itemTagsContainer = document.querySelector('.item-tags');
-    
-    // 入力エリア
-    const lessonContentInput = document.getElementById('lessonContent');
-    const belongingsTextarea = document.getElementById('belongingsTextarea');
-    const charCountDisplay = document.querySelector('.char-count');
 
-    let lessonData = {};
     let currentYear = 2026;
     let currentMonth = 1;
     let selectedDateKey = null;
     let isDeleteMode = false;
-    let selectedSubjectId = null;
+    let selectedItemsForDelete = []; 
 
-    // --- 2. データ読み込み関数 ---
-    
-    // 授業データとテンプレートを同時に読み込む
-    async function init() {
-        await Promise.all([loadData(), loadTemplates()]);
-    }
-
-    // 授業データの読み込み
+    // --- 【追加】DBからデータを読み込む関数 ---
     async function loadData() {
         try {
+            // PHPのcontrolファイルにデータ取得のリクエストを送る
             const response = await fetch('class_detail_edit_control.php?action=fetch');
             const data = await response.json();
             if (data) {
                 lessonData = data;
+                // データを取得した後にカレンダーとサイドバーを再描画
                 renderCalendar(currentYear, currentMonth);
                 refreshSidebar();
             }
-        } catch (e) { console.error("データ読み込み失敗:", e); }
+        } catch (e) {
+            console.error("データ読み込み失敗:", e);
+        }
     }
 
-    // テンプレートの読み込み
-    async function loadTemplates() {
-        try {
-            const response = await fetch('class_detail_edit_control.php?action=fetch_templates');
-            const templates = await response.json();
-            itemTagsContainer.innerHTML = ''; 
-            if (Array.isArray(templates)) {
-                templates.forEach(name => createTagElement(name));
-            }
-        } catch (e) { console.error("テンプレート読み込み失敗:", e); }
-    }
-
-    function createTagElement(name) {
-        const div = document.createElement('div');
-        div.className = 'item-tag-container';
-        div.innerHTML = `<span class="item-tag">${name}</span>`;
-        itemTagsContainer.appendChild(div);
-    }
-
-    // --- 3. テンプレートのDB保存・削除 ---
-    async function saveTemplateToDB(name) {
-        const formData = new URLSearchParams();
-        formData.append('action', 'save_template');
-        formData.append('template_name', name);
-        await fetch('class_detail_edit_control.php', { method: 'POST', body: formData });
-    }
-
-    async function deleteTemplateFromDB(name) {
-        const formData = new URLSearchParams();
-        formData.append('action', 'delete_template');
-        formData.append('template_name', name);
-        await fetch('class_detail_edit_control.php', { method: 'POST', body: formData });
-    }
-
-    // --- 4. 画面表示制御 ---
-    
-    // サイドバー更新
+    // --- 2. 反映処理（サイドバー・表示更新） ---
     function refreshSidebar() {
-        const sidebarContainer = document.getElementById('sidebarLessonList');
-        if (!sidebarContainer) return;
-        sidebarContainer.innerHTML = ''; 
         const sortedDates = Object.keys(lessonData).sort((a, b) => new Date(a) - new Date(b));
-        sortedDates.forEach(key => {
-            const data = lessonData[key];
-            const dateObj = new Date(key);
-            const m = dateObj.getMonth() + 1;
-            const d = dateObj.getDate();
-            const dayOfWeek = dateObj.toLocaleDateString('ja-JP', { weekday: 'short' });
-            const wrapper = document.createElement('div');
-            wrapper.className = 'sidebar-lesson-item';
-            wrapper.style.cursor = 'pointer';
-            wrapper.innerHTML = `
-                <div class="lesson-date-item" style="font-weight: bold;">${m}月${d}日(${dayOfWeek}) ${data.slot || '1限'}</div>
-                <div class="status-button ${data.status}" style="font-size: 12px; display: inline-block; padding: 2px 5px;">
-                    ${data.status === 'in-progress' ? '作成済み' : '作成中'}
-                </div>`;
-            wrapper.onclick = () => openModalWithDate(key);
-            sidebarContainer.appendChild(wrapper);
+        const sidebarItems = document.querySelectorAll('.sidebar .lesson-status-wrapper');
+
+        sidebarItems.forEach((targetWrapper, index) => {
+            const dateDisplay = targetWrapper.querySelector('.lesson-date-item');
+            const statusBtn = targetWrapper.querySelector('.status-button');
+
+            if (index < sortedDates.length) {
+                const key = sortedDates[index];
+                const data = lessonData[key];
+                
+                targetWrapper.style.cursor = 'pointer';
+                targetWrapper.onclick = function() {
+                    openModalWithDate(key);
+                };
+
+                const dateObj = new Date(key);
+                const m = dateObj.getMonth() + 1;
+                const d = dateObj.getDate();
+                const dayOfWeek = dateObj.toLocaleDateString('ja-JP', { weekday: 'short' });
+
+                if (dateDisplay) {
+                    dateDisplay.textContent = data.slot ? `${m}月${d}日(${dayOfWeek}) ${data.slot}` : `${m}月${d}日(${dayOfWeek})`;
+                }
+                if (statusBtn) {
+                    // DBのステータスに応じてテキストを決定
+                    let text = data.statusText;
+                    if (!text) {
+                        text = (data.status === "in-progress") ? "作成済み" : (data.status === "creating" ? "作成中" : "未作成");
+                    }
+                    statusBtn.textContent = text;
+                    statusBtn.className = `status-button ${data.status || 'not-created'}`;
+                }
+            }
         });
     }
 
-    // モーダルを開く（データ復元処理）
-    window.openModalWithDate = function(dateKey) {
-        selectedDateKey = dateKey;
-        
-        // 保存済みデータがあれば取得、なければ空
-        const data = lessonData[dateKey] || { content: "", belongings: "", status: "" };
-        
-        const [year, month, dayNum] = dateKey.split('-').map(Number);
-        const dateObj = new Date(year, month - 1, dayNum);
-
-        // 入力欄にセット
-        lessonContentInput.value = data.content || "";
-        belongingsTextarea.value = data.belongings || "";
-
-        // 文字数カウント更新
-        charCountDisplay.textContent = `${(lessonContentInput.value).length}/200文字`;
-
-        const modalTitleDate = document.querySelector('.modal-date');
-        if (modalTitleDate) {
-            modalTitleDate.textContent = `${month}月${dayNum}日(${dateObj.toLocaleDateString('ja-JP', { weekday: 'short' })})`;
+    function updateAllViews(dateKey, slot, status, text, isDelete = false) {
+        if (isDelete) {
+            delete lessonData[dateKey];
+        } else {
+            const currentSlot = lessonData[dateKey] ? lessonData[dateKey].slot : "1限";
+            lessonData[dateKey] = { slot: currentSlot, status: status, statusText: text };
         }
-        lessonModal.style.display = 'flex';
-    };
+        // 画面を再読み込みせずに最新状態を反映
+        refreshSidebar();
+        renderCalendar(currentYear, currentMonth);
+    }
 
-    // カレンダー描画
+    // --- 3. ドロップダウン制御 ---
+    dropdownToggles.forEach(toggle => {
+        const dropdownMenu = toggle.nextElementSibling;
+        toggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            dropdownMenu.classList.toggle('is-open');
+
+            dropdownToggles.forEach(otherToggle => {
+                if (otherToggle !== this) {
+                    otherToggle.setAttribute('aria-expanded', 'false');
+                    otherToggle.nextElementSibling.classList.remove('is-open');
+                }
+            });
+            updateDropdownPosition(this, dropdownMenu);
+        });
+
+        dropdownMenu.querySelectorAll('a').forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+                const selectedValue = this.textContent;
+                toggle.querySelector('.current-value').textContent = selectedValue;
+                toggle.setAttribute('aria-expanded', 'false');
+                dropdownMenu.classList.remove('is-open');
+            });
+        });
+    });
+
+    // --- 4. カレンダー描画とモーダル制御 ---
+    function openModalWithDate(dateKey) {
+        selectedDateKey = dateKey;
+        const [year, month, dayNum] = dateKey.split('-').map(Number);
+
+        // --- 【修正：情報を表示する機能】 ---
+        // lessonData[dateKey] に保存されている内容を取得
+        const existingData = lessonData[dateKey] || {};
+        
+        // 入力欄を取得
+        const lessonTextArea = document.querySelector('.lesson-details-textarea');
+        const belongingsTextArea = document.getElementById('detailsTextarea');
+        const charCountDisplay = document.querySelector('.char-count');
+
+        // データがあれば表示、なければ空にする（作成中・作成済みどちらでも動作）
+        lessonTextArea.value = existingData.content || "";
+        belongingsTextArea.value = existingData.belongings || "";
+        
+        // 文字数カウントを更新
+        if (charCountDisplay) {
+            charCountDisplay.textContent = `${lessonTextArea.value.length}/200文字`;
+        }
+        // -----------------------------------
+
+        const dateObj = new Date(year, month - 1, dayNum);
+        const dayOfWeek = dateObj.toLocaleDateString('ja-JP', { weekday: 'short' });
+        const modalTitleDate = document.querySelector('.modal-date');
+        if (modalTitleDate) modalTitleDate.textContent = `${month}月${dayNum}日(${dayOfWeek})`;
+
+        lessonModal.style.display = 'flex';
+    }
+
     function renderCalendar(year, month) {
         const oldCells = calendarGrid.querySelectorAll('.date-cell');
         oldCells.forEach(cell => cell.remove());
         const firstDay = new Date(year, month - 1, 1).getDay();
         const daysInMonth = new Date(year, month, 0).getDate();
-        
+        const prevMonthLastDay = new Date(year, month - 1, 0).getDate();
+
         for (let i = 0; i < 35; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'date-cell';
-            let dayNum = i - firstDay + 1;
-            if (dayNum > 0 && dayNum <= daysInMonth) {
-                const mm = String(month).padStart(2, '0');
-                const dd = String(dayNum).padStart(2, '0');
-                const dateKey = `${year}-${mm}-${dd}`;
-                cell.innerHTML = `<span class="date-num">${dayNum}</span>`;
-                if (lessonData[dateKey]) {
-                    const d = lessonData[dateKey];
-                    cell.classList.add('has-data');
-                    cell.innerHTML += `
-                        <span class="lesson-slot">${d.slot || '1限'}</span>
-                        <span class="status-button ${d.status}">${d.status === 'in-progress' ? '作成済み' : '作成中'}</span>`;
-                }
-                cell.onclick = () => openModalWithDate(dateKey);
-            } else { 
-                cell.classList.add('is-out-of-month'); 
+            let dayNum, isOutOfMonth = false;
+            if (i < firstDay) {
+                dayNum = prevMonthLastDay - (firstDay - 1 - i);
+                isOutOfMonth = true;
+            } else if (i >= firstDay + daysInMonth) {
+                dayNum = i - (firstDay + daysInMonth) + 1;
+                isOutOfMonth = true;
+            } else {
+                dayNum = i - firstDay + 1;
             }
+            const cell = createDateCell(dayNum, isOutOfMonth, year, month);
+            if (i % 7 === 0) cell.classList.add('is-sunday');
+            if (i % 7 === 6) cell.classList.add('is-saturday');
             calendarGrid.appendChild(cell);
         }
         monthElement.textContent = `${month}月`;
     }
 
-    // --- 5. イベントリスナー ---
+    function createDateCell(dayNum, isOutOfMonth, year, month) {
+        const cell = document.createElement('div');
+        cell.className = 'date-cell';
+        if (isOutOfMonth) cell.classList.add('is-out-of-month');
+        cell.innerHTML = `<span class="date-num">${dayNum}</span>`;
 
-    // テンプレート追加・削除切り替え
-    deleteIcon.onclick = () => {
+        const mm = String(month).padStart(2, '0');
+        const dd = String(dayNum).padStart(2, '0');
+        const dateKey = `${year}-${mm}-${dd}`;
+
+        if (!isOutOfMonth && lessonData[dateKey]) {
+            const data = lessonData[dateKey];
+            cell.classList.add('has-data');
+            let text = data.statusText;
+            if (!text) {
+                text = (data.status === "in-progress") ? "作成済み" : (data.status === "creating" ? "作成中" : "未作成");
+            }
+            cell.innerHTML += `
+                <span class="lesson-slot">${data.slot || '1限'}</span>
+                <span class="status-button ${data.status}">${text}</span>
+            `;
+        }
+
+        cell.addEventListener('click', function() {
+            if (isOutOfMonth) return;
+            openModalWithDate(dateKey);
+        });
+        return cell;
+    }
+
+    function updateDropdownPosition(toggle, menu) {
+        const toggleRect = toggle.getBoundingClientRect();
+        const sidebarRect = document.querySelector('.sidebar').getBoundingClientRect();
+        menu.style.top = `${toggleRect.top - sidebarRect.top}px`;
+        menu.style.left = `${toggleRect.right - sidebarRect.left}px`;
+    }
+
+    // --- 5. 持ち物管理 ---
+    deleteIcon.addEventListener('click', function() {
         isDeleteMode = !isDeleteMode;
-        deleteIcon.classList.toggle('is-active', isDeleteMode);
+        this.classList.toggle('is-active', isDeleteMode);
         addBtn.textContent = isDeleteMode ? '削除' : '追加';
         addBtn.classList.toggle('is-delete-mode', isDeleteMode);
-    };
+        itemInput.value = '';
+    });
 
-    // テンプレート追加
-    addBtn.onclick = async () => {
-        const name = itemInput.value.trim();
-        if (!isDeleteMode && name) {
-            createTagElement(name);
-            await saveTemplateToDB(name);
-            itemInput.value = '';
-        }
-    };
+    itemTagsContainer.addEventListener('click', function(e) {
+        const tagContainer = e.target.closest('.item-tag-container');
+        if (!tagContainer) return;
+        const itemName = tagContainer.querySelector('.item-tag').textContent;
 
-    // テンプレートクリック（削除 or 持ち物エリアへの追加）
-    itemTagsContainer.onclick = async (e) => {
-        const tag = e.target.closest('.item-tag-container');
-        if (!tag) return;
-        const name = tag.querySelector('.item-tag').textContent;
-        
         if (isDeleteMode) {
-            tag.remove();
-            await deleteTemplateFromDB(name);
-        } else {
-            let items = belongingsTextarea.value ? belongingsTextarea.value.split('、') : [];
-            items = items.map(i => i.trim()).filter(i => i !== "");
-            
-            if (items.includes(name)) {
-                items = items.filter(i => i !== name);
+            tagContainer.classList.toggle('is-selected');
+            if (tagContainer.classList.contains('is-selected')) {
+                selectedItemsForDelete.push(itemName);
             } else {
-                items.push(name);
+                selectedItemsForDelete = selectedItemsForDelete.filter(i => i !== itemName);
             }
-            belongingsTextarea.value = items.join('、');
+            itemInput.value = selectedItemsForDelete.join('、');
+        } else {
+            const detailsTextarea = document.getElementById('detailsTextarea');
+            let items = detailsTextarea.value ? detailsTextarea.value.split('、') : [];
+            if (!items.includes(itemName)) {
+                items.push(itemName);
+            } else {
+                items = items.filter(i => i !== itemName);
+            }
+            detailsTextarea.value = items.filter(i => i !== "").join('、');
         }
-    };
+    });
 
-    // 授業詳細の保存・削除通信
-    async function saveTextDataToStorage(status, isDelete = false) {
+    addBtn.addEventListener('click', function() {
+        if (isDeleteMode) {
+            document.querySelectorAll('.item-tag-container.is-selected').forEach(tag => tag.remove());
+            itemInput.value = '';
+            selectedItemsForDelete = [];
+        } else {
+            const val = itemInput.value.trim();
+            if (val !== "") {
+                const newTag = document.createElement('div');
+                newTag.className = 'item-tag-container';
+                newTag.innerHTML = `<span class="item-tag">${val}</span>`;
+                itemTagsContainer.appendChild(newTag);
+                itemInput.value = '';
+            }
+        }
+    });
+
+    // --- 6. 通信関数 ---
+    async function saveTextDataToStorage(status, statusText, isDelete = false) {
         if (!selectedDateKey) return;
+
         const formData = new URLSearchParams();
         formData.append('date', selectedDateKey);
-        
-        if (isDelete) { 
-            formData.append('action', 'delete'); 
+
+        if (isDelete) {
+            formData.append('action', 'delete');
         } else {
+            const lessonVal = document.querySelector('.lesson-details-textarea').value;
+            const belongingsVal = document.getElementById('detailsTextarea').value;
             formData.append('action', 'save');
-            formData.append('content', lessonContentInput.value);
-            formData.append('belongings', belongingsTextarea.value);
-            formData.append('status', status);
-            if (selectedSubjectId) formData.append('subject_id', selectedSubjectId);
+            formData.append('content', lessonVal);
+            formData.append('status', status); 
+            formData.append('belongings', belongingsVal);
         }
 
         try {
@@ -228,58 +292,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData
             });
-            const result = await response.json();
-            if (result.status === "success") {
-                await loadData(); // データを再取得して画面更新
-                lessonModal.style.display = 'none';
+
+            const responseText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                console.error("JSON解析エラー。サーバーからの応答:", responseText);
+                throw new Error("サーバーから不正な応答がありました。");
             }
-        } catch (e) { console.error("保存失敗:", e); }
+
+            if (result.status === "success") {
+                await loadData();
+                lessonModal.style.display = 'none';
+                alert(result.message);
+            } else {
+                alert("保存エラー: " + result.message);
+            }
+        } catch (error) {
+            console.error("通信失敗:", error);
+            alert("サーバーとの通信に失敗しました。");
+        }
     }
 
-    // ボタンクリックイベント
-    completeButton.onclick = () => saveTextDataToStorage("in-progress");
-    tempSaveButton.onclick = () => saveTextDataToStorage("creating");
-    deleteButton.onclick = () => confirm("この日のデータを削除しますか？") && saveTextDataToStorage(null, true);
-    
-    // カレンダー月移動
-    leftArrowButton.onclick = () => { 
-        currentMonth--; 
-        if (currentMonth < 1) { currentMonth = 12; currentYear--; } 
-        renderCalendar(currentYear, currentMonth); 
-    };
-    rightArrowButton.onclick = () => { 
-        currentMonth++; 
-        if (currentMonth > 12) { currentMonth = 1; currentYear++; } 
-        renderCalendar(currentYear, currentMonth); 
-    };
-
-    // モーダルを閉じる
-    lessonModal.addEventListener('click', (e) => { 
-        if (e.target === lessonModal) lessonModal.style.display = 'none'; 
+    // --- イベント紐付け ---
+    completeButton.addEventListener('click', () => saveTextDataToStorage("in-progress", "作成済み"));
+    tempSaveButton.addEventListener('click', () => saveTextDataToStorage("creating", "作成中"));
+    deleteButton.addEventListener('click', () => {
+        if (confirm("データを削除しますか？")) saveTextDataToStorage(null, null, true);
     });
 
-    // リアルタイム文字数カウント
-    lessonContentInput.addEventListener('input', () => {
-        charCountDisplay.textContent = `${lessonContentInput.value.length}/200文字`;
+    leftArrowButton.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        renderCalendar(currentYear, currentMonth);
     });
 
-    // ドロップダウン制御
-    dropdownToggles.forEach(toggle => {
-        const menu = toggle.nextElementSibling;
-        toggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // 他の開いているメニューを閉じる
-            document.querySelectorAll('.dropdown-menu.is-open').forEach(m => {
-                if (m !== menu) m.classList.remove('is-open');
-            });
-            menu.classList.toggle('is-open');
-        });
+    rightArrowButton.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+        renderCalendar(currentYear, currentMonth);
     });
 
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.dropdown-menu.is-open').forEach(m => m.classList.remove('is-open'));
+    const lessonTextAreaInput = document.querySelector('.lesson-details-textarea');
+    lessonTextAreaInput.addEventListener('input', function() {
+        document.querySelector('.char-count').textContent = `${this.value.length}/200文字`;
     });
 
-    // 初期起動
-    init();
+    lessonModal.addEventListener('click', (e) => {
+        if (e.target === lessonModal) lessonModal.style.display = 'none';
+    });
+
+    // 初期実行
+    renderCalendar(currentYear, currentMonth);
+    loadData();
 });
