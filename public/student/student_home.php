@@ -1,13 +1,10 @@
 <?php
-session_start();
-$status = $_SESSION['timetable_details'] ?? [];
-$dsn = $status['dsn'] ?? ''; 
-$user = $status['user'] ?? '';
-$pass = $status['pass'] ?? '';
-$options = $status['options'] ?? [];
-$subject_sql_first = $status['subject_sql_first'] ?? '';
-$subject_sql_second = $status['subject_sql_second'] ?? '';
+// student_home.php
+
+
 ?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
