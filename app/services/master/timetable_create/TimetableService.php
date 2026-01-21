@@ -1,107 +1,98 @@
 <?php
 // TimetableService.php
-// クラスの読み込み（パスは環境に合わせて調整してください）
 require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../../classes/helper/dropdown/ViewHelper.php';
 
 class TimetableService {
 
-    private $courses;
+    // クラス内キャッシュ用プロパティ
+    private $courses = null;
+
+    /**
+     * loadCourses
+     * 概要：コンストラクタ、または必要時にコース情報をロードする
+     * 戻り値：なし
+     * 取得情報：course_id, course_name, grade
+     */
+    private function loadCourses() {
+        if ($this->courses === null) {
+            $courseRepo = RepositoryFactory::getCourseRepository();
+            $this->courses = $courseRepo->getAllCoursesIncludedGrade();
+        }
+    }
+
+    /**
+     * getCourseDropdownOptions
+     * 概要：コースのドロップダウンオプションを配列で取得
+     * 戻り値：配列（course_id, course_name）
+     * ※loadCoursesを実行し、プロパティを参照してjsで使用するための全コース情報（生データ）を取得する
+     */
+    public function getRawCourseData() {
+        $this->loadCourses();
+        return $this->courses;
+    }
+
+    /**
+     * getCoursesHtmlWithGradeData
+     * 概要：コースのドロップダウンオプションをgrade付きでHTML化して取得
+     * 戻り値：HTML文字列（course_id, course_name, grade）
+     * ※ ViewHelperを使用してHTML化
+     * ※ 新規作成時のポップアップで使用する
+     */
+    public function getCoursesHtmlWithGradeData() {
+        $this->loadCourses();
+        return ViewHelper::renderDropdownList($this->courses, 'course_id', 'course_name', 'grade');
+    }
 
     /**
      * getAllTimetableData
-     * 概要：すべてのコースの時間割データを取得し、JSが読み込める形式で返す関数
-     * 戻り値：すべての時間割データの配列
+     * 概要：すべての時間割データを取得する
+     * 戻り値：配列（すべての時間割データ）
      */
     public function getAllTimetableData() {
         $allTimetables = [];
+        $this->loadCourses(); // コース情報確保
 
         try {
-            // 1. 各リポジトリの取得
-            $courseRepo = RepositoryFactory::getCourseRepository();
             $timetableRepo = RepositoryFactory::getTimetableRepository();
 
-            // 2. コース全取得
-            $this->courses = $courseRepo->getAllCourses();
-
-            // 3. コースごとにループして時間割を取得
             foreach ($this->courses as $course) {
                 $courseId = $course['course_id'];
-                
-                // 特定のコースの時間割を取得
                 $timetables = $timetableRepo->getTimetablesByCourseId($courseId);
 
-                // データがあれば結合
                 if (!empty($timetables)) {
-                    // array_mergeだとキーが連番でリセットされる可能性があるため、単純に追加
                     foreach ($timetables as $t) {
                         $allTimetables[] = $t;
                     }
                 }
             }
-
         } catch (Exception $e) {
-            // エラーログ出力など
             error_log("TimetableService Error: " . $e->getMessage());
-            return []; // エラー時は空配列を返す
+            return [];
         }
 
         return $allTimetables;
     }
 
     /**
-     * 
-     * 概要：コースの情報を返す関数
-     * 戻り値：コース情報が格納された配列
-     */
-    public function getCourseDropdownOptions() {
-        $courseRepo = RepositoryFactory::getCourseRepository();
-        $courses = $courseRepo->getAllCourses();
-        $html = ViewHelper::renderDropdownList($courses, 'course_id', 'course_name');
-        return $html;
-    }
-    
-    /**
      * getAllCourseMasterData
-     * 概要：全コースの「科目・担当教員・教室」のマスタデータを取得し、
-     * コースIDをキーとした連想配列として返す。
-     * 目的：フロントエンド(JS)での動的なドロップダウン生成とオートフィル用
-     * * 戻り値の形式:
-     * [
-     * 1 => [ // コースID
-     * [ 'subject_id' => 10, 'subject_name' => 'Java', 'teacher_id' => 5, ... ],
-     * [ ... ]
-     * ],
-     * 2 => [ ... ]
-     * ]
+     * 概要：マスタデータの取得
+     * 戻り値：配列（course_idをキーにした「科目・教員・教室」の組み合わせデータ）
+     * 目的：時間割り作成画面で、特定のコースに割り当てられた科目情報を取得し、ドロップダウンリストの選択肢として表示するため
      */
     public function getAllCourseMasterData() {
         $masterData = [];
+        $this->loadCourses(); // コース情報確保
 
         try {
-            // リポジトリの取得
-            $courseRepo = RepositoryFactory::getCourseRepository();
             $sicRepo = RepositoryFactory::getSubjectInChargesRepository();
 
-            // 1. 全コースを取得
-            // (getAllTimetableDataですでに取得していればプロパティを使っても良いですが、念のため再取得またはキャッシュ利用)
-            if (empty($this->courses)) {
-                $this->courses = $courseRepo->getAllCourses();
-            }
-
-            // 2. コースごとに定義データを取得して格納
             foreach ($this->courses as $course) {
                 $courseId = $course['course_id'];
-                
-                // SubjectInChargesRepositoryを使ってデータを取得
-                // ※学年(grade)による絞り込みが必要な場合は、ここでロジックを追加します
+                // ここで学年(grade)によるフィルタが必要なら $course['grade'] を渡せます
                 $definitions = $sicRepo->getSubjectDefinitionsByCourse($courseId);
-
-                // コースIDをキーにして格納
-                // データがない場合でも対応できるように空配列として処理する
                 $masterData[$courseId] = $definitions;
             }
-
         } catch (Exception $e) {
             error_log("TimetableService::getAllCourseMasterData Error: " . $e->getMessage());
             return [];

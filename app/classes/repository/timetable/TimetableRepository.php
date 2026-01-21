@@ -8,7 +8,7 @@ class TimetableRepository extends BaseRepository {
 
     /*
     * getTimetablesByCourseId
-    * 概要：指定されたコースIDに基づいて時間割りデータを取得する
+    * 概要：指定されたコースIDに基づいて、そのコースの時間割りデータを取得する
     * 引数：$courseId - 取得するコースのID
     * 戻り値：時間割りデータの配列
     */
@@ -21,7 +21,7 @@ class TimetableRepository extends BaseRepository {
                     t.course_id,
                     t.start_date,
                     t.end_date,
-                    t.status_type,  -- ★ここに追加
+                    t.status_type,
                     c.course_name,
                     td.day_of_week,
                     td.period,
