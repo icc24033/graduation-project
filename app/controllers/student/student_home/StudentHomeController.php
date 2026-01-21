@@ -25,20 +25,4 @@ class StudentHomeController {
 
         require_once '../student_home.php';
     }
-
-    /**
-     * コース編集画面
-     */
-    public function index_course($course_id, $year) {
-        $viewData = $this->service->getEditData();
-        $gradeData = $this->service->getGradeData();
-        $basic_data = $this->service->getStudentsInCourse($course_id, $year);
-        
-        RepositoryFactory::closePdo();
-
-        extract($viewData);
-        extract($basic_data);
-        extract($gradeData);
-        require_once '../student_edit_course.php';
-    }
 }
