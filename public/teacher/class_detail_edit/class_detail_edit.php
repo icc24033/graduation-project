@@ -16,7 +16,12 @@
         <header>
             <div class="header">
                 <h1>授業詳細</h1>
-                <img class="user-icon" src="images/user-icon.png" alt="アイコン">
+                <div class="header-right">
+                
+
+                <h2>授業詳細 先生ID: <?php echo htmlspecialchars($teacher_id); ?></h2>
+                    <img class="user-icon" src="images/user-icon.png" alt="アイコン">
+                </div>
             </div>
         </header>
         <main>
@@ -52,7 +57,11 @@
                         <ul class="dropdown-menu" id="subjectDropdownMenu">
                             <?php if (!empty($subjects)): ?>
                                 <?php foreach ($subjects as $subject): ?>
-                                    <li><a href="#" data-subject-id="<?= $subject['teacher_id'] ?>"><?= htmlspecialchars($subject['subject_name']) ?></a></li>
+                                    <li>
+                                        <a href="#" class="subject-select" data-subject-id="<?= htmlspecialchars($subject['subject_id'] ?? $subject['teacher_id']) ?>">
+                                            <?= htmlspecialchars($subject['subject_name']) ?>
+                                        </a>
+                                    </li>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <li><a href="#">担当教科なし</a></li>
@@ -81,7 +90,9 @@
                     </div>
                     <div class="month-wrapper">
                         <span class="course-name-title">学年</span>
-                        <span class="course-name-title" id="displayCourseName">授業名</span>
+                        <span class="course-name-title" id="displayCourseName">
+                             <?php echo !empty($subjects) ? htmlspecialchars($subjects[0]['subject_name']) : '授業名'; ?>
+                        </span>
                     </div>
                 </div>
                 <div class="calendar-container">
@@ -118,8 +129,6 @@
                                 <h3 class="sub-title">よく使う持ち物テンプレート</h3>
                                 <div class="item-list-wrapper">
                                     <div class="item-tags">
-                                        <div class="item-tag-container"><span class="item-tag">ノートパソコン</span></div>
-                                        <div class="item-tag-container"><span class="item-tag">筆記用具</span></div>
                                     </div>
                                     <div class="item-delete-icon-wrapper">
                                         <img class="delete-icon" src="images/Vector.png" alt="削除">
@@ -146,6 +155,16 @@
                 </div>
             </div>
         </main>
+
+        <script>
+    // PHPから渡されたスケジュールデータをJS変数に代入
+    // ここが teacherSchedules ではなく別の名前になっていないか確認してください
+    const teacherSchedules = <?php echo $teacher_schedule_json; ?>;
+    
+    // デバッグ用：ブラウザのコンソールに表示して確認
+    console.log("JSに渡されたスケジュール:", teacherSchedules);
+</script>
+
         <script src="js/script.js"></script>
     </body>
 </html>
