@@ -12,8 +12,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="nofollow,noindex">
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
@@ -117,8 +117,12 @@
 </head>
 <body>
     <?php
+    // student_home.php
+
+    // 1. 基本設定と時間割の定義
     date_default_timezone_set('Asia/Tokyo');
 
+    // 時限ごとの時間帯定義
     $time_schedule = [
         1 => '9:10 ～ 10:40', 2 => '10:50 ～ 12:20', 3 => '13:10 ～ 14:40',
         4 => '14:50 ～ 16:20', 5 => '16:30 ～ 18:00', 6 => '18:10 ～ 19:40',
@@ -126,42 +130,50 @@
 
     $day_map_full = [0 => '日', 1 => '月', 2 => '火', 3 => '水', 4 => '木', 5 => '金', 6 => '土'];
     $day_map_weekday = ['月', '火', '水', '木', '金'];
-    
+
+    // 2. 表示する日付の決定ロジック
     if (isset($_POST['search_date']) && !empty($_POST['search_date'])) {
+        // ユーザーがカレンダーから日付を選択した場合
         $display_date_obj = new DateTime($_POST['search_date']);
     } else {
+        // 初期表示：現在の時間に基づいて自動判定
         $current_time = new DateTime();
-        $end_time_threshold = new DateTime(date('Y-m-d') . ' 16:20:00'); 
+        $end_time_threshold = new DateTime(date('Y-m-d') . ' 16:20:00'); // 4限終了目安
         $display_date_obj = clone $current_time; 
         $current_day_jp = $day_map_full[(int)$display_date_obj->format('w')];
-    
+
+        // 平日の16:20以降は翌日の時間割を表示（土日は月曜にスキップ）
         if (in_array($current_day_jp, $day_map_weekday)) {
             if ($current_time >= $end_time_threshold) {
                 $display_date_obj->modify('+1 day');
                 $next_w = (int)$display_date_obj->format('w');
-                if ($next_w === 6) { $display_date_obj->modify('+2 days'); }
-                if ($next_w === 0) { $display_date_obj->modify('+1 day'); }
+                if ($next_w === 6) { $display_date_obj->modify('+2 days'); } // 土曜なら月曜へ
+                if ($next_w === 0) { $display_date_obj->modify('+1 day'); }  // 日曜なら月曜へ
             }
         } else {
+            // 現在が土日の場合は直後の月曜日を表示
             if ($current_day_jp === '土') { $display_date_obj->modify('+2 days'); }
             elseif ($current_day_jp === '日') { $display_date_obj->modify('+1 day'); }
         }
     }
-    
+
+    // 表示用データの整形
     $display_day_jp = $day_map_full[(int)$display_date_obj->format('w')];
     $today_date_value = $display_date_obj->format('Y-m-d'); 
     $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_jp . ")"; 
 
-    // コース選択の取得
+    // 3. コース選択状態の管理
     $selected_course = $_POST['selected_course'] ?? 'user_course';
-    // コースラベルのマッピング
     $course_labels = [
-        'system' => 'システム', 'web' => 'Web', 'multi' => 'マルチ',
+        'system' => 'システムデザインコース', 'web' => 'Web', 'multi' => 'マルチ',
         'ouyou' => '応用情報', 'kihon' => '基本情報', 'ipasu' => 'ITパスポート',
         'itikumi' => '1年1組', 'nikumi' => '1年2組'
     ];
     $course_label = $course_labels[$selected_course] ?? 'システム';
     ?>
+
+
+
 
     <header class="page-header">
         <p>ICCスマートキャンパス</p>
@@ -195,7 +207,7 @@
             </div>
 
             <button type="submit" class="search">
-                <img class="search-img" src="images/search.svg" alt="">
+                <img class="search-img" src="../images/search.svg" alt="">
                 <p>検索</p>
             </button>
         </div>
@@ -209,8 +221,8 @@
    <main class="main-content" id="schedule-container">
     <div class="schedule-list">
         <?php
+        // 4. データベースからのデータ取得処理
         try {
-            // データベース接続設定
             $dsn  = 'mysql:host=localhost;dbname=icc_smart_campus;charset=utf8';
             $user = 'root';
             $pass = 'root'; 
@@ -222,17 +234,18 @@
 
             $db = new PDO($dsn, $user, $pass, $options);
 
-            // 曜日とコースIDの変換
+            // 曜日の日本語名をDB用の数値(1-7)に変換
             $day_to_num = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
             $target_day_num = $day_to_num[$display_day_jp] ?? 1;
 
+            // コース識別子をDBのIDに変換
             $course_to_id = [
                 'system' => 1, 'web' => 2, 'multi' => 3, 
                 'ouyou' => 4, 'kihon' => 5, 'itikumi' => 6, 'nikumi' => 7
             ];
             $target_timetable_id = $course_to_id[$selected_course] ?? 1;
 
-            // ★ SQLの変更: subjectsテーブルを結合して科目名(subject_name)を取得
+            // SQL実行：科目名を取得するためにsubjectsテーブルをJOIN
             $sql = "SELECT td.*, s.subject_name 
                     FROM timetable_details td
                     LEFT JOIN subjects s ON td.subject_id = s.subject_id
@@ -247,26 +260,26 @@
             ]);
             $fetched_data = $stmt->fetchAll();
 
-            // 取得データを時限ごとに整理
+            // 取得したデータを「時限」をキーにした連想配列に整理
             $schedule_by_period = [];
             foreach ($fetched_data as $row) {
                 $schedule_by_period[$row['period']] = $row;
             }
 
+            // 5. 1限から4限までをループして表示生成
             for ($period = 1; $period <= 4; $period++) {
                 $item = $schedule_by_period[$period] ?? null;
                 
-                // データ準備
+                // 変数のサニタイズと初期値設定
                 $subject_name = htmlspecialchars($item["subject_name"] ?? '');
                 $class_detail = htmlspecialchars($item["class_detail"] ?? '詳細情報はありません。');
                 $bring_object = htmlspecialchars($item["bring_object"] ?? '特になし');
-                $room         = htmlspecialchars($item["room_name"] ?? '-'); // DBの列名に合わせて調整してください
-                $teacher      = htmlspecialchars($item["teacher_name"] ?? '未設定'); // DBにある場合
+                $room         = htmlspecialchars($item["room_name"] ?? '-');
                 
                 $display_title = $subject_name ?: '（授業なし）';
                 $time_str = $time_schedule[$period] ?? "時間未定";
-            
-                // カンマ、読点、および「スペース（全角・半角）」で分割するように修正
+
+                // 「持ってくるもの」を正規表現で分割（全角半角スペース、カンマ、読点に対応）
                 $item_list = preg_split('/[、,，\s\x{3000}]+/u', $bring_object, -1, PREG_SPLIT_NO_EMPTY);
             ?>
             
@@ -313,8 +326,8 @@
                         </div> </div>
                 </div>
             </section>
-                <?php
-            } 
+            <?php
+            } // end for
 
         } catch(Exception $e) {
             echo "<div class='error-msg'>エラー: " . htmlspecialchars($e->getMessage()) . "</div>";

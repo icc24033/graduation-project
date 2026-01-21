@@ -2,19 +2,18 @@
 // StudentHomeService.php
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 
-class TeacherAccountService {
-
+class StudentHomeService {
+    
     /**
-     * 教員リストの取得
-     * @return array 教員情報の配列とエラーメッセージ
+     * コースリストの取得
      */
-    public function getTeachers() {
-        $data = ['teacherList' => [], 'error_message' => ''];
+    public function getEditData() {
+        $data = ['courseList' => [], 'error_message' => ''];
         try {
-            $teacherRepo = RepositoryFactory::getTeacherRepository();
-            $data['teacherList'] = $teacherRepo->getAllTeachers();
+            $courseRepo = RepositoryFactory::getCourseRepository();
+            $data['courseList'] = $courseRepo->getAllCourses();
         } catch (Exception $e) {
-            error_log("TeacherAccountService Error (getTeachers): " . $e->getMessage());
+            error_log("StudentAccountService Error (getEditData): " . $e->getMessage());
             $data['error_message'] = "データの読み込みに失敗しました。";
         }
         return $data;

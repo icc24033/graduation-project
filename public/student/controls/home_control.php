@@ -12,5 +12,5 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 require_once '../../../app/controllers/student/student_home/StudentHomeController.php';
 
-$controller = new TeacherAccountEditController();
-$controller->index_master();
+$controller = new StudentHomeController();
+$controller->index();
