@@ -27,4 +27,17 @@ class CourseRepository extends BaseRepository {
             return [];
         }
     }
+
+    public function getAllCoursesIncludedGrade() {
+        try {
+            // grade カラムを含めて取得
+            $sql = "SELECT course_id, course_name, grade FROM course ORDER BY course_id ASC";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("CourseRepository Error: " . $e->getMessage());
+            return [];
+        }
+    }
 }
