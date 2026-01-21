@@ -10,62 +10,8 @@ $options = $status['options'] ?? [];
 $subject_sql_first = $status['subject_sql_first'] ?? '';
 $subject_sql_second = $status['subject_sql_second'] ?? '';
 */
-
-// student_home.php
-
-// 1. 基本設定
-date_default_timezone_set('Asia/Tokyo');
-
-/**
- * $courseList の内容に基づいて表示用ラベルを生成
- * var_dumpの内容: [ ["course_id"=>1, "course_name"=>"システムデザインコース"], ... ]
- */
-$course_labels = [];
-if (isset($courseList) && is_array($courseList)) {
-    foreach ($courseList as $course) {
-        $course_labels[$course['course_id']] = $course['course_name'];
-    }
-}
-
-// コース選択状態の管理（POSTがなければデフォルトでID:1を選択）
-$selected_course = isset($_POST['selected_course']) ? (int)$_POST['selected_course'] : 1;
-$course_label = $course_labels[$selected_course] ?? 'コース不明';
-
-// 2. 時限ごとの時間帯定義
-$time_schedule = [
-    1 => '9:10 ～ 10:40', 2 => '10:50 ～ 12:20', 3 => '13:10 ～ 14:40',
-    4 => '14:50 ～ 16:20', 5 => '16:30 ～ 18:00', 6 => '18:10 ～ 19:40',
-];
-
-$day_map_full = [0 => '日', 1 => '月', 2 => '火', 3 => '水', 4 => '木', 5 => '金', 6 => '土'];
-$day_map_weekday = ['月', '火', '水', '木', '金'];
-
-// 3. 表示する日付の決定ロジック
-if (isset($_POST['search_date']) && !empty($_POST['search_date'])) {
-    $display_date_obj = new DateTime($_POST['search_date']);
-} else {
-    $current_time = new DateTime();
-    $end_time_threshold = new DateTime(date('Y-m-d') . ' 16:20:00'); 
-    $display_date_obj = clone $current_time; 
-    $current_day_jp = $day_map_full[(int)$display_date_obj->format('w')];
-
-    if (in_array($current_day_jp, $day_map_weekday)) {
-        if ($current_time >= $end_time_threshold) {
-            $display_date_obj->modify('+1 day');
-            $next_w = (int)$display_date_obj->format('w');
-            if ($next_w === 6) { $display_date_obj->modify('+2 days'); }
-            if ($next_w === 0) { $display_date_obj->modify('+1 day'); }
-        }
-    } else {
-        if ($current_day_jp === '土') { $display_date_obj->modify('+2 days'); }
-        elseif ($current_day_jp === '日') { $display_date_obj->modify('+1 day'); }
-    }
-}
-
-$display_day_jp = $day_map_full[(int)$display_date_obj->format('w')];
-$today_date_value = $display_date_obj->format('Y-m-d'); 
-$formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_jp . ")"; 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -143,7 +89,6 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
     <main class="main-content" id="schedule-container">
         <div class="schedule-list">
             <?php
-            // すでにコントローラーで $schedule_by_period が用意されている
             for ($period = 1; $period <= 4; $period++) {
                 $item = $schedule_by_period[$period] ?? null;
                 $subject_name = htmlspecialchars($item["subject_name"] ?? '');
@@ -165,11 +110,11 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
                         <p class="period-time"><?php echo $period; ?>限（<?php echo $time_str; ?>）</p>
                         <div class="button-container">
                             <div class="dropdown-wrapper detail-dropdown-wrapper">
-                                <button type="button" class="button dropdown-toggle detail-toggle" id="detail-toggle-button-<?php echo $period; ?>">
+                                <button type="button" class="button dropdown-toggle detail-toggle">
                                     <p>授業詳細</p>
                                     <img class="button-icon detail-icon" src="images/arrow_right.svg" alt="">
                                 </button>
-                                <div class="dropdown-content detail-content" id="detail-content-<?php echo $period; ?>">
+                                <div class="dropdown-content detail-content">
                                     <div class="detail-box">
                                         <div class="detail-title">内容</div>
                                         <p class="detail-text"><?php echo $class_detail; ?></p>
@@ -177,11 +122,11 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
                                 </div>
                             </div>
                             <div class="dropdown-wrapper item-dropdown-wrapper">
-                                <button type="button" class="button dropdown-toggle item-toggle" id="item-toggle-button-<?php echo $period; ?>">
+                                <button type="button" class="button dropdown-toggle item-toggle">
                                     <p>持ってくるもの</p>
                                     <img class="button-icon item-icon" src="images/arrow_right.svg" alt="">
                                 </button>
-                                <div class="dropdown-content item-content" id="item-content-<?php echo $period; ?>">
+                                <div class="dropdown-content item-content">
                                     <ul class="item-list">
                                         <?php foreach($item_list as $idx => $val): ?>
                                             <?php $chkId = "item-chk-{$period}-{$idx}"; ?>
@@ -221,7 +166,6 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
 
         courseItems.forEach(item => {
             item.addEventListener('click', function() {
-                // ここで course_id (数値) がセットされ、フォームが送信される
                 hiddenCourseInput.value = this.getAttribute('data-value');
                 document.getElementById('mainForm').submit();
             });
