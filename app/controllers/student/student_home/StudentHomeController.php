@@ -16,13 +16,13 @@ class StudentHomeController {
      * 生徒ホーム画面
      */
     public function index() {
-        /*
-        $viewData = $this->service->getHomeData();
         
+        $courseList = $this->service->getEditData();
+
         RepositoryFactory::closePdo();
 
-        extract($viewData);
-        */
+        extract($courseList);
+
         require_once '../student_home.php';
     }
 
