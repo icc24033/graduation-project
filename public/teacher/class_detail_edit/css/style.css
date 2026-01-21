@@ -872,3 +872,32 @@ button.status-button.not-created {
 .date-cell .status-button.not-created {
     display: none;
 }
+
+/* 先生が担当している日の日付（数字）を青い丸にする */
+.date-cell.is-teacher-assigned .date-num {
+    background-color: #e3f2fd; /* 薄い青色 */
+    color: #1976d2;           /* 濃い青色の文字 */
+    border-radius: 50%;       /* 丸くする */
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+/* 先生の授業がある日のセルに青丸を表示する例 */
+.date-cell.is-teacher-assigned {
+    position: relative;
+}
+
+.date-cell.is-teacher-assigned::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: #007bff; /* 青色 */
+    border-radius: 50%;
+    z-index: 1;
+}

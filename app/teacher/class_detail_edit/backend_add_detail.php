@@ -4,12 +4,35 @@
 class BackendAddDetail {
 
     /**
-     * カレンダー表示・データ復旧用に全データを取得する
+     * 指定された先生が授業を持っている曜日を取得
+     */
+    public static function getTeacherScheduleDays($teacher_id) {
+        $pdo = self::getDbConnection();
+        try {
+            $sql = "SELECT DISTINCT d.day_of_week 
+                    FROM timetable_details d
+                    JOIN timetable_detail_teachers dt ON d.detail_id = dt.detail_id
+                    WHERE dt.teacher_id = :teacher_id";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':teacher_id' => $teacher_id]);
+            $days = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            return array_map(function($d) {
+                return ($d == 7) ? 0 : (int)$d;
+            }, $days);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * カレンダー表示用に自分のデータ(teacher_id)だけを正確に取得する
      */
     public static function getAllClassDetails($teacher_id) {
         $pdo = self::getDbConnection();
         try {
-            // 1. まずは授業の基本データ(日付、内容、ステータス)を取得
+            // 自分の teacher_id に紐づく授業詳細のみを取得
             $sql = "SELECT lesson_date, content, status FROM class_detail WHERE teacher_id = :teacher_id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':teacher_id' => $teacher_id]);
@@ -19,16 +42,15 @@ class BackendAddDetail {
             foreach ($rows as $row) {
                 $date = $row['lesson_date'];
 
-                // 2. その日の「持ち物」を bring_object テーブルから取得
-                $stmt2 = $pdo->prepare("SELECT object_name FROM bring_object WHERE lesson_date = :date");
-                $stmt2->execute([':date' => $date]);
+                // 自分の teacher_id に紐づく持ち物のみを取得
+                $stmt2 = $pdo->prepare("SELECT object_name FROM bring_object WHERE lesson_date = :date AND teacher_id = :teacher_id");
+                $stmt2->execute([':date' => $date, ':teacher_id' => $teacher_id]);
                 $belongingsArray = $stmt2->fetchAll(PDO::FETCH_COLUMN);
 
-                // 3. JSが画面に表示するために必要な形式へ整理
                 $result[$date] = [
                     "slot" => "1限", 
-                    "content" => $row['content'] ?? "", // 授業詳細
-                    "belongings" => implode('、', $belongingsArray), // 持ち物を「、」で結合
+                    "content" => $row['content'] ?? "", 
+                    "belongings" => implode('、', $belongingsArray), 
                     "status" => $row['status']
                 ];
             }
@@ -39,7 +61,7 @@ class BackendAddDetail {
     }
 
     /**
-     * テンプレート（よく使う持ち物）リストを取得
+     * テンプレートリストを取得
      */
     public static function getTemplateObjects($teacher_id) {
         $pdo = self::getDbConnection();
@@ -78,10 +100,13 @@ class BackendAddDetail {
         }
     }
 
+    /**
+     * 教科一覧を取得
+     */
     public static function getTeacherSubjects($teacher_id) {
         $pdo = self::getDbConnection();
         try {
-            $stmt = $pdo->prepare("SELECT teacher_id, subject_name FROM subjects WHERE teacher_id = :teacher_id");
+            $stmt = $pdo->prepare("SELECT subject_id, subject_name FROM subjects WHERE teacher_id = :teacher_id");
             $stmt->execute([':teacher_id' => $teacher_id]);
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -89,14 +114,22 @@ class BackendAddDetail {
         }
     }
 
+    /**
+     * 先生ごとにデータを保存・上書きする処理
+     */
     public static function saveClassDetail($date, $content, $status, $belongings, $teacher_id) {
         $pdo = self::getDbConnection();
         try {
             $pdo->beginTransaction();
 
-            // 授業詳細の保存
-            $sql1 = "REPLACE INTO class_detail (lesson_date, content, status, teacher_id) 
-                     VALUES (:lesson_date, :content, :status, :teacher_id)";
+            // INSERT ... ON DUPLICATE KEY UPDATE を使用
+            // 「日付 + 先生ID」が既に存在すれば中身を更新、なければ新規作成
+            $sql1 = "INSERT INTO class_detail (lesson_date, content, status, teacher_id) 
+                     VALUES (:lesson_date, :content, :status, :teacher_id)
+                     ON DUPLICATE KEY UPDATE 
+                        content = VALUES(content), 
+                        status = VALUES(status)";
+            
             $stmt1 = $pdo->prepare($sql1);
             $stmt1->execute([
                 ':lesson_date' => $date,
@@ -105,17 +138,21 @@ class BackendAddDetail {
                 ':teacher_id'  => $teacher_id
             ]);
 
-            // 持ち物の更新（一旦消して入れ直す）
-            $stmtDel = $pdo->prepare("DELETE FROM bring_object WHERE lesson_date = :lesson_date");
-            $stmtDel->execute([':lesson_date' => $date]);
+            // 自分の持ち物データのみを削除して再登録
+            $stmtDel = $pdo->prepare("DELETE FROM bring_object WHERE lesson_date = :lesson_date AND teacher_id = :teacher_id");
+            $stmtDel->execute([':lesson_date' => $date, ':teacher_id' => $teacher_id]);
 
             if (!empty($belongings)) {
                 $items = explode('、', $belongings); 
-                $stmt2 = $pdo->prepare("INSERT INTO bring_object (lesson_date, object_name) VALUES (:lesson_date, :object_name)");
+                $stmt2 = $pdo->prepare("INSERT INTO bring_object (lesson_date, object_name, teacher_id) VALUES (:lesson_date, :object_name, :teacher_id)");
                 foreach ($items as $item) {
                     $trimmedItem = trim($item);
                     if ($trimmedItem !== "") {
-                        $stmt2->execute([':lesson_date' => $date, ':object_name' => $trimmedItem]);
+                        $stmt2->execute([
+                            ':lesson_date' => $date, 
+                            ':object_name' => $trimmedItem,
+                            ':teacher_id'  => $teacher_id
+                        ]);
                     }
                 }
             }
@@ -128,12 +165,15 @@ class BackendAddDetail {
         }
     }
 
+    /**
+     * 削除処理（自分のデータだけを対象にする）
+     */
     public static function deleteClassDetail($date, $teacher_id) {
         $pdo = self::getDbConnection();
         try {
             $pdo->beginTransaction();
             $pdo->prepare("DELETE FROM class_detail WHERE lesson_date = ? AND teacher_id = ?")->execute([$date, $teacher_id]);
-            $pdo->prepare("DELETE FROM bring_object WHERE lesson_date = ?")->execute([$date]);
+            $pdo->prepare("DELETE FROM bring_object WHERE lesson_date = ? AND teacher_id = ?")->execute([$date, $teacher_id]);
             $pdo->commit();
             return true;
         } catch (Exception $e) {
@@ -142,6 +182,9 @@ class BackendAddDetail {
         }
     }
 
+    /**
+     * DB接続
+     */
     private static function getDbConnection() {
         $dsn = "mysql:host=localhost;dbname=icc_smart_campus;charset=utf8mb4";
         return new PDO($dsn, 'root', 'root', [
