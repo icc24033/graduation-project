@@ -140,37 +140,10 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
         <?php echo htmlspecialchars($course_label); ?> の時間割
     </p>
 
-   <main class="main-content" id="schedule-container">
-    <div class="schedule-list">
-        <?php
-        try {
-            $dsn  = 'mysql:host=localhost;dbname=icc_smart_campus;charset=utf8';
-            $user = 'root';
-            $pass = 'root'; 
-            $db = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-
-            $day_to_num = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
-            $target_day_num = $day_to_num[$display_day_jp] ?? 1;
-
-            // $selected_course はすでに course_id (数値) になっているためそのまま使用
-            $target_timetable_id = $selected_course;
-
-            $sql = "SELECT td.*, s.subject_name 
-                    FROM timetable_details td
-                    LEFT JOIN subjects s ON td.subject_id = s.subject_id
-                    WHERE td.day_of_week = :day 
-                    AND td.timetable_id = :tid 
-                    ORDER BY td.period ASC";
-            
-            $stmt = $db->prepare($sql);
-            $stmt->execute([':day' => $target_day_num, ':tid' => $target_timetable_id]);
-            $fetched_data = $stmt->fetchAll();
-
-            $schedule_by_period = [];
-            foreach ($fetched_data as $row) {
-                $schedule_by_period[$row['period']] = $row;
-            }
-
+    <main class="main-content" id="schedule-container">
+        <div class="schedule-list">
+            <?php
+            // すでにコントローラーで $schedule_by_period が用意されている
             for ($period = 1; $period <= 4; $period++) {
                 $item = $schedule_by_period[$period] ?? null;
                 $subject_name = htmlspecialchars($item["subject_name"] ?? '');
@@ -224,13 +197,10 @@ $formatted_full_date = $display_date_obj->format('Y/n/j') . " (" . $display_day_
                     </div>
                 </div>
             </section>
-            <?php } // for end 
-        } catch(Exception $e) {
-            echo "<div class='error-msg'>エラー: " . htmlspecialchars($e->getMessage()) . "</div>";
-        }
-        ?>
-    </div>
-</main>
+            
+            <?php } ?>
+        </div>
+    </main>
 
 <script>
     "use strict";
