@@ -79,10 +79,10 @@ body {
   background-color: #495666;
   gap: 10px;
   border-radius: 9px;
-  padding: 10px 10px; /* パディング */
-  flex-grow: 0; 
-  width: 130px; /* ラッパーの幅いっぱいに広がる */
-  justify-content: space-between; /* テキストとアイコンを両端に寄せる */
+  padding: 10px 15px; /* 左右の余白を少し調整 */
+  flex-grow: 1; 
+  width: 100%; /* 130pxから100%に変更 */
+  justify-content: space-between; 
   align-items: center;
   height: 40px;
   box-sizing: border-box;
@@ -486,8 +486,8 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 /* --- コース選択ドロップダウンのラッパー --- */
 .course-select-wrapper {
   position: relative;
-  flex-grow: 0;
-  width: 120px; /* ボタンの幅を120pxに固定 */
+  flex-grow: 1; /* 0から1に変更：空いたスペースいっぱいに広がるようになります */
+  width: auto;   /* 120pxの固定幅を解除 */
 }
 
 /* コース選択ボタンがアクティブな時 */
@@ -516,14 +516,14 @@ body > p { /* bodyの直下にある日付表示のpタグ */
 /* コース選択ドロップダウンコンテンツ (リスト本体) */
 .course-content {
   position: absolute;
-  top: 40px; /* ボタンの高さに合わせる */
+  top: 40px;
   left: 0;
-  width: 100%; /* 幅(120px)いっぱいに広がる */
+  width: 100%; /* これでボタンと同じ幅でリストが開きます */
   border-radius: 0 0 9px 9px;
   background-color: #ffffff;
   padding: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 5; /* 他のコンテンツの上に表示 */
+  z-index: 5;
 }
 
 /* ドロップダウンリストが開いた時のパディング設定を上書き */

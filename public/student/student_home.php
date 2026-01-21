@@ -73,11 +73,6 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
                     <?php endforeach; ?>
                 </div>
             </div>
-
-            <button type="submit" class="search">
-                <img class="search-img" src="../images/search.svg" alt="">
-                <p>検索</p>
-            </button>
         </div>
     </form>
     
