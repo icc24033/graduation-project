@@ -32,19 +32,19 @@ class StudentHomeController {
     }
 
     public function index() {
-        // 入力値の受け取り
-        $courseId  = $this->studentCourseId->getCourseId();
-
-        $courseId = (int)($_POST['selected_course'] ?? $courseId);
+        $sessionCourseId = $this->studentCourseId->getCourseId();
+    
+        // POSTがあればそれを、なければセッションのIDを使う
+        $courseId = (int)($_POST['selected_course'] ?? $sessionCourseId);
         $dateStr  = $_POST['search_date'] ?? null;
-
-        // サービスから表示用データを一括取得
+    
         $viewData = $this->service->getDashboardData($courseId, $dateStr);
-
-        // Viewで使いやすいように変数を展開（extract）
-        // これにより $viewData['course_label'] が $course_label として参照可能になります
+    
+        // ビュー側の変数名 $selected_course に合わせるためにキーを調整
+        $viewData['selected_course'] = $viewData['selected_course_id'];
+    
         extract($viewData);
-
+    
         RepositoryFactory::closePdo();
         require_once '../student_home.php';
     }
