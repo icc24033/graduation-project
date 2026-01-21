@@ -20,15 +20,19 @@ class CreateTimetableController extends HomeRepository
         $savedTimetables = $timetableService->getAllTimetableData();
 
         // コースのドロップダウンオプションをコース配列として取得
-        $courseList = $timetableService->getCourseDropdownOptions();
+        $courseList = $timetableService->getCoursesHtmlWithGradeData();
 
         // 時間割り作成に必要なマスタデータ（科目・教員・教室の紐づけ）を取得
         $masterSubjectData = $timetableService->getAllCourseMasterData();
+
+        // コースの生データ一覧を取得（JSで使用するため）
+        $rawCourseData = $timetableService->getRawCourseData();
         
         extract([
             'savedTimetables' => $savedTimetables,
             'courseList' => $courseList, 
-            'masterSubjectData' => $masterSubjectData
+            'masterSubjectData' => $masterSubjectData,
+            'rawCourseData' => $rawCourseData
         ]);
 
         // Viewにデータを渡す（requireすることで変数がView内で使えるようになります）
