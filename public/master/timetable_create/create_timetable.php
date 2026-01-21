@@ -245,7 +245,9 @@ SecurityHelper::applySecureHeaders();
         // PHPからデータを渡すが、変数名をJS内の既存変数と被らないように変更する
         // デフォルトで空配列 [] を入れることでnullエラーを防ぐ
         const dbTimetableData = <?php echo json_encode($savedTimetables ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-        
+        //マスタデータ（科目・教員・教室）
+        // JS側では dbMasterData[コースID] でアクセスする
+        const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         // 現在選択中のコースID
         let currentCourseId = null;
     </script>

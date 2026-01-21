@@ -14,13 +14,73 @@ if (typeof dbTimetableData !== 'undefined' && Array.isArray(dbTimetableData)) {
     savedTimetables = [];
 }
 
-let isCreatingMode = false;
+// --- グローバル変数 ---
 let isViewOnly = false;
 let currentRecord = null;
-let tempCreatingData = null;
 let originalRecordData = null; // 編集前のオリジナルデータ
 let previousState = null; // 新規作成前の状態を保存
 
+// --- 状態管理用変数 ---
+let isCreatingMode = false;    // 新規作成モードかどうか
+let isTestMode = false;        // テスト時間割モードかどうか（trueならオートフィル無効）
+let tempCreatingData = {};     // 作成中の時間割データを保持する { "月_1": { subjectId:..., teacherIds:[...], ... } }
+
+
+// --- マスタデータ操作用ヘルパー ---
+// ※dbMasterData は PHP 側で生成されたマスタデータオブジェクト
+/**
+ * getCurrentCourseMasterData
+ * 概要：選択中のコースに紐づく「科目定義リスト」を取得する関数
+ * 戻り値：配列（科目定義オブジェクトの配列）
+ * 使用方法：コース選択後や、科目/教員/教室のドロップダウン生成時に呼び出してください。
+ */
+function getCurrentCourseMasterData() {
+    if (!currentCourseId || !dbMasterData[currentCourseId]) {
+        return [];
+    }
+    return dbMasterData[currentCourseId];
+}
+
+/**
+ * getAvailableTeachers
+ * 概要：現在のコースで利用可能な「先生リスト」を抽出（重複を除去する）
+ * 戻り値：配列（先生オブジェクトの配列）
+ * 使用方法：教員ドロップダウン生成時に呼び出してください。
+ */
+function getAvailableTeachers() {
+    const data = getCurrentCourseMasterData();
+    const teachers = new Map(); // 重複排除のためMap使用
+    
+    data.forEach(row => {
+        if (row.teacher_id && row.teacher_name) {
+            teachers.set(row.teacher_id, row.teacher_name);
+        }
+    });
+    
+    return Array.from(teachers, ([id, name]) => ({ id, name }));
+}
+
+/**
+ * getAvailableRooms
+ * 概要：現在のコースで利用可能な「教室リスト」を抽出（重複を除去する）
+ * 戻り値：配列（教室オブジェクトの配列）
+ * 使用方法：教室ドロップダウン生成時に呼び出してください。
+ */
+function getAvailableRooms() {
+    const data = getCurrentCourseMasterData();
+    const rooms = new Map();
+    
+    data.forEach(row => {
+        if (row.room_id && row.room_name) {
+            rooms.set(row.room_id, row.room_name);
+        }
+    });
+    
+    return Array.from(rooms, ([id, name]) => ({ id, name }));
+}
+
+
+// --- 初期選択処理 ---
 /*
  * 概要: 優先度順、またはデータが存在する順に初期選択を行う。
  * 使用方法: データ読み込み後に呼び出すと、適切なコースを自動で選択して表示します。
@@ -159,6 +219,7 @@ mainStartDate.addEventListener('input', () => {
         mainEndDate.style.borderColor = '';
     }
     
+    // 編集モード時の削除ボタン表示切替
     if (!isCreatingMode && currentRecord && originalRecordData) {
         if (mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate) {
             // 適用中の時間割は削除不可の表示で統一する
