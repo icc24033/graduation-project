@@ -15,6 +15,7 @@ require_once __DIR__ . '/TempTeacherCsvRepository.php';
 require_once __DIR__ . '/ErrorTeacherTableRepository.php';
 require_once __DIR__ . '/class_subject_edit/SubjectInChargesRepository.php';
 require_once __DIR__ . '/RoomRepository.php';
+require_once __DIR__ . '/timetable_details/TimeTableDetailsRepository.php';
 
 
 
@@ -171,5 +172,12 @@ class RepositoryFactory {
      */
     public static function getRoomRepository() {
         return new RoomRepository(self::getPdo());
+    }
+
+    /**
+     * 時間割詳細リポジトリのインスタンスを取得
+     */
+    public static function getTimeTableDetailsRepository() {
+        return new TimeTableDetailsRepository(self::getPdo());
     }
 }
