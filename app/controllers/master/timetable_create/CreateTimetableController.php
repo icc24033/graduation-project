@@ -17,20 +17,22 @@ class CreateTimetableController extends HomeRepository
         
         // Serviceを使って時間割データを一括取得
         $timetableService = new TimetableService();
+
+        // 1. 保存されている時間割データをすべて取得
         $savedTimetables = $timetableService->getAllTimetableData();
 
-        // コースのドロップダウンオプションをコース配列として取得
-        $courseList = $timetableService->getCoursesHtmlWithGradeData();
+        // 2. サイドバー用のコースのドロップダウンオプションをHTMLで取得
+        $sidebarCourseList = $timetableService->getSidebarCourseListHtml();
 
-        // 時間割り作成に必要なマスタデータ（科目・教員・教室の紐づけ）を取得
-        $masterSubjectData = $timetableService->getAllCourseMasterData();
-
-        // コースの生データ一覧を取得（JSで使用するため）
+        // 3. コースの生データ一覧を取得（JSON化してJSで使用する）
         $rawCourseData = $timetableService->getRawCourseData();
+
+        // 4. 時間割り作成に必要なマスタデータ（科目・教員・教室の紐づけ）を取得
+        $masterSubjectData = $timetableService->getAllCourseMasterData();
         
         extract([
             'savedTimetables' => $savedTimetables,
-            'courseList' => $courseList, 
+            'sidebarCourseList' => $sidebarCourseList,
             'masterSubjectData' => $masterSubjectData,
             'rawCourseData' => $rawCourseData
         ]);
