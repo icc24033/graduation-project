@@ -142,66 +142,6 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
         </div>
     </main>
 
-<script>
-    "use strict";
-
-    const dateBtn = document.getElementById('dateTriggerBtn');
-    const dateInput = document.getElementById('hiddenDateInput');
-    if(dateBtn && dateInput){
-        dateBtn.addEventListener('click', () => {
-            if (dateInput.showPicker) { dateInput.showPicker(); } 
-            else { dateInput.click(); }
-        });
-        dateInput.addEventListener('change', () => { document.getElementById('mainForm').submit(); });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const courseItems = document.querySelectorAll('.course-select-wrapper .dropdown-item');
-        const hiddenCourseInput = document.getElementById('hiddenCourseInput');
-
-        courseItems.forEach(item => {
-            item.addEventListener('click', function() {
-                hiddenCourseInput.value = this.getAttribute('data-value');
-                document.getElementById('mainForm').submit();
-            });
-        });
-
-        const toggleButtons = document.querySelectorAll('.dropdown-toggle');
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', function() { toggleDropdown(this); });
-        });
-    });
-
-    function closeDropdown(wrapper) {
-        wrapper.classList.remove('active');
-        const button = wrapper.querySelector('.dropdown-toggle');
-        if(button) {
-            button.setAttribute('aria-expanded', 'false');
-            const internalContent = wrapper.querySelector('.dropdown-content');
-            if(internalContent) internalContent.classList.remove('show');
-        }
-    }
-
-    function toggleDropdown(button) {
-        const wrapper = button.closest('.dropdown-wrapper');
-        const isExpanded = wrapper.classList.contains('active');
-
-        if (button.classList.contains('detail-toggle') || button.classList.contains('item-toggle')) {
-            const card = button.closest('.card');
-            const otherClass = button.classList.contains('detail-toggle') ? '.item-dropdown-wrapper' : '.detail-dropdown-wrapper';
-            const otherWrapper = card.querySelector(otherClass);
-            if (otherWrapper) closeDropdown(otherWrapper);
-        }
-
-        if (isExpanded) {
-            closeDropdown(wrapper);
-        } else {
-            wrapper.classList.add('active');
-            button.setAttribute('aria-expanded', 'true');
-            const internalContent = wrapper.querySelector('.dropdown-content');
-            if(internalContent) internalContent.classList.add('show');
-        }
-    }
-</script>
+    <script src="../js/script.js"></script>
 </body>
 </html>

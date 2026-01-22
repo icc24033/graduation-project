@@ -13,7 +13,6 @@ SecurityHelper::applySecureHeaders();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
@@ -61,7 +60,7 @@ SecurityHelper::applySecureHeaders();
                                     <span class="current-value">コースを選択してください</span>
                                 </button>
                                 <ul id="courseDropdownMenu" class="dropdown-menu">
-                                    <?php echo $courseList; ?>
+                                    <?php echo $sidebarCourseList; ?>
                                 </ul>
                             </div>
                         </div>
@@ -153,6 +152,7 @@ SecurityHelper::applySecureHeaders();
         </div>
     </div>
 
+    <!-- 授業編集モーダル -->
     <div id="classModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 id="modalTitle" class="modal-title">○曜日 ○限</h2>
@@ -194,6 +194,7 @@ SecurityHelper::applySecureHeaders();
         </div>
     </div>
 
+    <!-- 新規作成モーダル -->
     <div id="createModal" class="modal-overlay hidden">
         <div class="create-modal-content">
             <h2 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2 border-slate-300">新規作成</h2>
@@ -242,14 +243,15 @@ SecurityHelper::applySecureHeaders();
         </div>
     </div>
     <script>
+        // JS用データの埋め込み
+        // コースのデータ一覧
+        const dbCourseList = <?php echo json_encode($rawCourseData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         // PHPからデータを渡すが、変数名をJS内の既存変数と被らないように変更する
         // デフォルトで空配列 [] を入れることでnullエラーを防ぐ
         const dbTimetableData = <?php echo json_encode($savedTimetables ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         //マスタデータ（科目・教員・教室）
         // JS側では dbMasterData[コースID] でアクセスする
         const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-        // 現在選択中のコースID
-        let currentCourseId = null;
     </script>
     <script src="js/create_timetable.js"></script>
 </body>
