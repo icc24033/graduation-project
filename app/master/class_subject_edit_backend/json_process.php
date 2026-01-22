@@ -1,6 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 // test.php
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -11,16 +14,9 @@ try {
     exit;
 }
 
-$courseInfo = [   
-    'itikumi'       => ['id' => 7, 'grade' => 1],
-    'nikumi'        => ['id' => 8, 'grade' => 1],
-    'iphasu'        => ['id' => 6, 'grade' => 1],
-    'kihon'         => ['id' => 5, 'grade' => 1],
-    'applied-info'  => ['id' => 4, 'grade' => 1],
-    'multimedia'    => ['id' => 3, 'grade' => 2],
-    'system-design' => ['id' => 1, 'grade' => 2],
-    'web-creator'   => ['id' => 2, 'grade' => 2]
-];
+// $courseInfo をサービスから取得（または共通化）
+$service = new ClassSubjectEditService();
+$courseInfo = $service->getCourseInfoMaster();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -108,15 +104,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } 
         
         // --- コース追加(add_course) ---
+        // json_process.php の add_course アクション部分
         elseif ($action === 'add_course') {
-            $course_key = $_POST['course_key'] ?? '';
-            if (!isset($courseInfo[$course_key])) throw new Exception("無効なコースです。");
-            $target = $courseInfo[$course_key];
+            $course_id = $_POST['course_key'] ?? ''; 
+            $teacher_id = (int)($_POST['teacher_id'] ?? 0); 
+            
+            $target = $courseInfo[$course_id];
+            $target_course_id = $target['id'];
 
-            $sql = "INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) 
-                    VALUES (?, ?, ?, 0, NULL)
-                    ON DUPLICATE KEY UPDATE subject_id = subject_id";
-            $pdo->prepare($sql)->execute([$target['id'], $target['grade'], $subject_id]);
+            // 【重要】「本当に何も入っていない枠」を探す
+            // teacher_id が NULL、もしくは空文字のレコードを1件探す
+            $sqlFindEmpty = "SELECT subject_in_charge_id FROM subject_in_charges 
+                            WHERE subject_id = ? AND course_id = ? 
+                            AND (teacher_id IS NULL) 
+                            LIMIT 1";
+            $stmtEmpty = $pdo->prepare($sqlFindEmpty);
+            $stmtEmpty->execute([$subject_id, $target_course_id]);
+            $emptyRow = $stmtEmpty->fetch();
+
+            if ($emptyRow) {
+                // --- A. 空席(NULL)を更新する ---
+                $sqlUpdate = "UPDATE subject_in_charges SET teacher_id = ? 
+                            WHERE subject_in_charge_id = ?";
+                $pdo->prepare($sqlUpdate)->execute([$teacher_id, $emptyRow['subject_in_charge_id']]);
+            } else {
+                // --- B. 空席がない場合、重複チェックして新規追加 ---
+                $sqlCheck = "SELECT COUNT(*) FROM subject_in_charges 
+                            WHERE subject_id = ? AND course_id = ? AND teacher_id = ?";
+                $stmtCheck = $pdo->prepare($sqlCheck);
+                $stmtCheck->execute([$subject_id, $target_course_id, $teacher_id]);
+
+                if ($stmtCheck->fetchColumn() == 0) {
+                    $sqlInsert = "INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) 
+                                VALUES (?, ?, ?, ?, NULL)";
+                    $pdo->prepare($sqlInsert)->execute([$target_course_id, $target['grade'], $subject_id, $teacher_id]);
+                }
+            }
 
             echo json_encode(['success' => true]);
             exit;
@@ -124,9 +147,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         // --- コース削除(remove_course) ---
         elseif ($action === 'remove_course') {
-            $course_key = $_POST['course_key'] ?? '';
-            if (!isset($courseInfo[$course_key])) throw new Exception("無効なコースです。");
-            $target_course_id = $courseInfo[$course_key]['id'];
+            $course_id = $_POST['course_key'] ?? ''; // course_key から course_id に変数名を合わせる
+            if (!isset($courseInfo[$course_id])) throw new Exception("無効なコースです。");
+            $target_course_id = $courseInfo[$course_id]['id']; // $courseInfo[$course_id] を参照
 
             $sql = "DELETE FROM subject_in_charges WHERE subject_id = :sid AND course_id = :cid";
             $stmt = $pdo->prepare($sql);

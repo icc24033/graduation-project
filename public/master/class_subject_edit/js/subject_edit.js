@@ -20,14 +20,12 @@ function updateAddModalCourses() {
         courseSelect.appendChild(opt);
         courseBox.style.opacity = "0.5";
     } else {
-        courseBox.style.opacity = "1";
         const grade = parseInt(gradeVal);
-        // allCourseInfo は tuika.php 側でグローバル定義する
-        for (let key in allCourseInfo) {
-            if (allCourseInfo[key].grade === grade) {
+        for (let id in allCourseInfo) { // idはcourse_idになる
+            if (allCourseInfo[id].grade === grade) {
                 let opt = document.createElement('option');
-                opt.value = key;
-                opt.text = allCourseInfo[key].name;
+                opt.value = id; // ここが数値(course_id)になる
+                opt.text = allCourseInfo[id].name;
                 courseSelect.appendChild(opt);
             }
         }
@@ -122,8 +120,22 @@ function clearField(field) {
 function updateCourse(action) {
     const type = (action === 'add_course') ? 'add' : 'remove';
     const courseKey = document.getElementById('sel-course-' + type).value;
+    
+    // 追加時は講師セレクトボックスの値も取得（HTML側にID=sel-teacher-addを用意）
+    let teacherId = 0;
+    if (action === 'add_course') {
+        const tSelect = document.getElementById('sel-teacher-add');
+        teacherId = tSelect ? tSelect.value : 0;
+    }
+
     if (!courseKey) return alert("コースを選択してください");
-    ajax({action: action, course_key: courseKey, grade: currentData.grade});
+    
+    ajax({
+        action: action, 
+        course_key: courseKey, 
+        teacher_id: teacherId, // 講師IDを追加
+        grade: currentData.grade
+    });
 }
 
 function ajax(data) {
