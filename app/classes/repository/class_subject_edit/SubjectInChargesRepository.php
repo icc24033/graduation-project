@@ -72,7 +72,6 @@ class SubjectInChargesRepository extends BaseRepository {
             
             $sql = "
                 SELECT 
-                    sic.id as sic_id,
                     sic.subject_id,
                     s.subject_name,
                     sic.teacher_id,
@@ -80,7 +79,7 @@ class SubjectInChargesRepository extends BaseRepository {
                     sic.room_id,
                     r.room_name,
                     sic.course_id
-                FROM subject_in_charge sic
+                FROM subject_in_charges sic
                 INNER JOIN subjects s ON sic.subject_id = s.subject_id
                 LEFT JOIN teacher t ON sic.teacher_id = t.teacher_id
                 LEFT JOIN room r ON sic.room_id = r.room_id

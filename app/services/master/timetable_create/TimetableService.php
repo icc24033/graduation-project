@@ -32,6 +32,13 @@ class TimetableService {
         return $this->courses;
     }
 
+    public function getSidebarCourseListHtml() {
+        $this->loadCourses();
+        // ViewHelperを使って <li>...</li> のリストを生成する
+        // 第3引数のラベルキーは 'course_name' を使用
+        return ViewHelper::renderDropdownList($this->courses, 'course_id', 'course_name');
+    }
+
     /**
      * getCoursesHtmlWithGradeData
      * 概要：コースのドロップダウンオプションをgrade付きでHTML化して取得
