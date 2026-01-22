@@ -1,68 +1,71 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. 変数・要素の定義 ---
-    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-    const monthElement = document.querySelector('.month');
-    const leftArrowButton = document.getElementById('prevBtn');
-    const rightArrowButton = document.getElementById('nextBtn');
+    let lessonData = {}; 
+    let dbTimetable = [];
+    let currentSelectedSubject = ""; 
+    let currentSelectedGrade = "";
+    let currentSelectedCourse = "";
+    let selectedDateKey = null;
+
+    // 削除モードの状態管理
+    let isDeleteMode = false;
+
     const calendarGrid = document.getElementById('calendarGrid'); 
     const lessonModal = document.getElementById('lessonModal');
-    const completeButton = document.querySelector('.complete-button');
-    const tempSaveButton = document.querySelector('.temp-save-button');
-    const deleteButton = document.querySelector('.delete-button');
-
-    const deleteIcon = document.querySelector('.delete-icon');
-    const addBtn = document.querySelector('.add-button');
-    const itemInput = document.querySelector('.add-item-input');
+    const detailTextarea = document.querySelector('.lesson-details-textarea');
+    const belongingsTextarea = document.getElementById('detailsTextarea'); 
+    const itemInput = document.querySelector('.add-item-input'); 
     const itemTagsContainer = document.querySelector('.item-tags');
-    
-    const lessonContentInput = document.getElementById('lessonContent');
-    const belongingsTextarea = document.getElementById('belongingsTextarea');
-    const charCountDisplay = document.querySelector('.char-count');
+    // セレクタをHTMLの実装に合わせて調整
+    const deleteIcon = document.getElementById('deleteIcon') || document.querySelector('.delete-icon'); 
+    const addBtn = document.querySelector('.add-button'); // 追加ボタン
 
-    let lessonData = {};
+    const displayGrade = document.getElementById('displayGrade');
+    const displayCourse = document.getElementById('displayCourse');
+    const displayGradeSidebar = document.getElementById('displayGradeSidebar');
+    const displayCourseSidebar = document.getElementById('displayCourseSidebar');
+
     let currentYear = 2026;
     let currentMonth = 1;
-    let selectedDateKey = null;
-    let isDeleteMode = false;
-    let selectedSubjectId = null;
 
+    // --- 1. 初期化 ---
     async function init() {
-        const firstSubject = document.querySelector('#subjectDropdownMenu a[data-subject-id]');
-        if (firstSubject) {
-            selectedSubjectId = firstSubject.getAttribute('data-subject-id');
-        }
-        await Promise.all([loadData(), loadTemplates()]);
-    }
+        loadTemplates(); // 起動時にlocalStorageから読み込み
 
-    async function loadData() {
         try {
-            let url = 'class_detail_edit_control.php?action=fetch';
-            if (selectedSubjectId) {
-                url += `&subject_id=${selectedSubjectId}`;
-            }
-            const response = await fetch(url);
+            const response = await fetch('class_detail_edit_control.php');
             const data = await response.json();
-            lessonData = data || {}; 
-            renderCalendar(currentYear, currentMonth);
-            refreshSidebar();
-        } catch (e) { 
-            console.error("データ読み込み失敗:", e); 
-        }
-    }
-
-    async function loadTemplates() {
-        try {
-            const response = await fetch('class_detail_edit_control.php?action=fetch_templates');
-            const templates = await response.json();
-            itemTagsContainer.innerHTML = ''; 
-            if (Array.isArray(templates)) {
-                templates.forEach(name => createTagElement(name));
+            
+            if (data.error) {
+                console.error("DBエラー:", data.error);
+                return;
             }
-        } catch (e) { 
-            console.error("テンプレート読み込み失敗:", e); 
+            
+            dbTimetable = data;
+            setupSubjectDropdown();
+        } catch (e) {
+            console.error("データ取得エラー:", e);
         }
     }
 
+    // localStorageからテンプレートを読み込む
+    function loadTemplates() {
+        const defaultTemplates = ["ノートパソコン", "筆記用具", "教科書1", "教科書2"];
+        const savedTemplates = JSON.parse(localStorage.getItem('belongingsTemplates') || JSON.stringify(defaultTemplates));
+        
+        itemTagsContainer.innerHTML = ''; 
+        savedTemplates.forEach(name => {
+            createTagElement(name);
+        });
+    }
+
+    // 現在のテンプレート（タグ）の状態をlocalStorageへ保存
+    function saveTemplatesToStorage() {
+        const tags = Array.from(itemTagsContainer.querySelectorAll('.item-tag'))
+                          .map(el => el.textContent.trim());
+        localStorage.setItem('belongingsTemplates', JSON.stringify(tags));
+    }
+
+    // タグを生成する共通関数
     function createTagElement(name) {
         const div = document.createElement('div');
         div.className = 'item-tag-container';
@@ -70,228 +73,249 @@ document.addEventListener('DOMContentLoaded', function() {
         itemTagsContainer.appendChild(div);
     }
 
-    async function saveTemplateToDB(name) {
-        const formData = new URLSearchParams();
-        formData.append('action', 'save_template');
-        formData.append('template_name', name);
-        await fetch('class_detail_edit_control.php', { method: 'POST', body: formData });
-    }
+    // --- 2. カレンダー・ドロップダウン制御 ---
+    function setupSubjectDropdown() {
+        const toggle = document.getElementById('subjectDropdownToggle');
+        const menu = document.getElementById('subjectDropdownMenu');
+        menu.innerHTML = '';
+        const seen = new Set();
+        const uniqueEntries = [];
 
-    async function deleteTemplateFromDB(name) {
-        const formData = new URLSearchParams();
-        formData.append('action', 'delete_template');
-        formData.append('template_name', name);
-        await fetch('class_detail_edit_control.php', { method: 'POST', body: formData });
-    }
-
-    function refreshSidebar() {
-        const sidebarContainer = document.getElementById('sidebarLessonList');
-        if (!sidebarContainer) return;
-        sidebarContainer.innerHTML = ''; 
-        const sortedDates = Object.keys(lessonData).sort((a, b) => new Date(a) - new Date(b));
-        sortedDates.forEach(key => {
-            const data = lessonData[key];
-            const dateObj = new Date(key);
-            const m = dateObj.getMonth() + 1;
-            const d = dateObj.getDate();
-            const dayOfWeek = dateObj.toLocaleDateString('ja-JP', { weekday: 'short' });
-            const wrapper = document.createElement('div');
-            wrapper.className = 'sidebar-lesson-item';
-            wrapper.style.cursor = 'pointer';
-            wrapper.innerHTML = `
-                <div class="lesson-date-item" style="font-weight: bold;">${m}月${d}日(${dayOfWeek}) ${data.slot || '1限'}</div>
-                <div class="status-button ${data.status}" style="font-size: 12px; display: inline-block; padding: 2px 5px;">
-                    ${data.status === 'in-progress' ? '作成済み' : '作成中'}
-                </div>`;
-            wrapper.onclick = () => openModalWithDate(key);
-            sidebarContainer.appendChild(wrapper);
+        dbTimetable.forEach(item => {
+            const key = `${item.subject_name.trim()}-${item.grade}-${item.course_name}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueEntries.push(item);
+            }
         });
+
+        uniqueEntries.forEach((item, index) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = item.subject_name.trim(); 
+            a.href = "#";
+            a.onclick = (e) => {
+                e.preventDefault();
+                applySelection(item);
+                menu.classList.remove('is-open');
+            };
+            li.appendChild(a);
+            menu.appendChild(li);
+            if(index === 0) applySelection(item);
+        });
+
+        function applySelection(item) {
+            currentSelectedSubject = item.subject_name.trim();
+            currentSelectedGrade = String(item.grade);
+            currentSelectedCourse = item.course_name;
+            if(toggle.querySelector('.current-value')) 
+                toggle.querySelector('.current-value').textContent = currentSelectedSubject;
+            if(displayGrade) displayGrade.textContent = ""; 
+            if(displayCourse) displayCourse.textContent = currentSelectedCourse;
+            if(displayGradeSidebar) displayGradeSidebar.textContent = ""; 
+            if(displayCourseSidebar) displayCourseSidebar.textContent = currentSelectedCourse;
+            updateCalendar();
+        }
     }
 
-    window.openModalWithDate = function(dateKey) {
-        selectedDateKey = dateKey;
-        const data = lessonData[dateKey] || { content: "", belongings: "", status: "" };
-        const [year, month, dayNum] = dateKey.split('-').map(Number);
-        const dateObj = new Date(year, month - 1, dayNum);
-        lessonContentInput.value = data.content || "";
-        belongingsTextarea.value = data.belongings || "";
-        charCountDisplay.textContent = `${(lessonContentInput.value).length}/200文字`;
-        const modalTitleDate = document.querySelector('.modal-date');
-        if (modalTitleDate) {
-            modalTitleDate.textContent = `${month}月${dayNum}日(${dateObj.toLocaleDateString('ja-JP', { weekday: 'short' })})`;
-        }
-        lessonModal.style.display = 'flex';
-    };
+    function updateCalendar() {
+        lessonData = {};
+        const sqlDayToJsDay = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 0 };
+        const storedData = JSON.parse(localStorage.getItem('lessonTextData') || '{}');
+        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-    // カレンダー描画関数
-    function renderCalendar(year, month) {
-        const oldCells = calendarGrid.querySelectorAll('.date-cell');
-        oldCells.forEach(cell => cell.remove());
-        const firstDay = new Date(year, month - 1, 1).getDay();
-        const daysInMonth = new Date(year, month, 0).getDate();
-        
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(currentYear, currentMonth - 1, d);
+            const jsDay = dateObj.getDay();
+            dbTimetable.forEach(item => {
+                if (item.subject_name.trim() === currentSelectedSubject && 
+                    String(item.grade) === currentSelectedGrade && 
+                    item.course_name === currentSelectedCourse &&
+                    sqlDayToJsDay[item.day_of_week] === jsDay) {
+                    const key = `${currentYear}-${currentMonth}-${d}`;
+                    const saved = storedData[key];
+                    lessonData[key] = {
+                        slot: `${item.period}限`,
+                        status: saved ? saved.status : "not-created",
+                        statusText: saved ? saved.statusText : "未作成"
+                    };
+                }
+            });
+        }
+        renderCalendarUI();
+        refreshSidebar();
+    }
+
+    function renderCalendarUI() {
+        const cells = calendarGrid.querySelectorAll('.date-cell, .is-out-of-month');
+        cells.forEach(c => c.remove());
+        const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
         for (let i = 0; i < 35; i++) {
             const cell = document.createElement('div');
-            cell.className = 'date-cell';
-            let dayNum = i - firstDay + 1;
-
+            const dayNum = i - firstDay + 1;
             if (dayNum > 0 && dayNum <= daysInMonth) {
-                const mm = String(month).padStart(2, '0');
-                const dd = String(dayNum).padStart(2, '0');
-                const dateKey = `${year}-${mm}-${dd}`;
-                
-                const dateObj = new Date(year, month - 1, dayNum);
-                const currentDayOfWeek = dateObj.getDay(); // 0:日, 1:月, 2:火, 3:水, 4:木, 5:金, 6:土
-
+                cell.className = 'date-cell';
                 cell.innerHTML = `<span class="date-num">${dayNum}</span>`;
-
-                // ★判定ロジックの修正：[1, 3, 5] という数値配列に合わせた比較
-                if (typeof teacherSchedules !== 'undefined' && Array.isArray(teacherSchedules)) {
-                    // DBの 1:月 ... 7:日 を JSの曜日に変換
-                    const hasLesson = teacherSchedules.some(dbDay => {
-                        let jsDay = (parseInt(dbDay) === 7) ? 0 : parseInt(dbDay); 
-                        return jsDay === currentDayOfWeek;
-                    });
-
-                    if (hasLesson) {
-                        cell.classList.add('is-teacher-assigned');
-                    }
-                }
-
-                if (lessonData[dateKey]) {
-                    const d = lessonData[dateKey];
+                const key = `${currentYear}-${currentMonth}-${dayNum}`;
+                if (lessonData[key]) {
                     cell.classList.add('has-data');
                     cell.innerHTML += `
-                        <span class="lesson-slot">${d.slot || '1限'}</span>
-                        <span class="status-button ${d.status}">${d.status === 'in-progress' ? '作成済み' : '作成中'}</span>`;
+                        <span class="lesson-slot">${lessonData[key].slot}</span>
+                        <span class="status-button ${lessonData[key].status}">${lessonData[key].statusText}</span>
+                    `;
+                    cell.onclick = () => openModal(key);
                 }
-                cell.onclick = () => openModalWithDate(dateKey);
-            } else { 
-                cell.classList.add('is-out-of-month'); 
+            } else {
+                cell.className = 'date-cell is-out-of-month';
             }
             calendarGrid.appendChild(cell);
         }
-        monthElement.textContent = `${month}月`;
+        document.querySelector('.month').textContent = `${currentMonth}月`;
     }
 
-    // --- 5. イベントリスナー ---
-    document.querySelectorAll('#subjectDropdownMenu a').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const subjectId = this.getAttribute('data-subject-id');
-            if (!subjectId) return;
-            selectedSubjectId = subjectId;
-            const toggleLabel = document.querySelector('#subjectDropdownToggle .current-value');
-            if (toggleLabel) toggleLabel.textContent = this.textContent;
-            const displayCourseName = document.getElementById('displayCourseName');
-            if (displayCourseName) displayCourseName.textContent = this.textContent;
-            loadData();
-            this.closest('.dropdown-menu').classList.remove('is-open');
+    function refreshSidebar() {
+        const sidebarItems = document.querySelectorAll('.sidebar .lesson-status-wrapper');
+        sidebarItems.forEach(el => el.style.display = 'none');
+        const sortedKeys = Object.keys(lessonData).sort((a,b) => {
+            const dateA = a.split('-').map(Number);
+            const dateB = b.split('-').map(Number);
+            return new Date(dateA[0], dateA[1]-1, dateA[2]) - new Date(dateB[0], dateB[1]-1, dateB[2]);
         });
+        sortedKeys.forEach((key, i) => {
+            if (sidebarItems[i]) {
+                const el = sidebarItems[i];
+                el.style.display = 'flex';
+                const [y, m, d] = key.split('-');
+                el.querySelector('.lesson-date-item').textContent = `${m}月${d}日 ${lessonData[key].slot}`;
+                const btn = el.querySelector('.status-button');
+                btn.className = `status-button ${lessonData[key].status}`;
+                btn.textContent = lessonData[key].statusText;
+                el.onclick = () => openModal(key);
+            }
+        });
+    }
+
+    // --- 3. モーダル基本操作 ---
+    function openModal(key) {
+        selectedDateKey = key;
+        
+        isDeleteMode = false;
+        if(deleteIcon) {
+            deleteIcon.style.backgroundColor = "";
+            deleteIcon.style.color = "";
+            deleteIcon.style.filter = ""; 
+        }
+
+        loadTemplates(); 
+
+        const stored = JSON.parse(localStorage.getItem('lessonTextData') || '{}');
+        const data = stored[key] || { content: "", belongings: "" };
+        detailTextarea.value = data.content;
+        belongingsTextarea.value = data.belongings || "";
+        
+        const [y, m, d] = key.split('-');
+        document.querySelector('.modal-date').textContent = `${m}月${d}日`;
+        lessonModal.style.display = 'flex';
+    }
+
+    document.querySelector('.complete-button').onclick = () => saveToStorage("in-progress", "作成済み", true);
+    document.querySelector('.temp-save-button').onclick = () => saveToStorage("creating", "作成中", false);
+
+    function saveToStorage(status, statusText, isComplete) {
+        if (isComplete && (!detailTextarea.value.trim() || !belongingsTextarea.value.trim())) {
+            return alert("授業詳細と持ち物の両方を入力してください。");
+        }
+        const stored = JSON.parse(localStorage.getItem('lessonTextData') || '{}');
+        stored[selectedDateKey] = { 
+            content: detailTextarea.value, 
+            belongings: belongingsTextarea.value,
+            status: status,
+            statusText: statusText
+        };
+        localStorage.setItem('lessonTextData', JSON.stringify(stored));
+        updateCalendar();
+        lessonModal.style.display = 'none';
+    }
+
+    document.querySelector('.delete-button').onclick = () => {
+        if (!confirm("授業詳細を削除してもよろしいですか？")) return;
+        const stored = JSON.parse(localStorage.getItem('lessonTextData') || '{}');
+        delete stored[selectedDateKey];
+        localStorage.setItem('lessonTextData', JSON.stringify(stored));
+        updateCalendar();
+        lessonModal.style.display = 'none';
+    };
+
+    lessonModal.addEventListener('mousedown', (e) => {
+        if (e.target === lessonModal) lessonModal.style.display = 'none';
     });
 
-    deleteIcon.onclick = () => {
-        isDeleteMode = !isDeleteMode;
-        deleteIcon.classList.toggle('is-active', isDeleteMode);
-        addBtn.textContent = isDeleteMode ? '削除' : '追加';
-        addBtn.classList.toggle('is-delete-mode', isDeleteMode);
-    };
+    // --- 4. 持ち物テンプレート管理 ---
 
-    addBtn.onclick = async () => {
-        const name = itemInput.value.trim();
-        if (!isDeleteMode && name) {
-            createTagElement(name);
-            await saveTemplateToDB(name);
-            itemInput.value = '';
-        }
-    };
-
-    itemTagsContainer.onclick = async (e) => {
-        const tag = e.target.closest('.item-tag-container');
-        if (!tag) return;
-        const name = tag.querySelector('.item-tag').textContent;
-        if (isDeleteMode) {
-            tag.remove();
-            await deleteTemplateFromDB(name);
-        } else {
-            let items = belongingsTextarea.value ? belongingsTextarea.value.split('、') : [];
-            items = items.map(i => i.trim()).filter(i => i !== "");
-            if (items.includes(name)) {
-                items = items.filter(i => i !== name);
+    // ゴミ箱アイコンクリック（修正箇所）
+    if (deleteIcon) {
+        deleteIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            isDeleteMode = !isDeleteMode;
+            
+            if (isDeleteMode) {
+                // 削除モード：赤色背景にする（画像の場合はfilterを使用）
+                this.style.backgroundColor = "#ff4d4d";
+                this.style.color = "white";
+                this.style.borderRadius = "4px";
+                if (this.tagName === 'IMG') this.style.filter = "brightness(0) saturate(100%) invert(30%) sepia(100%) saturate(5000%) hue-rotate(350deg)";
             } else {
-                items.push(name);
+                this.style.backgroundColor = "";
+                this.style.color = "";
+                this.style.filter = "";
+            }
+        });
+    }
+
+    itemTagsContainer.addEventListener('click', function(e) {
+        const tagContainer = e.target.closest('.item-tag-container');
+        if (!tagContainer) return;
+        
+        const itemName = tagContainer.querySelector('.item-tag').textContent.trim();
+
+        if (isDeleteMode) {
+            tagContainer.remove();
+            saveTemplatesToStorage(); 
+        } else {
+            let currentText = belongingsTextarea.value.trim();
+            if (currentText === "持ち物は入力されていません") currentText = "";
+            
+            let items = currentText === "" ? [] : currentText.split('、');
+            const index = items.indexOf(itemName);
+            
+            if (index === -1) {
+                items.push(itemName);
+            } else {
+                items.splice(index, 1);
             }
             belongingsTextarea.value = items.join('、');
         }
-    };
-
-    async function saveTextDataToStorage(status, isDelete = false) {
-        if (!selectedDateKey) return;
-        const formData = new URLSearchParams();
-        formData.append('date', selectedDateKey);
-        if (isDelete) { 
-            formData.append('action', 'delete'); 
-        } else {
-            formData.append('action', 'save');
-            formData.append('content', lessonContentInput.value);
-            formData.append('belongings', belongingsTextarea.value);
-            formData.append('status', status);
-            if (selectedSubjectId) {
-                formData.append('subject_id', selectedSubjectId);
-            }
-        }
-        try {
-            const response = await fetch('class_detail_edit_control.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            });
-            const result = await response.json();
-            if (result.status === "success") {
-                await loadData();
-                lessonModal.style.display = 'none';
-            }
-        } catch (e) { 
-            console.error("保存失敗:", e); 
-        }
-    }
-
-    completeButton.onclick = () => saveTextDataToStorage("in-progress");
-    tempSaveButton.onclick = () => saveTextDataToStorage("creating");
-    deleteButton.onclick = () => confirm("この日のデータを削除しますか？") && saveTextDataToStorage(null, true);
-    
-    leftArrowButton.onclick = () => { 
-        currentMonth--; 
-        if (currentMonth < 1) { currentMonth = 12; currentYear--; } 
-        loadData(); 
-    };
-    rightArrowButton.onclick = () => { 
-        currentMonth++; 
-        if (currentMonth > 12) { currentMonth = 1; currentYear++; } 
-        loadData(); 
-    };
-
-    lessonModal.addEventListener('click', (e) => { 
-        if (e.target === lessonModal) lessonModal.style.display = 'none'; 
     });
 
-    lessonContentInput.addEventListener('input', () => {
-        charCountDisplay.textContent = `${lessonContentInput.value.length}/200文字`;
-    });
+    addBtn.onclick = () => {
+        const val = itemInput.value.trim();
+        if (!val) return;
+        createTagElement(val);
+        saveTemplatesToStorage(); 
+        itemInput.value = '';
+    };
 
-    dropdownToggles.forEach(toggle => {
-        const menu = toggle.nextElementSibling;
-        toggle.addEventListener('click', (e) => {
+    document.querySelectorAll('.dropdown-toggle').forEach(btn => {
+        btn.onclick = (e) => {
             e.stopPropagation();
-            document.querySelectorAll('.dropdown-menu.is-open').forEach(m => {
-                if (m !== menu) m.classList.remove('is-open');
-            });
-            menu.classList.toggle('is-open');
-        });
+            btn.nextElementSibling.classList.toggle('is-open');
+        };
     });
 
     document.addEventListener('click', () => {
-        document.querySelectorAll('.dropdown-menu.is-open').forEach(m => m.classList.remove('is-open'));
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('is-open'));
     });
 
     init();
