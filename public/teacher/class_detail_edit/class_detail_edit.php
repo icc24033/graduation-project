@@ -25,24 +25,7 @@
     <main>
         <nav class="sidebar">
             <ul>
-                <li class="is-group-label">フィルター</li>
-                
-                <li class="nav-item has-dropdown">
-                    <button class="dropdown-toggle" id="gradeDropdownToggle" aria-expanded="false">
-                        <span class="current-value" id="displayGradeSidebar">全学年</span>
-                    </button>
-                    <ul class="dropdown-menu" id="gradeDropdownMenu">
-                        </ul>
-                </li>
-
-                <li class="nav-item has-dropdown">
-                    <button class="dropdown-toggle" id="courseDropdownToggle" aria-expanded="false">
-                        <span class="current-value" id="displayCourseSidebar">全コース</span>
-                    </button>
-                    <ul class="dropdown-menu" id="courseDropdownMenu">
-                        </ul>
-                </li>
-
+                <li class="is-group-label">授業を選択</li>
                 <li class="nav-item has-dropdown">
                     <button class="dropdown-toggle" id="subjectDropdownToggle" aria-expanded="false">
                         <span class="current-value" id="currentSubjectDisplay">授業を選択</span>
