@@ -143,46 +143,51 @@ class ClassSubjectEditService {
 
     /**
      * 表示用に科目名でグルーピングしたリストを作成する
+     * 講師情報(IDと名前)も配列として集約します
      */
     public function getGroupedSubjectList($classSubjectList, $courseInfo) {
         $subjects = [];
         $total_course_count = count($courseInfo);
 
         foreach ($classSubjectList as $row) {
-            $id = $row['subject_name']; 
-                
+            // IDの作成 (学年_科目名)
+            $id = $row['grade'] . "_" . $row['subject_name'];
+
             if (!isset($subjects[$id])) {
                 $subjects[$id] = [
-                    'grade'       => $row['grade'], 
-                    'title'       => $row['subject_name'],
-                    'teachers'    => [], 
-                    'room'        => $row['room_name'] ?? '未設定', 
-                    'courses'     => [], 
-                    'course_keys' => [] 
+                    'grade'   => $row['grade'], 
+                    'title'   => $row['subject_name'],
+                    'courses' => [], 
+                    'course_keys' => [],
+                    'teachers' => [],    // 講師名の配列
+                    'teacher_ids' => []  // 講師IDの配列
                 ];
             }
 
-            // 講師名の追加
-            if (!empty($row['teacher_name']) && $row['teacher_name'] !== '未設定') {
-                if (!in_array($row['teacher_name'], $subjects[$id]['teachers'])) {
-                    $subjects[$id]['teachers'][] = $row['teacher_name'];
+            // コース名の追加（重複チェック）
+            if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
+                $subjects[$id]['courses'][] = $row['course_name'];
+            }
+
+            // DBの course_id をそのまま course_keys 配列に追加
+            $cid = $row['course_id'];
+            if (isset($courseInfo[$cid])) {
+                if (!in_array($cid, $subjects[$id]['course_keys'])) {
+                    $subjects[$id]['course_keys'][] = $cid;
                 }
             }
 
-            // 表示用コース名と削除用キーの追加
-            if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
-                $subjects[$id]['courses'][] = $row['course_name'];
-                
-                // 現在、courseInfo のキーは course_id になっているので
-                // DBの course_id をそのまま course_keys 配列に追加
-                $cid = $row['course_id'];
-                if (isset($courseInfo[$cid])) {
-                    $subjects[$id]['course_keys'][] = $cid;
+            // 講師情報の追加処理
+            // teacher_id が 0(未設定) や null でない場合のみ配列に追加する
+            if (!empty($row['teacher_id']) && $row['teacher_id'] != 0) {
+                if (!in_array($row['teacher_id'], $subjects[$id]['teacher_ids'])) {
+                    $subjects[$id]['teacher_ids'][] = $row['teacher_id'];
+                    $subjects[$id]['teachers'][] = $row['teacher_name'];
                 }
             }
         }
 
-        // 全コース対象かどうかの判定
+        // 全コース対象かどうかの判定（is_allフラグ）
         foreach ($subjects as $id => $data) {
             $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
         }

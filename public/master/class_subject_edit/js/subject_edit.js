@@ -1,5 +1,6 @@
 /**
  * 授業科目編集用JavaScript
+ * subject_edit.js
  */
 
 function openAddModal() {
@@ -75,6 +76,45 @@ function openDetail(data) {
 
     document.querySelectorAll('.selector-area').forEach(el => el.style.display = 'none');
     document.getElementById('detailModal').style.display = 'flex';
+
+    // 講師削除用ドロップダウンの初期化
+    const teacherRemSel = document.getElementById('sel-teacher-remove');
+    teacherRemSel.innerHTML = '<option value="" disabled selected>解除する講師を選択</option>';
+    
+    if (data.teacher_ids && data.teacher_ids.length > 0) {
+        data.teacher_ids.forEach((id, index) => {
+            // teacher_idが0(未設定)でない場合のみリストに追加
+            if(id != 0) {
+                let opt = document.createElement('option');
+                opt.value = id;
+                opt.text = data.teachers[index] + " 先生";
+                teacherRemSel.appendChild(opt);
+            }
+        });
+    }
+}
+
+// 講師を一人削除する関数を新規追加
+function removeSingleTeacher() {
+    const tId = document.getElementById('sel-teacher-remove').value;
+    if (!tId) return alert("講師を選択してください");
+
+    if (confirm("選択した講師の担当を解除しますか？")) {
+        // currentData.course_keys[0] など、対象のIDを確実に取得する
+        const targetKey = (currentData.course_keys && currentData.course_keys.length > 0) 
+                          ? currentData.course_keys[0] : null;
+
+        if(!targetKey) return alert("コース情報が特定できません");
+
+        ajax({
+            action: 'update_field',
+            field: 'teacher',
+            mode: 'remove_single', // PHP側でこれを判定に使う
+            teacher_id: tId,
+            course_key: targetKey, // ここで送信
+            grade: currentData.grade
+        });
+    }
 }
 
 function toggleArea(id) {
@@ -102,7 +142,7 @@ function saveField(field, mode) {
 }
 
 function clearField(field) {
-    if(confirm("解除して『未設定』にしますか？")) {
+    if(confirm("担当教師を全員解除して『未設定』にしますか？ 実施教室と実施コースも全て解除されます。")) {
         const targetKey = currentData.course_keys && currentData.course_keys.length > 0 ? currentData.course_keys[0] : null;
         if(!targetKey) return alert("コース情報を特定できませんでした");
 
