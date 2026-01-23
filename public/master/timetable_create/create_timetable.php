@@ -254,6 +254,6 @@ SecurityHelper::applySecureHeaders();
         // JS側では dbMasterData[コースID] でアクセスする
         const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
-    <script src="js/create_timetable.js?v=<?php echo time(); ?>"></script>
+    <script src="js/timetable_create.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

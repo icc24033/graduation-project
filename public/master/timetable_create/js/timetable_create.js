@@ -297,7 +297,7 @@ mainCreateNewBtn.addEventListener('click', () => {
     if (currentRecord && originalRecordData && !isCreatingMode && !isViewOnly) {
         // 実際に編集があるかチェック
         const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-        const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+        const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
         
         if (hasDateChanges || hasGridChanges) {
             if (!confirm('編集中の内容は保存されていません。\n新規作成を開始しますか？')) {
@@ -312,7 +312,7 @@ mainCreateNewBtn.addEventListener('click', () => {
         originalRecordData: originalRecordData ? JSON.parse(JSON.stringify(originalRecordData)) : null,
         startDate: mainStartDate.value,
         endDate: mainEndDate.value,
-        gridData: getCurrentGridData(),
+        gridData: getTimetableData(),
         courseDisplayText: document.getElementById('mainCourseDisplay').innerHTML,
         selectedItemId: document.querySelector('.saved-item.active')?.getAttribute('data-id')
     };
@@ -1316,35 +1316,27 @@ btnSave.addEventListener('click', function() {
  * 画面上のグリッドデータを配列化して取得する
  * (ID取得ロジックを含む完全版)
  */
-function getCurrentGridData() {
-    const data = [];
+function getTimetableData() {
+const data = [];
     document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
-        // 教員IDの取得とパース
-        let tIds = [];
-        try {
-            if (cell.dataset.teacherIds) tIds = JSON.parse(cell.dataset.teacherIds);
-        } catch (e) { console.error("Teacher ID Parse Error", e); }
-
-        // 教室IDの取得とパース
-        let rIds = [];
-        try {
-            if (cell.dataset.roomIds) rIds = JSON.parse(cell.dataset.roomIds);
-        } catch (e) { console.error("Room ID Parse Error", e); }
+        let tIds = [], rIds = [];
+        try { if (cell.dataset.teacherIds) tIds = JSON.parse(cell.dataset.teacherIds); } catch (e) {}
+        try { if (cell.dataset.roomIds) rIds = JSON.parse(cell.dataset.roomIds); } catch (e) {}
 
         const item = {
-            day: cell.dataset.day, 
+            // 文字列のまま取得
+            day: cell.dataset.day,
             period: parseInt(cell.dataset.period),
             className: cell.querySelector('.class-name')?.textContent || '',
             subjectId: cell.dataset.subjectId || null,
             teacherId: tIds.length > 0 ? tIds[0] : null,
             roomId: rIds.length > 0 ? rIds[0] : null,
-            
-            // 表示用
             teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
             roomName: cell.querySelector('.room-name span')?.textContent || ''
         };
         data.push(item);
     });
+    console.log("送信データ:", data);
     return data;
 }
 
@@ -1408,7 +1400,7 @@ cancelCreationBtn.addEventListener('click', () => {
         if (hasChanges) {
             // --- 変更破棄のロジック（提示されたコードのまま） ---
             const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-            const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+            const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
 
             if (hasDateChanges || hasGridChanges) {
                 if(!confirm('変更を破棄しますか？')) return;
@@ -1530,7 +1522,7 @@ function handleSavedItemClick(e, forceSelect = false) {
     if (currentRecord && currentRecord.id !== id && originalRecordData) {
         // 現在の時間割りで編集があるかチェック
         const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-        const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+        const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
 
         if (hasDateChanges || hasGridChanges) {
             if (!confirm('現在の時間割りの編集が保存されていません。\n別の時間割りに移動しますか？\n（変更は失われます）')) {
@@ -1545,7 +1537,7 @@ function handleSavedItemClick(e, forceSelect = false) {
             courseName: document.getElementById('creatingCourseName').textContent,
             startDate: mainStartDate.value,
             endDate: mainEndDate.value,
-            gridData: JSON.parse(JSON.stringify(getCurrentGridData()))  // 深くコピーしてデータ混在を防ぐ
+            gridData: JSON.parse(JSON.stringify(getTimetableData()))  // 深くコピーしてデータ混在を防ぐ
         };
         
         // 作成中から他の時間割を見る = 閲覧専用
@@ -1655,7 +1647,7 @@ function handleSavedItemClick(e, forceSelect = false) {
 /**
  * 画面上のグリッドデータを配列化して取得する
  */
-function getCurrentGridData() {
+function getTimetableData() {
     const data = [];
     document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
         // 必須データの取得
@@ -1698,7 +1690,7 @@ async function saveTimetable() {
     }
 
     // 2. 送信データの構築
-    const gridData = getCurrentGridData();
+    const gridData = getTimetableData();
     
     // IDの特定: 新規作成なら null, 編集なら currentRecord.id
     const targetId = (!isCreatingMode && currentRecord) ? currentRecord.id : null;
