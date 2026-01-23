@@ -901,3 +901,15 @@ button.status-button.not-created {
     border-radius: 50%;
     z-index: 1;
 }
+
+/* ゴミ箱がアクティブな時 */
+#deleteIcon.is-active {
+    background-color: #ff4d4d !important;
+    color: white !important;
+}
+
+/* 削除モード中のタグにマウスを乗せたら赤くする */
+#deleteIcon.is-active ~ .item-tags .item-tag-container:hover {
+    border: 1px solid red;
+    background-color: #fff0f0;
+}

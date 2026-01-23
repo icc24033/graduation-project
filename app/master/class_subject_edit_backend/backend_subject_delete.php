@@ -4,18 +4,13 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// 必要なファイルを読み込み
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
-// sakuzyo.php と完全に一致するキーと ID のセットを定義
-$courseInfo = [   
-    'itikumi'       => ['id' => 7],
-    'nikumi'        => ['id' => 8],
-    'kihon'         => ['id' => 5],
-    'applied-info'  => ['id' => 4],
-    'multimedia'    => ['id' => 3],
-    'system-design' => ['id' => 1],
-    'web-creator'   => ['id' => 2]
-];
+// --- 修正箇所：手書きの $courseInfo 配列を削除し、Serviceから取得 ---
+$service = new ClassSubjectEditService();
+$courseInfo = $service->getCourseInfoMaster(); 
 
 try {
     $pdo = RepositoryFactory::getPdo();
@@ -33,20 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($subject_name)) {
         $pdo->beginTransaction();
 
         // 1. 科目名から subject_id を特定
-        $stmtId = $pdo->prepare("SELECT subject_id FROM subjects WHERE subject_name = ?");
+        $stmtId = $pdo->prepare("SELECT subject_id FROM subjects WHERE subject_name = ? LIMIT 1");
         $stmtId->execute([$subject_name]);
         $subject_id = $stmtId->fetchColumn();
 
         if ($subject_id) {
             if ($action === 'delete_single') {
-                // セレクトボックスで選択されたキー（例: 'itikumi'）を取得
-                $course_key = $_POST['course_key'] ?? '';
+                // フロント（JS）から送られてきた数値ID（course_id）
+                $course_id = $_POST['course_key'] ?? '';
                 
-                // キーに対応する数値IDが存在するかチェック
-                if (isset($courseInfo[$course_key])) {
-                    $cid = $courseInfo[$course_key]['id']; // 例: 7
+                // マスタに存在するかチェック
+                if (isset($courseInfo[$course_id])) {
+                    $cid = $courseInfo[$course_id]['id']; // DB上の ID
                     
-                    // 管理テーブル subject_in_charges から該当レコードを削除
                     $stmt = $pdo->prepare("DELETE FROM subject_in_charges 
                                            WHERE subject_id = ? AND course_id = ? AND grade = ?");
                     $stmt->execute([$subject_id, $cid, $target_grade]);
@@ -59,10 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($subject_name)) {
         }
 
         $pdo->commit();
+        // 削除後、元の画面に戻る
         header("Location: ../../../public/master/class_subject_edit/controls/delete_control.php?" . $query_string);
         exit;
+
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        $pdo->rollBack();
         die("削除エラー: " . $e->getMessage());
     }
 }

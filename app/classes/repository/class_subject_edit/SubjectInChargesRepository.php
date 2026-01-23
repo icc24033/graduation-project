@@ -15,7 +15,7 @@ class SubjectInChargesRepository extends BaseRepository {
         try {
             // INNER JOIN を使用して全ての関連情報を取得
             $sql = "SELECT
-                        c.course_id,
+                        c.course_id,       
                         c.course_name, 
                         sic.grade, 
                         s.subject_name, 
