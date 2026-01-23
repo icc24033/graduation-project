@@ -1,5 +1,6 @@
 /**
  * 授業科目編集用JavaScript
+ * subject_edit.js
  */
 
 function openAddModal() {
@@ -20,14 +21,12 @@ function updateAddModalCourses() {
         courseSelect.appendChild(opt);
         courseBox.style.opacity = "0.5";
     } else {
-        courseBox.style.opacity = "1";
         const grade = parseInt(gradeVal);
-        // allCourseInfo は tuika.php 側でグローバル定義する
-        for (let key in allCourseInfo) {
-            if (allCourseInfo[key].grade === grade) {
+        for (let id in allCourseInfo) { // idはcourse_idになる
+            if (allCourseInfo[id].grade === grade) {
                 let opt = document.createElement('option');
-                opt.value = key;
-                opt.text = allCourseInfo[key].name;
+                opt.value = id; // ここが数値(course_id)になる
+                opt.text = allCourseInfo[id].name;
                 courseSelect.appendChild(opt);
             }
         }
@@ -77,6 +76,45 @@ function openDetail(data) {
 
     document.querySelectorAll('.selector-area').forEach(el => el.style.display = 'none');
     document.getElementById('detailModal').style.display = 'flex';
+
+    // 講師削除用ドロップダウンの初期化
+    const teacherRemSel = document.getElementById('sel-teacher-remove');
+    teacherRemSel.innerHTML = '<option value="" disabled selected>解除する講師を選択</option>';
+    
+    if (data.teacher_ids && data.teacher_ids.length > 0) {
+        data.teacher_ids.forEach((id, index) => {
+            // teacher_idが0(未設定)でない場合のみリストに追加
+            if(id != 0) {
+                let opt = document.createElement('option');
+                opt.value = id;
+                opt.text = data.teachers[index] + " 先生";
+                teacherRemSel.appendChild(opt);
+            }
+        });
+    }
+}
+
+// 講師を一人削除する関数を新規追加
+function removeSingleTeacher() {
+    const tId = document.getElementById('sel-teacher-remove').value;
+    if (!tId) return alert("講師を選択してください");
+
+    if (confirm("選択した講師の担当を解除しますか？")) {
+        // currentData.course_keys[0] など、対象のIDを確実に取得する
+        const targetKey = (currentData.course_keys && currentData.course_keys.length > 0) 
+                          ? currentData.course_keys[0] : null;
+
+        if(!targetKey) return alert("コース情報が特定できません");
+
+        ajax({
+            action: 'update_field',
+            field: 'teacher',
+            mode: 'remove_single', // PHP側でこれを判定に使う
+            teacher_id: tId,
+            course_key: targetKey, // ここで送信
+            grade: currentData.grade
+        });
+    }
 }
 
 function toggleArea(id) {
@@ -87,16 +125,22 @@ function toggleArea(id) {
 }
 
 function saveField(field, mode) {
-    const val = document.getElementById('sel-' + field).value;
+    const selectEl = document.getElementById('sel-' + field);
+    const val = selectEl.value; // roomの場合はIDが入る
+    
+    if(field === 'room' && (val === "" || val === null)) {
+        return alert("教室を選択してください");
+    }
     if(!val) return alert("選択してください");
     
+    // 科目に関連する全てのコースに適用するため、
+    // course_keyは送るが、PHP側でsubject_idをメインに処理させる
     const targetKey = currentData.course_keys && currentData.course_keys.length > 0 ? currentData.course_keys[0] : null;
-    if(!targetKey) return alert("コース情報を特定できませんでした");
 
     ajax({
         action: 'update_field', 
         field: field, 
-        value: val, 
+        value: val, // roomの場合は数値IDが飛ぶ
         mode: mode, 
         grade: currentData.grade,
         course_key: targetKey
@@ -104,9 +148,19 @@ function saveField(field, mode) {
 }
 
 function clearField(field) {
-    if(confirm("解除して『未設定』にしますか？")) {
+    let message = "";
+    
+    if (field === 'teacher') {
+        message = "担当教師を全員解除して『未設定』にしますか？ 実施教室と実施コースも全て解除されます。";
+    } else if (field === 'room') {
+        message = "実施教室の設定を解除して『未設定』にしますか？";
+    } else {
+        message = "設定を解除しますか？";
+    }
+
+    if (confirm(message)) {
         const targetKey = currentData.course_keys && currentData.course_keys.length > 0 ? currentData.course_keys[0] : null;
-        if(!targetKey) return alert("コース情報を特定できませんでした");
+        if (!targetKey) return alert("コース情報を特定できませんでした");
 
         ajax({
             action: 'update_field', 
@@ -122,8 +176,22 @@ function clearField(field) {
 function updateCourse(action) {
     const type = (action === 'add_course') ? 'add' : 'remove';
     const courseKey = document.getElementById('sel-course-' + type).value;
+    
+    // 追加時は講師セレクトボックスの値も取得（HTML側にID=sel-teacher-addを用意）
+    let teacherId = 0;
+    if (action === 'add_course') {
+        const tSelect = document.getElementById('sel-teacher-add');
+        teacherId = tSelect ? tSelect.value : 0;
+    }
+
     if (!courseKey) return alert("コースを選択してください");
-    ajax({action: action, course_key: courseKey, grade: currentData.grade});
+    
+    ajax({
+        action: action, 
+        course_key: courseKey, 
+        teacher_id: teacherId, // 講師IDを追加
+        grade: currentData.grade
+    });
 }
 
 function ajax(data) {

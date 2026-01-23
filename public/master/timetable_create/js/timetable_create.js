@@ -297,7 +297,7 @@ mainCreateNewBtn.addEventListener('click', () => {
     if (currentRecord && originalRecordData && !isCreatingMode && !isViewOnly) {
         // 実際に編集があるかチェック
         const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-        const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+        const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
         
         if (hasDateChanges || hasGridChanges) {
             if (!confirm('編集中の内容は保存されていません。\n新規作成を開始しますか？')) {
@@ -312,7 +312,7 @@ mainCreateNewBtn.addEventListener('click', () => {
         originalRecordData: originalRecordData ? JSON.parse(JSON.stringify(originalRecordData)) : null,
         startDate: mainStartDate.value,
         endDate: mainEndDate.value,
-        gridData: getCurrentGridData(),
+        gridData: getTimetableData(),
         courseDisplayText: document.getElementById('mainCourseDisplay').innerHTML,
         selectedItemId: document.querySelector('.saved-item.active')?.getAttribute('data-id')
     };
@@ -702,9 +702,9 @@ function getFormattedDate(inputVal) {
 }
 
 /*
-    * 概要: 保存された時間割のリストを指定モードに合わせてフィルタ・ソートして描画する。
-    * 使用方法: 表示モードやドロップダウン選択が変わったら呼び出してリストを再描画してください。
-    */
+* 概要: 保存された時間割のリストを指定モードに合わせてフィルタ・ソートして描画する。
+* 使用方法: 表示モードやドロップダウン選択が変わったら呼び出してリストを再描画してください。
+*/
 function renderSavedList(mode) {
     const container = document.getElementById('savedListContainer');
     const divider = document.getElementById('savedListDivider');
@@ -1312,20 +1312,32 @@ btnSave.addEventListener('click', function() {
 * 概要: 現在のメイン画面のグリッド（入力済みセル）を配列として収集する。
 * 使用方法: 現在の編集内容を取得して保存／比較に使う際に呼び出してください。
 */
-function getCurrentGridData() {
-    const gridData = [];
+/**
+ * 画面上のグリッドデータを配列化して取得する
+ * (ID取得ロジックを含む完全版)
+ */
+function getTimetableData() {
+const data = [];
     document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
-        const teachers = Array.from(cell.querySelectorAll('.teacher-name span')).map(el => el.textContent);
-        const rooms = Array.from(cell.querySelectorAll('.room-name span')).map(el => el.textContent);
-        gridData.push({
-            day: cell.dataset.day, 
-            period: cell.dataset.period,
+        let tIds = [], rIds = [];
+        try { if (cell.dataset.teacherIds) tIds = JSON.parse(cell.dataset.teacherIds); } catch (e) {}
+        try { if (cell.dataset.roomIds) rIds = JSON.parse(cell.dataset.roomIds); } catch (e) {}
+
+        const item = {
+            // 文字列のまま取得
+            day: cell.dataset.day,
+            period: parseInt(cell.dataset.period),
             className: cell.querySelector('.class-name')?.textContent || '',
-            teacherName: teachers[0] || '',
-            roomName: rooms[0] || ''
-        });
+            subjectId: cell.dataset.subjectId || null,
+            teacherId: tIds.length > 0 ? tIds[0] : null,
+            roomId: rIds.length > 0 ? rIds[0] : null,
+            teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
+            roomName: cell.querySelector('.room-name span')?.textContent || ''
+        };
+        data.push(item);
     });
-    return gridData;
+    console.log("送信データ:", data);
+    return data;
 }
 
 /*
@@ -1343,121 +1355,9 @@ function getGridDataForComparison(gridData) {
     return JSON.stringify(sorted);
 }
 
-completeButton.addEventListener('click', () => {
-    if (!mainStartDate.value || !mainEndDate.value) { 
-        alert('適用期間を入力してください。'); 
-        return; 
-    }
-    
-    // 適用期間が逆転していないかチェック
-    if (mainStartDate.value > mainEndDate.value) {
-        alert('開始日が終了日より後になっています。\n適用期間を正しく設定してください。');
-        return;
-    }
-    
-    const currentGridData = getCurrentGridData();
-
-    if (isCreatingMode) {
-        // 新規作成の完了
-        const courseText = document.getElementById('creatingCourseName').textContent;
-        
-        // 適用期間の重複チェック
-        const sDate = mainStartDate.value;
-        const eDate = mainEndDate.value;
-        
-        if (sDate && eDate) {
-            if (checkCourseOverlap(courseText, sDate, eDate)) {
-                alert('指定された適用期間は、同じコースの既存の時間割と重複しています。\n別の期間を指定するか、既存の時間割を削除してください。');
-                return;
-            }
-        } else {
-            // 期間未設定の場合、同じコースに既に期間未設定の時間割があるかチェック
-            const existingNoPeriod = savedTimetables.find(record => 
-                record.course === courseText && (!record.startDate || !record.endDate)
-            );
-            if (existingNoPeriod) {
-                alert('同じコースに期間未設定の時間割が既に存在します。\n先に既存の時間割に適用期間を設定するか、削除してください。');
-                return;
-            }
-        }
-
-        const newRecord = {
-            id: Date.now(),
-            course: courseText,
-            startDate: mainStartDate.value,
-            endDate: mainEndDate.value,
-            data: currentGridData
-        };
-        savedTimetables.push(newRecord);
-        
-        toggleCreatingMode(false);
-
-        currentCourseName = courseText;
-        
-        const mode = document.querySelector('input[name="displayMode"]:checked').value;
-        renderSavedList(mode);
-        
-        handleSavedItemClick({
-            preventDefault: () => {},
-            currentTarget: { getAttribute: () => newRecord.id }
-        }, true);
-
-        alert('保存しました。');
-    } else if (currentRecord) {
-        // 既存の編集の保存
-        
-        // 適用期間の重複チェック（自分以外のレコードとの重複）
-        const sDate = mainStartDate.value;
-        const eDate = mainEndDate.value;
-        
-        if (sDate && eDate && checkCourseOverlap(currentRecord.course, sDate, eDate, currentRecord.id)) {
-            alert('指定された適用期間は、同じコースの既存の時間割と重複しています。\n別の期間を指定してください。');
-            return;
-        }
-        
-        // データと期間を更新
-        currentRecord.data = currentGridData;
-        currentRecord.startDate = mainStartDate.value;
-        currentRecord.endDate = mainEndDate.value;
-        
-        // originalRecordDataを再度設定（保存状態をリセット）
-        originalRecordData = {
-            data: JSON.parse(JSON.stringify(currentRecord.data)),
-            startDate: currentRecord.startDate,
-            endDate: currentRecord.endDate
-        };
-        
-        // ボタンラベルをリセット
-        completeButton.textContent = '保存';
-        
-        // 更新後の適用期間状態に応じてボタンを設定
-        if (isRecordActive(currentRecord)) {
-            cancelCreationBtn.textContent = '削除不可（適用中）';
-            cancelCreationBtn.disabled = true;
-            cancelCreationBtn.style.opacity = '0.5';
-            cancelCreationBtn.style.cursor = 'not-allowed';
-        } else {
-            cancelCreationBtn.textContent = '削除';
-            cancelCreationBtn.disabled = false;
-            cancelCreationBtn.style.opacity = '1';
-            cancelCreationBtn.style.cursor = 'pointer';
-        }
-        
-        // リストを更新
-        const mode = document.querySelector('input[name="displayMode"]:checked').value;
-        renderSavedList(mode);
-        
-        // 選択状態を維持
-        const targetItem = document.querySelector(`.saved-item[data-id="${currentRecord.id}"]`);
-        if(targetItem) targetItem.classList.add('active');
-        
-        // 編集ハイライトを削除
-        document.querySelectorAll('.timetable-cell.is-edited').forEach(cell => {
-            cell.classList.remove('is-edited');
-        });
-        
-        alert('変更を保存しました。');
-    }
+completeButton.addEventListener('click', async () => {
+    // ボタンの多重クリック防止などを入れても良いですが、まずはシンプルに実行
+    await saveTimetable();
 });
 
 cancelCreationBtn.addEventListener('click', () => {
@@ -1486,8 +1386,7 @@ cancelCreationBtn.addEventListener('click', () => {
         // 3. モードを戻す
         toggleCreatingMode(false);
 
-        // ★重要：ここで「初期表示」を呼び出します！
-        // これがないと画面が空のままになります。
+        // 初期表示に戻す
         selectInitialTimetable();
 
         setTimeout(() => alert('キャンセルしました。'), 10);
@@ -1501,7 +1400,7 @@ cancelCreationBtn.addEventListener('click', () => {
         if (hasChanges) {
             // --- 変更破棄のロジック（提示されたコードのまま） ---
             const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-            const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+            const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
 
             if (hasDateChanges || hasGridChanges) {
                 if(!confirm('変更を破棄しますか？')) return;
@@ -1536,7 +1435,7 @@ cancelCreationBtn.addEventListener('click', () => {
                 
                 const mode = document.querySelector('input[name="displayMode"]:checked').value;
                 
-                // ★ここもIDで再描画するように修正済みの関数を呼ぶ
+                // リスト再描画
                 renderSavedList(mode);
                 
                 // アクティブ状態を復元
@@ -1603,7 +1502,7 @@ cancelCreationBtn.addEventListener('click', () => {
         document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
         document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
 
-        // ★削除後も、残っているデータの先頭を表示すると親切です
+        // 初期表示に戻す
         selectInitialTimetable();
 
         setTimeout(() => alert('削除しました。'), 10);
@@ -1623,7 +1522,7 @@ function handleSavedItemClick(e, forceSelect = false) {
     if (currentRecord && currentRecord.id !== id && originalRecordData) {
         // 現在の時間割りで編集があるかチェック
         const hasDateChanges = mainStartDate.value !== originalRecordData.startDate || mainEndDate.value !== originalRecordData.endDate;
-        const hasGridChanges = getGridDataForComparison(getCurrentGridData()) !== getGridDataForComparison(originalRecordData.data);
+        const hasGridChanges = getGridDataForComparison(getTimetableData()) !== getGridDataForComparison(originalRecordData.data);
 
         if (hasDateChanges || hasGridChanges) {
             if (!confirm('現在の時間割りの編集が保存されていません。\n別の時間割りに移動しますか？\n（変更は失われます）')) {
@@ -1638,7 +1537,7 @@ function handleSavedItemClick(e, forceSelect = false) {
             courseName: document.getElementById('creatingCourseName').textContent,
             startDate: mainStartDate.value,
             endDate: mainEndDate.value,
-            gridData: JSON.parse(JSON.stringify(getCurrentGridData()))  // 深くコピーしてデータ混在を防ぐ
+            gridData: JSON.parse(JSON.stringify(getTimetableData()))  // 深くコピーしてデータ混在を防ぐ
         };
         
         // 作成中から他の時間割を見る = 閲覧専用
@@ -1742,6 +1641,106 @@ function handleSavedItemClick(e, forceSelect = false) {
                 targetCell.classList.add('is-filled');
             }
         });
+    }
+}
+
+/**
+ * 画面上のグリッドデータを配列化して取得する
+ */
+function getTimetableData() {
+    const data = [];
+    document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
+        // 必須データの取得
+        const item = {
+            day: parseInt(cell.dataset.day),
+            period: parseInt(cell.dataset.period),
+            className: cell.querySelector('.class-name')?.textContent || '',
+            // 以下の属性はデータセットに保存されている前提
+            // (ドラッグ&ドロップ時や入力時に data-teacher-id 等をセットする処理が必要です)
+            subjectId: cell.dataset.subjectId || null, 
+            teacherId: cell.dataset.teacherId || null,
+            roomId: cell.dataset.roomId || null,
+            
+            // 表示用（バックエンド保存には不要かもしれませんが、念のため）
+            teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
+            roomName: cell.querySelector('.room-name span')?.textContent || ''
+        };
+        data.push(item);
+    });
+    return data;
+}
+
+/**
+ * saveTimetable
+ * 概要:保存処理を実行する関数で、バックエンドのPHPスクリプトにデータを送信する。
+ * 使用方法: 保存ボタンのクリックイベントなどで呼び出してください。
+ * 引数: なし
+ * 返り値: なし
+ * ※ 新規時間割り作成モード：id=null  既存時間割り編集モード：id=割り当てられている時間割りID
+ */
+async function saveTimetable() {
+    // 1. バリデーション
+    if (!mainStartDate.value || !mainEndDate.value) {
+        alert('適用期間を入力してください。');
+        return;
+    }
+    if (mainStartDate.value > mainEndDate.value) {
+        alert('開始日が終了日より後になっています。\n適用期間を正しく設定してください。');
+        return;
+    }
+
+    // 2. 送信データの構築
+    const gridData = getTimetableData();
+    
+    // IDの特定: 新規作成なら null, 編集なら currentRecord.id
+    const targetId = (!isCreatingMode && currentRecord) ? currentRecord.id : null;
+
+    const payload = {
+        id: targetId,
+        course_id: currentCourseId,
+        start_date: mainStartDate.value,
+        end_date: mainEndDate.value,
+        timetable_data: gridData
+    };
+
+    console.log("送信データ:", payload);
+
+    // CSRFトークン取得
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = metaToken ? metaToken.getAttribute('content') : '';
+
+    try {
+        // 3. PHPへ送信
+        // ※パスはファイルの配置場所に合わせて調整してください
+        const response = await fetch('../../api/timetable/save_timetable.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        // レスポンスがHTMLで返ってきてしまっている場合のエラーハンドリング
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("予期せぬレスポンス:", text);
+            throw new Error("サーバーエラーが発生しました (Not JSON response)");
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('保存しました。');
+            location.reload(); // 成功したらリロードして反映
+        } else {
+            alert('保存に失敗しました: ' + (result.message || '不明なエラー'));
+        }
+
+    } catch (error) {
+        console.error('保存エラー:', error);
+        alert('通信エラーが発生しました。\nコンソールログを確認してください。');
     }
 }
 

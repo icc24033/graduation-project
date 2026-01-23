@@ -82,7 +82,12 @@
                     <button class="update-btn" onclick="saveField('teacher', 'add')">講師を追加する</button>
                 </div>
                 <div id="area-teacher-remove" class="selector-area">
-                    <button class="update-btn btn-danger" onclick="clearField('teacher')">全員解除（未設定にする）</button>
+                    <select id="sel-teacher-remove" class="sidebar-select"></select>
+                    <button class="update-btn btn-danger" onclick="removeSingleTeacher()">選択した講師を解除</button>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    <button class="update-btn" style="background-color: #d9534f; color: white;" onclick="clearField('teacher')">
+                        全員解除（未設定にする）
+                    </button>
                 </div>
             </div>
 
@@ -93,14 +98,20 @@
                     <button class="circle-btn" onclick="toggleArea('room-add')">＋</button>
                     <button class="circle-btn" onclick="toggleArea('room-remove')">－</button>
                 </div>
+                
                 <div id="area-room-add" class="selector-area">
                     <select id="sel-room" class="sidebar-select">
-                        <?php foreach($roomList as $r): ?><option value="<?= $r['room_name'] ?>"><?= $r['room_name'] ?></option><?php endforeach; ?>
+                        <option value="" disabled selected>教室を選択</option>
+                        <?php foreach($roomList as $r): ?>
+                            <option value="<?= $r['room_id'] ?>"><?= htmlspecialchars($r['room_name']) ?></option>
+                        <?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('room', 'overwrite')">教室を確定する</button>
                 </div>
+                
                 <div id="area-room-remove" class="selector-area">
-                    <button class="update-btn btn-danger" onclick="clearField('room')">教室を解除する</button>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">現在の教室設定を解除しますか？</p>
+                    <button class="update-btn btn-danger" onclick="clearField('room')">教室を解除して未設定にする</button>
                 </div>
             </div>
 

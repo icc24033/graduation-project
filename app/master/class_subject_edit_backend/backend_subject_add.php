@@ -8,23 +8,19 @@ error_reporting(E_ALL);
 // backend_subject_add.php
 
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
+require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
-// 1. コース情報の定義
-$courseInfo = [   
-    'itikumi'      => ['id' => 7, 'name' => '1年1組', 'grade' => 1],
-    'nikumi'        => ['id' => 8, 'name' => '1年2組', 'grade' => 1],
-    'kihon'         => ['id' => 5, 'name' => '基本情報', 'grade' => 1],
-    'applied-info'  => ['id' => 4, 'name' => '応用情報', 'grade' => 1],
-    'multimedia'    => ['id' => 3, 'name' => 'マルチメディア', 'grade' => 2],
-    'system-design' => ['id' => 1, 'name' => 'システムデザイン', 'grade' => 2],
-    'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター', 'grade' => 2]
-];
 
 try {
     $pdo = RepositoryFactory::getPdo();
 } catch (Exception $e) {
     die("DB接続失敗: " . $e->getMessage());
 }
+
+// 1. コース情報の定義
+$service = new ClassSubjectEditService();
+$courseInfo = $service->getCourseInfoMaster();
+
 
 // 2. データの受け取り
 $action     = $_POST['action'] ?? '';
@@ -37,14 +33,14 @@ if ($action === 'insert_new' && !empty($title)) {
         $pdo->beginTransaction();
 
         // --- 修正箇所 A: subjectsテーブルに新しい科目を登録 ---
-        // ※ 渡された $title を subject_name として登録し、自動採番されたIDを取得します。
-        // ※ テーブル名やカラム名は一般的な推測に基づいています。環境に合わせて適宜変更してください。
+        // ※ 渡された $title を subject_name として登録し、自動採番されたIDを取得します
         $sqlSubject = "INSERT INTO subjects (subject_name) VALUES (?)";
         $stmt = $pdo->prepare($sqlSubject);
         $stmt->execute([$title]);
         $new_subject_id = $pdo->lastInsertId();
 
-        // B. 対象コースの選別ロジック
+        // B. コース判定ロジック
+        $course_id = $_POST['course'] ?? ''; // フロントからは数値のIDが届く
         $targets = [];
 
         if ($raw_grade === '1_all') {
@@ -55,18 +51,17 @@ if ($action === 'insert_new' && !empty($title)) {
             foreach ($courseInfo as $info) {
                 if ($info['grade'] == 2) $targets[] = $info;
             }
-        } elseif ($raw_grade === 'all') {
-            $targets = $courseInfo;
         } else {
-            if (isset($courseInfo[$course_key])) {
-                $targets[] = $courseInfo[$course_key];
+            // 直接IDで検索（キーがcourse_idなのでissetで判定可能）
+            if (isset($courseInfo[$course_id])) {
+                $targets[] = $courseInfo[$course_id];
             }
         }
 
         // C. subject_in_chargesテーブルに一括登録
         // teacher_id=0 は「担当者未設定」などの運用と想定します。
         $sqlInsert = "INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) 
-                      VALUES (:cid, :grade, :sid, 0, NULL)";
+                      VALUES (:cid, :grade, :sid, NULL, NULL)";
         $stmtInsert = $pdo->prepare($sqlInsert);
 
         foreach ($targets as $target) {

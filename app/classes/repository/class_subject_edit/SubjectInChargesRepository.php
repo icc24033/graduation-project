@@ -15,12 +15,13 @@ class SubjectInChargesRepository extends BaseRepository {
         try {
             // INNER JOIN を使用して全ての関連情報を取得
             $sql = "SELECT
-                        c.course_id,
+                        c.course_id,       
                         c.course_name, 
                         sic.grade, 
                         s.subject_name, 
                         t.teacher_name, 
-                        r.room_name
+                        r.room_name,
+                        sic.teacher_id
                     FROM subject_in_charges sic
                     JOIN course c ON sic.course_id = c.course_id
                     JOIN subjects s ON sic.subject_id = s.subject_id

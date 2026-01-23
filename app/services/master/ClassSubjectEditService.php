@@ -82,14 +82,30 @@ class ClassSubjectEditService {
     }
 
     /**
+     * 授業科目追加・表示用コースの基本情報を取得（マスタデータ）
+     * DBから取得した course_id をキーにした連想配列を返す
+     */
+    public function getCourseInfoMaster() {
+        $courseRepo = RepositoryFactory::getCourseRepository();
+        $courses = $courseRepo->getAllCoursesIncludedGrade();
+    
+        $master = [];
+        foreach ($courses as $row) {
+            $master[$row['course_id']] = [
+                'id'    => (int)$row['course_id'],
+                'name'  => $row['course_name'],
+                'grade' => (int)$row['grade']
+            ];
+        }
+        return $master;
+    }
+
+    /**
      * 条件（学年・コース）に基づいてフィルタリングされた授業科目一覧を取得
      */
     public function getFilteredClassSubjects($search_grade, $search_course) {
-
-        // 共通のマスタデータメソッドから取得
         $courseInfo = $this->getCourseInfoMaster();
         
-        // 学年の判定
         $search_grade_val = null;
         if ($search_grade === '1年生' || $search_grade === '1') {
             $search_grade_val = 1;
@@ -97,117 +113,87 @@ class ClassSubjectEditService {
             $search_grade_val = 2;
         } 
 
-        // 1. $search_course（文字列キー）を対応する course_id に変換
+        // $search_course（数値ID）に対応する course_id を取得
         $target_course_id = null;
         if ($search_course !== 'all' && isset($courseInfo[$search_course])) {
-            $target_course_id = $courseInfo[$search_course]['course_id'];
+            $target_course_id = (int)$courseInfo[$search_course]['id'];
         }
 
-        // 元となる全データを取得
         $data = $this->getClassSubjectData();
         $classSubjectList = $data['classSubjectList'];
 
-        // 2. 配列をフィルタリング
-        $classSubjectList = array_filter($classSubjectList, function ($item) use ($search_grade_val, $target_course_id, $courseInfo, $search_course) {
-            // 条件A: 学年フィルタリング
+        $classSubjectList = array_filter($classSubjectList, function ($item) use ($search_grade_val, $target_course_id) {
+            // 学年フィルタリング
             if ($search_grade_val !== null) {
-                // 型を一致させて比較
                 if ((int)$item['grade'] !== (int)$search_grade_val) {
                     return false;
                 }
             }
-
-            // 条件B: コースフィルタリング
+            // コースフィルタリング（数値ID同士で比較）
             if ($target_course_id !== null) {
-                $target_name = $courseInfo[$search_course]['name'];
-                if (strpos($item['course_name'], $target_name) === false) {
+                if ((int)$item['course_id'] !== $target_course_id) {
                     return false;
                 }
             }
-
             return true;
         });
 
-        // 3. 配列の添字を振り直して返す
         return array_values($classSubjectList);
     }
 
     /**
-     * 授業科目追加用コースの基本情報を取得（マスタデータ）
-     */
-    public function getCourseInfoMaster() {
-        return [   
-            'itikumi'       => ['table' => 'itikumi',         'name' => '1年1組', 'grade' => 1, 'course_id' => 7],
-            'nikumi'        => ['table' => 'nikumi',          'name' => '1年2組', 'grade' => 1, 'course_id' => 8],
-            'iphasu'        => ['table' => 'iphasu_itiran',   'name' => 'ITパスポートコース', 'grade' => 1, 'course_id' => 6],
-            'kihon'         => ['table' => 'kihon_itiran',    'name' => '基本情報コース', 'grade' => 1, 'course_id' => 5],
-            'applied-info'  => ['table' => 'ouyou_itiran',    'name' => '応用情報コース', 'grade' => 1, 'course_id' => 4],
-            'multimedia'    => ['table' => 'mariti_itiran',   'name' => 'マルチメディアOAコース', 'grade' => 2, 'course_id' => 3],
-            'system-design' => ['table' => 'sisutemu_itiran', 'name' => 'システムデザインコース', 'grade' => 2, 'course_id' => 1],
-            'web-creator'   => ['table' => 'web_itiran',      'name' => 'Webクリエイターコース', 'grade' => 2, 'course_id' => 2]
-        ];
-    }
-
-    /**
-     * 授業科目削除用コースの基本情報を取得（マスタデータ）
-     */
-    public function getCourseInfoDeleteMaster() {
-        return [   
-            'itikumi'       => ['id' => 7, 'name' => '1年1組'],
-            'nikumi'        => ['id' => 8, 'name' => '1年2組'],
-            'kihon'         => ['id' => 5, 'name' => '基本情報'],
-            'applied-info'  => ['id' => 4, 'name' => '応用情報'],
-            'multimedia'    => ['id' => 3, 'name' => 'マルチメディア'],
-            'system-design' => ['id' => 1, 'name' => 'システムデザイン'],
-            'web-creator'   => ['id' => 2, 'name' => 'Webクリエイター']
-        ];
-    }
-
-    /**
      * 表示用に科目名でグルーピングしたリストを作成する
+     * 講師情報(IDと名前)も配列として集約します
      */
     public function getGroupedSubjectList($classSubjectList, $courseInfo) {
         $subjects = [];
-        $total_course_count = count($courseInfo); // 全コース数
+        $total_course_count = count($courseInfo);
 
         foreach ($classSubjectList as $row) {
-            $id = $row['subject_name']; 
-                
+            // IDの作成 (学年_科目名)
+            $id = $row['grade'] . "_" . $row['subject_name'];
+
             if (!isset($subjects[$id])) {
                 $subjects[$id] = [
-                    'grade'       => $row['grade'], 
-                    'title'       => $row['subject_name'],
-                    'teachers'    => [], 
-                    'room'        => $row['room_name'] ?? '未設定', 
-                    'courses'     => [], 
-                    'course_keys' => [] 
+                    'grade'   => $row['grade'], 
+                    'title'   => $row['subject_name'],
+                    'courses' => [], 
+                    'course_keys' => [],
+                    'teachers' => [],    // 講師名の配列
+                    'teacher_ids' => [],  // 講師IDの配列
+                    'room' => '' // ★追加：教室名の初期値
                 ];
             }
 
-            // 講師名の追加（重複防止）
-            if (!empty($row['teacher_name']) && $row['teacher_name'] !== '未設定') {
-                if (!in_array($row['teacher_name'], $subjects[$id]['teachers'])) {
-                    $subjects[$id]['teachers'][] = $row['teacher_name'];
-                }
+            // ★追加：教室名のセット（すでに入っている場合は上書き、または代表として1つ保持）
+            if (!empty($row['room_name'])) {
+                $subjects[$id]['room'] = $row['room_name'];
             }
 
-            // 表示用のコース名を追加
+            // コース名の追加（重複チェック）
             if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
                 $subjects[$id]['courses'][] = $row['course_name'];
             }
 
-            // course_id からキーを逆引き
-            foreach ($courseInfo as $key => $info) {
-                if ($info['course_id'] == $row['course_id']) {
-                    if (!in_array($key, $subjects[$id]['course_keys'])) {
-                        $subjects[$id]['course_keys'][] = $key;
-                    }
-                    break;
+            // DBの course_id をそのまま course_keys 配列に追加
+            $cid = $row['course_id'];
+            if (isset($courseInfo[$cid])) {
+                if (!in_array($cid, $subjects[$id]['course_keys'])) {
+                    $subjects[$id]['course_keys'][] = $cid;
+                }
+            }
+
+            // 講師情報の追加処理
+            // teacher_id が 0(未設定) や null でない場合のみ配列に追加する
+            if (!empty($row['teacher_id']) && $row['teacher_id'] != 0) {
+                if (!in_array($row['teacher_id'], $subjects[$id]['teacher_ids'])) {
+                    $subjects[$id]['teacher_ids'][] = $row['teacher_id'];
+                    $subjects[$id]['teachers'][] = $row['teacher_name'];
                 }
             }
         }
 
-        // 全コース対象かどうかの判定
+        // 全コース対象かどうかの判定（is_allフラグ）
         foreach ($subjects as $id => $data) {
             $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
         }
@@ -233,26 +219,13 @@ class ClassSubjectEditService {
                 ];
             }
 
-            // コース名の追加（重複チェック）
+            // コース名の追加と削除用キーの追加
             if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
                 $subjects[$id]['courses'][] = $row['course_name'];
-
-                // courseInfoのキー(itikumi等)を特定するロジック
-                $foundKey = '';
-                foreach ($courseInfo as $key => $info) {
-                    // getCourseInfoDeleteMasterの構造に合わせて 'id' で比較
-                    $isIdMatch = isset($row['course_id']) && (int)$row['course_id'] === (int)$info['id'];
-                    // 部分一致も含めて名前で比較
-                    $isNameMatch = (strpos($row['course_name'], $info['name']) !== false);
-
-                    if ($isIdMatch || $isNameMatch) {
-                        $foundKey = $key;
-                        break;
-                    }
-                }
-                
-                if ($foundKey !== '') {
-                    $subjects[$id]['course_keys'][] = $foundKey;
+            
+                $cid = $row['course_id'];
+                if (isset($courseInfo[$cid])) {
+                    $subjects[$id]['course_keys'][] = $cid;
                 }
             }
         }
