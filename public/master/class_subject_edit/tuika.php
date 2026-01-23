@@ -82,7 +82,12 @@
                     <button class="update-btn" onclick="saveField('teacher', 'add')">講師を追加する</button>
                 </div>
                 <div id="area-teacher-remove" class="selector-area">
-                    <button class="update-btn btn-danger" onclick="clearField('teacher')">全員解除（未設定にする）</button>
+                    <select id="sel-teacher-remove" class="sidebar-select"></select>
+                    <button class="update-btn btn-danger" onclick="removeSingleTeacher()">選択した講師を解除</button>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    <button class="update-btn" style="background-color: #d9534f; color: white;" onclick="clearField('teacher')">
+                        全員解除（未設定にする）
+                    </button>
                 </div>
             </div>
 
