@@ -5,10 +5,11 @@ SecurityHelper::applySecureHeaders();
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <title>時間割り作成</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="nofollow, noindex">
-    <title>時間割り作成</title>
+    <meta name="csrf-token" content="<?php echo SecurityHelper::escapeHtml($csrfToken); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -253,6 +254,6 @@ SecurityHelper::applySecureHeaders();
         // JS側では dbMasterData[コースID] でアクセスする
         const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
-    <script src="js/create_timetable.js"></script>
+    <script src="js/create_timetable.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

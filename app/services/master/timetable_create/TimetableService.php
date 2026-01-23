@@ -107,4 +107,101 @@ class TimetableService {
 
         return $masterData;
     }
+
+    /**
+     * saveTimetable
+     * 概要: 時間割データの保存（新規・更新の自動判別）
+     * 引数: $data - 保存する時間割データの配列 (詳細は下記参照)
+     * 戻り値: 保存された時間割ID
+     * $dataの構造例:
+     * [
+     *   'id' => (int|null) 既存の時間割ID（新規の場合はnullまたは未設定）
+     *   'course_id' => (int) コースID
+     *   'start_date' => (string) 開始日 (YYYY-MM-DD)
+     *   'end_date' => (string) 終了日 (YYYY-MM-DD)
+     *   'timetable_data' => [ // グリッドの中身
+     *      [
+     *          'day' => (string|int) 曜日 ("月"などの文字列、または1-7の数値)
+     *          'period' => (int) 時限
+     *          'subjectId' => (int) 科目ID
+     *          'teacherId' => (int) 教員ID
+     *          'roomId' => (int) 教室ID
+     *      ],
+     *   ...
+     * ]
+     * 
+     * 注意: トランザクション処理を含むため、例外発生時にはロールバックされます
+     * ※ 科目・教員・教室の紐づけは subject_in_charges テーブルで事前に設定されている必要があります
+     * ※ teacherId, roomId は省略可能（未設定の場合は0やNULLで保存されます）
+     * 
+     * 目的: 時間割り作成画面で編集されたデータを保存するため
+     */
+    public function saveTimetable($data) {
+        $id = $data['id'] ?? null; // IDがあれば更新、なければ新規
+        $courseId = $data['course_id'];
+        $startDate = $data['start_date'];
+        $endDate = $data['end_date'];
+        $details = $data['timetable_data'] ?? []; // グリッドの中身
+
+        // トランザクション開始のためにPDOを取得（RepositoryFactory経由などで取得できる前提、あるいはコンストラクタで確保）
+        // ※ここでは簡易的にリポジトリからPDOにアクセスするか、Service内でPDOを持つ構造にしてください。
+        $repo = RepositoryFactory::getTimetableRepository();
+        $pdo = $repo->getConnection(); // BaseRepositoryにgetConnection()がある前提
+
+        try {
+            $pdo->beginTransaction();
+
+            if ($id) {
+                // --- 更新処理 ---
+                $repo->updateTimetable($id, $startDate, $endDate);
+                // 詳細データは一度削除して作り直す（Delete-Insert）
+                $repo->deleteDetailsByTimetableId($id);
+            } else {
+                // --- 新規作成処理 ---
+                $timetableName = $data['timetable_name'] ?? '新規時間割'; // 名前が必要ならJSから送る
+                $id = $repo->createTimetable($courseId, $startDate, $endDate, $timetableName);
+            }
+
+            // --- 詳細データの登録 ---
+            // 曜日変換マップ（JSから「月」などの文字で来る場合の対策）
+            $dayMap = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
+
+            foreach ($details as $row) {
+                // 1. 曜日の変換 (数値で来ているならそのまま、文字なら変換)
+                $dayVal = $row['day'];
+                if (!is_numeric($dayVal) && isset($dayMap[$dayVal])) {
+                    $dayVal = $dayMap[$dayVal];
+                }
+
+                if (empty($dayVal) || !is_numeric($dayVal)) {
+                    error_log("スキップされたデータ: dayの値が不正です (" . print_r($row['day'], true) . ")");
+                    continue; 
+                }
+
+                // 2. detail (科目) の登録
+                // JS側のキー名 (subjectId) と合わせる
+                $subjectId = $row['subjectId'];
+                if (!$subjectId) continue; // 科目がない空データはスキップ
+
+                $detailId = $repo->addDetail($id, $dayVal, $row['period'], $subjectId);
+
+                // 3. teacher/room の登録
+                // ※ JSから teacherIds (配列) で来るか、teacherId (単一) で来るかで処理を分ける
+                // 今回はシンプルに「単一の先生・教室」として処理する例
+                $teacherId = !empty($row['teacherId']) ? $row['teacherId'] : 0; // 0=未定など
+                $roomId = !empty($row['roomId']) ? $row['roomId'] : null;
+
+                $repo->addDetailTeacher($detailId, $teacherId, $roomId);
+            }
+
+            $pdo->commit();
+            return $id; // 保存したIDを返す
+
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
 }

@@ -105,61 +105,112 @@ class TimetableRepository extends BaseRepository {
 
     /**
      * createTimetable
-     * 概要：新しい時間割りを作成する
-     * 動作: 新規作成された時間割りに関して、timetablesテーブルに登録予定のレコードを挿入する
-     * 引数：$courseId - コースID, $startDate - 開始日, $endDate - 終了日, $statusType - ステータス（デフォルト1）
-     * 戻り値：新規作成された時間割りのID
+     * 概要: 親テーブル(timetables)に新規レコードを作成する
+     * 引数: $courseId - コースID
+     *       $startDate - 開始日
+     *       $endDate - 終了日
+     *       $name - 時間割り名（デフォルトは コース名）
+     * 戻り値: 作成された時間割りID
      */
-    public function createTimetable($courseId, $startDate, $endDate, $statusType = 1) {
-        $sql = "INSERT INTO timetables (course_id, start_date, end_date, status_type, created_at, updated_at) 
-                VALUES (:course_id, :start_date, :end_date, :status_type, NOW(), NOW())";
-        
+    public function createTimetable($courseId, $startDate, $endDate, $name='新規時間割') {
+        $sql = "INSERT INTO timetables (course_id, start_date, end_date, timetable_name, status_type) 
+                VALUES (:courseId, :startDate, :endDate, :name, 1)";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':course_id', $courseId, PDO::PARAM_INT);
-        $stmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
-        $stmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
-        $stmt->bindValue(':status_type', $statusType, PDO::PARAM_INT);
+        $stmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
+        $stmt->bindValue(':startDate', $startDate, PDO::PARAM_STR);
+        $stmt->bindValue(':endDate', $endDate, PDO::PARAM_STR);
+
+        // コース名を割り当てる
+        try {
+            $courseSql = "SELECT course_name FROM course WHERE course_id = :courseId";
+            $courseStmt = $this->pdo->prepare($courseSql);
+            $courseStmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
+            $courseStmt->execute();
+            $courseRow = $courseStmt->fetch(PDO::FETCH_ASSOC);
+            if ($courseRow) {
+                $name = $courseRow['course_name'];
+            }
+        } catch (PDOException $e) {
+            error_log("TimetableRepository Error (fetching course name): " . $e->getMessage());
+        }
         
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
         $stmt->execute();
-        
-        // 自動採番された timetable_id を返す（これを子テーブルで使う）
-        return $this->pdo->lastInsertId();
+        return (int)$this->pdo->lastInsertId();
     }
 
     /**
-     * createTimetableDetail
-     * 概要：新しい時間割り詳細を作成する
-     * 動作: 新規作成された時間割り詳細に関して、timetable_detailsテーブルに登録予定のレコードを挿入する
-     * 引数：$timetableId - 親時間割りID, $dayOfWeek - 曜日, $period - 時限, $subjectId - 科目ID
-     * 戻り値：新規作成された時間割り詳細のID
+     * updateTimetable
+     * 概要: 親テーブル(timetables)の日付などを更新
+     * 引数: $id - 更新対象の時間割りID
+     *       $startDate - 新しい開始日
+     *       $endDate - 新しい終了日
+     * 戻り値: なし
      */
-    public function createTimetableDetail($timetableId, $dayOfWeek, $period, $subjectId) {
+    public function updateTimetable($id, $startDate, $endDate) {
+        $sql = "UPDATE timetables SET start_date = :startDate, end_date = :endDate WHERE timetable_id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':startDate', $startDate, PDO::PARAM_STR);
+        $stmt->bindValue(':endDate', $endDate, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    /**
+     * deleteDetailsByTimetableId
+     * 概要: 指定された時間割IDに関連する詳細データを全削除する
+     * 引数: $timetableId - 削除対象の時間割ID
+     * ※外部キー制約(ON DELETE CASCADE)により、timetable_detail_teachers も自動で消える設計になっています
+     * 戻り値: なし
+     */
+    public function deleteDetailsByTimetableId($timetableId) {
+        $sql = "DELETE FROM timetable_details WHERE timetable_id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':id', $timetableId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    /**
+     * addDetail
+     * 概要: timetable_details（コマと科目の紐づけ）を登録
+     * 引数: $timetableId - 時間割ID
+     *       $day - 曜日 (1=月曜, 2=火曜, ...)
+     *       $period - 時限 (1,2,3,...)
+     *       $subjectId - 科目ID
+     * 戻り値: 新しく作られた detail_id
+     */
+    public function addDetail($timetableId, $day, $period, $subjectId) {
         $sql = "INSERT INTO timetable_details (timetable_id, day_of_week, period, subject_id) 
-                VALUES (:timetable_id, :day_of_week, :period, :subject_id)";
-        
+                VALUES (:tId, :day, :period, :sId)";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':timetable_id', $timetableId, PDO::PARAM_INT);
-        $stmt->bindValue(':day_of_week', $dayOfWeek, PDO::PARAM_INT);
+        $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
+        $stmt->bindValue(':day', $day, PDO::PARAM_INT);
         $stmt->bindValue(':period', $period, PDO::PARAM_INT);
-        $stmt->bindValue(':subject_id', $subjectId, PDO::PARAM_INT); // 空きコマならNULLなどの制御が必要
-        
+        $stmt->bindValue(':sId', $subjectId, PDO::PARAM_INT);
         $stmt->execute();
-        
-        // 自動採番された detail_id を返す（これを孫テーブルで使う）
-        return $this->pdo->lastInsertId();
+        return (int)$this->pdo->lastInsertId();
     }
 
     /**
-     * 
+     * addDetailTeacher
+     * 概要: timetable_detail_teachers（先生・教室の割り当て）を登録
+     * 引数: $detailId - 対応する timetable_details の detail_id
+     *       $teacherId - 担当教員ID
+     *       $roomId - 教室ID（省略可能）
+     * 戻り値: なし
      */
-    public function createDetailTeacher($detailId, $teacherId, $roomId = null) {
+    public function addDetailTeacher($detailId, $teacherId, $roomId = null) {
         $sql = "INSERT INTO timetable_detail_teachers (detail_id, teacher_id, room_id) 
-                VALUES (:detail_id, :teacher_id, :room_id)";
-        
+                VALUES (:dId, :teacherId, :roomId)";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':detail_id', $detailId, PDO::PARAM_INT);
-        $stmt->bindValue(':teacher_id', $teacherId, PDO::PARAM_INT);
-        $stmt->bindValue(':room_id', $roomId, ($roomId ? PDO::PARAM_INT : PDO::PARAM_NULL));
+        $stmt->bindValue(':dId', $detailId, PDO::PARAM_INT);
+        $stmt->bindValue(':teacherId', $teacherId, PDO::PARAM_INT);
+        
+        if ($roomId) {
+            $stmt->bindValue(':roomId', $roomId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':roomId', null, PDO::PARAM_NULL);
+        }
         
         $stmt->execute();
     }

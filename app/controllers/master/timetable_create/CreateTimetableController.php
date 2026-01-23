@@ -29,12 +29,21 @@ class CreateTimetableController extends HomeRepository
 
         // 4. 時間割り作成に必要なマスタデータ（科目・教員・教室の紐づけ）を取得
         $masterSubjectData = $timetableService->getAllCourseMasterData();
+
+        // CSRFトークンを生成
+        $csrfToken = SecurityHelper::generateCsrfToken();
+    
+    extract([
+        // ... (既存の変数)
+        'csrfToken' => $csrfToken // Viewに渡す
+    ]);
         
         extract([
             'savedTimetables' => $savedTimetables,
             'sidebarCourseList' => $sidebarCourseList,
             'masterSubjectData' => $masterSubjectData,
-            'rawCourseData' => $rawCourseData
+            'rawCourseData' => $rawCourseData,
+            'csrfToken' => $csrfToken
         ]);
 
         // Viewにデータを渡す（requireすることで変数がView内で使えるようになります）
