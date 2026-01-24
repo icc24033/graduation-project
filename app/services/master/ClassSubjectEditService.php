@@ -160,8 +160,14 @@ class ClassSubjectEditService {
                     'courses' => [], 
                     'course_keys' => [],
                     'teachers' => [],    // 講師名の配列
-                    'teacher_ids' => []  // 講師IDの配列
+                    'teacher_ids' => [],  // 講師IDの配列
+                    'room' => '' // ★追加：教室名の初期値
                 ];
+            }
+
+            // ★追加：教室名のセット（すでに入っている場合は上書き、または代表として1つ保持）
+            if (!empty($row['room_name'])) {
+                $subjects[$id]['room'] = $row['room_name'];
             }
 
             // コース名の追加（重複チェック）

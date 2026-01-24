@@ -125,16 +125,22 @@ function toggleArea(id) {
 }
 
 function saveField(field, mode) {
-    const val = document.getElementById('sel-' + field).value;
+    const selectEl = document.getElementById('sel-' + field);
+    const val = selectEl.value; // roomの場合はIDが入る
+    
+    if(field === 'room' && (val === "" || val === null)) {
+        return alert("教室を選択してください");
+    }
     if(!val) return alert("選択してください");
     
+    // 科目に関連する全てのコースに適用するため、
+    // course_keyは送るが、PHP側でsubject_idをメインに処理させる
     const targetKey = currentData.course_keys && currentData.course_keys.length > 0 ? currentData.course_keys[0] : null;
-    if(!targetKey) return alert("コース情報を特定できませんでした");
 
     ajax({
         action: 'update_field', 
         field: field, 
-        value: val, 
+        value: val, // roomの場合は数値IDが飛ぶ
         mode: mode, 
         grade: currentData.grade,
         course_key: targetKey
@@ -142,9 +148,19 @@ function saveField(field, mode) {
 }
 
 function clearField(field) {
-    if(confirm("担当教師を全員解除して『未設定』にしますか？ 実施教室と実施コースも全て解除されます。")) {
+    let message = "";
+    
+    if (field === 'teacher') {
+        message = "担当教師を全員解除して『未設定』にしますか？ 実施教室と実施コースも全て解除されます。";
+    } else if (field === 'room') {
+        message = "実施教室の設定を解除して『未設定』にしますか？";
+    } else {
+        message = "設定を解除しますか？";
+    }
+
+    if (confirm(message)) {
         const targetKey = currentData.course_keys && currentData.course_keys.length > 0 ? currentData.course_keys[0] : null;
-        if(!targetKey) return alert("コース情報を特定できませんでした");
+        if (!targetKey) return alert("コース情報を特定できませんでした");
 
         ajax({
             action: 'update_field', 

@@ -98,14 +98,20 @@
                     <button class="circle-btn" onclick="toggleArea('room-add')">＋</button>
                     <button class="circle-btn" onclick="toggleArea('room-remove')">－</button>
                 </div>
+                
                 <div id="area-room-add" class="selector-area">
                     <select id="sel-room" class="sidebar-select">
-                        <?php foreach($roomList as $r): ?><option value="<?= $r['room_name'] ?>"><?= $r['room_name'] ?></option><?php endforeach; ?>
+                        <option value="" disabled selected>教室を選択</option>
+                        <?php foreach($roomList as $r): ?>
+                            <option value="<?= $r['room_id'] ?>"><?= htmlspecialchars($r['room_name']) ?></option>
+                        <?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('room', 'overwrite')">教室を確定する</button>
                 </div>
+                
                 <div id="area-room-remove" class="selector-area">
-                    <button class="update-btn btn-danger" onclick="clearField('room')">教室を解除する</button>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">現在の教室設定を解除しますか？</p>
+                    <button class="update-btn btn-danger" onclick="clearField('room')">教室を解除して未設定にする</button>
                 </div>
             </div>
 

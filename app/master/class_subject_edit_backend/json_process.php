@@ -34,35 +34,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         // --- フィールド更新 (講師・教室) ---
         if ($action === 'update_field') {
-            $field = $_POST['field']; 
-            $new_val = $_POST['value'] ?? '';
-            $course_key = $_POST['course_key'] ?? ''; 
-            $course_id = $courseInfo[$course_key]['id'] ?? null;
-            $grade = $_POST['grade'] ?? null;
-
-            if (!$course_id) throw new Exception("コース情報が正しくありません。");
+            $field = $_POST['field'] ?? '';
+            $value = $_POST['value'] ?? '';
+            $mode  = $_POST['mode'] ?? 'overwrite';
+            $course_key = $_POST['course_key'] ?? '';
+            
+            if (!isset($courseInfo[$course_key])) throw new Exception("無効なコースです。");
+            
+            $target_course_id = $courseInfo[$course_key]['id'];
+            $target_grade     = $courseInfo[$course_key]['grade']; // 学年を取得しておく
 
             // --- 講師(teacher)の処理 ---
             if ($field === 'teacher') {
-                $mode = $_POST['mode'] ?? ''; 
-
                 // A. 【追加】個別講師削除モード
                 if ($mode === 'remove_single') {
-                    $target_teacher_id = $_POST['teacher_id'];
+                    $target_teacher_id = $_POST['teacher_id'] ?? 0;
 
-                    // 指定された講師・科目・コースのレコードを削除
                     $sqlDel = "DELETE FROM subject_in_charges 
                                WHERE subject_id = ? AND course_id = ? AND teacher_id = ?";
-                    $pdo->prepare($sqlDel)->execute([$subject_id, $course_id, $target_teacher_id]);
+                    $pdo->prepare($sqlDel)->execute([$subject_id, $target_course_id, $target_teacher_id]);
 
-                    // 削除後、そのコースの担当者が0人になったら「未設定(0)」を補充
+                    // 削除後、0人になったら「未設定」を補充
                     $sqlCheck = "SELECT COUNT(*) FROM subject_in_charges WHERE subject_id = ? AND course_id = ?";
                     $stmtCheck = $pdo->prepare($sqlCheck);
-                    $stmtCheck->execute([$subject_id, $course_id]);
+                    $stmtCheck->execute([$subject_id, $target_course_id]);
                     
                     if ($stmtCheck->fetchColumn() == 0) {
-                        $pdo->prepare("INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) VALUES (?, ?, ?, 0, NULL)")
-                            ->execute([$course_id, $grade, $subject_id]);
+                        $pdo->prepare("INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) VALUES (?, ?, ?, NULL, NULL)")
+                            ->execute([$target_course_id, $target_grade, $subject_id]);
                     }
 
                     echo json_encode(['success' => true]);
@@ -71,17 +70,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // --- 以降、通常の更新・追加処理 ---
                 $stmtT = $pdo->prepare("SELECT teacher_id FROM teacher WHERE teacher_name = ? LIMIT 1");
-                $stmtT->execute([$new_val]);
+                $stmtT->execute([$value]); // $value を使用
                 $teacher_id = $stmtT->fetchColumn();
 
                 // B. 「全員解除」の場合
-                if ($new_val === '未設定' || $teacher_id === false) {
+                if ($value === '未設定' || $teacher_id === false) {
                     $pdo->beginTransaction();
                     try {
                         $pdo->prepare("DELETE FROM subject_in_charges WHERE subject_id = :sid AND course_id = :cid")
-                            ->execute([':sid' => $subject_id, ':cid' => $course_id]);
+                            ->execute([':sid' => $subject_id, ':cid' => $target_course_id]);
                         $pdo->prepare("INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) VALUES (?, ?, ?, NULL, NULL)")
-                            ->execute([$course_id, $grade, $subject_id]);
+                            ->execute([$target_course_id, $target_grade, $subject_id]);
                         $pdo->commit();
                         echo json_encode(['success' => true]);
                     } catch (Exception $e) {
@@ -92,13 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
 
                 // C. 講師を追加・上書きする場合
-                // 空席(NULL)を探す
                 $sqlFindEmpty = "SELECT subject_in_charge_id FROM subject_in_charges 
-                                WHERE subject_id = ? AND course_id = ? 
-                                AND (teacher_id IS NULL OR teacher_id = 0) 
-                                LIMIT 1";
+                                 WHERE subject_id = ? AND course_id = ? 
+                                 AND (teacher_id IS NULL OR teacher_id = 0) 
+                                 LIMIT 1";
                 $stmtEmpty = $pdo->prepare($sqlFindEmpty);
-                $stmtEmpty->execute([$subject_id, $course_id]);
+                $stmtEmpty->execute([$subject_id, $target_course_id]);
                 $emptyRow = $stmtEmpty->fetch();
 
                 if ($emptyRow) {
@@ -106,14 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $pdo->prepare($sqlUpdate)->execute([$teacher_id, $emptyRow['subject_in_charge_id']]);
                 } else {
                     $sqlCheck = "SELECT COUNT(*) FROM subject_in_charges 
-                                WHERE subject_id = ? AND course_id = ? AND teacher_id = ?";
+                                 WHERE subject_id = ? AND course_id = ? AND teacher_id = ?";
                     $stmtCheck = $pdo->prepare($sqlCheck);
-                    $stmtCheck->execute([$subject_id, $course_id, $teacher_id]);
+                    $stmtCheck->execute([$subject_id, $target_course_id, $teacher_id]);
     
                     if ($stmtCheck->fetchColumn() == 0) {
                         $sqlInsert = "INSERT INTO subject_in_charges (course_id, grade, subject_id, teacher_id, room_id) 
                                       VALUES (?, ?, ?, ?, NULL)";
-                        $pdo->prepare($sqlInsert)->execute([$course_id, $grade, $subject_id, $teacher_id]);
+                        $pdo->prepare($sqlInsert)->execute([$target_course_id, $target_grade, $subject_id, $teacher_id]);
                     }
                 }
 
@@ -122,20 +120,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             // --- 教室(room)の処理 ---
             } else if ($field === 'room') {
-                $stmtR = $pdo->prepare("SELECT room_id FROM room WHERE room_name = ? LIMIT 1");
-                $stmtR->execute([$new_val]);
-                $found_id = $stmtR->fetchColumn();
-                $room_id = ($found_id !== false) ? $found_id : null;
-
-                $sql = "UPDATE subject_in_charges SET room_id = :rid 
-                        WHERE subject_id = :sid AND course_id = :cid";
+                // $value には room_id (数値) が入ってくるので、そのまま利用する
+                // 「未設定」の場合は null にする
+                $room_id = (is_numeric($value) && $value > 0) ? (int)$value : null;
+            
+                // 現在のカード（科目）に関連するすべてのコースを更新したい場合は
+                // JSから送られてくる course_key ではなく、subject_id をキーに一括更新するのがスムーズです
+                $sql = "UPDATE subject_in_charges 
+                        SET room_id = :rid 
+                        WHERE subject_id = :sid";
+                
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([':rid' => $room_id, ':sid' => $subject_id, ':cid' => $course_id]);
+                $stmt->execute([
+                    ':rid' => $room_id,
+                    ':sid' => $subject_id
+                ]);
                 
                 echo json_encode(['success' => true]);
                 exit;
             }
-        } 
+        }
         
         // --- コース追加(add_course) ---
         elseif ($action === 'add_course') {
