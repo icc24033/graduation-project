@@ -7,7 +7,6 @@ let savedTimetables = [];
 if (typeof dbTimetableData !== 'undefined' && Array.isArray(dbTimetableData)) {
     // PHP (Repository) 側ですでに整形済みなので、そのまま代入するだけでOKです！
     savedTimetables = dbTimetableData;
-    console.log("DBから読み込んだデータ(PHP整形済み):", savedTimetables);
 } else {
     // データが無い場合は空配列で初期化
     console.warn("DBからのデータ読み込みに失敗しました、またはデータがありません。");
@@ -115,8 +114,6 @@ function selectInitialTimetable() {
         const sidebarItem = container.querySelector(`.saved-item[data-id="${targetTimetableId}"]`);
 
         if (sidebarItem) {
-            console.log(`自動選択を実行: ID=${targetTimetableId}`);
-            // 強制的にクリックイベントを作成して送出（.click()より確実な場合があります）
             sidebarItem.click();
         } else {
             console.error(`自動選択エラー: ID=${targetTimetableId} の要素が描画されていません。`);
@@ -360,7 +357,6 @@ mainCreateNewBtn.addEventListener('click', () => {
  */
 createCancelBtn.addEventListener('click', (e) => {
     if(e) e.preventDefault();
-    console.log("キャンセル実行");
 
     // モーダル閉じる
     createModal.classList.add('hidden');
@@ -813,7 +809,6 @@ function renderSavedList(mode) {
         
         // クリックイベントの登録
         newItem.addEventListener('click', (e) => {
-            console.log(`クリックされました: ID ${record.id}`); // 動作確認用ログ
             handleSavedItemClick(e);
         });
         
@@ -1336,7 +1331,6 @@ const data = [];
         };
         data.push(item);
     });
-    console.log("送信データ:", data);
     return data;
 }
 
@@ -1645,32 +1639,6 @@ function handleSavedItemClick(e, forceSelect = false) {
 }
 
 /**
- * 画面上のグリッドデータを配列化して取得する
- */
-function getTimetableData() {
-    const data = [];
-    document.querySelectorAll('.timetable-cell.is-filled').forEach(cell => {
-        // 必須データの取得
-        const item = {
-            day: parseInt(cell.dataset.day),
-            period: parseInt(cell.dataset.period),
-            className: cell.querySelector('.class-name')?.textContent || '',
-            // 以下の属性はデータセットに保存されている前提
-            // (ドラッグ&ドロップ時や入力時に data-teacher-id 等をセットする処理が必要です)
-            subjectId: cell.dataset.subjectId || null, 
-            teacherId: cell.dataset.teacherId || null,
-            roomId: cell.dataset.roomId || null,
-            
-            // 表示用（バックエンド保存には不要かもしれませんが、念のため）
-            teacherName: cell.querySelector('.teacher-name span')?.textContent || '',
-            roomName: cell.querySelector('.room-name span')?.textContent || ''
-        };
-        data.push(item);
-    });
-    return data;
-}
-
-/**
  * saveTimetable
  * 概要:保存処理を実行する関数で、バックエンドのPHPスクリプトにデータを送信する。
  * 使用方法: 保存ボタンのクリックイベントなどで呼び出してください。
@@ -1702,8 +1670,6 @@ async function saveTimetable() {
         end_date: mainEndDate.value,
         timetable_data: gridData
     };
-
-    console.log("送信データ:", payload);
 
     // CSRFトークン取得
     const metaToken = document.querySelector('meta[name="csrf-token"]');
@@ -1762,9 +1728,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if(toggleText) toggleText.textContent = selectedText;
 
-            // ★【修正】グローバル変数を更新
+            // グローバル変数を更新
             currentCourseId = selectedId;
-            currentCourseName = selectedText; // ← これにより renderSavedList が正しく動く
+            currentCourseName = selectedText;
             
             console.log(`コースが変更されました: ID=${currentCourseId}, Name=${currentCourseName}`);
 
