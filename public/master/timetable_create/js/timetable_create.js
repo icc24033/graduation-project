@@ -131,7 +131,7 @@ function selectInitialTimetable() {
     // リスト描画
     renderSavedList('select');
 
-    // ★修正：確実にクリックイベントを発火させる
+    // 確実にクリックイベントを発火させる
     setTimeout(() => {
         // コンテナ内の対象要素を探す
         const container = document.getElementById('savedListContainer');
@@ -609,8 +609,6 @@ createSubmitBtn.addEventListener('click', () => {
         }
     }
 
-    // --- ここから状態更新 ---
-
     // グローバル変数を更新
     editingCourseId = selectedCourseId;
     currentCourseId = selectedCourseId;      // 現在のコースIDも更新
@@ -628,7 +626,7 @@ createSubmitBtn.addEventListener('click', () => {
     document.getElementById('mainCourseDisplay').innerHTML = selectedCourseName;
 
     // ---------------------------------------------------------
-    // ★追加修正: サイドバーのドロップダウン表示を更新する処理
+    // サイドバーのドロップダウン表示を更新する処理
     // ---------------------------------------------------------
     const toggleText = document.querySelector('#courseDropdownToggle .current-value');
     if (toggleText) {
@@ -986,7 +984,7 @@ function renderSubjectDropdown(selectedId = '') {
     masterData.forEach(item => {
         const option = document.createElement('option');
         
-        // ★ここを修正：DB保存用にIDをvalueにセット
+        // DB保存用にIDをvalueにセット
         option.value = item.subject_id; 
         
         // 表示は名称のまま
@@ -1400,7 +1398,7 @@ btnSave.addEventListener('click', function() {
             </div>`;
         currentCell.classList.add('is-filled');
         
-        // ★IDをデータ属性に保存
+        // IDをデータ属性に保存
         currentCell.dataset.subjectId = subjectId;
         currentCell.dataset.teacherIds = JSON.stringify(teacherIds);
         currentCell.dataset.roomIds = JSON.stringify(roomIds);
@@ -1568,7 +1566,7 @@ cancelCreationBtn.addEventListener('click', (e) => {
     }
     
     // ■ ケース2: 既存データの削除
-    // ★修正点: 「変更破棄」のチェックを削除し、すぐに削除処理へ進むようにしました
+    // 「変更破棄」のチェックを削除し、すぐに削除処理へ進むようにしました
     if (currentRecord) {
         
         // 適用中のチェック
