@@ -699,7 +699,7 @@ function getFormattedDate(inputVal) {
 
 /*
 * 概要: 保存された時間割のリストを指定モードに合わせてフィルタ・ソートして描画する。
-* 使用方法: 表示モードやドロップダウン選択が変わったら呼び出してリストを再描画してください。
+* 使用方法: 表示モードやドロップダウン選択が変わったら呼び出してリストを再描画する。
 */
 function renderSavedList(mode) {
     const container = document.getElementById('savedListContainer');
@@ -708,9 +708,11 @@ function renderSavedList(mode) {
     // コンテナがない場合は何もしない
     if (!container) return;
 
+    // 既存のリスト項目をクリア
     const items = container.querySelectorAll('li:not(.is-group-label)');
     items.forEach(item => item.remove());
 
+    // 1. フィルタリング処理
     let filteredRecords = savedTimetables;
 
     if (mode === 'select') {
@@ -718,79 +720,81 @@ function renderSavedList(mode) {
         if (!currentCourseId && savedTimetables.length > 0) {
             currentCourseId = savedTimetables[0].courseId;
         }
-        // ★IDで確実にフィルタリング (数値と文字列の差を無視するため == を使用)
+        // IDでフィルタリング
         filteredRecords = filteredRecords.filter(item => item.courseId == currentCourseId);
-    }
-
-    // 日付フィルタリングロジック（変更なし）
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-
-    if (mode === 'current') {
-        filteredRecords = filteredRecords.filter(item => {
-            if (!item.startDate) return false;
-            const isStarted = item.startDate <= todayStr;
-            const isNotEnded = !item.endDate || item.endDate >= todayStr;
-            return isStarted && isNotEnded;
-        });
+    } else if (mode === 'current') {
+        // 現在適用中 (statusType = 1) のみ
+        filteredRecords = filteredRecords.filter(item => item.statusType == 1);
     } else if (mode === 'next') {
-        filteredRecords = filteredRecords.filter(item => {
-            if (!item.startDate) return false;
-            return item.startDate > todayStr;
-        });
+        // 次回以降 (statusType >= 2) のみ
+        filteredRecords = filteredRecords.filter(item => item.statusType >= 2);
     }
 
-    // ソート
+    // 2. ソート処理（並び替え）
+    // 優先順位: 現在(1) -> 次回(2) -> 次回以降(3,4...) -> 過去(0かつ日付が新しい順)
     filteredRecords.sort((a, b) => {
-        const aActive = isRecordActive(a) ? 0 : 1;
-        const bActive = isRecordActive(b) ? 0 : 1;
-        return aActive - bActive;
+        const typeA = parseInt(a.statusType);
+        const typeB = parseInt(b.statusType);
+
+        // 両方とも「過去(0)」の場合：終了日が新しい順（降順）
+        if (typeA === 0 && typeB === 0) {
+            if (a.endDate < b.endDate) return 1;
+            if (a.endDate > b.endDate) return -1;
+            return 0;
+        }
+
+        // 片方だけ「過去(0)」の場合：過去は一番下へ
+        if (typeA === 0) return 1; // Aが過去なら後ろへ
+        if (typeB === 0) return -1; // Bが過去なら後ろへ
+
+        // 両方とも「現在・未来(1以上)」の場合：ステータス番号の若い順（昇順）
+        // 1(現在) -> 2(次回) -> 3(次回以降)の順
+        return typeA - typeB;
     });
 
-    // ★重要：コンテナを強制的に表示状態にする
+    // コンテナの表示制御
     if (filteredRecords.length > 0) {
         container.classList.remove('hidden');
-        container.style.display = 'block'; // 念のためスタイルも直接指定
+        container.style.display = 'block';
         if(divider) divider.classList.remove('hidden');
     }
 
+    // 3. リスト項目の生成
     filteredRecords.forEach(record => {
         const dateLabel = getFormattedDate(record.startDate);
         let statusText = "";
         let statusClass = "text-slate-500";
         
-        // ステータス判定（変更なし）
-        const nextMonthStart = new Date(today);
-        nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
-        nextMonthStart.setDate(1);
-        const nextMonthStartStr = nextMonthStart.toISOString().split('T')[0];
-        
-        const nextMonthEnd = new Date(nextMonthStart);
-        nextMonthEnd.setMonth(nextMonthEnd.getMonth() + 1, 0);
-        const nextMonthEndStr = nextMonthEnd.toISOString().split('T')[0];
-        
-        if (isRecordActive(record)) {
+        // ステータス判定（DBの値 statusType を使用）
+        // 0:過去, 1:適用中, 2:次回, 3以降:次回以降
+        const sType = parseInt(record.statusType);
+
+        if (sType === 1) {
             statusText = "適用中：";
             statusClass = "text-emerald-600 font-bold";
-        } else if (record.startDate && record.startDate >= nextMonthStartStr && record.startDate <= nextMonthEndStr) {
+        } else if (sType === 2) {
             statusText = "次回：";
             statusClass = "text-blue-600 font-bold";
-        } else if (!record.startDate || !record.endDate) {
+        } else if (sType >= 3) {
             statusText = "次回以降：";
-            statusClass = "text-indigo-600 font-bold";
-        } else if (record.startDate && record.startDate > todayStr) {
-            statusText = "次回以降：";
-            statusClass = "text-indigo-600 font-bold";
-        } else if (record.endDate && record.endDate < todayStr) {
+            statusClass = "text-indigo-600 font-bold"; // 3以降も同じ色・テキストで統一
+        } else if (sType === 0) {
             statusText = "過去：";
             statusClass = "text-gray-400";
+        } else {
+            // 万が一 statusType が不正な場合のフォールバック
+            statusText = "不明：";
         }
 
         const newItem = document.createElement('li');
         newItem.className = 'nav-item saved-item';
-        newItem.setAttribute('data-id', record.id); // ここでIDをセット
+        newItem.setAttribute('data-id', record.id);
         
-        // ★視認性を高めるため、背景色とカーソルを明示
+        // アクティブ状態の復元（再描画前の選択状態を維持する）
+        if (currentRecord && currentRecord.id == record.id) {
+            newItem.classList.add('active');
+        }
+        
         newItem.style.cursor = 'pointer';
         
         newItem.innerHTML = `
@@ -807,7 +811,6 @@ function renderSavedList(mode) {
             </a>
         `;
         
-        // クリックイベントの登録
         newItem.addEventListener('click', (e) => {
             handleSavedItemClick(e);
         });
@@ -1647,7 +1650,7 @@ function handleSavedItemClick(e, forceSelect = false) {
  * ※ 新規時間割り作成モード：id=null  既存時間割り編集モード：id=割り当てられている時間割りID
  */
 async function saveTimetable() {
-    // 1. バリデーション
+    // 1. バリデーション（期間入力チェック）
     if (!mainStartDate.value || !mainEndDate.value) {
         alert('適用期間を入力してください。');
         return;
@@ -1657,12 +1660,40 @@ async function saveTimetable() {
         return;
     }
 
+
+    // 重複チェック
+    const targetId = (!isCreatingMode && currentRecord) ? currentRecord.id : null;
+    
+    // checkCourseOverlap は (courseName, start, end, excludeId) を引数に取る仕様ですが、
+    // courseNameでの比較は「同名コース」前提のため、本来は courseId で比較する。
+    // 今回は既存の checkCourseOverlap が savedTimetables (全データ) を走査しているため、
+    // そのロジックを少し調整して利用するか、ここで直接フィルタリングします。
+
+    // 現在選択中のコースIDと一致し、かつ期間が被るものを探す
+    const isOverlap = savedTimetables.some(record => {
+        // 自分自身は除外する
+        if (targetId && record.id == targetId) return false;
+        
+        // 異なるコースは除外する
+        if (record.courseId != currentCourseId) return false;
+
+        // 期間の重複判定
+        // (A_start <= B_end) && (B_start <= A_end)
+        const recStart = record.startDate;
+        const recEnd = record.endDate;
+        if (!recStart || !recEnd) return false; // 期間未設定はチェック対象外
+
+        return (mainStartDate.value <= recEnd) && (recStart <= mainEndDate.value);
+    });
+
+    if (isOverlap) {
+        alert('指定された適用期間は、既存の時間割と重複しています。\n期間を変更してください。');
+        return; // 保存中断
+    }
+
     // 2. 送信データの構築
     const gridData = getTimetableData();
     
-    // IDの特定: 新規作成なら null, 編集なら currentRecord.id
-    const targetId = (!isCreatingMode && currentRecord) ? currentRecord.id : null;
-
     const payload = {
         id: targetId,
         course_id: currentCourseId,
@@ -1677,7 +1708,6 @@ async function saveTimetable() {
 
     try {
         // 3. PHPへ送信
-        // ※パスはファイルの配置場所に合わせて調整してください
         const response = await fetch('../../api/timetable/save_timetable.php', {
             method: 'POST',
             headers: {
@@ -1687,26 +1717,26 @@ async function saveTimetable() {
             body: JSON.stringify(payload)
         });
 
-        // レスポンスがHTMLで返ってきてしまっている場合のエラーハンドリング
+        // エラーハンドリング
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
             const text = await response.text();
             console.error("予期せぬレスポンス:", text);
-            throw new Error("サーバーエラーが発生しました (Not JSON response)");
+            throw new Error("サーバーエラーが発生しました");
         }
 
         const result = await response.json();
 
         if (result.success) {
             alert('保存しました。');
-            location.reload(); // 成功したらリロードして反映
+            location.reload(); 
         } else {
             alert('保存に失敗しました: ' + (result.message || '不明なエラー'));
         }
 
     } catch (error) {
         console.error('保存エラー:', error);
-        alert('通信エラーが発生しました。\nコンソールログを確認してください。');
+        alert('通信エラーが発生しました。');
     }
 }
 

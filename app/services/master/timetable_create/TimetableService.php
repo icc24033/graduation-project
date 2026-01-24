@@ -109,6 +109,77 @@ class TimetableService {
     }
 
     /**
+     * updateStatusAutomatically
+     * 概要: 指定されたコース内の全時間割のステータスを日付に基づいて自動更新する
+     * ロジック:
+     * 0: 過去 (endDate < 今日)
+     * 1: 現在 (startDate <= 今日 <= endDate)
+     * 2: 次回 (今日 < startDate の中で一番早いもの)
+     * 3~: 次回以降 (次回以外の未来の時間割に対して、日付が近い順に番号を振る)
+     */
+    private function updateStatusAutomatically($courseId, $pdo) {
+        $today = date('Y-m-d');
+
+        // 1. そのコースの全時間割を取得 (日付などでソートしておく)
+        $sql = "SELECT timetable_id, start_date, end_date FROM timetables 
+                WHERE course_id = :courseId 
+                ORDER BY start_date ASC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
+        $stmt->execute();
+        $timetables = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($timetables)) return;
+
+        // 未来の時間割を格納する配列
+        $futureTimetables = [];
+
+        // 更新用SQLステートメント
+        $updateSql = "UPDATE timetables SET status_type = :status WHERE timetable_id = :id";
+        $updateStmt = $pdo->prepare($updateSql);
+
+        foreach ($timetables as $t) {
+            $tid = $t['timetable_id'];
+            $start = $t['start_date'];
+            $end = $t['end_date'];
+
+            $status = 0; // デフォルト（エラー回避用で設定する）
+
+            if ($end < $today) {
+                // 過去
+                $status = 0;
+                $updateStmt->bindValue(':status', 0, PDO::PARAM_INT);
+                $updateStmt->bindValue(':id', $tid, PDO::PARAM_INT);
+                $updateStmt->execute();
+            } elseif ($start <= $today && $today <= $end) {
+                // 現在適用中
+                $status = 1;
+                $updateStmt->bindValue(':status', 1, PDO::PARAM_INT);
+                $updateStmt->bindValue(':id', $tid, PDO::PARAM_INT);
+                $updateStmt->execute();
+            } else {
+                // 未来 (後でソートして 2, 3... を振る)
+                $futureTimetables[] = $t;
+            }
+        }
+
+        // 未来分のステータス更新
+        // SQLでASCソートしているので、配列の先頭が「次回(2)」になる
+        if (!empty($futureTimetables)) {
+            $nextStatus = 2; // 次回は2からスタート
+            foreach ($futureTimetables as $ft) {
+                $updateStmt->bindValue(':status', $nextStatus, PDO::PARAM_INT);
+                $updateStmt->bindValue(':id', $ft['timetable_id'], PDO::PARAM_INT);
+                $updateStmt->execute();
+                
+                // 次回以降はステータス番号を増やしていく（3, 4, 5...）
+                // 仕様に合わせて固定値「3」にする場合はここを調整
+                $nextStatus++; 
+            }
+        }
+    }
+
+    /**
      * saveTimetable
      * 概要: 時間割データの保存（新規・更新の自動判別）
      * 引数: $data - 保存する時間割データの配列 (詳細は下記参照)
@@ -119,6 +190,7 @@ class TimetableService {
      *   'course_id' => (int) コースID
      *   'start_date' => (string) 開始日 (YYYY-MM-DD)
      *   'end_date' => (string) 終了日 (YYYY-MM-DD)
+     *   'timetable_name' => (string) 時間割名 (新規作成時のみ必要)
      *   'timetable_data' => [ // グリッドの中身
      *      [
      *          'day' => (string|int) 曜日 ("月"などの文字列、または1-7の数値)
@@ -133,69 +205,58 @@ class TimetableService {
      * 注意: トランザクション処理を含むため、例外発生時にはロールバックされます
      * ※ 科目・教員・教室の紐づけは subject_in_charges テーブルで事前に設定されている必要があります
      * ※ teacherId, roomId は省略可能（未設定の場合は0やNULLで保存されます）
-     * 
+     * 戻り値: 保存された時間割ID
      * 目的: 時間割り作成画面で編集されたデータを保存するため
      */
     public function saveTimetable($data) {
-        $id = $data['id'] ?? null; // IDがあれば更新、なければ新規
+        $id = $data['id'] ?? null;
         $courseId = $data['course_id'];
         $startDate = $data['start_date'];
         $endDate = $data['end_date'];
-        $details = $data['timetable_data'] ?? []; // グリッドの中身
+        $details = $data['timetable_data'] ?? [];
 
-        // トランザクション開始のためにPDOを取得（RepositoryFactory経由などで取得できる前提、あるいはコンストラクタで確保）
-        // ※ここでは簡易的にリポジトリからPDOにアクセスするか、Service内でPDOを持つ構造にしてください。
         $repo = RepositoryFactory::getTimetableRepository();
-        $pdo = $repo->getConnection(); // BaseRepositoryにgetConnection()がある前提
+        $pdo = $repo->getConnection();
 
+        // トランザクション開始
         try {
             $pdo->beginTransaction();
 
             if ($id) {
-                // --- 更新処理 ---
                 $repo->updateTimetable($id, $startDate, $endDate);
-                // 詳細データは一度削除して作り直す（Delete-Insert）
                 $repo->deleteDetailsByTimetableId($id);
             } else {
-                // --- 新規作成処理 ---
-                $timetableName = $data['timetable_name'] ?? '新規時間割'; // 名前が必要ならJSから送る
+                $timetableName = $data['timetable_name'] ?? '新規時間割';
+                // 一旦 status_type=0 などで作成（後で更新されるので何でも良い）
                 $id = $repo->createTimetable($courseId, $startDate, $endDate, $timetableName);
             }
 
-            // --- 詳細データの登録 ---
-            // 曜日変換マップ（JSから「月」などの文字で来る場合の対策）
+            // 詳細データの登録処理
             $dayMap = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
-
             foreach ($details as $row) {
-                // 1. 曜日の変換 (数値で来ているならそのまま、文字なら変換)
                 $dayVal = $row['day'];
                 if (!is_numeric($dayVal) && isset($dayMap[$dayVal])) {
                     $dayVal = $dayMap[$dayVal];
                 }
+                if (empty($dayVal) || !is_numeric($dayVal)) continue;
 
-                if (empty($dayVal) || !is_numeric($dayVal)) {
-                    error_log("スキップされたデータ: dayの値が不正です (" . print_r($row['day'], true) . ")");
-                    continue; 
-                }
-
-                // 2. detail (科目) の登録
-                // JS側のキー名 (subjectId) と合わせる
                 $subjectId = $row['subjectId'];
-                if (!$subjectId) continue; // 科目がない空データはスキップ
+                if (!$subjectId) continue;
 
                 $detailId = $repo->addDetail($id, $dayVal, $row['period'], $subjectId);
 
-                // 3. teacher/room の登録
-                // ※ JSから teacherIds (配列) で来るか、teacherId (単一) で来るかで処理を分ける
-                // 今回はシンプルに「単一の先生・教室」として処理する例
-                $teacherId = !empty($row['teacherId']) ? $row['teacherId'] : 0; // 0=未定など
+                $teacherId = !empty($row['teacherId']) ? $row['teacherId'] : 0;
                 $roomId = !empty($row['roomId']) ? $row['roomId'] : null;
 
                 $repo->addDetailTeacher($detailId, $teacherId, $roomId);
             }
 
+            // ここでステータスを自動更新する
+            // トランザクション内で行うことで整合性を保つ
+            $this->updateStatusAutomatically($courseId, $pdo);
+
             $pdo->commit();
-            return $id; // 保存したIDを返す
+            return $id;
 
         } catch (Exception $e) {
             if ($pdo->inTransaction()) {
