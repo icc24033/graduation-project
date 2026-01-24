@@ -233,22 +233,54 @@ class TimetableService {
 
             // 詳細データの登録処理
             $dayMap = ['月' => 1, '火' => 2, '水' => 3, '木' => 4, '金' => 5, '土' => 6, '日' => 7];
+
             foreach ($details as $row) {
+                // 1. 曜日の変換
                 $dayVal = $row['day'];
                 if (!is_numeric($dayVal) && isset($dayMap[$dayVal])) {
                     $dayVal = $dayMap[$dayVal];
                 }
                 if (empty($dayVal) || !is_numeric($dayVal)) continue;
 
+                // 2. detail (科目) の登録
                 $subjectId = $row['subjectId'];
                 if (!$subjectId) continue;
 
                 $detailId = $repo->addDetail($id, $dayVal, $row['period'], $subjectId);
 
-                $teacherId = !empty($row['teacherId']) ? $row['teacherId'] : 0;
-                $roomId = !empty($row['roomId']) ? $row['roomId'] : null;
+                // 3. teacher/room の登録（複数の登録に対応する）
+                // JSから送られてくるのは teacherIds, roomIds という配列
+                $teacherIds = $row['teacherIds'] ?? [];
+                $roomIds = $row['roomIds'] ?? [];
 
-                $repo->addDetailTeacher($detailId, $teacherId, $roomId);
+                // 配列でない場合の正規化を実施する
+                if (!is_array($teacherIds)) $teacherIds = [];
+                if (!is_array($roomIds)) $roomIds = [];
+
+                // teacher_id はDB制約上 NOT NULL なので、教員が0人の場合は登録できない
+                // ※空の場合はスキップする
+                if (empty($teacherIds)) continue;
+
+                // ループ回数は「多い方」に合わせる
+                // 例: 先生2人, 教室3つ → 3回ループ
+                $loopCount = max(count($teacherIds), count($roomIds));
+
+                for ($i = 0; $i < $loopCount; $i++) {
+                    // 先生IDの決定
+                    // インデックスに対応する先生がいればその先生、いなければ「最後の先生」を割り当てる
+                    // これにより「先生A, 先生B」で「教室1, 教室2, 教室3」の場合、(A-1), (B-2), (B-3) のように保存される
+                    if (isset($teacherIds[$i])) {
+                        $tId = $teacherIds[$i];
+                    } else {
+                        $tId = end($teacherIds); // 最後の要素を取得
+                    }
+
+                    // 教室IDの決定（足りない場合は NULL）
+                    $rId = isset($roomIds[$i]) ? $roomIds[$i] : null;
+
+                    // DB登録処理
+                    $repo->addDetailTeacher($detailId, $tId, $rId);
+                }
             }
 
             // ここでステータスを自動更新する
@@ -262,6 +294,23 @@ class TimetableService {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
+            throw $e;
+        }
+    }
+
+    /**
+     * deleteTimetable
+     * 概要: 時間割の削除処理
+     * 引数: $id - 時間割りID
+     * 戻り値: bool 削除に成功したらtrue
+     */
+    public function deleteTimetable($id) {
+        try {
+            $repo = RepositoryFactory::getTimetableRepository();
+            $deletedCount = $repo->deleteTimetable($id);
+            return $deletedCount > 0;
+        } catch (Exception $e) {
+            error_log("TimetableService::deleteTimetable Error: " . $e->getMessage());
             throw $e;
         }
     }
