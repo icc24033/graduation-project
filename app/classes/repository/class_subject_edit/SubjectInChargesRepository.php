@@ -13,7 +13,6 @@ class SubjectInChargesRepository extends BaseRepository {
      */
     public function getAllClassSubjects() {
         try {
-            // INNER JOIN を使用して全ての関連情報を取得
             $sql = "SELECT
                         c.course_id,       
                         c.course_name, 
@@ -21,19 +20,18 @@ class SubjectInChargesRepository extends BaseRepository {
                         s.subject_name, 
                         t.teacher_name, 
                         r.room_name,
-                        sic.teacher_id
+                        sic.teacher_id,
+                        sic.room_id  -- ★ここを確実に追加
                     FROM subject_in_charges sic
                     JOIN course c ON sic.course_id = c.course_id
                     JOIN subjects s ON sic.subject_id = s.subject_id
                     LEFT JOIN teacher t ON sic.teacher_id = t.teacher_id
                     LEFT JOIN room r ON sic.room_id = r.room_id
-                    ORDER BY c.course_id ASC, sic.grade ASC;"; // コースと学年順に並べ替え
+                    ORDER BY c.course_id ASC, sic.grade ASC;";
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
-
             return $stmt->fetchAll();
-
         } catch (PDOException $e) {
             error_log("ClassSubjectsRepository Error: " . $e->getMessage());
             return [];
