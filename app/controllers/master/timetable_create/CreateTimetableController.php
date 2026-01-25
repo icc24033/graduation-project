@@ -32,11 +32,6 @@ class CreateTimetableController extends HomeRepository
 
         // CSRFトークンを生成
         $csrfToken = SecurityHelper::generateCsrfToken();
-    
-    extract([
-        // ... (既存の変数)
-        'csrfToken' => $csrfToken // Viewに渡す
-    ]);
         
         extract([
             'savedTimetables' => $savedTimetables,

@@ -9,7 +9,6 @@ if (typeof dbTimetableData !== 'undefined' && Array.isArray(dbTimetableData)) {
     savedTimetables = dbTimetableData;
 } else {
     // データが無い場合は空配列で初期化
-    console.warn("DBからのデータ読み込みに失敗しました、またはデータがありません。");
     savedTimetables = [];
 }
 
@@ -140,8 +139,6 @@ function selectInitialTimetable() {
 
         if (sidebarItem) {
             sidebarItem.click();
-        } else {
-            console.error(`自動選択エラー: ID=${targetTimetableId} の要素が描画されていません。`);
         }
     }, 300); // 描画待ち時間を少し長めに(300ms)確保
 }
@@ -787,7 +784,7 @@ function renderSavedList(mode) {
         filteredRecords = filteredRecords.filter(item => item.statusType == 1);
     } else if (mode === 'next') {
         // 次回以降 (statusType >= 2) のみ
-        filteredRecords = filteredRecords.filter(item => item.statusType >= 2);
+        filteredRecords = filteredRecords.filter(item => item.statusType == 2);
     }
 
     // 2. ソート処理（並び替え）
@@ -1239,7 +1236,7 @@ document.querySelectorAll('.timetable-cell').forEach(cell => {
                 currentTeacherIds = [this.dataset.teacherId];
             }
         } catch (e) { 
-            console.error("Teacher IDs parse error:", e);
+            alert('先生データの読み込みに失敗しました。');
         }
 
         // 教室ID配列の取得
@@ -1252,7 +1249,7 @@ document.querySelectorAll('.timetable-cell').forEach(cell => {
                 currentRoomIds = [this.dataset.roomId];
             }
         } catch (e) { 
-            console.error("Room IDs parse error:", e);
+            alert('教室データの読み込みに失敗しました。');
         }
 
         // ----------------------------------------------------
@@ -1825,7 +1822,6 @@ async function saveTimetable() {
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
             const text = await response.text();
-            console.error("予期せぬレスポンス:", text);
             throw new Error("サーバーエラーが発生しました (Not JSON response)");
         }
 
@@ -1839,7 +1835,6 @@ async function saveTimetable() {
         }
 
     } catch (error) {
-        console.error('保存エラー:', error);
         alert('通信エラーが発生しました。\nコンソールログを確認してください。');
     }
 }
@@ -1883,7 +1878,6 @@ async function deleteTimetable(id) {
         }
 
     } catch (error) {
-        console.error('削除エラー:', error);
         alert('通信エラーが発生しました。');
     }
 }
@@ -1909,8 +1903,6 @@ window.addEventListener('DOMContentLoaded', () => {
             // グローバル変数を更新
             currentCourseId = selectedId;
             currentCourseName = selectedText;
-            
-            console.log(`コースが変更されました: ID=${currentCourseId}, Name=${currentCourseName}`);
 
             renderSavedList('select'); 
         });

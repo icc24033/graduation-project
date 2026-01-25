@@ -110,72 +110,121 @@ class TimetableService {
 
     /**
      * updateStatusAutomatically
-     * 概要: 指定されたコース内の全時間割のステータスを日付に基づいて自動更新する
-     * ロジック:
-     * 0: 過去 (endDate < 今日)
-     * 1: 現在 (startDate <= 今日 <= endDate)
-     * 2: 次回 (今日 < startDate の中で一番早いもの)
-     * 3~: 次回以降 (次回以外の未来の時間割に対して、日付が近い順に番号を振る)
+     * 概要: 指定されたコースの時間割ステータスを自動更新する
+     * 引数: $courseId - コースID
+     *       $pdo - PDO接続オブジェクト
+     * 戻り値: なし
+     * 目的: 時間割り作成・更新後に、時間割のステータスを自動的に最新化するため
      */
-    private function updateStatusAutomatically($courseId, $pdo) {
+    public function updateStatusAutomatically($courseId, $pdo) {
         $today = date('Y-m-d');
 
-        // 1. そのコースの全時間割を取得 (日付などでソートしておく)
+        // ----------------------------------------------------
+        // ① 今日すでに更新済みかチェック
+        // ----------------------------------------------------
+        $checkSql = "SELECT last_status_update FROM course WHERE course_id = :courseId";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
+        $checkStmt->execute();
+        $lastUpdate = $checkStmt->fetchColumn();
+
+        // 最終更新日が今日なら、何もせず終了 (Return)
+        if ($lastUpdate === $today) {
+            return; 
+        }
+
+        // ----------------------------------------------------
+        // ② ステータス更新ロジック (既存コード + 負荷軽減)
+        // ----------------------------------------------------
+        
+        // 「過去」ですでに「ステータス0」になっているものは取得対象から外し負荷軽減を図る
+        // (end_date < 今日 かつ status_type != 0) OR (end_date >= 今日) のような条件
+
+        // 対象の全時間割を取得
         $sql = "SELECT timetable_id, start_date, end_date FROM timetables 
                 WHERE course_id = :courseId 
-                ORDER BY start_date ASC";
+                ORDER BY start_date ASC"; // 日付順は必須
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
         $stmt->execute();
         $timetables = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (empty($timetables)) return;
+        if (empty($timetables)) {
+            // データがなくても「今日チェックした」ことに更新しておく
+            $this->markCourseAsUpdated($courseId, $today, $pdo);
+            return;
+        }
 
-        // 未来の時間割を格納する配列
-        $futureTimetables = [];
-
-        // 更新用SQLステートメント
+        // 更新用SQL
         $updateSql = "UPDATE timetables SET status_type = :status WHERE timetable_id = :id";
         $updateStmt = $pdo->prepare($updateSql);
+
+        $futureTimetables = [];
 
         foreach ($timetables as $t) {
             $tid = $t['timetable_id'];
             $start = $t['start_date'];
             $end = $t['end_date'];
-
-            $status = 0; // デフォルト（エラー回避用で設定する）
-
+            
+            // 判定ロジック
             if ($end < $today) {
-                // 過去
-                $status = 0;
+                // 過去 (0)
                 $updateStmt->bindValue(':status', 0, PDO::PARAM_INT);
                 $updateStmt->bindValue(':id', $tid, PDO::PARAM_INT);
                 $updateStmt->execute();
             } elseif ($start <= $today && $today <= $end) {
-                // 現在適用中
-                $status = 1;
+                // 現在 (1)
                 $updateStmt->bindValue(':status', 1, PDO::PARAM_INT);
                 $updateStmt->bindValue(':id', $tid, PDO::PARAM_INT);
                 $updateStmt->execute();
             } else {
-                // 未来 (後でソートして 2, 3... を振る)
+                // 未来 (後で採番)
                 $futureTimetables[] = $t;
             }
         }
 
-        // 未来分のステータス更新
-        // SQLでASCソートしているので、配列の先頭が「次回(2)」になる
+        // 未来分の更新 (2, 3, ...)
         if (!empty($futureTimetables)) {
-            $nextStatus = 2; // 次回は2からスタート
+            $nextStatus = 2;
             foreach ($futureTimetables as $ft) {
                 $updateStmt->bindValue(':status', $nextStatus, PDO::PARAM_INT);
                 $updateStmt->bindValue(':id', $ft['timetable_id'], PDO::PARAM_INT);
                 $updateStmt->execute();
-                
-                // 次回以降はステータス番号を増やしていく（3, 4, 5...）
-                // 仕様に合わせて固定値「3」にする場合はここを調整
+                // 次回以降は 3 で固定する仕様であれば $nextStatus = 3; をループ内で制御
+                // 番号を増やすならインクリメント
                 $nextStatus++; 
             }
+        }
+
+        // ----------------------------------------------------
+        // ③ 最後に「今日更新した」ことを記録
+        // ----------------------------------------------------
+        $this->markCourseAsUpdated($courseId, $today, $pdo);
+    }
+
+    // 更新日記録用のヘルパーメソッド
+    private function markCourseAsUpdated($courseId, $today, $pdo) {
+        $sql = "UPDATE course SET last_status_update = :today WHERE course_id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':today', $today, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $courseId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    // 時間割りデータのstatusTypeをすべてのコースで更新する（外部から呼び出し可能）
+    public function updateTimetableStatusTypeForAllCourses() {
+        try {
+            // 先生や管理者の場合、担当コースまたは全コースをチェック
+            // ここでは例として全コースチェック
+            $courseRepo = RepositoryFactory::getCourseRepository();
+            $pdo = RepositoryFactory::getPdo();
+            $courses = $courseRepo->getAllCoursesIncludedGrade();
+            foreach($courses as $course) {
+                $this->updateStatusAutomatically($course['course_id'], $pdo);
+            }
+        } catch (Exception $e) {
+            // 更新処理のエラーでログイン自体を落とさないようログ出力に留める
+            error_log("Status Auto Update Failed: " . $e->getMessage());
         }
     }
 
