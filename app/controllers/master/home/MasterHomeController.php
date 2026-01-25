@@ -22,7 +22,7 @@ class MasterHomeController extends HomeRepository {
             // 時間割り作成へのリンク
             'link_time_table_create' => "../master/timetable_create/create_timetable_control.php",
             // 時間割り変更へのリンク
-            'link_time_table_edit'   => "../teacher/timetable_change/edit_timetable_control.php",
+            'link_time_table_edit'   => "../teacher/timetable_change/timetable_change_control.php",
             // アカウント編集へのリンク
             'link_account_edit'      => "../master/user-round/user-round.html",
             // 授業科目編集へのリンク

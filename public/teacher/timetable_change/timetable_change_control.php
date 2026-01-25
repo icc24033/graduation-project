@@ -11,16 +11,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // 2. コントローラーとヘルパーの読み込み
-require_once '../../../app/controllers/teacher/timetable_change/TimetableController.php';
+require_once '../../../app/controllers/teacher/timetable_change/TimetableChangeController.php';
 // ViewHelperはビューで使用する
 require_once '../../../app/classes/helper/dropdown/ViewHelper.php';
 
 // 3. コントローラーを起動してデータを取得する
-$controller = new TimetableController();
+$controller = new TimetableChangeController();
 $viewData = $controller->edit();
-
-// 4. 配列を展開して変数にする ($courseList, $error_message 等の生成)
-extract($viewData);
-
-// 5. ビュー（表示用ファイル）を読み込む
-require_once 'edit_timetable.php';
