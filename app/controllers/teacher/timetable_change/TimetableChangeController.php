@@ -1,5 +1,5 @@
 <?php
-// TimetableController.php
+// TimetableChangeController.php
 
 // 必要なリポジトリやヘルパーを読み込む
 // ディレクトリ構成図に基づき、相対パスを調整
@@ -21,7 +21,7 @@ class TimetableChangeController extends HomeRepository
         $timetableService = new TimetableService();
 
         // 1. 保存されている時間割データをすべて取得
-        $savedTimetables = $timetableService->getAllTimetableData();
+        $savedTimetables = $timetableService->ChangeConsideringAllTimetables();
 
         // 2. サイドバー用のコースのドロップダウンオプションをHTMLで取得
         $sidebarCourseList = $timetableService->getSidebarCourseListHtml();

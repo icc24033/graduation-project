@@ -302,4 +302,114 @@ class TimetableRepository extends BaseRepository {
         $stmt->execute();
         return $stmt->rowCount();
     }
+
+    // ------------------------------------------------------------
+    // 以下、時間割変更用のメソッド
+    // ------------------------------------------------------------
+    /**
+     * deleteChangesByTimetableId
+     * 概要: 指定された時間割IDに関連する変更データを全て削除する（洗い替え用）
+     * 引数: $timetableId
+     */
+    public function deleteChangesByTimetableId($timetableId) {
+        // ON DELETE CASCADE が設定されているため、親テーブル(timetable_changes)を消せば
+        // 子テーブル(timetable_change_teachers)も自動的に消えます
+        $sql = "DELETE FROM timetable_changes WHERE timetable_id = :tId";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    /**
+     * addChange
+     * 概要: 時間割変更の基本情報（timetable_changes）を登録
+     * 引数: $timetableId, $date, $period, $subjectId(null可)
+     * 戻り値: 登録された change_id
+     */
+    public function addChange($timetableId, $date, $period, $subjectId) {
+        $sql = "INSERT INTO timetable_changes (timetable_id, change_date, period, subject_id) 
+                VALUES (:tId, :cDate, :period, :sId)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
+        $stmt->bindValue(':cDate', $date, PDO::PARAM_STR);
+        $stmt->bindValue(':period', $period, PDO::PARAM_INT);
+        
+        if ($subjectId) {
+            $stmt->bindValue(':sId', $subjectId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':sId', null, PDO::PARAM_NULL); // 休講などの場合
+        }
+        
+        $stmt->execute();
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    /**
+     * addChangeTeacher
+     * 概要: 変更の詳細（先生・教室）を登録
+     * 引数: $changeId, $teacherId, $roomId(null可)
+     */
+    /**
+     * addChangeTeacher
+     * 概要: 変更の詳細（先生・教室）を登録
+     * 引数: $changeId, $teacherId(null可), $roomId(null可)
+     */
+    public function addChangeTeacher($changeId, $teacherId, $roomId = null) {
+        $sql = "INSERT INTO timetable_change_teachers (change_id, teacher_id, room_id) 
+                VALUES (:cId, :tId, :rId)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':cId', $changeId, PDO::PARAM_INT);
+        
+        // teacherId が NULL の場合のハンドリング [Fix]
+        if ($teacherId) {
+            $stmt->bindValue(':tId', $teacherId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':tId', null, PDO::PARAM_NULL);
+        }
+        
+        if ($roomId) {
+            $stmt->bindValue(':rId', $roomId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':rId', null, PDO::PARAM_NULL);
+        }
+        
+        $stmt->execute();
+    }
+
+    // ------------------------------------------------------------
+    // 以下、時間割変更取得用のメソッド
+    // ------------------------------------------------------------
+    /**
+     * getChangesByTimetableId
+     * 概要: 指定された時間割IDに関連する変更データを全て取得する
+     * 引数: $timetableId
+     * 戻り値: 変更データの配列（先生などの詳細情報込み）
+     */
+    public function getChangesByTimetableId($timetableId) {
+        $sql = "
+            SELECT 
+                tc.change_id,
+                tc.change_date,
+                tc.period,
+                tc.subject_id,
+                s.subject_name,
+                tct.teacher_id,
+                te.teacher_name,
+                tct.room_id,
+                r.room_name
+            FROM timetable_changes tc
+            LEFT JOIN subjects s ON tc.subject_id = s.subject_id
+            LEFT JOIN timetable_change_teachers tct ON tc.change_id = tct.change_id
+            LEFT JOIN teacher te ON tct.teacher_id = te.teacher_id
+            LEFT JOIN room r ON tct.room_id = r.room_id
+            WHERE tc.timetable_id = :tId
+            ORDER BY tc.change_date, tc.period, tct.teacher_id
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

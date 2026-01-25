@@ -82,6 +82,72 @@ class TimetableService {
     }
 
     /**
+     * ChangeConsideringAllTimetables
+     * 概要：すべての時間割データに対して、変更データを考慮した形で取得する
+     * 戻り値：配列（すべての時間割データ＋変更データをマージしたもの）
+     * 目的：時間割り作成画面で、既存の変更データを反映した形で表示するため
+     */
+    public function ChangeConsideringAllTimetables() {
+        $repo = RepositoryFactory::getTimetableRepository();
+        
+        // 1. 全ての時間割基本データを取得
+        $timetables = $this->getAllTimetableData();
+
+        // 2. 各時間割について、変更データを取得してマージする
+        foreach ($timetables as &$timetable) {
+            // 【修正箇所】Repositoryで整形されたキー名は 'id' です
+            // 修正前: $tId = $timetable['timetable_id'];
+            $tId = $timetable['id']; 
+            
+            // 変更データを取得
+            $rawChanges = $repo->getChangesByTimetableId($tId);
+            
+            // データを整形（JavaScriptが扱いやすい形にする）
+            $formattedChanges = [];
+            
+            foreach ($rawChanges as $row) {
+                // キーを一意にする（日付_時限）
+                $key = $row['change_date'] . '_' . $row['period'];
+                
+                if (!isset($formattedChanges[$key])) {
+                    $formattedChanges[$key] = [
+                        'date' => $row['change_date'],
+                        'period' => $row['period'],
+                        'subjectId' => $row['subject_id'],
+                        'subjectName' => $row['subject_name'],
+                        'teachers' => [],
+                        'rooms' => [],
+                        'teacherIds' => [],
+                        'roomIds' => []
+                    ];
+                }
+                
+                // 先生情報の追加
+                if ($row['teacher_id']) {
+                    $formattedChanges[$key]['teachers'][] = [
+                        'id' => $row['teacher_id'],
+                        'name' => $row['teacher_name']
+                    ];
+                    $formattedChanges[$key]['teacherIds'][] = $row['teacher_id'];
+                }
+                
+                // 教室情報の追加
+                if ($row['room_id']) {
+                    $formattedChanges[$key]['rooms'][] = [
+                        'id' => $row['room_id'],
+                        'name' => $row['room_name']
+                    ];
+                    $formattedChanges[$key]['roomIds'][] = $row['room_id'];
+                }
+            }
+            
+            // 連想配列のキーを捨てて、普通の配列にする
+            $timetable['existing_changes'] = array_values($formattedChanges);
+        }
+
+        return $timetables;
+    }
+    /**
      * getAllCourseMasterData
      * 概要：マスタデータの取得
      * 戻り値：配列（course_idをキーにした「科目・教員・教室」の組み合わせデータ）
@@ -363,4 +429,70 @@ class TimetableService {
             throw $e;
         }
     }
+
+    
+    /**
+     * saveTimetableChanges
+     * 概要: 時間割の変更データを保存する（既存の変更をクリアして再登録する洗い替え方式）
+     * 引数: $timetableId, $changes (配列)
+     */
+    public function saveTimetableChanges($timetableId, $changes) {
+        $repo = RepositoryFactory::getTimetableRepository();
+        $pdo = $repo->getConnection();
+
+        try {
+            $pdo->beginTransaction();
+
+            // 1. 既存の変更をクリア（この時間割IDに関する変更を一旦全て削除）
+            // 注意: フロントエンドは必ず「現在の全ての変更」を送信する必要があります。
+            // 差分だけを送ると、他の変更が消えてしまいます。
+            $repo->deleteChangesByTimetableId($timetableId);
+
+            // 2. 新しい変更データを登録
+            if (!empty($changes) && is_array($changes)) {
+                foreach ($changes as $change) {
+                    // 入力データの取得
+                    $date = $change['date'];
+                    $period = $change['period'];
+                    $subjectId = !empty($change['subjectId']) ? $change['subjectId'] : null;
+
+                    // 親テーブル(timetable_changes)へ登録
+                    $changeId = $repo->addChange($timetableId, $date, $period, $subjectId);
+
+                    // 子テーブル(timetable_change_teachers)へ詳細登録
+                    $teacherIds = $change['teacherIds'] ?? [];
+                    $roomIds = $change['roomIds'] ?? [];
+
+                    // 配列化の保証
+                    if (!is_array($teacherIds)) $teacherIds = [];
+                    if (!is_array($roomIds)) $roomIds = [];
+
+                    // ループ回数は「多い方」に合わせる (先生なし・教室ありのパターンに対応するため) [Fix]
+                    $loopCount = max(count($teacherIds), count($roomIds));
+
+                    for ($i = 0; $i < $loopCount; $i++) {
+                        // 先生IDの決定 (存在しない場合は NULL)
+                        $tId = isset($teacherIds[$i]) ? $teacherIds[$i] : null;
+
+                        // 教室IDの決定 (存在しない場合は NULL、足りない場合は最後の教室を使い回す処理があれば記述)
+                        // ここではインデックスがなければ NULL とします
+                        $rId = isset($roomIds[$i]) ? $roomIds[$i] : (end($roomIds) ?: null);
+                        
+                        // DB登録 (tId が null でも登録できるようにRepository側も修正が必要)
+                        $repo->addChangeTeacher($changeId, $tId, $rId);
+                    }
+                }
+            }
+
+            $pdo->commit();
+            return true;
+
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
 }
+

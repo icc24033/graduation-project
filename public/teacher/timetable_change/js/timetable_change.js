@@ -338,11 +338,10 @@ function renderSidebarList(mode = 'select') {
 function selectTimetable(id, element) {
     // UIのアクティブ化
     document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
-    // プログラムからの呼び出し等でelementがない場合のガード
+    
     if (element && element.parentElement) {
         element.parentElement.classList.add('active');
     } else {
-        // elementが直接 <li> の場合や、要素指定がない場合の検索
         const target = document.querySelector(`.saved-item[data-id="${id}"]`);
         if (target) target.classList.add('active');
     }
@@ -351,30 +350,64 @@ function selectTimetable(id, element) {
     currentRecord = savedTimetables.find(r => r.id === id);
     
     if (currentRecord) {
+        // -------------------------------------------------------
+        // ★ここが追加箇所：DBの変更データをJS用にロードする処理
+        // -------------------------------------------------------
+        
+        // changes配列がなければ初期化
+        if (!currentRecord.changes) {
+            currentRecord.changes = [];
+        }
+
+        // まだDBデータをロードしていない場合のみ実行（重複防止フラグ isLoadedFromDB を使用）
+        if (currentRecord.existing_changes && currentRecord.existing_changes.length > 0 && !currentRecord.isLoadedFromDB) {
+            
+            currentRecord.existing_changes.forEach(dbChange => {
+                // PHPのデータ構造を、JSの renderTable が期待する構造に変換して push
+                currentRecord.changes.push({
+                    date: dbChange.date,
+                    period: dbChange.period,
+                    
+                    // 表示用データ (renderTableで使用)
+                    className: dbChange.subjectName,
+                    teacherNames: dbChange.teachers.map(t => t.name), // 配列から名前リストへ
+                    roomNames: dbChange.rooms.map(r => r.name),       // 配列から名前リストへ
+                    
+                    // 保存・編集用データ
+                    subjectId: dbChange.subjectId,
+                    teacherIds: dbChange.teacherIds,
+                    roomIds: dbChange.roomIds,
+                    
+                    // 曜日（念のため計算して入れておく）
+                    day: new Date(dbChange.date).toLocaleDateString('ja-JP', {weekday: 'short'})
+                });
+            });
+
+            // ロード済みフラグを立てる（次回以降、同じデータを二重に追加しないように）
+            currentRecord.isLoadedFromDB = true;
+        }
+        // -------------------------------------------------------
+
+
         // 表示初期化
         updateHeaderDisplay(currentRecord);
         
         // 表示する週の基準日を決定
         let targetDate;
-        
         if (isRecordActive(currentRecord)) {
-            // 適用中の場合は「今日」を基準にする
             targetDate = new Date();
         } else {
-            // それ以外（次回・未来・過去）は「開始日」を基準にする
-            // ※startDateがない場合は今日にするガードを入れる
             targetDate = currentRecord.startDate ? new Date(currentRecord.startDate) : new Date();
         }
 
-        // 月曜日（週の始まり）まで戻す計算
+        // 月曜日（週の始まり）まで戻す
         const day = targetDate.getDay();
-        // getDay(): 日=0, 月=1, ... 土=6
-        // 月曜(1)なら引かない(0)、火曜(2)なら1日引く... 日曜(0)なら6日引く
         const diff = targetDate.getDate() - (day === 0 ? 6 : day - 1);
         
         currentWeekStart = new Date(targetDate);
         currentWeekStart.setDate(diff);
         
+        // 週表示更新（内部で renderTable() が呼ばれ、上の changes が画面に反映されます）
         updateWeekDisplay();
     }
 }
@@ -933,23 +966,22 @@ document.querySelectorAll('.timetable-cell').forEach(cell => {
             return;
         }
 
-        // 期間外・過去のセルはクリック無効（renderTableでのクラス付与に依存）
+        // 期間外・過去のセルはクリック無効
         if (this.classList.contains('is-out-of-period')) {
             return;
         }
 
         // 現在操作中のセルを保持
         currentCell = this;
-        editingCell = this; // 互換性のため両方保持
+        editingCell = this; 
         
         // 日付・時限の取得
-        const date = inputDate.value; // 日付選択欄、またはセルのデータから取得
-        // ※ renderTableでセルに dataset.date を仕込んでいるのでそれを使うのが確実
+        // renderTableでセルに埋め込まれたデータを使用（確実）
         const cellDate = this.dataset.date;
         const day = this.dataset.day;
         const period = this.dataset.period;
 
-        // モーダルの日付欄・タイトル更新
+        // モーダルの日付・タイトル更新
         inputDate.value = cellDate; 
         modalTitle.textContent = `${day}曜日 ${period}限 の変更`;
 
@@ -957,7 +989,6 @@ document.querySelectorAll('.timetable-cell').forEach(cell => {
         // 2. データの取得と復元
         // ----------------------------------------------------
         
-        // 科目ID
         const currentSubjectId = this.dataset.subjectId || '';
         
         // 先生ID配列の取得
@@ -1021,15 +1052,18 @@ document.querySelectorAll('.timetable-cell').forEach(cell => {
         // 4. 「変更を戻す」ボタンの表示制御
         // ----------------------------------------------------
         
-        // 現在のレコードから、この日付・時限の変更データが存在するか確認
-        const targetRecord = findApplicableRecord(cellDate);
+        const btnRevert = document.getElementById('btnRevert');
         let hasExistingChange = false;
 
-        if (targetRecord && targetRecord.changes) {
-            hasExistingChange = targetRecord.changes.some(ch => ch.date === cellDate && ch.period === period);
+        // currentRecord.changes（保存済み＆未保存の全変更リスト）の中に
+        // この日付・時限のデータがあるか探す
+        if (currentRecord && currentRecord.changes) {
+            hasExistingChange = currentRecord.changes.some(
+                // ※ period は文字列と数値が混在する可能性があるため == で比較
+                ch => ch.date === cellDate && ch.period == period
+            );
         }
 
-        const btnRevert = document.getElementById('btnRevert');
         if (hasExistingChange) {
             btnRevert.style.display = 'block'; // 変更があるなら表示
         } else {
@@ -1106,40 +1140,46 @@ btnCancel.addEventListener('click', () => {
 
 // 変更を取り消すボタン
 document.getElementById('btnRevert').addEventListener('click', () => {
-    if (!editingCell) return;
+    // editingCell と currentRecord が存在しなければ処理しない
+    if (!editingCell || !currentRecord) return;
     
     // 日付と時限を取得
     const date = inputDate.value;
     const period = editingCell.dataset.period;
     
-    // 該当日付に適用されるレコードを検索
-    const targetRecord = findApplicableRecord(date);
-    if (!targetRecord || !targetRecord.changes) return;
+    // 現在の変更リストが存在するか確認
+    if (!currentRecord.changes) return;
     
-    // 確認ダイアログ（誤操作防止）
-    if (!confirm('変更を取り消して、元の時間割に戻しますか？')) {
+    // 確認ダイアログ
+    if (!confirm('この時限の変更を取り消して、元の時間割に戻しますか？\n（※「保存」ボタンを押すまで確定しません）')) {
         return;
     }
 
-    // 変更データを検索して削除
-    const changeIndex = targetRecord.changes.findIndex(ch => ch.date === date && ch.period === period);
+    // 配列から削除対象のインデックスを探す
+    const changeIndex = currentRecord.changes.findIndex(
+        // ※ period は文字列と数値が混在する可能性があるため == で比較
+        ch => ch.date === date && ch.period == period
+    );
+
     if (changeIndex !== -1) {
-        targetRecord.changes.splice(changeIndex, 1);
+        // 配列から削除 (splice)
+        currentRecord.changes.splice(changeIndex, 1);
         
-        // 画面更新 (ここが重要)
-        // データ削除後に renderTable を呼ぶと、renderTable 内のロジックで
-        // 自動的に「基本データ (currentRecord.data)」が表示されます。
+        // 画面更新
+        // renderTableは currentRecord.changes を参照して描画するため、
+        // 削除されたこのセルは自動的に「基本データ（白いセル）」に戻ります。
         renderTable();
         
-        // サイドバーのバッジ更新
-        renderSidebarList('select'); 
+        // （必要であれば）サイドバーのバッジ更新など
+        // renderSidebarList('select'); 
         
-        alert('変更を取り消しました。');
+        // モーダルを閉じる
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+
+        // 完了メッセージ（任意）
+        // alert('変更を取り消しました。画面右下の「保存」ボタンを押すと確定します。');
     }
-    
-    // モーダルを閉じる
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
 });
 
 // 初期化処理
@@ -1250,8 +1290,69 @@ btnUpdate.addEventListener('click', () => {
 });
 
 // 変更を保存ボタン (サーバー送信などを想定、ここではアラートのみ)
-document.getElementById('saveChangesBtn').addEventListener('click', () => {
-    if(!currentRecord) return;
-    alert('変更内容を保存しました。');
-    // ここでJSONなどをサーバーに送る
+/**
+ * 変更を保存ボタン (サーバー送信)
+ * 概要: 変更データをAPIに送信し、DBを更新する
+ */
+document.getElementById('saveChangesBtn').addEventListener('click', async () => {
+    // 1. バリデーション
+    if (!currentRecord) {
+        alert('保存対象の時間割が選択されていません。');
+        return;
+    }
+
+    if (!currentRecord.changes || currentRecord.changes.length === 0) {
+        alert('変更内容がありません。');
+        return;
+    }
+
+    if (!confirm('変更内容を保存しますか？')) {
+        return;
+    }
+
+    // 2. 送信データの準備
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : '';
+
+    const payload = {
+        // 【修正】 currentRecord.timetable_id ではなく currentRecord.id を使用
+        timetable_id: currentRecord.id, 
+        changes: currentRecord.changes,
+        csrf_token: csrfToken
+    };
+
+    // ボタンを無効化
+    const saveBtn = document.getElementById('saveChangesBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中...';
+
+    try {
+        // 3. APIへの送信
+        const response = await fetch('../../api/timetable/change_timetable.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        // 4. 結果のハンドリング
+        if (response.ok && result.success) {
+            alert('変更を保存しました。');
+            window.location.reload();
+        } else {
+            throw new Error(result.message || '保存に失敗しました。');
+        }
+
+    } catch (error) {
+        console.error('Save Error:', error);
+        alert('エラーが発生しました: ' + error.message);
+        
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+    }
 });
