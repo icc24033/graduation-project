@@ -1,6 +1,6 @@
 /**
  * timetable_view.js
- * 時間割り閲覧画面用スクリプト（DB連携版）
+ * 時間割り閲覧画面用スクリプト
  */
 
 let savedTimetables = [];
