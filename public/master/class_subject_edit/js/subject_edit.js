@@ -37,20 +37,22 @@ function openDetail(data) {
     currentData = data;
     document.getElementById('m-title').innerText = data.title;
     
-    // 講師表示
+    // 講師表示 (既存通り)
     let tDisplay = '未設定';
     if (data.teachers && data.teachers.length > 0 && data.teachers[0] !== '未設定') {
         tDisplay = data.teachers.map(t => t + " 先生").join(' / ');
     }
     document.getElementById('m-teacher').innerText = tDisplay;
 
-    // 教室・コース表示
-    document.getElementById('m-room').innerText = data.room || '未設定';
+    // --- 修正箇所：教室・コース表示 ---
+    // innerText には表示用の room_name を使用
+    document.getElementById('m-room').innerText = data.room_name || '未設定'; 
     document.getElementById('m-courses').innerText = data.courses.join(' / ');
 
     // 選択ボックス初期化
     document.getElementById('sel-teacher').selectedIndex = 0;
-    document.getElementById('sel-room').value = data.room;
+    // value (選択値) には ID である room_id をセット
+    document.getElementById('sel-room').value = data.room_id || "";
 
     // コース追加用
     const addSel = document.getElementById('sel-course-add');
@@ -151,7 +153,7 @@ function clearField(field) {
     let message = "";
     
     if (field === 'teacher') {
-        message = "担当教師を全員解除して『未設定』にしますか？ 実施教室と実施コースも全て解除されます。";
+        message = "担当教師を全員解除して『未設定』にしますか？";
     } else if (field === 'room') {
         message = "実施教室の設定を解除して『未設定』にしますか？";
     } else {
@@ -175,21 +177,37 @@ function clearField(field) {
 
 function updateCourse(action) {
     const type = (action === 'add_course') ? 'add' : 'remove';
-    const courseKey = document.getElementById('sel-course-' + type).value;
+    // IDがHTMLと合っているか確認してください (例: id="sel-course-add")
+    const courseSelect = document.getElementById('sel-course-' + type) || document.getElementById('add_course');
+    const courseKey = courseSelect.value;
     
-    // 追加時は講師セレクトボックスの値も取得（HTML側にID=sel-teacher-addを用意）
-    let teacherId = 0;
+    if (!courseKey) return alert("コースを選択してください");
+
+    let teacherIds = [];
     if (action === 'add_course') {
+        // 1. 現在表示中の科目に紐付いている講師IDをすべて取得 (既存の1人目など)
+        if (currentData && currentData.teacher_ids) {
+            // 数値配列としてコピー
+            teacherIds = currentData.teacher_ids.map(id => parseInt(id)).filter(id => id > 0);
+        }
+        
+        // 2. モーダルで新しく選択された講師IDを取得
         const tSelect = document.getElementById('sel-teacher-add');
-        teacherId = tSelect ? tSelect.value : 0;
+        const newTeacherId = tSelect ? parseInt(tSelect.value) : 0;
+        
+        // 3. 新しい講師をリストに追加 (重複していなければ)
+        if (newTeacherId > 0 && !teacherIds.includes(newTeacherId)) {
+            teacherIds.push(newTeacherId);
+        }
+        
+        // 4. 講師が一人もいない場合は 0 (未設定) を送る
+        if (teacherIds.length === 0) teacherIds = [0];
     }
 
-    if (!courseKey) return alert("コースを選択してください");
-    
     ajax({
         action: action, 
         course_key: courseKey, 
-        teacher_id: teacherId, // 講師IDを追加
+        teacher_ids: teacherIds.join(','), // "101,102" 形式の文字列で送信
         grade: currentData.grade
     });
 }

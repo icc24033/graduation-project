@@ -83,7 +83,6 @@ class ClassSubjectEditService {
 
     /**
      * 授業科目追加・表示用コースの基本情報を取得（マスタデータ）
-     * DBから取得した course_id をキーにした連想配列を返す
      */
     public function getCourseInfoMaster() {
         $courseRepo = RepositoryFactory::getCourseRepository();
@@ -113,7 +112,6 @@ class ClassSubjectEditService {
             $search_grade_val = 2;
         } 
 
-        // $search_course（数値ID）に対応する course_id を取得
         $target_course_id = null;
         if ($search_course !== 'all' && isset($courseInfo[$search_course])) {
             $target_course_id = (int)$courseInfo[$search_course]['id'];
@@ -122,94 +120,87 @@ class ClassSubjectEditService {
         $data = $this->getClassSubjectData();
         $classSubjectList = $data['classSubjectList'];
 
-        $classSubjectList = array_filter($classSubjectList, function ($item) use ($search_grade_val, $target_course_id) {
-            // 学年フィルタリング
+        $filtered = array_filter($classSubjectList, function ($item) use ($search_grade_val, $target_course_id) {
             if ($search_grade_val !== null) {
-                if ((int)$item['grade'] !== (int)$search_grade_val) {
-                    return false;
-                }
+                if ((int)$item['grade'] !== (int)$search_grade_val) return false;
             }
-            // コースフィルタリング（数値ID同士で比較）
             if ($target_course_id !== null) {
-                if ((int)$item['course_id'] !== $target_course_id) {
-                    return false;
-                }
+                if ((int)$item['course_id'] !== $target_course_id) return false;
             }
             return true;
         });
 
-        return array_values($classSubjectList);
+        return array_values($filtered);
     }
 
     /**
      * 表示用に科目名でグルーピングしたリストを作成する
-     * 講師情報(IDと名前)も配列として集約します
      */
     public function getGroupedSubjectList($classSubjectList, $courseInfo) {
         $subjects = [];
         $total_course_count = count($courseInfo);
 
         foreach ($classSubjectList as $row) {
-            // IDの作成 (学年_科目名)
             $id = $row['grade'] . "_" . $row['subject_name'];
 
             if (!isset($subjects[$id])) {
                 $subjects[$id] = [
-                    'grade'   => $row['grade'], 
+                    'grade'   => $row['grade'],
                     'title'   => $row['subject_name'],
-                    'courses' => [], 
+                    'courses' => [],
                     'course_keys' => [],
-                    'teachers' => [],    // 講師名の配列
-                    'teacher_ids' => [],  // 講師IDの配列
-                    'room' => '' // ★追加：教室名の初期値
+                    'teacher_ids' => [],
+                    'teachers' => [],
+                    'room_id'  => null,
+                    'room_name' => '未設定'
                 ];
             }
 
-            // ★追加：教室名のセット（すでに入っている場合は上書き、または代表として1つ保持）
-            if (!empty($row['room_name'])) {
-                $subjects[$id]['room'] = $row['room_name'];
+            // --- 教室情報の保持ロジック (重要) ---
+            // 1人目の講師の行に教室がなくても、2人目の行にあればそれを採用する
+            if (!empty($row['room_id'])) {
+                $subjects[$id]['room_id'] = $row['room_id'];
+                $subjects[$id]['room_name'] = !empty($row['room_name']) ? $row['room_name'] : '未設定';
             }
 
-            // コース名の追加（重複チェック）
+            // コース名の追加
             if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
                 $subjects[$id]['courses'][] = $row['course_name'];
+                $subjects[$id]['course_keys'][] = $row['course_id'];
             }
 
-            // DBの course_id をそのまま course_keys 配列に追加
-            $cid = $row['course_id'];
-            if (isset($courseInfo[$cid])) {
-                if (!in_array($cid, $subjects[$id]['course_keys'])) {
-                    $subjects[$id]['course_keys'][] = $cid;
+            // 講師名の追加 (重複排除)
+            $t_id = isset($row['teacher_id']) ? (int)$row['teacher_id'] : null;
+            $t_name = !empty($row['teacher_name']) ? $row['teacher_name'] : '未設定';
+
+            $is_duplicate = false;
+            foreach ($subjects[$id]['teacher_ids'] as $idx => $existing_id) {
+                if ($existing_id === $t_id) {
+                    // 小田原先生(ID=0)が複数いる場合も考慮
+                    if ($t_id !== 0 || $subjects[$id]['teachers'][$idx] === $t_name) {
+                        $is_duplicate = true;
+                        break;
+                    }
                 }
             }
 
-            // 講師情報の追加処理
-            // teacher_id が 0(未設定) や null でない場合のみ配列に追加する
-            if (!empty($row['teacher_id']) && $row['teacher_id'] != 0) {
-                if (!in_array($row['teacher_id'], $subjects[$id]['teacher_ids'])) {
-                    $subjects[$id]['teacher_ids'][] = $row['teacher_id'];
-                    $subjects[$id]['teachers'][] = $row['teacher_name'];
-                }
+            if (!$is_duplicate) {
+                $subjects[$id]['teacher_ids'][] = $t_id;
+                $subjects[$id]['teachers'][] = $t_name;
             }
         }
 
-        // 全コース対象かどうかの判定（is_allフラグ）
         foreach ($subjects as $id => $data) {
-            $subjects[$id]['is_all'] = (count($data['course_keys']) === $total_course_count);
+            $subjects[$id]['is_all'] = (count($data['course_keys']) >= $total_course_count);
         }
 
         return $subjects;
     }
 
-    /**
-     * 削除画面表示用に科目名でグルーピングしたリストを作成する
-     */
     public function getGroupedSubjectListForDelete($classSubjectList, $courseInfo) {
         $subjects = [];
         foreach ($classSubjectList as $row) {
-            // IDの作成 (学年_科目名)
             $id = $row['grade'] . "_" . $row['subject_name'];
-
             if (!isset($subjects[$id])) {
                 $subjects[$id] = [
                     'grade'   => $row['grade'], 
@@ -218,11 +209,8 @@ class ClassSubjectEditService {
                     'course_keys' => [] 
                 ];
             }
-
-            // コース名の追加と削除用キーの追加
             if (!in_array($row['course_name'], $subjects[$id]['courses'])) {
                 $subjects[$id]['courses'][] = $row['course_name'];
-            
                 $cid = $row['course_id'];
                 if (isset($courseInfo[$cid])) {
                     $subjects[$id]['course_keys'][] = $cid;
