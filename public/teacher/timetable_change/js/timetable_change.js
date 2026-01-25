@@ -1,43 +1,77 @@
+// timetable_change.js
 // --- データ管理 ---
-let savedTimetables = [
-    {
-        id: 1,
-        course: "システムデザインコース",
-        startDate: "2026-01-01",
-        endDate: "2026-01-15",
-        data: [
-            { day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "201教室" },
-            { day: "火", period: "1", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "301演習室" }
-        ],
-        changes: [] 
-    },
-    {
-        id: 2,
-        course: "システムデザインコース",
-        startDate: "2026-01-16",
-        endDate: "2026-01-30",
-        data: [
-            { day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "201教室" },
-            { day: "火", period: "2", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "301演習室" },
-            { day: "金", period: "2", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "301演習室" }
-        ],
-        changes: [] 
-    },
-    {
-        id: 3,
-        course: "システムデザインコース",
-        startDate: "2026-02-01",
-        endDate: "2026-02-14",
-        data: [
-            { day: "月", period: "1", className: "Javaプログラミング", teacherName: "佐藤 健一", roomName: "201教室" },
-            { day: "火", period: "3", className: "Webデザイン演習", teacherName: "鈴木 花子", roomName: "301演習室" }
-        ],
-        changes: [] 
-    }
-];
+// --- データ管理 ---
+let savedTimetables = [];
 
-let currentRecord = null; // 現在編集中の時間割レコード
-let currentWeekStart = null; // 現在表示中の週の月曜日 (Dateオブジェクト)
+// PHPからデータが渡ってきているか確認して格納
+if (typeof dbTimetableData !== 'undefined' && Array.isArray(dbTimetableData)) {
+    savedTimetables = dbTimetableData;
+}
+
+let currentRecord = null; // 現在選択中の時間割レコード
+let currentWeekStart = null; // 現在表示中の週の月曜日
+let originalValues = {}; // 変更前の値を保持
+
+// --- マスタデータ操作用ヘルパー ---
+/**
+ * 現在選択中のコースに紐づくマスタデータを取得
+ */
+function getCurrentCourseMasterData() {
+    // currentRecord がない、またはマスタデータがない場合は空配列
+    if (!currentRecord || !dbMasterData || !dbMasterData[currentRecord.courseId]) {
+        return [];
+    }
+    return dbMasterData[currentRecord.courseId];
+}
+
+/**
+ * 先生リストの抽出（重複排除）
+ */
+function getAvailableTeachers() {
+    const data = getCurrentCourseMasterData();
+    const teachers = new Map();
+    data.forEach(row => {
+        if (row.teacher_id && row.teacher_name) {
+            teachers.set(row.teacher_id, row.teacher_name);
+        }
+    });
+    return Array.from(teachers, ([id, name]) => ({ id, name }));
+}
+
+/**
+ * 教室リストの抽出（重複排除）
+ */
+function getAvailableRooms() {
+    const data = getCurrentCourseMasterData();
+    const rooms = new Map();
+    data.forEach(row => {
+        if (row.room_id && row.room_name) {
+            rooms.set(row.room_id, row.room_name);
+        }
+    });
+    return Array.from(rooms, ([id, name]) => ({ id, name }));
+}
+
+// ドロップダウンの重複制御用
+function updateDropdownOptions(targetClass) {
+    const selects = Array.from(document.querySelectorAll(`.${targetClass}`));
+    const selectedValues = selects.map(s => s.value).filter(v => v !== "");
+
+    selects.forEach(select => {
+        const currentValue = select.value;
+        const options = Array.from(select.options);
+        options.forEach(option => {
+            if (option.value === "") return;
+            if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                option.disabled = true;
+                option.style.backgroundColor = '#f3f4f6';
+            } else {
+                option.disabled = false;
+                option.style.backgroundColor = '';
+            }
+        });
+    });
+}
 
 // --- 初期化 ---
 window.addEventListener('DOMContentLoaded', () => {
@@ -102,17 +136,88 @@ function updateHeaderDisplay(record) {
  * changeDisplayMode('current'); // 現在適用中の時間割のみ表示
  */
 function changeDisplayMode(mode) {
-    // ドロップダウンの有効/無効切り替え
     const toggleBtn = document.getElementById('courseDropdownToggle');
+    
+    // ドロップダウンの有効/無効切り替え
     if (mode === 'select') {
         toggleBtn.classList.remove('disabled');
+        toggleBtn.removeAttribute('disabled');
     } else {
         toggleBtn.classList.add('disabled');
-        // 「現在反映」「次回反映」モードの場合は、最初に見つかったコースを選択
-        const firstCourse = savedTimetables.length > 0 ? savedTimetables[0].course : 'システムデザインコース';
-        toggleBtn.querySelector('.current-value').textContent = firstCourse;
+        toggleBtn.setAttribute('disabled', 'true');
     }
+    // リスト再描画
     renderSidebarList(mode);
+}
+
+/**
+ * 初期表示時の時間割自動選択処理
+ * 概要: IDが最も若いコースを選択し、その中で優先度（適用中 > 次回 > 未来 > 過去）の高い時間割を表示する
+ */
+function selectInitialTimetable() {
+    // データがない場合は何もしない
+    if (!savedTimetables || savedTimetables.length === 0) return;
+
+    // 1. 最も若いコースIDを持つデータを特定するためにソート
+    // コースIDの昇順でソート
+    const sortedByCourse = [...savedTimetables].sort((a, b) => {
+        return (a.courseId || 0) - (b.courseId || 0);
+    });
+    
+    // 最も若いコースIDを取得
+    const targetCourseId = sortedByCourse[0].courseId;
+    const targetCourseName = sortedByCourse[0].course;
+
+    // 2. そのコースの中で、statusTypeの優先度に従ってレコードを選択
+    // statusType: 1=適用中, 2=次回, 3~=次回以降, 0=過去
+    const courseRecords = savedTimetables.filter(r => r.courseId == targetCourseId);
+
+    let targetRecord = null;
+
+    // 優先順位1: 適用中 (statusType = 1)
+    targetRecord = courseRecords.find(r => r.statusType == 1);
+
+    // 優先順位2: 次回 (statusType = 2)
+    if (!targetRecord) {
+        targetRecord = courseRecords.find(r => r.statusType == 2);
+    }
+
+    // 優先順位3: 次回以降 (statusType >= 3) の中で最も若いもの
+    if (!targetRecord) {
+        const futureRecords = courseRecords.filter(r => r.statusType >= 3);
+        if (futureRecords.length > 0) {
+            futureRecords.sort((a, b) => a.statusType - b.statusType);
+            targetRecord = futureRecords[0];
+        }
+    }
+
+    // 優先順位4: 見つからなければ（過去データのみの場合など）、そのコースの先頭データ
+    if (!targetRecord && courseRecords.length > 0) {
+        targetRecord = courseRecords[0];
+    }
+
+    // 対象が見つかった場合のUI反映処理
+    if (targetRecord) {
+        // ドロップダウンの表示テキストを更新（renderSidebarListのフィルタリングに使用されるため重要）
+        const toggleBtn = document.getElementById('courseDropdownToggle');
+        if (toggleBtn) {
+            toggleBtn.querySelector('.current-value').textContent = targetRecord.course;
+        }
+
+        // リストを描画 (selectモード)
+        // これによりサイドバーに該当コースのリストが生成される
+        renderSidebarList('select');
+
+        // サイドバーの該当項目をプログラムからクリックして表示を実行
+        // DOM描画待ちのためにわずかに遅延させる
+        setTimeout(() => {
+            // data-id属性を使ってリスト項目を検索
+            const itemLink = document.querySelector(`.saved-item[data-id="${targetRecord.id}"] a`);
+            if (itemLink) {
+                itemLink.click();
+            }
+        }, 50);
+    }
 }
 
 // --- リスト描画 (フィルタリング付き) ---
@@ -126,61 +231,81 @@ function changeDisplayMode(mode) {
  */
 function renderSidebarList(mode = 'select') {
     const container = document.getElementById('savedListContainer');
+    
+    // 既存のリスト項目をクリア（ラベル以外）
     const items = container.querySelectorAll('li:not(.is-group-label)');
     items.forEach(item => item.remove());
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const currentCourse = document.querySelector('#courseDropdownToggle .current-value').textContent;
-    
-    // コースで絞り込み
-    let filteredRecords = savedTimetables.filter(item => item.course === currentCourse);
+    let filteredRecords = [];
 
-    // モードによる絞り込み
-    if (mode === 'current') {
-        filteredRecords = filteredRecords.filter(item => {
-            const isStarted = item.startDate <= todayStr;
-            const isNotEnded = !item.endDate || item.endDate >= todayStr;
-            return isStarted && isNotEnded;
-        });
+    // --- フィルタリングとソート ---
+    if (mode === 'select') {
+        // ■「選択」モード
+        // ドロップダウンで選択中のコース名を取得
+        const toggleBtn = document.querySelector('#courseDropdownToggle');
+        const currentCourseName = toggleBtn ? toggleBtn.querySelector('.current-value').textContent.trim() : "";
+        
+        // 未選択状態でなければフィルタリング実行
+        if (currentCourseName !== "（未選択）" && currentCourseName !== "コースを選択してください") {
+            // コース名が一致し、かつ「過去(0)」以外のものを表示
+            filteredRecords = savedTimetables.filter(item => 
+                item.course === currentCourseName && item.statusType != 0
+            );
+        }
+        
+        // ソート: 適用中(1) -> 次回(2) -> 次回以降(3~) の昇順
+        filteredRecords.sort((a, b) => a.statusType - b.statusType);
+
+    } else if (mode === 'current') {
+        // ■「現在反映」モード
+        // コースに関係なく、ステータスが「適用中(1)」のもの全て
+        filteredRecords = savedTimetables.filter(item => item.statusType == 1);
+        
+        // コースID順にソートして見やすくする
+        filteredRecords.sort((a, b) => (a.courseId || 0) - (b.courseId || 0));
+
     } else if (mode === 'next') {
-        filteredRecords = filteredRecords.filter(item => {
-            return item.startDate > todayStr;
-        });
+        // ■「次回の反映」モード
+        // コースに関係なく、ステータスが「次回(2)」のもの全て
+        filteredRecords = savedTimetables.filter(item => item.statusType == 2);
+        
+        // コースID順にソート
+        filteredRecords.sort((a, b) => (a.courseId || 0) - (b.courseId || 0));
     }
 
-    // 「次回」判定用：同じコースの未来の時間割で最も開始日が近いものを特定
-    const futureRecords = savedTimetables.filter(item => 
-        item.course === currentCourse && item.startDate > todayStr
-    );
-    futureRecords.sort((a, b) => a.startDate.localeCompare(b.startDate));
-    const nextRecordId = futureRecords.length > 0 ? futureRecords[0].id : null;
-
-    // リスト生成
+    // --- リスト生成 ---
     filteredRecords.forEach(record => {
         const hasChanges = record.changes && record.changes.length > 0;
         const newItem = document.createElement('li'); 
         newItem.className = `nav-item saved-item ${hasChanges ? 'has-changes' : ''}`;
         newItem.setAttribute('data-id', record.id);
         
+        // アクティブ状態の維持
+        if (currentRecord && currentRecord.id == record.id) {
+            newItem.classList.add('active');
+        }
+        
         let badgeHtml = hasChanges ? '<span class="changed-badge"></span>' : '';
         
-        const dateLabel = `${new Date(record.startDate).getMonth()+1}/${new Date(record.startDate).getDate()}~`;
+        // 日付整形 (YYYY-MM-DD -> M/D~)
+        const dateParts = record.startDate ? record.startDate.split('-') : [];
+        const dateLabel = dateParts.length === 3 ? `${parseInt(dateParts[1])}/${parseInt(dateParts[2])}~` : '';
+
+        // ステータスごとの表示設定
         let statusText = "";
         let statusClass = "text-slate-500";
-        
-        if (isRecordActive(record)) {
+        const sType = parseInt(record.statusType);
+
+        if (sType === 1) {
             statusText = "適用中：";
             statusClass = "text-emerald-600 font-bold";
-        } else if (record.id === nextRecordId) {
+        } else if (sType === 2) {
             statusText = "次回：";
             statusClass = "text-blue-600 font-bold";
-        } else if (!record.startDate || !record.endDate) {
+        } else if (sType >= 3) {
             statusText = "次回以降：";
             statusClass = "text-indigo-600 font-bold";
-        } else if (record.startDate && record.startDate > todayStr) {
-            statusText = "次回以降：";
-            statusClass = "text-indigo-600 font-bold";
-        } else if (record.endDate && record.endDate < todayStr) {
+        } else {
             statusText = "過去：";
             statusClass = "text-gray-400";
         }
@@ -213,21 +338,42 @@ function renderSidebarList(mode = 'select') {
 function selectTimetable(id, element) {
     // UIのアクティブ化
     document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
-    element.parentElement.classList.add('active');
+    // プログラムからの呼び出し等でelementがない場合のガード
+    if (element && element.parentElement) {
+        element.parentElement.classList.add('active');
+    } else {
+        // elementが直接 <li> の場合や、要素指定がない場合の検索
+        const target = document.querySelector(`.saved-item[data-id="${id}"]`);
+        if (target) target.classList.add('active');
+    }
 
     // データ取得
     currentRecord = savedTimetables.find(r => r.id === id);
     
     if (currentRecord) {
-        // 表示初期化（バッジ付き）
+        // 表示初期化
         updateHeaderDisplay(currentRecord);
         
-        // 開始日を基準に最初の週を表示
-        const start = new Date(currentRecord.startDate);
-        // 月曜日まで戻す
-        const day = start.getDay();
-        const diff = start.getDate() - day + (day == 0 ? -6 : 1); 
-        currentWeekStart = new Date(start.setDate(diff));
+        // 表示する週の基準日を決定
+        let targetDate;
+        
+        if (isRecordActive(currentRecord)) {
+            // 適用中の場合は「今日」を基準にする
+            targetDate = new Date();
+        } else {
+            // それ以外（次回・未来・過去）は「開始日」を基準にする
+            // ※startDateがない場合は今日にするガードを入れる
+            targetDate = currentRecord.startDate ? new Date(currentRecord.startDate) : new Date();
+        }
+
+        // 月曜日（週の始まり）まで戻す計算
+        const day = targetDate.getDay();
+        // getDay(): 日=0, 月=1, ... 土=6
+        // 月曜(1)なら引かない(0)、火曜(2)なら1日引く... 日曜(0)なら6日引く
+        const diff = targetDate.getDate() - (day === 0 ? 6 : day - 1);
+        
+        currentWeekStart = new Date(targetDate);
+        currentWeekStart.setDate(diff);
         
         updateWeekDisplay();
     }
@@ -284,17 +430,34 @@ function setupDropdown(toggleId, menuId, onChangeCallback) {
     }
 }
 setupDropdown('courseDropdownToggle', 'courseDropdownMenu', function() {
-    // コース変更時にリストを再描画
+    // 1. コース変更時にリストを再描画
     renderSidebarList('select');
     
-    // 表示クリア
-    document.getElementById('mainCourseDisplay').textContent = "（未選択）";
-    document.querySelectorAll('.timetable-cell').forEach(cell => {
-        cell.innerHTML = ''; cell.classList.remove('is-filled'); cell.classList.remove('is-changed');
-    });
-    document.getElementById('weekDisplay').textContent = "（時間割を選択してください）";
-    currentRecord = null;
-    document.querySelectorAll('.saved-item').forEach(el => el.classList.remove('active'));
+    // 2. リストの一番上の項目を自動選択
+    // DOM描画待ちのために少し遅延させてからクリックを実行
+    setTimeout(() => {
+        const container = document.getElementById('savedListContainer');
+        // リスト内の最初のリンク要素を取得
+        const firstItemLink = container.querySelector('.saved-item a');
+        
+        if (firstItemLink) {
+            // 項目があればクリックして表示（selectTimetableが実行されます）
+            firstItemLink.click();
+        } else {
+            // 項目が1つもない場合のクリア処理
+            document.getElementById('mainCourseDisplay').textContent = "（データなし）";
+            document.querySelectorAll('.timetable-cell').forEach(cell => {
+                cell.innerHTML = '';
+                cell.className = 'timetable-cell'; // クラスもリセット
+                cell.dataset.date = '';
+                delete cell.dataset.subjectId;
+                delete cell.dataset.teacherIds;
+                delete cell.dataset.roomIds;
+            });
+            document.getElementById('weekDisplay').textContent = "（時間割データがありません）";
+            currentRecord = null;
+        }
+    }, 50);
 });
 
 // ドロップダウン閉じる
@@ -388,13 +551,23 @@ function renderTable() {
         cell.innerHTML = '';
         cell.className = 'timetable-cell'; 
         cell.dataset.date = ''; 
+        // 編集ハイライトなどもクリア
+        cell.classList.remove('is-filled', 'is-changed', 'is-out-of-period', 'is-edited');
     });
+
+    // 今日の日付を取得 (YYYY-MM-DD形式)
+    const todayStr = new Date().toISOString().split('T')[0];
 
     // 日付セット
     const ths = ['th-mon', 'th-tue', 'th-wed', 'th-thu', 'th-fri'];
     const days = ['月','火','水','木','金'];
+    
+    // ヘッダーの日付情報をセルに伝播
     days.forEach((d, idx) => {
-        const dateStr = document.getElementById(ths[idx]).dataset.date;
+        const th = document.getElementById(ths[idx]);
+        if (!th) return;
+        
+        const dateStr = th.dataset.date;
         document.querySelectorAll(`.timetable-cell[data-day="${d}"]`).forEach(cell => {
             cell.dataset.date = dateStr;
         });
@@ -402,17 +575,23 @@ function renderTable() {
 
     // 各日付ごとに適用される時間割を判定して描画
     days.forEach((d, idx) => {
-        const dateStr = document.getElementById(ths[idx]).dataset.date;
+        const th = document.getElementById(ths[idx]);
+        if (!th) return;
+        const dateStr = th.dataset.date;
         
-        // 現在選択中のレコードの適用期間をチェック
+        // 1. 期間外チェック
         const isOutOfPeriod = !currentRecord || 
             !dateStr || 
-            dateStr < currentRecord.startDate || 
-            dateStr > currentRecord.endDate;
+            (currentRecord.startDate && dateStr < currentRecord.startDate) || 
+            (currentRecord.endDate && dateStr > currentRecord.endDate);
         
-        // 適用期間外の場合はスタイルを適用
+        // 2. 過去日付チェック (今日より前なら編集不可)
+        const isPastDate = dateStr && dateStr < todayStr;
+
+        // 適用期間外 または 過去の日付 の場合はスタイルを適用
         document.querySelectorAll(`.timetable-cell[data-day="${d}"]`).forEach(cell => {
-            if (isOutOfPeriod) {
+            // 既存の 'is-out-of-period' クラスを活用して編集不可・グレーアウトにする
+            if (isOutOfPeriod || isPastDate) {
                 cell.classList.add('is-out-of-period');
             }
         });
@@ -427,9 +606,26 @@ function renderTable() {
             
             const targetCell = document.querySelector(`.timetable-cell[data-day="${d}"][data-period="${item.period}"]`);
             if (targetCell) {
-                const teacherNames = Array.isArray(item.teacherName) ? item.teacherName : (item.teacherName ? [item.teacherName] : []);
-                const roomNames = Array.isArray(item.roomName) ? item.roomName : (item.roomName ? [item.roomName] : []);
-                updateCellContent(targetCell, item.className, teacherNames, roomNames);
+                // 配列かどうか確認して正規化
+                let tNames = [];
+                if (Array.isArray(item.teacherNames)) tNames = item.teacherNames;
+                else if (item.teacherName) tNames = [item.teacherName]; // 旧データ互換
+
+                let rNames = [];
+                if (Array.isArray(item.roomNames)) rNames = item.roomNames;
+                else if (item.roomName) rNames = [item.roomName]; // 旧データ互換
+
+                updateCellContent(targetCell, item.className, tNames, rNames);
+                
+                // データ属性にIDもセットしておく（編集モーダル表示用）
+                if(item.subjectId) targetCell.dataset.subjectId = item.subjectId;
+                
+                // ID配列のセット
+                let tIds = item.teacherIds || (item.teacherId ? [item.teacherId] : []);
+                targetCell.dataset.teacherIds = JSON.stringify(tIds);
+                
+                let rIds = item.roomIds || (item.roomId ? [item.roomId] : []);
+                targetCell.dataset.roomIds = JSON.stringify(rIds);
             }
         });
 
@@ -440,10 +636,17 @@ function renderTable() {
                 
                 const targetCell = document.querySelector(`.timetable-cell[data-day="${d}"][data-period="${change.period}"]`);
                 if (targetCell) {
-                    const teacherNames = Array.isArray(change.teacherNames) ? change.teacherNames : (change.teacherName ? [change.teacherName] : []);
-                    const roomNames = Array.isArray(change.roomNames) ? change.roomNames : (change.roomName ? [change.roomName] : []);
-                    updateCellContent(targetCell, change.className, teacherNames, roomNames);
+                    // 基本データと同様に配列チェック
+                    let tNames = Array.isArray(change.teacherNames) ? change.teacherNames : (change.teacherName ? [change.teacherName] : []);
+                    let rNames = Array.isArray(change.roomNames) ? change.roomNames : (change.roomName ? [change.roomName] : []);
+
+                    updateCellContent(targetCell, change.className, tNames, rNames);
                     targetCell.classList.add('is-changed'); // ハイライト
+                    
+                    // 変更データに含まれるID情報でdatasetを上書き
+                    if(change.subjectId) targetCell.dataset.subjectId = change.subjectId;
+                    if(change.teacherIds) targetCell.dataset.teacherIds = JSON.stringify(change.teacherIds);
+                    if(change.roomIds) targetCell.dataset.roomIds = JSON.stringify(change.roomIds);
                 }
             });
         }
@@ -556,9 +759,10 @@ function getRoomInputs() {
  * @example
  * addTeacherRow(); // 新しい担当教員入力フィールドを追加
  */
-function addTeacherRow() {
+function addTeacherRow(selectedValue = null) {
     const teacherSelectionArea = document.getElementById('teacherSelectionArea');
-    const currentCount = getTeacherInputs().length;
+    const currentCount = teacherSelectionArea.querySelectorAll('.teacher-input').length;
+    
     if (currentCount >= 5) {
         alert('最大5個まで追加できます。');
         return;
@@ -569,7 +773,20 @@ function addTeacherRow() {
     
     const select = document.createElement('select');
     select.className = 'teacher-input modal-select';
-    select.innerHTML = '<option value="">(選択してください)</option><option value="佐藤 健一">佐藤 健一</option><option value="鈴木 花子">鈴木 花子</option><option value="高橋 誠">高橋 誠</option><option value="田中 優子">田中 優子</option><option value="渡辺 剛">渡辺 剛</option><option value="伊藤 直人">伊藤 直人</option><option value="山本 さくら">山本 さくら</option>';
+    
+    // 重複チェックイベント
+    select.addEventListener('change', () => updateDropdownOptions('teacher-input'));
+
+    // マスタデータからOption生成
+    let html = '<option value="">(選択してください)</option>';
+    const teachers = getAvailableTeachers();
+    
+    teachers.forEach(t => {
+        // IDで比較 (数値/文字列の型違いを吸収するため == を使用)
+        const isSelected = (selectedValue == t.id) ? 'selected' : '';
+        html += `<option value="${t.id}" ${isSelected}>${t.name}</option>`;
+    });
+    select.innerHTML = html;
     
     const arrowDiv = document.createElement('div');
     arrowDiv.className = 'select-arrow';
@@ -582,6 +799,7 @@ function addTeacherRow() {
         e.preventDefault();
         rowDiv.remove();
         updateTeacherRemoveButtons();
+        updateDropdownOptions('teacher-input');
     });
     
     rowDiv.appendChild(select);
@@ -590,6 +808,7 @@ function addTeacherRow() {
     teacherSelectionArea.appendChild(rowDiv);
     
     updateTeacherRemoveButtons();
+    updateDropdownOptions('teacher-input');
 }
 
 /**
@@ -598,9 +817,10 @@ function addTeacherRow() {
  * @example
  * addRoomRow(); // 新しい教室入力フィールドを追加
  */
-function addRoomRow() {
+function addRoomRow(selectedValue = null) {
     const roomSelectionArea = document.getElementById('roomSelectionArea');
-    const currentCount = getRoomInputs().length;
+    const currentCount = roomSelectionArea.querySelectorAll('.room-input').length;
+    
     if (currentCount >= 5) {
         alert('最大5個まで追加できます。');
         return;
@@ -611,7 +831,17 @@ function addRoomRow() {
     
     const select = document.createElement('select');
     select.className = 'room-input modal-select';
-    select.innerHTML = '<option value="">(選択してください)</option><option value="201教室">201教室</option><option value="202教室">201教室</option><option value="301演習室">301演習室</option><option value="302演習室">302演習室</option><option value="4F大講義室">4F大講義室</option><option value="別館Lab A">別館Lab A</option><option value="別館Lab B">別館Lab B</option>';
+    
+    select.addEventListener('change', () => updateDropdownOptions('room-input'));
+
+    let html = '<option value="">(選択してください)</option>';
+    const rooms = getAvailableRooms();
+    
+    rooms.forEach(r => {
+        const isSelected = (selectedValue == r.id) ? 'selected' : '';
+        html += `<option value="${r.id}" ${isSelected}>${r.name}</option>`;
+    });
+    select.innerHTML = html;
     
     const arrowDiv = document.createElement('div');
     arrowDiv.className = 'select-arrow';
@@ -624,6 +854,7 @@ function addRoomRow() {
         e.preventDefault();
         rowDiv.remove();
         updateRoomRemoveButtons();
+        updateDropdownOptions('room-input');
     });
     
     rowDiv.appendChild(select);
@@ -632,6 +863,7 @@ function addRoomRow() {
     roomSelectionArea.appendChild(rowDiv);
     
     updateRoomRemoveButtons();
+    updateDropdownOptions('room-input');
 }
 
 /**
@@ -687,90 +919,184 @@ const inputRoomName = document.getElementById('inputRoomName');
 const btnCancel = document.getElementById('btnCancel');
 const btnUpdate = document.getElementById('btnUpdate');
 let editingCell = null;
-let originalValues = {}; // 元の値を保存
 
+/**
+ * timetable-cell click event
+ * 概要: 時間割セルがクリックされたときの処理。
+ * 複数の先生・教室データを正しく復元してモーダルに表示します。
+ */
 document.querySelectorAll('.timetable-cell').forEach(cell => {
     cell.addEventListener('click', function() {
+        // 1. ガード処理
         if (!currentRecord) {
-            alert('左のリストから変更したい時間割を選択してください。');
+            alert('編集する時間割を選択してください。');
             return;
         }
 
-        // 適用期間外のセルの場合はアラートを表示
+        // 期間外・過去のセルはクリック無効（renderTableでのクラス付与に依存）
         if (this.classList.contains('is-out-of-period')) {
-            alert('この時間割は適用期間外のため編集できません。');
             return;
         }
 
-        const date = this.dataset.date;
-        const targetRecord = findApplicableRecord(date);
-
-        editingCell = this;
+        // 現在操作中のセルを保持
+        currentCell = this;
+        editingCell = this; // 互換性のため両方保持
+        
+        // 日付・時限の取得
+        const date = inputDate.value; // 日付選択欄、またはセルのデータから取得
+        // ※ renderTableでセルに dataset.date を仕込んでいるのでそれを使うのが確実
+        const cellDate = this.dataset.date;
         const day = this.dataset.day;
         const period = this.dataset.period;
 
+        // モーダルの日付欄・タイトル更新
+        inputDate.value = cellDate; 
         modalTitle.textContent = `${day}曜日 ${period}限 の変更`;
-        inputDate.value = date; // 日付をセット
 
-        // 変更済みセルかどうか判定して「変更を取り消す」ボタンの表示を切り替え
-        const btnRevert = document.getElementById('btnRevert');
-        const hasChange = targetRecord && targetRecord.changes && 
-            targetRecord.changes.some(ch => ch.date === date && ch.period === period);
+        // ----------------------------------------------------
+        // 2. データの取得と復元
+        // ----------------------------------------------------
         
-        if (hasChange) {
-            btnRevert.classList.remove('hidden');
+        // 科目ID
+        const currentSubjectId = this.dataset.subjectId || '';
+        
+        // 先生ID配列の取得
+        let currentTeacherIds = [];
+        try {
+            if (this.dataset.teacherIds) {
+                currentTeacherIds = JSON.parse(this.dataset.teacherIds);
+            } else if (this.dataset.teacherId) {
+                currentTeacherIds = [this.dataset.teacherId];
+            }
+        } catch (e) { 
+            console.error('Teacher ID Parse Error', e);
+            currentTeacherIds = [];
+        }
+
+        // 教室ID配列の取得
+        let currentRoomIds = [];
+        try {
+            if (this.dataset.roomIds) {
+                currentRoomIds = JSON.parse(this.dataset.roomIds);
+            } else if (this.dataset.roomId) {
+                currentRoomIds = [this.dataset.roomId];
+            }
+        } catch (e) { 
+            console.error('Room ID Parse Error', e);
+            currentRoomIds = [];
+        }
+
+        // ----------------------------------------------------
+        // 3. モーダルUIの構築
+        // ----------------------------------------------------
+
+        // 科目ドロップダウン生成 & 初期値選択
+        renderSubjectDropdown(currentSubjectId);
+
+        // 先生エリアのリセットと復元
+        const teacherSelectionArea = document.getElementById('teacherSelectionArea');
+        teacherSelectionArea.innerHTML = '';
+        if (currentTeacherIds.length > 0) {
+            currentTeacherIds.forEach(id => addTeacherRow(id));
         } else {
-            btnRevert.classList.add('hidden');
-        }
-
-        // 現在の値をセット
-        const cName = this.querySelector('.class-name')?.textContent.replace('(休講/空き)', '') || '';
-        const teacherElems = this.querySelectorAll('.teacher-name span');
-        const roomElems = this.querySelectorAll('.room-name span');
-
-        setSelectValue(inputClassName, cName);
-        
-        // 複数の先生を取得
-        const teacherInputs = getTeacherInputs();
-        
-        // 先生フィールドをリセット（最初のフィールドのみ残す）
-        while (teacherInputs.length > 1) {
-            teacherInputs[teacherInputs.length - 1].closest('.teacher-input-row').remove();
-            teacherInputs.pop();
+            addTeacherRow(); // 空行
         }
         
-        // 先生データをセット
-        teacherInputs.forEach((input, idx) => {
-            setSelectValue(input, teacherElems[idx]?.textContent || '');
-        });
-        
-        // 複数の教室を取得
-        const roomInputs = getRoomInputs();
-        
-        // 教室フィールドをリセット（最初のフィールドのみ残す）
-        while (roomInputs.length > 1) {
-            roomInputs[roomInputs.length - 1].closest('.room-input-row').remove();
-            roomInputs.pop();
+        // 教室エリアのリセットと復元
+        const roomSelectionArea = document.getElementById('roomSelectionArea');
+        roomSelectionArea.innerHTML = '';
+        if (currentRoomIds.length > 0) {
+            currentRoomIds.forEach(id => addRoomRow(id));
+        } else {
+            addRoomRow(); // 空行
         }
-        
-        // 教室データをセット
-        roomInputs.forEach((input, idx) => {
-            setSelectValue(input, roomElems[idx]?.textContent || '');
-        });
 
+        // 削除ボタンやドロップダウンの整合性更新
         updateTeacherRemoveButtons();
         updateRoomRemoveButtons();
+        updateDropdownOptions('teacher-input');
+        updateDropdownOptions('room-input');
 
-        // 元の値を保存
+        // ----------------------------------------------------
+        // 4. 「変更を戻す」ボタンの表示制御
+        // ----------------------------------------------------
+        
+        // 現在のレコードから、この日付・時限の変更データが存在するか確認
+        const targetRecord = findApplicableRecord(cellDate);
+        let hasExistingChange = false;
+
+        if (targetRecord && targetRecord.changes) {
+            hasExistingChange = targetRecord.changes.some(ch => ch.date === cellDate && ch.period === period);
+        }
+
+        const btnRevert = document.getElementById('btnRevert');
+        if (hasExistingChange) {
+            btnRevert.style.display = 'block'; // 変更があるなら表示
+        } else {
+            btnRevert.style.display = 'none';  // 基本データなら非表示
+        }
+
+        // ----------------------------------------------------
+        // 5. 変更検知用の初期値を保存
+        // ----------------------------------------------------
+        const teacherInputs = getTeacherInputs();
+        const roomInputs = getRoomInputs();
+
         originalValues = {
-            className: cName,
-            teacherNames: Array.from(teacherElems).map(el => el.textContent),
-            roomNames: Array.from(roomElems).map(el => el.textContent)
+            subjectId: currentSubjectId,
+            teacherIds: teacherInputs.map(input => input.value).filter(val => val !== ''),
+            roomIds: roomInputs.map(input => input.value).filter(val => val !== '')
         };
 
+        // モーダル表示
         modal.classList.remove('hidden');
         document.body.classList.add('modal-open');
+        
+        // フォーカス
+        setTimeout(() => inputClassName.focus(), 100);
     });
+});
+
+function renderSubjectDropdown(selectedId = '') {
+    const inputClassName = document.getElementById('inputClassName');
+    // マスタデータ取得
+    const masterData = getCurrentCourseMasterData();
+    
+    // HTML生成
+    inputClassName.innerHTML = '<option value="">(休講/空き)</option>';
+
+    masterData.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.subject_id;
+        option.textContent = item.subject_name;
+        
+        if (item.subject_id == selectedId) {
+            option.selected = true;
+        }
+        
+        // オートフィル用データ
+        option.dataset.defTeacherId = item.teacher_id || '';
+        option.dataset.defRoomId = item.room_id || '';
+        
+        inputClassName.appendChild(option);
+    });
+}
+
+// 科目変更時のオートフィル（create_timetable.jsと同様）
+document.getElementById('inputClassName').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const defTeacherId = selectedOption.dataset.defTeacherId;
+    const defRoomId = selectedOption.dataset.defRoomId;
+    
+    // 先生・教室が空の場合のみオートフィル
+    if (defTeacherId) {
+        const tInputs = document.querySelectorAll('.teacher-input');
+        if (tInputs.length > 0 && !tInputs[0].value) tInputs[0].value = defTeacherId;
+    }
+    if (defRoomId) {
+        const rInputs = document.querySelectorAll('.room-input');
+        if (rInputs.length > 0 && !rInputs[0].value) rInputs[0].value = defRoomId;
+    }
 });
 
 btnCancel.addEventListener('click', () => {
@@ -782,32 +1108,50 @@ btnCancel.addEventListener('click', () => {
 document.getElementById('btnRevert').addEventListener('click', () => {
     if (!editingCell) return;
     
+    // 日付と時限を取得
     const date = inputDate.value;
     const period = editingCell.dataset.period;
     
     // 該当日付に適用されるレコードを検索
     const targetRecord = findApplicableRecord(date);
-    if (!targetRecord) return;
+    if (!targetRecord || !targetRecord.changes) return;
     
-    // 変更を削除
+    // 確認ダイアログ（誤操作防止）
+    if (!confirm('変更を取り消して、元の時間割に戻しますか？')) {
+        return;
+    }
+
+    // 変更データを検索して削除
     const changeIndex = targetRecord.changes.findIndex(ch => ch.date === date && ch.period === period);
     if (changeIndex !== -1) {
         targetRecord.changes.splice(changeIndex, 1);
+        
+        // 画面更新 (ここが重要)
+        // データ削除後に renderTable を呼ぶと、renderTable 内のロジックで
+        // 自動的に「基本データ (currentRecord.data)」が表示されます。
+        renderTable();
+        
+        // サイドバーのバッジ更新
+        renderSidebarList('select'); 
+        
+        alert('変更を取り消しました。');
     }
     
-    // 画面更新
-    renderTable();
-    renderSidebarList();
-    
+    // モーダルを閉じる
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
 });
 
-// Initialize remove buttons visibility on page load
+// 初期化処理
 window.addEventListener('DOMContentLoaded', () => {
+    // 既存の renderSidebarList() だけの呼び出しを削除し、
+    // 自動選択ロジックを含んだ関数を呼び出す
+    selectInitialTimetable();
+    
+    // 削除ボタンの初期表示更新などはそのまま維持
     updateTeacherRemoveButtons();
     updateRoomRemoveButtons();
-}, { once: true });
+});
 
 // Add button event listeners
 document.getElementById('addTeacherBtn').addEventListener('click', (e) => {
@@ -819,52 +1163,73 @@ document.getElementById('addRoomBtn').addEventListener('click', (e) => {
     addRoomRow();
 });
 
+/**
+ * 変更反映ボタンクリックイベント (DB準拠版)
+ * 概要：モーダルの入力値を収集し、対象レコードの changes 配列を更新する
+ */
 btnUpdate.addEventListener('click', () => {
     if (!editingCell || !currentRecord) return;
 
+    // 1. 変更対象の日付・時限を特定
     const date = inputDate.value;
     const day = editingCell.dataset.day;
     const period = editingCell.dataset.period;
-    const c = inputClassName.value;
     
-    // この日付に適用されるレコードを検索
+    // 2. この日付に適用されるレコードを再確認（念のため）
     const targetRecord = findApplicableRecord(date);
     if (!targetRecord) {
-        alert('この日付に適用される時間割がありません。');
+        alert('この日付に適用される時間割が見つかりません。');
         return;
     }
-    
-    // 複数の先生を取得
+
+    // 3. 入力値の収集（IDと名前の両方を取得）
+    const inputClassName = document.getElementById('inputClassName');
+    const subjectId = inputClassName.value;
+    const subjectName = subjectId ? inputClassName.options[inputClassName.selectedIndex].text : "";
+
+    // 先生（複数）
     const teacherInputs = getTeacherInputs();
-    const teacherNames = teacherInputs.map(input => input.value).filter(val => val !== '');
-    
-    // 複数の教室を取得
+    const teacherIds = teacherInputs.map(input => input.value).filter(val => val !== '');
+    const teacherNames = teacherInputs.filter(input => input.value).map(input => input.options[input.selectedIndex].text);
+
+    // 教室（複数）
     const roomInputs = getRoomInputs();
-    const roomNames = roomInputs.map(input => input.value).filter(val => val !== '');
+    const roomIds = roomInputs.map(input => input.value).filter(val => val !== '');
+    const roomNames = roomInputs.filter(input => input.value).map(input => input.options[input.selectedIndex].text);
 
-    // 値が変更されたかチェック
-    const isClassNameChanged = c !== originalValues.className;
-    const isTeacherNamesChanged = JSON.stringify(teacherNames) !== JSON.stringify(originalValues.teacherNames);
-    const isRoomNamesChanged = JSON.stringify(roomNames) !== JSON.stringify(originalValues.roomNames);
+    // 4. 値が変更されたかチェック
+    // DB連携用にIDで比較するのが確実
+    const isSubjectChanged = subjectId != (originalValues.subjectId || "");
+    const isTeacherChanged = JSON.stringify(teacherIds) !== JSON.stringify(originalValues.teacherIds || []);
+    const isRoomChanged = JSON.stringify(roomIds) !== JSON.stringify(originalValues.roomIds || []);
 
-    // 何も変更されていない場合は処理を終了
-    if (!isClassNameChanged && !isTeacherNamesChanged && !isRoomNamesChanged) {
+    // 変更がない場合は閉じるだけ
+    if (!isSubjectChanged && !isTeacherChanged && !isRoomChanged) {
         modal.classList.add('hidden');
         document.body.classList.remove('modal-open');
         return;
     }
 
-    // 変更データを該当レコードに保存
-    const existingChangeIndex = targetRecord.changes.findIndex(ch => ch.date === date && ch.period === period);
-    
+    // 5. 変更データオブジェクトの作成
     const newChange = {
         date: date,
         day: day,
         period: period,
-        className: c,
+        // 表示用
+        className: subjectName, 
         teacherNames: teacherNames,
-        roomNames: roomNames
+        roomNames: roomNames,
+        // 保存用IDデータ (DB登録に必要)
+        subjectId: subjectId,
+        teacherIds: teacherIds,
+        roomIds: roomIds
     };
+
+    // 6. changes 配列への保存（既存があれば上書き、なければ追加）
+    // targetRecord.changes が未定義なら初期化
+    if (!targetRecord.changes) targetRecord.changes = [];
+    
+    const existingChangeIndex = targetRecord.changes.findIndex(ch => ch.date === date && ch.period === period);
 
     if (existingChangeIndex !== -1) {
         targetRecord.changes[existingChangeIndex] = newChange;
@@ -872,10 +1237,14 @@ btnUpdate.addEventListener('click', () => {
         targetRecord.changes.push(newChange);
     }
 
-    // 画面更新
+    // 7. 画面更新
+    // renderTable を呼ぶことで changes の内容がセルに反映される
     renderTable();
-    renderSidebarList(); // バッジ更新のため
+    
+    // サイドバーのバッジ更新なども必要なら
+    renderSidebarList('select'); // 現在のモードに合わせて引数は調整してください
 
+    // モーダルを閉じる
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
 });
