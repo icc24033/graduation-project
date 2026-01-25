@@ -2,6 +2,8 @@
 // TeacherHomeController.php
 // 教員ホーム画面のコントローラー
 require_once __DIR__ . '/../../../classes/repository/home/HomeRepository.php';
+require_once __DIR__ . '/../../../classes/security/SecurityHelper.php';
+require_once __DIR__ . '/../../../services/master/timetable_create/TimetableService.php';
 
 class TeacherHomeController extends HomeRepository {
     // HomeRepositoryのsession_resettingを呼び出す
@@ -17,11 +19,11 @@ class TeacherHomeController extends HomeRepository {
         // 遷移先ファイルの定義（クラスに渡すため配列化）
         $links = [
             // 時間割り変更へのリンク
-            'link_time_table_edit'   => "timetable_change/edit_timetable_control.php",
+            'link_time_table_edit'   => "timetable_change/timetable_change_control.php",
             // 授業詳細編集へのリンク
             'link_subject_edit'      => "class_detail_edit/class_detail_edit_control.php",
             // 時間割り閲覧へのリンク
-            'link_time_table_view'   => "time_table_view.php",
+            'link_time_table_view'   => "timetable_view/timetable_view_control.php",
         ];
 
         return $links;
@@ -39,6 +41,11 @@ class TeacherHomeController extends HomeRepository {
 
         // ユーザーインスタンス生成
         $user_instance = $this->create_user_instance($user_data['user_grade'], $user_data['current_user_id']);
+
+        // 時間割りサービスのインスタンス化
+        $timetableService = new TimetableService();
+        // 時間割りデータのstatusType更新
+        $timetableService->updateTimetableStatusTypeForAllCourses();
 
         // 3. 権限チェックと表示準備
         // Masterクラスのインスタンスかチェック（instanceof を使うとより確実です）

@@ -1,3 +1,27 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    }
+    
+    body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #f3f3f3;
+    color: #222;
+    font-size: 16px;
+    font-weight: 400;
+    }
+    
+    a {
+    text-decoration: none;
+    color: inherit;
+    }
+    
+    ul,
+    ol {
+    list-style: none;
+    }
+    
     /* スクロールバー */
     ::-webkit-scrollbar {
     width: 8px;
@@ -49,11 +73,11 @@
     text-align: center;
     }
     
-    .user_icon {
-    font-size: 24px;
-    color: #333;
+    .header_icon {
+    width: 32px;
+    height: 32px;
     }
-    
+        
     .main-section {
     padding-top: 70px;
     margin-top: 30px;
@@ -67,7 +91,7 @@
     left: 0;
     bottom: 0;
     top: 70px;
-    z-index: 999;
+    z-index: 50;
     width: 300px;
     background-color: #F3F8FF;
     padding: 0 0 150px 10px;
@@ -280,6 +304,10 @@
     transform: translateY(-50%);
     }
     
+    .saved-item.has-changes a {
+    color: #b45309;
+    }
+    
     /* メインコンテンツ */
     .main-content {
     flex: 1;
@@ -339,8 +367,41 @@
     }
     
     .course-display {
-    text-align: right;
+    text-align: right;    position: relative;
     }
+    
+    .active-badge {
+        position: absolute;
+        top: -40px;
+        right: 0px;
+        display: inline-block;
+        color: white;
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        white-space: nowrap;
+        margin-left: 12px;
+        vertical-align: middle;
+    }
+    
+    .active-badge.current {
+        background-color: #10b981; /* emerald-500 */
+    }
+    
+    .active-badge.next {
+        background-color: #3b82f6; /* blue-500 */
+    }
+    
+    .active-badge.creating {
+        background-color: #f97316; /* orange-500 */
+    }
+    
+    #mainCourseDisplay {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;}
     
     /* 時間割テーブル */
     .timetable-container {
@@ -440,19 +501,22 @@
     background-color: #F3F8FF;
     }
     
+    /* 変更されたセルのスタイル */
     .timetable-cell.is-changed {
-    background-color: #C0DEFF;
-    border: 2px solid #89B4E8;
+    background-color: #fef08a;
+    /* yellow-200 */
+    border: 2px solid #eab308;
     }
     
-    .timetable-cell.is-changed .class-name,
-    .timetable-cell.is-changed .class-detail {
-    color: #334155;
+    /* 適用期間外のセルのスタイル */
+    .timetable-cell.is-out-of-period {
+    background-color: #959595;
+    cursor: not-allowed;
+    opacity: 0.6;
     }
     
-    .timetable-cell.is-changed .teacher-name .icon,
-    .timetable-cell.is-changed .room-name .icon {
-    color: #64748b;
+    .timetable-cell.is-out-of-period:hover {
+    background-color: #959595;
     }
     
     .class-content {
@@ -506,24 +570,17 @@
     gap: 1rem;
     }
     
-    .action-button {
+    .save-changes-button {
+    background-color: #495666;
     color: #fff;
+    width: 220px;
     padding: 15px 30px;
     border: none;
     border-radius: 5px;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    }
-    
-    .save-changes-button {
-    background-color: #495666;
-    width: 220px;
-    justify-content: center;
+    transition: background-color 0.5s;
     }
     
     .save-changes-button:hover {
@@ -560,6 +617,21 @@
     width: 500px;
     padding: 2rem;
     animation: fadeInUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    }
+    
+    .create-modal-content {
+    background-color: #f3f3f3;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    padding: 2.5rem;
+    animation: fadeInUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     }
     
     @keyframes fadeInUp {
@@ -567,6 +639,7 @@
     opacity: 0;
     transform: translateY(20px);
     }
+    
     to {
     opacity: 1;
     transform: translateY(0);
@@ -623,37 +696,24 @@
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
     border-color: transparent;
     }
-    
-    .select-arrow {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: #94a3b8;
-    }
-    
+        
     .modal-button-area {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
     gap: 1rem;
     margin-top: 2.5rem;
-    flex-wrap: nowrap;
     }
     
     .modal-cancel-button,
-    .modal-save-button,
-    .modal-undo-button {
+    .modal-save-button {
     padding: 0.5rem 1.5rem;
     border-radius: 0.25rem;
     background-color: #495666;
     color: #fff;
     transition: 0.2s;
-    cursor: pointer;
     border: none;
+    cursor: pointer;
     white-space: nowrap;
-    flex-shrink: 0;
     }
     
     .modal-cancel-button:hover,
@@ -662,20 +722,91 @@
     background-color: #CFD5DF;
     }
     
-    .modal-undo-button {
-    background-color: #FF5F5F;
+    .modal-cancel-button:focus,
+    .modal-save-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
     }
     
-    .modal-undo-button:hover {
-    background-color: #ff7a7a;
+    .modal-revert-button {
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.25rem;
+    background-color: #495666;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
     }
     
-    .modal-undo-button:disabled {
-    background-color: #cbd5e1;
-    cursor: not-allowed;
-    opacity: 0.6;
+    .modal-revert-button:hover {
+    color: #222;
+    background-color: #CFD5DF;
     }
     
+    .modal-revert-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    }
+    
+    .create-form-group {
+    margin-bottom: 20px;
+    }
+    
+    .create-form-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #334155;
+    }
+    
+    .checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #CFD5DF;
+    }
+    
+    .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #334155;
+    }
+    
+    .checkbox-label input {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    }
+    
+    .file-input-area {
+    display: none;
+    margin-left: 28px;
+    margin-top: 8px;
+    }
+    
+    .file-input-area.active {
+    display: block;
+    }
+    
+    .file-input {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border: 2px dashed #CFD5DF;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #64748b;
+    cursor: pointer;
+    }
+    
+    /* 日付入力のスタイル */
     .modal-date-input {
     width: 100%;
     border: 1px solid #CFD5DF;
@@ -686,12 +817,247 @@
     color: #334155;
     cursor: not-allowed;
     }
-    
-    .error-message {
-    color: #ef4444;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
+
+    /* インラインスタイル統合 */
+    .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    }
+
+    .py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    }
+
+    .space-y-4 > * + * {
+    margin-top: 1rem;
+    }
+
+    .mb-3 {
+    margin-bottom: 0.75rem;
+    }
+
+    .ml-6 {
+    margin-left: 1.5rem;
+    }
+
+    .mt-1 {
+    margin-top: 0.25rem;
+    }
+
+    .mb-2 {
+    margin-bottom: 0.5rem;
+    }
+
+    .relative {
+    position: relative;
+    }
+
+    .text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    }
+
+    .font-bold {
+    font-weight: bold;
+    }
+
+    .text-slate-700 {
+    color: #374151;
+    }
+
+    .border-b-2 {
+    border-bottom-width: 2px;
+    }
+
+    .border-\[\#C0DEFF\] {
+    border-color: #C0DEFF;
+    }
+
+    .px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    }
+
+    .inline-block {
+    display: inline-block;
+    }
+
+    .flex {
+    display: flex;
+    }
+
+    .flex-shrink-0 {
+    flex-shrink: 0;
+    }
+
+    .mt-6 {
+    margin-top: 1.5rem;
+    }
+
+    .gap-8 {
+    gap: 2rem;
+    }
+
+    .align-items-center {
+    align-items: center;
+    }
+
+    .flex-col {
+    flex-direction: column;
+    }
+
+    .gap-12 {
+    gap: 3rem;
+    }
+
+    .gap-6 {
+    gap: 1.5rem;
+    }
+
+    .gap-4 {
+    gap: 1rem;
+    }
+
+    .min-w-0 {
+    min-width: 0;
+    }
+
+    .flex-grow {
+    flex-grow: 1;
+    }
+
+    .text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    }
+
+    .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    }
+
+    .text-slate-500 {
+    color: #64748b;
+    }
+
+    .text-emerald-600 {
+    color: #059669;
+    }
+
+    .text-blue-600 {
+    color: #2563eb;
+    }
+
+    .text-indigo-600 {
+    color: #4f46e5;
+    }
+
+    .text-gray-400 {
+    color: #9ca3af;
+    }
+
+    .text-blue-500 {
+    color: #3b82f6;
+    }
+
+    .modal-form-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    }
+
+    .teacher-input-row,
+    .room-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    }
+
+    .teacher-input-row select,
+    .room-input-row select {
+    flex: 1;
+    }
+
+    .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #94a3b8;
+    flex-shrink: 0;
+    }
+
+    .remove-teacher-btn,
+    .remove-room-btn {
+    padding: 4px 8px;
+    background-color: #f87171;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    }
+
+    .add-button {
+    padding: 4px 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    }
+
+    .hidden {
+    display: none;
+    }
+
+    /* モーダル内のフォーム要素スタイル */
+    .teacher-selection-area,
+    .room-selection-area {
+    margin-left: 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    }
+
+    .teacher-input-row,
+    .room-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    }
+
+    .teacher-input-row select,
+    .room-input-row select {
+    flex: 1;
+    }
+
+    .add-teacher-btn,
+    .add-room-btn {
+    margin-left: 8rem;
+    margin-top: 6px;
+    padding: 4px 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    }
+
+    .modal-button-area .flex-grow {
+    flex-grow: 1;
+    }
+
+    .modal-revert-button {
+    white-space: nowrap;
+    }
+
+    .modal-cancel-button,
+    .modal-save-button {
+    white-space: nowrap;
     }

@@ -1,6 +1,7 @@
 <?php
 // create_timetable.php
 SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 ?>
 <!DOCTYPE html>
 <html lang="ja">

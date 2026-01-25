@@ -1,15 +1,17 @@
 <?php
-// CreateTimetableController.php
-// 時間割作成画面のコントローラー
+// TimetableController.php
 
+// 必要なリポジトリやヘルパーを読み込む
+// ディレクトリ構成図に基づき、相対パスを調整
+require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../../classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../../classes/repository/home/HomeRepository.php';
 require_once __DIR__ . '/../../../services/master/timetable_create/TimetableService.php'; // Serviceクラスの読み込み
 
-class CreateTimetableController extends HomeRepository
+class TimetableChangeController extends HomeRepository
 {
-    public function index()
-    {
+
+    public function edit() {
         parent::session_resetting();
         SecurityHelper::requireLogin();
         
@@ -42,6 +44,6 @@ class CreateTimetableController extends HomeRepository
         ]);
 
         // Viewにデータを渡す（requireすることで変数がView内で使えるようになります）
-        require_once __DIR__ . '/../../../../public/master/timetable_create/create_timetable.php';
+        require_once __DIR__ . '/../../../../public/teacher/timetable_change/timetable_change.php';
     }
 }
