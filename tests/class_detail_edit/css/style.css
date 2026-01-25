@@ -1,0 +1,874 @@
+/* ヘッダー */
+.header {
+    /* 画面上部に固定 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF; /* 画像に合わせて薄い水色から白に近い色へ */
+    height: 70px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    /* gap: 10px; */
+ }
+ 
+ .header h1 {
+     font-size: 20px;
+     font-weight: 700;
+     text-align: center;
+ }
+ 
+ .user-icon {
+     position: absolute; /* headerの真ん中寄せを維持するため絶対配置に */
+     right: 20px;
+     height: 24px; /* 画像サイズに合わせて調整 */
+     width: 24px;
+ }
+ 
+ /* メインコンテナ */
+ .main-container { 
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 0; /* content-area側のmarginで調整するので0でOK */
+}
+ 
+ /* 左サイドバー */
+ .sidebar {
+     /* 画面の左側に固定 */
+     position: fixed; 
+     left: 0;
+     bottom: 0;
+     top: 70px; 
+     /* 常に最前面に表示 */
+     z-index: 999;
+     width: 300px; 
+     background-color: #F3F8FF;
+     padding: 0 0 0 10px;
+     flex-shrink: 0; 
+     border-right: solid 1px #CFD5DF;
+ }
+ 
+ /* 右メインコンテンツエリア（HTMLの <section class="content-area"> に対応） */
+ .content-area { 
+    /* position: fixed; は削除 */
+    margin-top: 68px;   /* ヘッダー(70px)の少し下から開始 */
+    margin-left: 300px; /* サイドバーの幅(300px)分だけ左に余白を作る */
+    padding: 30px 20px;
+    flex-grow: 1;       /* 残りの横幅を自動で埋める */
+    min-width: 0;       /* 中身がはみ出すのを防ぐおまじない */
+}
+ 
+ /* サイドバー内部の調整 */
+ .sidebar ul { 
+     padding: 0;
+ }
+ 
+ .nav-item {
+     position: relative; 
+     padding: 0; /* 親要素のパディングを削除 */
+ }
+ 
+ /* フィルターアイテム（"全学年"などのテキスト部分）のスタイル */
+ .sidebar ul .nav-item:not(.is-group-label):not(.has-dropdown) {
+     width: 290px;
+     padding: 10px 20px;
+     text-align: left;
+     border: none;
+     background-color: transparent;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+     box-sizing: border-box; /* パディングを含めて幅を計算 */
+ }
+ 
+ /* アクティブなフィルターアイテムのスタイル */
+ .sidebar ul .nav-item.is-active {
+     background-color: #C0DEFF; /* ライトブルーの背景 */
+ }
+ 
+ /* グループラベルのスタイル（「フィルター」など） */
+ .is-group-label {
+     pointer-events: none; 
+     border-bottom: none;
+     padding: 15px 0;
+ }
+ 
+ /* 次回以降" の見出しのスタイル調整 */
+ h2.is-group-label {
+     padding: 10px 20px 5px 20px; /* 上パディングを小さく */
+     margin-top: 5px; /* reflection-status との間にマージンを追加 */
+     margin-bottom: 0; /* デフォルトのh2マージンをリセット */
+     font-weight: normal; 
+ }
+ 
+ /* --- ドロップダウンボタンのスタイル --- */
+ .nav-item a, .dropdown-toggle {
+    display: block;
+     width: 290px;
+     padding: 10px 20px;
+     text-align: left;
+     border: none;
+     background-color: transparent;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     position: relative;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     /* 通常時にも角丸を設定し、ホバー時のちらつきを防止 */
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+ }
+ 
+ /* 現在の値の表示（年度、コース） */
+ .dropdown-toggle .current-value {
+     margin-left: 0;
+ }
+ 
+    /* アクティブなドロップダウンボタンのスタイル */
+ .nav-item a.is-active {
+     /* ホバー時と同じ背景色を固定で適用 */
+     background-color: #CFD5DF; 
+ }
+ 
+ /* ホバー時のスタイル（非アクティブ時） */
+ .nav-item a:hover {
+     background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+ }
+ 
+ /* ドロップダウンボタンが閉じている時のホバー効果 */
+ /* コース */
+ #courseDropdownToggle[aria-expanded="false"]:hover {
+     background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+ }
+ /* 学年 */
+ #gradeDropdownToggle[aria-expanded="false"]:hover {
+     background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+ }
+ /* ドロップダウンボタンアクティブ状態の制御 */
+ 
+ /* 【コースボタン】 閉じている時 -> 透明 */
+ #courseDropdownToggle[aria-expanded="false"] {
+     background-color: transparent; 
+ }
+ 
+ /* 【コースボタン】 開いた時 -> グレー */
+ #courseDropdownToggle[aria-expanded="true"] {
+     background-color: #CFD5DF; 
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+ }
+ 
+ /* 【学年ボタン】 閉じている時 -> 透明 */
+ #gradeDropdownToggle[aria-expanded="false"] {
+     background-color: transparent; 
+ }
+ 
+ /* 【学年ボタン】 開いた時 -> グレー */
+ #gradeDropdownToggle[aria-expanded="true"] {
+     background-color: #CFD5DF; 
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+ }
+ 
+ /* --- ドロップダウンメニューのスタイル --- */
+ .dropdown-menu {
+     /* 絶対位置指定から、画面全体を基準とした固定位置指定に変更 */
+     position: fixed;
+     width: 250px; 
+     background-color: #fff;
+     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4); /* 影を強調し、浮いていることを示す */
+     z-index: 1001; /* ヘッダー(1000)より高くし、最前面に表示 */
+     display: none; /* 初期状態で非表示にする */
+     border-radius: 20px;
+ }
+ 
+ /* is-openクラスが付いたメニューを表示 */
+ .dropdown-menu.is-open {
+     padding: 10px 0 ; 
+     display: block; 
+     width: 250px;
+     border: 1px solid #CFD5DF;
+     top: auto; 
+     left: auto;
+ }
+ 
+ /* コースのドロップダウンメニューに高さとスクロールを適用 */
+ #courseDropdownMenu {
+     /* サイドバーのスペースを考慮し、画面の高さに合わせて調整 */
+     max-height: 200px; /* 最大高さを指定 */
+     overflow-y: auto; /* 縦方向のスクロールを有効にする */
+     /* 横方向のスクロールを非表示にする */
+     overflow-x: hidden;
+ }
+ 
+    /* ドロップダウンメニューの各項目スタイル */
+ .dropdown-menu li a {
+     display: block;
+     /* ホバー範囲をメニュー幅に収めるため230pxに設定 */
+     width: 230px;
+     padding: 9px 10px; /* 画像に合わせてパディングを調整 */
+     text-align: left;
+     font-size: 14px;
+     border: none;
+     background-color: transparent;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     position: relative;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     /* 左右に10pxの余白を設定 */
+     margin: 0 0 0 10px; 
+ }
+ 
+    /* ドロップダウンメニュー項目のホバー効果 */
+ .dropdown-menu li a:hover {
+     background-color: #CFD5DF; /* グレー */
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+ }
+ 
+    /* 次の授業セクション */
+ .next-lesson-wrapper {
+    display: flex;
+ }
+
+ /* next-lesson-wrapper内のliとpのスタイル調整 */
+ .next-lesson-wrapper li {
+    font-size: 500;
+    width: auto;
+    height: auto;
+ }
+
+ /* next-lesson-wrapper内のpのスタイル調整 */
+ .next-lesson-wrapper p {
+    font-size: 14px;
+    width: auto;
+    height: auto;
+    color: #FF5F5F;
+    position: static;
+    margin-left: 10px; /* next-lesson-wrapper内のliと間隔を空ける */
+    margin-top: 0;
+    margin-bottom: 0;
+ }
+
+ /* 授業ステータスセクション */
+ .lesson-status-wrapper {
+     display: flex;
+     /* --- デフォルトの幅は290pxを維持 --- */
+     width: 290px;
+     padding: 10px 20px;
+     text-align: left;
+     border: none;
+     background-color: #FFF;
+     border-right: solid 1px #CFD5DF;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     position: relative;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+     margin-bottom: 15px;
+ }
+ 
+    /* 授業ステータスボタンのスタイル */
+ .status-button {
+     padding: 4px 8px;
+     border: none;
+     border-top-left-radius: 5px;
+     border-bottom-left-radius: 5px;
+     font-weight: normal;
+     cursor: pointer;
+     min-width: 70px;
+     text-align: left;
+ }
+
+    /* グループラベルのスタイル（「フィルター」など） */
+ .is-group-label {
+    font-weight: 500;
+    width: auto;
+    height: auto;
+ }
+
+ /* 状態別の色 */
+ .in-progress {
+     background-color: #ff5e5e; /* 作成済み (赤) */
+     color: #FFF;
+ }
+ 
+ 
+ .creating {
+     background-color: #F8FF99; /* 作成中 (黄/緑) */ 
+ }
+ 
+ .not-created {
+     background-color: #C0DEFF; /* 未作成 (ライトブルー) */
+ }
+ 
+ .reflection-status {
+    color: #ff5e5e; /* 赤色 */
+    text-align: left; /* 左寄せ */
+    padding: 0 0 0 20px; 
+    margin-bottom: 5px; /* 次の見出しとの間にマージン */
+}
+
+/* 月選択エリア */
+.month-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 矢印と月の間隔 */
+    justify-content: flex-start; /* 左寄せ */
+    margin-left: 0;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+.month-search {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.left-arrow {
+    background-color: #F3F8FF;
+    border-radius: 100%;
+    padding: 8px 8px;
+}
+
+.month {
+    position: static;
+    font-size: 35px;
+    font-weight: 700;
+}
+
+.right-arrow {
+    position: static;
+    background-color: #F3F8FF;
+    border-radius: 100%;
+    padding: 8px 8px;
+}
+
+/* 月表示エリアを右上に固定 */
+.month-wrapper {
+    display: flex;
+    flex-direction: column; /* 子要素を縦に並べる */
+    align-items: flex-end;  /* 右側に寄せる */
+    position: absolute;     /* 親要素に対して位置を固定 */
+    top: 90px;              /* ヘッダー(70px) + 余白(20px) */
+    right: 20px;            /* 右からの距離 */
+    text-align: right;
+}
+
+/* --- コース名タイトル--- */
+.course-name-title {
+    margin-left: auto; 
+    font-size: 35px;
+    font-weight: 700;
+}
+
+/* カレンダーコンテナの幅と配置調整 */
+.calendar-container {
+    margin-top: 40px; 
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    background-color: #fff;
+    padding: 10px;
+    width: 100%; /* width: auto から 100% に変更 */
+    box-sizing: border-box;
+}
+    /* カレンダーコンテナの幅と配置調整 */
+.calendar-container {
+    margin-top: 40px; 
+    margin-left: 0;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    background-color: #fff;
+    padding: 10px;
+    width: auto; 
+}
+
+.calendar-grid {
+    display: grid;
+    /* 7列 (日～土) - 各列を1frで均等分割（画面いっぱい） */
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 0;
+    text-align: center;
+}
+
+/* 曜日ヘッダーのスタイル */
+.day-header {
+    padding: 5px 0;
+    font-weight: 500;
+    text-align: left;
+    border-bottom: 1px solid #CFD5DF;
+    width: auto; 
+}
+
+.day-header.is-sunday {
+    color: #FF5F5F; /* 日曜日（赤） */
+}
+
+.day-header.is-saturday {
+    color: #4BA0FF; /* 土曜日（青） */
+}
+
+/* 日付マスの基本スタイル */
+.date-cell {
+    /* マス目の最小高さを指定 */
+    min-height: 120px; 
+    /* 上下の罫線を日付の下にのみ表示するため */
+    border-right: 1px solid #CFD5DF;
+    border-bottom: 1px solid #CFD5DF;
+    padding: 5px;
+    /* 日付番号を左上に配置 */
+    text-align: left; 
+    font-size: 21px;
+    font-weight: 500;
+    position: relative;
+    cursor: pointer;
+    width: auto;
+}
+
+/* --- デフォルトでは背景を透明にする --- */
+.date-num {
+    position: relative;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent; 
+}
+
+.date-cell-circle {
+    background-color: #C0DEFF;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+}
+
+/* .status-label {
+    padding: 4px 8px;
+     border: none;
+     border-top-left-radius: 5px;
+     border-bottom-left-radius: 5px;
+     font-weight: normal;
+     cursor: pointer;
+     min-width: 70px;
+     text-align: left;
+     background-color: #C0DEFF;
+} */
+
+/* 各行の最終列（土曜日）の右側の罫線を消す */
+.date-cell:nth-child(7n) {
+    border-right: none;
+}
+
+/* 曜日ヘッダーを除いた35マスが日付なので、36マス目以降 */
+.calendar-grid .date-cell:nth-child(n + 36) { 
+    border-bottom: none;
+}
+
+/* 翌月・前月の日付の色 */
+.is-out-of-month {
+    background-color: #F3F8FF; /* 薄い青/白 */
+    color: #aaa; /* グレーアウト */
+}
+
+/* 日曜日の色 */
+.is-sunday .date-num {
+    color: #FF5F5F !important;
+}
+
+/* 土曜日の色 */
+.is-saturday .date-num {
+    color: #4BA0FF !important;
+}
+
+/* ラベルが表示される日（青丸） */
+.has-data .date-num {
+    background-color: #C0DEFF;
+}
+
+/* 状態別の色（status-button用） */
+.status-button.not-created { background-color: #C0DEFF; color: #000;} /* 未作成（青色） */
+.status-button.creating { background-color: #F8FF99; color: #000; } /* 作成中（黄色） */
+.status-button.in-progress { background-color: #FF5F5F; color: #fff; } /* 作成済み（赤色） */
+
+/* --- モーダル（ポップアップ）関連のスタイル --- */
+/* モーダル背景（オーバーレイ） */
+.modal-overlay {
+    display: none; /* 初期状態で非表示 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒 */
+    z-index: 2000; /* ヘッダーやドロップダウンの上に表示 */
+    justify-content: center; /* 中央寄せ */
+    align-items: center; /* 中央寄せ */
+}
+
+/* モーダル本体 */
+.modal-content {
+    background-color: #C0DEFF; /* 背景色を白に変更 */
+    width: 700px; /* 画像に合わせた幅 */
+    max-width: 90%; 
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+}
+
+/* モーダルヘッダーの内部レイアウト */
+.modal-header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    padding-left: 20px; /* 左側に少し余白 */
+}
+
+/* 日付のスタイル */
+.modal-date {
+    font-weight: 500;
+    color: #495666;
+    margin: 0;
+    flex-shrink: 0; /* 折り返さないように固定 */
+}
+
+/* 授業名のスタイル（中央寄せ） */
+.modal-lesson-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    flex-grow: 1; /* 残りのスペースをすべて占有 */
+    text-align: center; /* テキストを中央に */
+    padding-right: 44px; /* 右側のアイコン分のスペースを考慮して中心を調整 */
+}
+
+.modal-header .user-icon {
+    position: absolute;
+    right: 20px;
+    height: 24px;
+    width: 24px;
+}
+
+/* モーダルのコンテンツ本体 */
+.modal-body {
+    padding: 30px 50px;
+    background-color: #F3F8FF; /* 背景色を薄い青のまま維持 */
+}
+
+.form-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #CFD5DF; /* 画像に合わせて境界線を追加 */
+    margin-bottom: 25px;
+}
+
+.form-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* 授業詳細テキストエリア */
+.lesson-details-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    resize: none; 
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* --- 持ち物セクションのスタイル --- */
+.sub-title {
+    font-weight: 500;
+}
+
+.common-items-area {
+    margin-bottom: 20px;
+}
+
+/* --- 「よく使う持ち物」エリア --- */
+.item-list-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 折り返しに対応するため上揃えに */
+    border-bottom: 1px solid #CFD5DF;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    width: 484px; 
+    height: 70px;
+    /* 縦スクロールのみ有効、横は隠す */
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.item-tags {
+    display: flex;
+    flex-wrap: wrap; /* 4個目の次などで自動的に折り返す */
+    gap: 12px 24px; /* 上下間隔 12px / 左右間隔 24px */
+    flex: 1; /* ゴミ箱アイコン以外のスペースを占有 */
+}
+
+.item-tag-container {
+    display: inline-flex;
+    align-items: center;
+    background-color: #fff; 
+    border: 1px solid #CFD5DF;
+    border-radius: 6px; 
+    flex-shrink: 0;
+}
+
+.item-tag {
+    padding: 8px 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #495666;
+    border: 1px dashed #CFD5DF;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* 右側のゴミ箱アイコンがスクロールに巻き込まれないよう固定 */
+.item-delete-icon-wrapper {
+    margin-left: 10px;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    padding: 6px 8px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    cursor: pointer;
+}
+
+.delete-icon {
+    /* 画像のゴミ箱アイコンに合わせてサイズと色を調整 */
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.add-item-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.add-item-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    font-family: inherit;
+}
+
+.add-button {
+    background-color: #495666; 
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+/* 現在の持ち物表示エリア */
+.current-items-area {
+    border: 1px solid #CFD5DF;
+    border-radius: 4px;
+    padding: 15px;
+    min-height: 70px;
+    position: relative;
+    background-color: #FFF;
+}
+
+/* 「持ち物は入力されていません」の入力エリア */
+.details-textarea,
+.details-items-textarea {
+    width: 530px;
+    height: 100px;
+    padding: 15px;
+    border: 1px solid #CFD5DF;
+    border-radius: 5px;
+    resize: none; 
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+    background-color: #fff;
+    display: block;
+    margin-top: 10px;
+}
+
+/* プレースホルダーの色 */
+.details-textarea::placeholder,
+.details-items-textarea::placeholder {
+    color: #A5ADBC;
+}
+
+/* 親コンテナの幅も合わせて調整が必要な場合 */
+.current-items-area {
+    width: 530px; 
+    border: none;
+}
+
+.details-items-textarea::placeholder {
+    color: #A5ADBC;
+    opacity: 1; 
+}
+
+.details-text-wrapper {
+    padding: 10px;
+}
+
+/* --- モーダルのフッターボタン --- */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background-color: #F3F8FF;
+}
+
+.delete-button {
+    background-color: #ff5e5e; 
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.save-button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.temp-save-button {
+    background-color: #495666; 
+    color: #fff;
+}
+
+.complete-button {
+    background-color: #495666; 
+    color: #fff;
+}
+
+/* 削除モード時のボタン（赤） */
+.add-button.is-delete-mode {
+    background-color: #ff5e5e;
+}
+
+/* 削除対象として選択されたアイテムの枠線（黒） */
+.item-tag-container.is-selected {
+    border: 2px solid #000;
+}
+
+/* 削除モード時のカーソル */
+.is-delete-mode-active .item-tag-container {
+    cursor: pointer;
+}
+
+/* 削除モード時のボタン（赤） */
+.add-button.is-delete-mode {
+    background-color: #ff5e5e !important;
+}
+
+/* 削除対象として選択されたアイテムの枠線（黒） */
+.item-tag-container.is-selected {
+    border: 2px solid #000 !important;
+}
+
+/* 削除モード中のゴミ箱アイコン（回転させたり色を変えたりする場合） */
+.delete-icon.is-active {
+    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); /* アイコンを赤っぽく */
+    transform: scale(1.1);
+}
+
+/* 青い丸のついた日付セルのみの親設定 */
+.date-cell.highlight-blue {
+    position: relative;
+    cursor: pointer;
+}
+
+/* ホバーしたときだけ表示 */
+.date-cell.highlight-blue:hover::after,
+.date-cell.highlight-blue:hover::before {
+    display: block;
+}
+
+/* 日付の数字背後の青い丸（既存のdate-num設定がある場合） */
+.date-num {
+    position: relative;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.highlight-blue .date-num {
+    background-color: #C0DEFF;
+}
+
+/* status-buttonかつnot-createdクラスを持つ要素の背景色を強制上書き */
+button.status-button.not-created {
+    background-color: #C0DEFF !important;
+}
+
+.status-button.not-created {
+    background-color: #C0DEFF !important;
+}
+
+.status-button.not-created, .status-label {
+    background-color: #C0DEFF !important;
+}
+
+/* buttonタグかつstatus-buttonクラスかつnot-createdクラスの背景色を強制上書き */
+button.status-button.not-created {
+    background-color: #C0DEFF !important;
+}
+
+/* 「未作成」ラベルをカレンダー内だけで非表示にする */
+.date-cell .status-button.not-created {
+    display: none;
+}
