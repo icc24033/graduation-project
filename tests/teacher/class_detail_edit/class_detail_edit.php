@@ -188,6 +188,6 @@
             </main>
         <footer></footer>
         
-        <script src="js/script.js"></script>
+        <script src="js/class_detail_edit.js"></script>
     </body>
 </html>

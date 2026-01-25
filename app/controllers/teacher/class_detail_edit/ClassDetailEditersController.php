@@ -25,6 +25,6 @@ class ClassDetailEditersController
         
         // ビュー（画面）の読み込み
         // class_detail_editers.php を読み込む
-        require_once __DIR__ . '/../../../../public/teacher/class_detail_edit/class_detail_edit.php';
+        require_once __DIR__ . '/../../../../tests/teacher/class_detail_edit/class_detail_edit.php';
     }
 }
