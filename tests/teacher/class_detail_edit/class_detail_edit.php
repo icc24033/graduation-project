@@ -1,10 +1,19 @@
+<?php
+// class_detail_edit.php
+// 授業詳細編集画面のビュー
+// SecurityHelper::requireLogin();
+SecurityHelper::applySecureHeaders();
+
+// コントローラーから渡されていない場合の初期値設定
+$gradeList = $gradeList ?? [];
+$courseList = $courseList ?? [];
+$subjectList = $subjectList ?? [];
+?>
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-        <title></title>
+        <title>授業詳細編集</title>
         <meta charset="utf-8">
-        <meta name="discription" content="">
-        <meta name="keywords" content="">
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="robots" content="nofollow,noindex">
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,73 +33,52 @@
         <main>
             <nav class="sidebar">
                 <ul>
-                    <li class="is-group-label">フィルター</li>
-                        <li class="nav-item has-dropdown">
-                            <button class="dropdown-toggle" id="gradeDropdownToggle" aria-expanded="false">
-                                <span class="current-value">全学年</span>
-                            </button>
-                            <ul class="dropdown-menu" id="gradeDropdownMenu">
-                                <li><a href="#" data-course="1nen">１年生</a></li>
-                                <li><a href="#" data-course="2nen">２年生</a></li>
-                                <li><a href="#" data-course="all">全学生</a></li>
+                    <li class="is-group-label">フィルター設定</li>
+                    
+                    <li class="nav-item has-dropdown">
+                        <button class="dropdown-toggle" id="gradeFilterToggle" aria-expanded="false">
+                            <span class="current-value">全学年</span>
+                        </button>
+                        <ul class="dropdown-menu" id="gradeFilterMenu">
                             </ul>
-                        </li>
-                        <li class="nav-item has-dropdown">
-                            <button class="dropdown-toggle" id="courseDropdownToggle" aria-expanded="false">
-                                <span class="current-value">全コース</span>
-                            </button>
-                            <ul class="dropdown-menu" id="courseDropdownMenu">
-                                <li><a href="#" data-course="system-design">システムデザインコース</a></li>
-                                <li><a href="#" data-course="web-creator">Webクリエイタコース</a></li>
-                                <li><a href="#" data-course="multimedia-oa">マルチメディアOAコース</a></li>
-                                <li><a href="#" data-course="applied-info">応用情報コース</a></li>
-                                <li><a href="#" data-course="basic-info">基本情報コース</a></li>
-                                <li><a href="#" data-course="it-passport">ITパスポートコース</a></li>
-                                <li><a href="#" data-course="1-1">1年1組</a></li>
-                                <li><a href="#" data-course="1-2">1年2組</a></li>
-                                <li><a href="#" data-course="1-2">全コース</a></li>
+                    </li>
+
+                    <li class="nav-item has-dropdown">
+                        <button class="dropdown-toggle" id="courseFilterToggle" aria-expanded="false">
+                            <span class="current-value">全コース</span>
+                        </button>
+                        <ul class="dropdown-menu" id="courseFilterMenu">
                             </ul>
-                        </li>
-                        <li class="nav-item has-dropdown">
-                            <button class="dropdown-toggle" id="subjectDropdownToggle" aria-expanded="false">
-                                <span class="current-value">テキスト1</span>
-                            </button>
-                            <ul class="dropdown-menu" id="subjectDropdownMenu">
-                                <li><a href="#" data-course="system-design">テキスト1</a></li>
-                                <li><a href="#" data-course="web-creator">テキスト2</a></li>
+                    </li>
+
+                    <li style="border-top: 1px solid #ccc; margin: 15px 10px; padding-top: 15px;"></li>
+                    <li class="is-group-label" style="color: #0056b3; font-weight:bold;">編集対象の科目</li>
+
+                    <li class="nav-item has-dropdown subject-selector-wrapper">
+                        <button class="dropdown-toggle special-subject-toggle" id="subjectSelectorToggle" aria-expanded="false">
+                            <span class="current-value">読込中...</span>
+                        </button>
+                        <ul class="dropdown-menu" id="subjectSelectorMenu">
                             </ul>
-                        </li>
+                    </li>
                     
                     <div class="next-lesson-wrapper">
                         <li class="is-group-label">次回の授業</li>
                     </div>
                     <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
+                        <div class="lesson-date-item">--月--日(-) --限</div>
                         <button class="status-button not-created">未作成</button>
                     </div>
-                        <li class="is-group-label">次回以降</li>
+                    
+                    <li class="is-group-label">次回以降</li>
+                    
                     <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">○月○日(○) ○限</div>
+                        <div class="lesson-date-item">--月--日(-) --限</div>
                         <button class="status-button not-created">未作成</button>
                     </div>
                 </ul>
             </nav>
+            
             <section class="content-area">
                 <div class="month-selector">
                     <div class="month-search">
@@ -125,7 +113,6 @@
                     <header class="modal-header">
                         <div class="modal-header-content">
                             <p class="modal-date">〇月〇日(〇)</p>
-                            <!-- <h1 class="modal-lesson-title">C#</h1> -->
                         </div>
                         <img class="user-icon" src="images/user-icon.png" alt="アイコン">
                     </header>
@@ -147,16 +134,7 @@
                                             <span class="item-tag">ノートパソコン</span>
                                         </div>
                                         <div class="item-tag-container">
-                                            <span class="item-tag">筆記用具</span>
-                                        </div>
-                                        <div class="item-tag-container">
                                             <span class="item-tag">教科書1</span>
-                                        </div>
-                                        <div class="item-tag-container">
-                                            <span class="item-tag">教科書2</span>
-                                        </div>
-                                        <div class="item-tag-container">
-                                            <span class="item-tag">プリント</span>
                                         </div>
                                     </div>
                                     <div class="item-delete-icon-wrapper">
@@ -185,9 +163,11 @@
                     </div>
                 </div>
             </div>
-            </main>
-        <footer></footer>
-        
+        </main>
+        <script>
+            // PHPの配列をJSON形式でJSオブジェクトとして受け取る
+            const assignedClassesData = <?php echo json_encode($assignedClasses ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        </script>
         <script src="js/class_detail_edit.js"></script>
     </body>
 </html>

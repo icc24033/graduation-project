@@ -94,6 +94,11 @@ class SubjectInChargesRepository extends BaseRepository {
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':courseId', $courseId, PDO::PARAM_INT);
+
+            if (!is_null($grade)) {
+                $stmt->bindValue(':grade', $grade, PDO::PARAM_INT);
+            }
+
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -101,6 +106,39 @@ class SubjectInChargesRepository extends BaseRepository {
         } catch (PDOException $e) {
             error_log("SubjectInChargesRepository Error: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * 指定された先生IDに関連する担当授業（コース、科目、学年）を取得する
+     * @param int|string $teacherId
+     * @return array
+     */
+public function getAssignedClassesByTeacherId($teacherId) {
+        try {
+            // 重複を除外して取得
+            $sql = "
+                SELECT DISTINCT
+                    sic.course_id,
+                    c.course_name,
+                    c.grade,
+                    sic.subject_id,
+                    s.subject_name
+                FROM subject_in_charges sic
+                INNER JOIN course c ON sic.course_id = c.course_id
+                INNER JOIN subjects s ON sic.subject_id = s.subject_id
+                WHERE sic.teacher_id = :teacherId
+                ORDER BY c.grade ASC, sic.course_id ASC, sic.subject_id ASC
+            ";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':teacherId', $teacherId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            return []; // エラー時は空配列を返す
         }
     }
 }
