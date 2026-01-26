@@ -30,104 +30,92 @@ class ClassDetailEditService {
      * カレンダー表示用のデータを生成
      * 基本時間割、変更情報、保存済み詳細をマージして返す
      */
-    public function getCalendarData($teacherId, $subjectId, $courseId, $year, $month) {
-        // 1. 保存済みの授業詳細データを取得
+    public function getCalendarData($teacherId, $subjectId, array $courseIds, $year, $month) {
         $infoRepo = RepositoryFactory::getClassDailyInfoRepository();
-        $savedInfos = $infoRepo->findByMonthAndSubject($year, $month, $subjectId, $courseId);
         
-        // 検索しやすいように日付をキーにしたマップに変換
-        $savedMap = [];
-        foreach ($savedInfos as $info) {
-            $savedMap[$info['date']] = $info;
-        }
+        // 複数コースのうち、代表1つ（最初の1つ）のデータを取得すれば、
+        // 「同じ授業を行う」前提なら内容は同じはず。
+        // ただし、もしコースごとに日付が違う（月曜クラスと火曜クラス）場合を考慮し、
+        // 「対象コース全てのデータを取得してマージ」するのが安全です。
+        
+        $mergedData = [];
 
-        // 2. その月のカレンダー日付を生成＆判定
-        // ここでは簡易的に「基本時間割でその科目が設定されている曜日」を特定する必要があります。
-        // 本来は TimeTableRepository から「このクラスのこの科目は月曜1限」などの情報を引きます。
-        
-        // ※実装の複雑さを下げるため、まずは「保存データがある日」と
-        // 「固定の曜日（仮）」でデータを構築するロジックの枠組みを作ります。
-        
-        $calendarData = [];
-        $daysInMonth = date('t', mktime(0, 0, 0, $month, 1, $year));
-
-        for ($d = 1; $d <= $daysInMonth; $d++) {
-            $dateStr = sprintf('%04d-%02d-%02d', $year, $month, $d);
-            $timestamp = strtotime($dateStr);
-            $dayOfWeek = date('w', $timestamp); // 0(日)~6(土)
+        foreach ($courseIds as $cId) {
+            $savedInfos = $infoRepo->findByMonthAndSubject($year, $month, $subjectId, $cId);
             
-            // 判定ロジック（実際はDBから取得した時間割と照合）
-            // 例: 月曜(1)か水曜(3)なら授業があるとする
-            // TODO: ここを TimetableDetailsRepository を使って動的にする
-            $isLessonDay = ($dayOfWeek == 1 || $dayOfWeek == 3); 
-
-            // TODO: TimetableChangeRepository で変更/休講をチェック
-            
-            if ($isLessonDay) {
-                // デフォルト状態
-                $status = 'not-created';
-                $statusText = '未作成';
-                $details = '';
-                $belongings = '';
-                $slot = '1限'; // 仮
-
-                // 保存済みデータがあれば上書き
-                if (isset($savedMap[$dateStr])) {
-                    $row = $savedMap[$dateStr];
-                    $slot = $row['period'] . '限';
-                    $details = $row['content'];
-                    $belongings = $row['belongings'];
-                    
-                    if ($row['status_type'] == 1) {
-                        $status = 'creating'; // 一時保存
-                        $statusText = '作成中';
-                    } elseif ($row['status_type'] == 2) {
-                        $status = 'in-progress'; // 完了（JSのクラス名に合わせて調整）
-                        $statusText = '作成済';
-                    }
+            foreach ($savedInfos as $info) {
+                $date = $info['date'];
+                // 既にその日のデータがあれば上書きしない（あるいは最新を優先）
+                if (!isset($mergedData[$date])) {
+                    $mergedData[$date] = [
+                        'slot' => $info['period'] . '限',
+                        'status' => ($info['status_type'] == 2) ? 'in-progress' : 'creating',
+                        'statusText' => ($info['status_type'] == 2) ? '作成済' : '作成中',
+                        'content' => $info['content'],
+                        'belongings' => $info['belongings']
+                    ];
                 }
-
-                $calendarData[$dateStr] = [
-                    'slot' => $slot,
-                    'status' => $status,
-                    'statusText' => $statusText,
-                    'details' => $details, // JSで復元用
-                    'belongings' => $belongings // JSで復元用
-                ];
             }
         }
 
-        return $calendarData;
+        // ここに本来は「基本時間割(timetables)」から授業実施日を算出するロジックが入ります。
+        // 今回は「保存データがある日だけ表示」する簡易実装とします。
+        
+        return $mergedData;
     }
 
     /**
      * 授業詳細の保存処理
+     * @param array $data
+     * @return bool
      */
     public function saveClassDetail($data) {
         $repo = RepositoryFactory::getClassDailyInfoRepository();
-        // status文字列を数値コードに変換
-        $statusType = ($data['status'] === 'in-progress' || $data['status'] === '作成済み') ? 2 : 1;
+        $statusType = ($data['status'] === 'in-progress' || $data['status'] === '作成済み' || $data['status'] === 'created') ? 2 : 1;
+        $courseIds = $data['course_ids'] ?? [];
 
-        $saveData = [
-            'date' => $data['date'],
-            'period' => str_replace('限', '', $data['slot']), // "1限" -> 1
-            'course_id' => $data['course_id'],
-            'subject_id' => $data['subject_id'],
-            'teacher_id' => $data['teacher_id'],
-            'content' => $data['content'],
-            'belongings' => $data['belongings'],
-            'status_type' => $statusType
-        ];
+        if (!is_array($courseIds)) $courseIds = [$courseIds];
 
-        return $repo->save($saveData);
+        $success = true;
+        foreach ($courseIds as $cId) {
+            $saveData = [
+                'date' => $data['date'],
+                'period' => str_replace('限', '', $data['slot']),
+                'course_id' => $cId, // ループごとのコースID
+                'subject_id' => $data['subject_id'],
+                'teacher_id' => $data['teacher_id'],
+                'content' => $data['content'],
+                'belongings' => $data['belongings'],
+                'status_type' => $statusType
+            ];
+            
+            // 1つでも失敗したらfalse扱いにする（トランザクション制御が望ましいが簡易的に）
+            if (!$repo->save($saveData)) {
+                $success = false;
+            }
+        }
+        return $success;
     }
     
     /**
      * 授業詳細の削除処理
+     * @param string $date
+     * @param string $slot
+     * @param array $courseIds
+     * @return bool
      */
-    public function deleteClassDetail($date, $slot, $courseId) {
+    public function deleteClassDetail($date, $slot, $courseIds) {
         $repo = RepositoryFactory::getClassDailyInfoRepository();
         $period = str_replace('限', '', $slot);
-        return $repo->delete($date, $period, $courseId);
+        
+        if (!is_array($courseIds)) $courseIds = [$courseIds];
+
+        $success = true;
+        foreach ($courseIds as $cId) {
+            if (!$repo->delete($date, $period, $cId)) {
+                $success = false;
+            }
+        }
+        return $success;
     }
 }
