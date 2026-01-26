@@ -3,9 +3,11 @@
 require_once __DIR__ . '/../../../services/student/StudentHomeService.php';
 require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../../classes/login/student_login_class.php';
+require_once __DIR__ . '/../../../services/master/timetable_create/TimeTableService.php';
 
 class StudentHomeController {
     private $service;
+    private $serviceTimeTable;
     private $studentCourseId;
 
     public function __construct() {
@@ -15,6 +17,7 @@ class StudentHomeController {
         }
 
         $this->service = new StudentHomeService();
+        $this->serviceTimeTable = new TimeTableService();
         
         // セッションに値があるかチェックしてからインスタンスを作る（エラー回避）
         if (isset($_SESSION['user_id'], $_SESSION['user_grade'], $_SESSION['user_course'])) {
@@ -43,6 +46,11 @@ class StudentHomeController {
         // ビュー側の変数名 $selected_course に合わせるためにキーを調整
         $viewData['selected_course'] = $viewData['selected_course_id'];
     
+        $testdata = $this->serviceTimeTable->ChangeConsideringAllTimetables();
+        // 変数 $testdata をビューで使えるようにする    
+        extract($testdata);
+
+
         extract($viewData);
     
         RepositoryFactory::closePdo();
