@@ -412,4 +412,21 @@ class TimetableRepository extends BaseRepository {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * getDailyInfo
+     * 概要: 指定されたコースと日付の授業詳細・持ち物情報を取得する
+     */
+    public function getDailyInfo($courseId, $date) {
+        $sql = "SELECT period, content, belongings 
+                FROM class_daily_infos 
+                WHERE course_id = :cId AND date = :dVal";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':cId', $courseId, PDO::PARAM_INT);
+        $stmt->bindValue(':dVal', $date, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
