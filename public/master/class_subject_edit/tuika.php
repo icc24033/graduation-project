@@ -10,6 +10,21 @@
     <meta charset="UTF-8">
     <title>授業科目一覧</title>
     <link rel="stylesheet" href="../css/add_style.css"> 
+    <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">   
+            </div>
+            <div class="user-menu-popup" id="userMenuPopup">
+                    <a href="../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                        アプリからログアウト
+                    </a>
+                    <!-- リンク先わかりません -->
+                    <a href="" class="help-button">
+                        <span class="icon-lightbulb"></span> ヘルプ
+                    </a>
+                </div>
+            <!--  ICCスマートキャンパスロゴ -->
+            <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">  
 </head>
 <body>
     <header class="header"><h1>授業科目一覧</h1></header>
@@ -170,6 +185,27 @@
         // 外部JSで使用するために、PHPからデータを渡す
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
         let currentData = {}; // 外部JSから参照・更新される
+
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                // アイコンをクリックした時の処理
+                userAvatar.addEventListener('click', function(event) {
+                    // ポップアップの表示・非表示を切り替える
+                    userMenuPopup.classList.toggle('is-visible');
+                    // イベントの伝播を停止して、ドキュメント全体へのクリックイベントがすぐに実行されるのを防ぐ
+                    event.stopPropagation();
+                });
+
+                // ポップアップの外側をクリックした時に閉じる処理
+                document.addEventListener('click', function(event) {
+                    // クリックされた要素がアイコンでもポップアップ内でもない場合
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
     </script>
     <script src="../js/subject_edit.js"></script>
 </body>

@@ -22,8 +22,10 @@ SecurityHelper::applySecureHeaders();
     <div class="app-container">
         <header class="app-header">
             <h1>先生アカウント作成編集</h1>
-            <img class="user_icon" src="../images/user-icon.png"alt="ユーザーアイコン">
-        </header>
+            <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">
+            </div>   
+            </header>
 
         <main class="main-content">
             <nav class="sidebar">
@@ -69,6 +71,27 @@ SecurityHelper::applySecureHeaders();
             </div>
         </main>
     </div>
-    <script src="../js/script.js"></script>
+    <script src="../js/script.js">
+                    document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                // アイコンをクリックした時の処理
+                userAvatar.addEventListener('click', function(event) {
+                    // ポップアップの表示・非表示を切り替える
+                    userMenuPopup.classList.toggle('is-visible');
+                    // イベントの伝播を停止して、ドキュメント全体へのクリックイベントがすぐに実行されるのを防ぐ
+                    event.stopPropagation();
+                });
+
+                // ポップアップの外側をクリックした時に閉じる処理
+                document.addEventListener('click', function(event) {
+                    // クリックされた要素がアイコンでもポップアップ内でもない場合
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+    </script>
 </body>
 </html>

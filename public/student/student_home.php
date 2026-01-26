@@ -1,5 +1,5 @@
 <?php
-
+var_dump($testdata);
 /*
 session_start();
 $status = $_SESSION['timetable_details'] ?? [];
@@ -84,7 +84,7 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     <main class="main-content" id="schedule-container">
         <div class="schedule-list">
             <?php
-            for ($period = 1; $period <= 4; $period++) {
+            for ($period = 1; $period <= 5; $period++) {
                 $item = $schedule_by_period[$period] ?? null;
                 $subject_name = htmlspecialchars($item["subject_name"] ?? '');
                 $class_detail = htmlspecialchars($item["class_detail"] ?? '詳細情報はありません。');

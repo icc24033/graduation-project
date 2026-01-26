@@ -147,6 +147,7 @@ class TimetableService {
 
         return $timetables;
     }
+    
     /**
      * getAllCourseMasterData
      * 概要：マスタデータの取得
