@@ -20,8 +20,12 @@ class TeacherAccountEditController {
 
         $viewData = $this->service->getTeachers();
         RepositoryFactory::closePdo();
-        
+
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+
+        extract(['user_picture' => $user_picture]);
         extract($viewData);
+
         require_once '../master.php';
     }
 
@@ -33,6 +37,10 @@ class TeacherAccountEditController {
         $viewData = $this->service->getTeachers();
         RepositoryFactory::closePdo();
 
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+
+        extract(['user_picture' => $user_picture]);
+
         extract($viewData);
         require_once '../teacher_delete.php';
     }
@@ -42,6 +50,10 @@ class TeacherAccountEditController {
      */
     public function index_addition() {
         $basicInfo = $this->service->getAdditionBasicInfo($_GET['backend'] ?? '');
+
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+
+        extract(['user_picture' => $user_picture]);
         
         extract($basicInfo);
 
@@ -55,6 +67,10 @@ class TeacherAccountEditController {
 
         $viewData = $this->service->getTeachers();
         RepositoryFactory::closePdo();
+
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+
+        extract(['user_picture' => $user_picture]);
         
         extract($viewData);
         require_once '../teacher_Information.php';

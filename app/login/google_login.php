@@ -128,7 +128,7 @@ if (isset($_GET['code'])) {
                     session_regenerate_id(true);
                     $_SESSION['user_email']   = $userEmail;
                     $_SESSION['logged_in']    = true;
-                    $_SESSION['user_picture'] = $userInfo['picture'] ?? null;
+                    $_SESSION['user_picture'] = $userInfo['picture'] ?? null; // プロフィール画像URL
 
                     // --- ユーザータイプを問わず共通のメソッドで値を取得 ---
                     $_SESSION['user_id']    = $user->getUserId();
