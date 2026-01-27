@@ -1,7 +1,16 @@
 <?php
 // tuika.php
-// ここにあった foreach などのロジックは削除されました
-// すでに $subjects, $grade_val, $courseInfo などがコントローラーから渡されています
+// セッション開始（必要に応じて）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// SecurityHelperの読み込みとヘッダー適用
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+SecurityHelper::applySecureHeaders();
+
+// 元のロジック（コントローラーから渡される変数）はそのまま維持されます
+// $subjects, $grade_val, $courseInfo, $data, $teacherList, $roomList, $search_grade, $search_course, $smartcampus_picture など
 ?>
 
 <!DOCTYPE html>
@@ -20,20 +29,18 @@
     <header class="header">
         <h1>授業科目一覧</h1>
         <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
-            <img src="<?= htmlspecialchars($data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+            <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
         </div>
             <div class="user-menu-popup" id="userMenuPopup">
                 <a href="../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
                         アプリからログアウト
                 </a>
-                <!-- リンク先わかりません -->
                 <a href="" class="help-button">
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
-            <!--  ICCスマートキャンパスロゴ -->
-        <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
     </header>
     <div class="container">
         <nav class="sidebar">
@@ -57,7 +64,9 @@
                         <?php foreach ($courseInfo as $key => $info): 
                             if ($grade_val && $info['grade'] !== $grade_val) continue;
                         ?>
-                            <option value="<?= $key ?>" <?= $search_course === $key ? 'selected' : '' ?>><?= $info['name'] ?></option>
+                            <option value="<?= SecurityHelper::escapeHtml((string)$key) ?>" <?= $search_course === $key ? 'selected' : '' ?>>
+                                <?= SecurityHelper::escapeHtml((string)$info['name']) ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -75,10 +84,10 @@
             <?php foreach ($subjects as $row): ?>
                 <div class="subject-card" onclick='openDetail(<?= json_encode($row) ?>)'>
                     <div class="card-header">
-                        <?= $row['is_all'] ? '全体' : $row['grade'] . '年生' ?>
+                        <?= $row['is_all'] ? '全体' : SecurityHelper::escapeHtml((string)$row['grade']) . '年生' ?>
                     </div>
-                    <div class="card-body"><h3 class="card-title"><?= htmlspecialchars($row['title']) ?></h3></div>
-                    <div class="card-footer"><?= implode(' / ', $row['courses']) ?></div>
+                    <div class="card-body"><h3 class="card-title"><?= SecurityHelper::escapeHtml((string)$row['title']) ?></h3></div>
+                    <div class="card-footer"><?= SecurityHelper::escapeHtml(implode(' / ', $row['courses'])) ?></div>
                 </div>
             <?php endforeach; ?>
         </section>
@@ -98,7 +107,9 @@
                 <div id="area-teacher-add" class="selector-area">
                     <select id="sel-teacher" class="sidebar-select">
                         <?php foreach($teacherList as $t): ?>
-                            <option value="<?= $t['teacher_name'] ?>"><?= $t['teacher_name'] ?> 先生</option>
+                            <option value="<?= SecurityHelper::escapeHtml((string)$t['teacher_name']) ?>">
+                                <?= SecurityHelper::escapeHtml((string)$t['teacher_name']) ?> 先生
+                            </option>
                         <?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('teacher', 'add')">講師を追加する</button>
@@ -125,7 +136,9 @@
                     <select id="sel-room" class="sidebar-select">
                         <option value="" disabled selected>教室を選択</option>
                         <?php foreach($roomList as $r): ?>
-                            <option value="<?= $r['room_id'] ?>"><?= htmlspecialchars($r['room_name']) ?></option>
+                            <option value="<?= SecurityHelper::escapeHtml((string)$r['room_id']) ?>">
+                                <?= SecurityHelper::escapeHtml((string)$r['room_name']) ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                     <button class="update-btn" onclick="saveField('room', 'overwrite')">教室を確定する</button>
@@ -189,25 +202,19 @@
     </div>
 
     <script>
-        // 外部JSで使用するために、PHPからデータを渡す
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
-        let currentData = {}; // 外部JSから参照・更新される
+        let currentData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
                 const userAvatar = document.getElementById('userAvatar');
                 const userMenuPopup = document.getElementById('userMenuPopup');
 
-                // アイコンをクリックした時の処理
                 userAvatar.addEventListener('click', function(event) {
-                    // ポップアップの表示・非表示を切り替える
                     userMenuPopup.classList.toggle('is-visible');
-                    // イベントの伝播を停止して、ドキュメント全体へのクリックイベントがすぐに実行されるのを防ぐ
                     event.stopPropagation();
                 });
 
-                // ポップアップの外側をクリックした時に閉じる処理
                 document.addEventListener('click', function(event) {
-                    // クリックされた要素がアイコンでもポップアップ内でもない場合
                     if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
                         userMenuPopup.classList.remove('is-visible');
                     }
