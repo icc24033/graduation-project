@@ -72,6 +72,11 @@ class MasterHomeController extends HomeRepository {
             // 5. Viewの読み込み
             // パスはコントローラーからの相対パスになるので注意
             require_once __DIR__ . '/../../../../public/master/master_home.php';
+
+            // ユーザーアイコン表示用
+            $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+            extract($data);
+
         
         } else {
             // 権限がない、またはユーザーが取得できない場合

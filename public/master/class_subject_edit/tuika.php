@@ -9,25 +9,32 @@
 <head>
     <meta charset="UTF-8">
     <title>授業科目一覧</title>
-    <link rel="stylesheet" href="../css/add_style.css"> 
-    <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
-                <img src="<?= htmlspecialchars($user_picture) ?>" alt="ユーザーアイコン" class="avatar-image">   
-            </div>
-            <div class="user-menu-popup" id="userMenuPopup">
-                    <a href="../logout/logout.php" class="logout-button">
-                        <span class="icon-key"></span>
-                        アプリからログアウト
-                    </a>
-                    <!-- リンク先わかりません -->
-                    <a href="" class="help-button">
-                        <span class="icon-lightbulb"></span> ヘルプ
-                    </a>
-                </div>
-            <!--  ICCスマートキャンパスロゴ -->
-            <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">  
+    <link rel="stylesheet" type="text/css" href="../css/add_style.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/teacher_home/header.css">
+    <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
+    <link rel="stylesheet" type="text/css" href="css/teacher_home/user_menu.css">
 </head>
 <body>
-    <header class="header"><h1>授業科目一覧</h1></header>
+    <header class="header">
+        <h1>授業科目一覧</h1>
+        <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+            <img src="<?= htmlspecialchars($data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+        </div>
+            <div class="user-menu-popup" id="userMenuPopup">
+                <a href="../logout/logout.php" class="logout-button">
+                    <span class="icon-key"></span>
+                        アプリからログアウト
+                </a>
+                <!-- リンク先わかりません -->
+                <a href="" class="help-button">
+                    <span class="icon-lightbulb"></span> ヘルプ
+                </a>
+            </div>
+            <!--  ICCスマートキャンパスロゴ -->
+        <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+    </header>
     <div class="container">
         <nav class="sidebar">
             <div class="sidebar-section">
