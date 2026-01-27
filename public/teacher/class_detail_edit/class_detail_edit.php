@@ -51,7 +51,7 @@ $subjectList = $subjectList ?? [];
                             </ul>
                     </li>
 
-                    <li style="border-top: 1px solid #ccc; margin: 15px 10px; padding-top: 15px;"></li>
+                    <li style="border-top: 1px solid #ccc; margin: 15px 10px;"></li>
                     <li class="is-group-label" style="color: #0056b3; font-weight:bold;">編集対象の科目</li>
 
                     <li class="nav-item has-dropdown subject-selector-wrapper">
