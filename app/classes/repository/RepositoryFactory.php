@@ -188,4 +188,6 @@ class RepositoryFactory {
     public static function getClassDailyInfoRepository() {
         return new ClassDailyInfoRepository(self::getPdo());
     }
+
+    
 }
