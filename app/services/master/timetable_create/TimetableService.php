@@ -257,7 +257,6 @@ class TimetableService {
                 $updateStmt->bindValue(':status', $nextStatus, PDO::PARAM_INT);
                 $updateStmt->bindValue(':id', $ft['timetable_id'], PDO::PARAM_INT);
                 $updateStmt->execute();
-                // 次回以降は 3 で固定する仕様であれば $nextStatus = 3; をループ内で制御
                 // 番号を増やすならインクリメント
                 $nextStatus++; 
             }
@@ -337,13 +336,14 @@ class TimetableService {
         // トランザクション開始
         try {
             $pdo->beginTransaction();
-
+            
+            //　新規作成：idがnullの場合、更新：idがある場合
             if ($id) {
                 $repo->updateTimetable($id, $startDate, $endDate);
                 $repo->deleteDetailsByTimetableId($id);
             } else {
                 $timetableName = $data['timetable_name'] ?? '新規時間割';
-                // 一旦 status_type=0 などで作成（後で更新されるので何でも良い）
+                // 一旦 status_type=0 などで作成
                 $id = $repo->createTimetable($courseId, $startDate, $endDate, $timetableName);
             }
 
