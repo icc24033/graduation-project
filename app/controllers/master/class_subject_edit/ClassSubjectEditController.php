@@ -60,7 +60,10 @@ class ClassSubjectEditController {
         $courseList = $this->service->getCourseList();
         $teacherList = $this->service->getTeacherList();
         $roomList = $this->service->getRoomList();
-        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+
+        // ユーザーアイコン表示用
+        $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+        extract($data);
         
         // --- 修正箇所：ハードコード版ではなく DB版を取得 ---
         $courseInfo = $this->service->getCourseInfoMaster(); 
@@ -78,7 +81,6 @@ class ClassSubjectEditController {
         extract($courseList);
         extract($teacherList);
         extract($roomList);
-        extract($user_picture);
         
         require_once '../sakuzyo.php';
     }
