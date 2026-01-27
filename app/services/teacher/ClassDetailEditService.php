@@ -88,13 +88,6 @@ class ClassDetailEditService {
      */
     public function getCalendarData($teacherId, $subjectId, array $courseIds, $year, $month) {
 
-        // ▼追加：デバッグログ開始
-        $logFile = __DIR__ . '/debug_log.txt';
-        $logMsg = "\n[" . date('Y-m-d H:i:s') . "] getCalendarData Start\n";
-        $logMsg .= "Params: Year=$year, Month=$month, SubjectID=$subjectId, CourseIDs=" . json_encode($courseIds) . "\n";
-        file_put_contents($logFile, $logMsg, FILE_APPEND);
-        // ▲追加ここまで
-        
         $timetableRepo = RepositoryFactory::getTimetableRepository();
         $dailyInfoRepo = RepositoryFactory::getClassDailyInfoRepository();
 
