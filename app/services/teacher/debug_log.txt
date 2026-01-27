@@ -1,0 +1,3 @@
+
+[2026-01-27 16:37:47] getCalendarData Start
+Params: Year=2026, Month=1, SubjectID=1, CourseIDs=["1"]

@@ -2,7 +2,7 @@
 // ClassDetailEditService.php
 // 授業詳細編集に関するサービスクラス
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
-// require_once __DIR__ . '/../../classes/repository/class_detail/ClassDailyInfoRepository.php';
+require_once __DIR__ . '/../../classes/repository/class_detail/ClassDailyInfoRepository.php';
 
 class ClassDetailEditService {
 
@@ -87,6 +87,14 @@ class ClassDetailEditService {
      * 基本時間割 + 変更情報 + 保存済みステータス をマージする
      */
     public function getCalendarData($teacherId, $subjectId, array $courseIds, $year, $month) {
+
+        // ▼追加：デバッグログ開始
+        $logFile = __DIR__ . '/debug_log.txt';
+        $logMsg = "\n[" . date('Y-m-d H:i:s') . "] getCalendarData Start\n";
+        $logMsg .= "Params: Year=$year, Month=$month, SubjectID=$subjectId, CourseIDs=" . json_encode($courseIds) . "\n";
+        file_put_contents($logFile, $logMsg, FILE_APPEND);
+        // ▲追加ここまで
+        
         $timetableRepo = RepositoryFactory::getTimetableRepository();
         $dailyInfoRepo = RepositoryFactory::getClassDailyInfoRepository();
 

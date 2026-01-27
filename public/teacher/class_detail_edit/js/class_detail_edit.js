@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. 変数・要素の定義
     // ============================================================
     
-    // API設定
-    const API_BASE_URL = '/../../../../public/api/class_detail_edit/class_detail_api.php'; 
+    // API設定　現在地を表すパスと、相対パスによる文字列結合を利用
+    const API_BASE_URL = location.pathname + '/../../../api/class_detail_edit/class_detail_api.php'; 
 
     // ドロップダウン用要素（IDを修正後のHTMLに合わせて取得）
     const gradeToggle = document.getElementById('gradeFilterToggle');
