@@ -9,7 +9,7 @@ class StudentHomeService {
         4 => '14:50 ～ 16:20', 5 => '16:30 ～ 18:00', 6 => '18:10 ～ 19:40',
     ];
 
-    /**
+    /** getDashboardData
      * ダッシュボード表示に必要な全てのデータを一括で取得・整形する
      */
     public function getDashboardData($courseId, $targetDateStr) {
@@ -22,15 +22,33 @@ class StudentHomeService {
         $date_obj = $this->determineDisplayDate($targetDateStr);
         $w = (int)$date_obj->format('w');
         $day_jp = self::DAY_MAP_FULL[$w];
+        $formatted_date = $date_obj->format('Y-m-d');
 
-        // 3. 時間割
+        // 3. 基本の時間割を取得
         $schedule = $this->getTimeTable($courseId, $day_jp);
+
+        // 4. 【追加】class_daily_infos テーブルから「授業詳細」と「持ち物」を取得
+        // TimetableRepository に getDailyInfo($courseId, $date) がある前提
+        $timetableRepo = RepositoryFactory::getTimetableRepository();
+        $dailyInfos = $timetableRepo->getDailyInfo($courseId, $formatted_date);
+
+        // 5. 取得した詳細情報を各時限にマージする
+        foreach ($dailyInfos as $info) {
+            $p = (int)$info['period'];
+            // その時限のデータがなければ初期化
+            if (!isset($schedule[$p])) {
+                $schedule[$p] = [];
+            }
+            // 詳細と持ち物をセット
+            $schedule[$p]['class_detail'] = $info['content'] ?? '詳細情報はありません。';
+            $schedule[$p]['bring_object'] = $info['belongings'] ?? '特になし';
+        }
 
         return [
             'course_labels'       => $course_labels,
             'selected_course_id'  => $courseId,
             'course_label'        => $course_labels[$courseId] ?? 'コース不明',
-            'today_date_value'    => $date_obj->format('Y-m-d'),
+            'today_date_value'    => $formatted_date,
             'formatted_full_date' => $date_obj->format('Y/n/j') . " ($day_jp)",
             'schedule_by_period'  => $schedule,
             'time_schedule'       => self::TIME_SCHEDULE
@@ -60,6 +78,7 @@ class StudentHomeService {
         $target_day_num = $day_to_num[$dayJp] ?? 1;
 
         $repo = RepositoryFactory::getTimeTableDetailsRepository();
+        // ここでの $courseId は timetable_id として使われているか確認が必要
         $rows = $repo->findByDayAndTimetableId($target_day_num, $courseId);
 
         return array_column($rows, null, 'period');

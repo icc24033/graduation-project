@@ -28,7 +28,8 @@ class MasterHomeController extends HomeRepository {
             // 授業科目編集へのリンク
             'link_notification_edit' => "../master/class_subject_edit/controls/addition_control.php",
             // 授業詳細編集へのリンク
-            'link_subject_edit'      => "../teacher/class_detail_edit/class_detail_edit_control.php",
+            //'link_subject_edit'      => "../teacher/class_detail_edit/class_detail_edit_control.php",
+            'link_subject_edit'      => "../../tests/teacher/class_detail_edit/class_detail_edit_control.php",
             // 時間割り閲覧へのリンク
             'link_time_table_view'   => "../teacher/timetable_view/timetable_view_control.php",
         ];

@@ -16,6 +16,7 @@ require_once __DIR__ . '/ErrorTeacherTableRepository.php';
 require_once __DIR__ . '/class_subject_edit/SubjectInChargesRepository.php';
 require_once __DIR__ . '/RoomRepository.php';
 require_once __DIR__ . '/timetable_details/TimeTableDetailsRepository.php';
+require_once __DIR__ . '/class_detail/ClassDailyInfoRepository.php';
 
 
 
@@ -179,5 +180,12 @@ class RepositoryFactory {
      */
     public static function getTimeTableDetailsRepository() {
         return new TimeTableDetailsRepository(self::getPdo());
+    }
+
+    /**
+     * 授業詳細（日別）リポジトリのインスタンスを取得
+     */
+    public static function getClassDailyInfoRepository() {
+        return new ClassDailyInfoRepository(self::getPdo());
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 /*
 session_start();
 $status = $_SESSION['timetable_details'] ?? [];
@@ -40,6 +39,34 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
         .detail-title { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 60px; font-weight: bold; color: #333; font-size: 0.9em; border-right: 1px solid rgba(0, 0, 0, 0.1); }
         .detail-text { flex-grow: 1; padding: 15px; margin: 0; line-height: 1.6; font-size: 0.95em; color: #333; white-space: pre-wrap; text-align: left; }
         .dropdown-content.detail-content { background-color: #ffffff; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* 1. 時間割変更があるカード（左右いっぱいに広げる） */
+        .card.is-changed {
+            background-color: #fff9c4; /* パステルイエロー */
+            border: none;
+            box-shadow: none;           /* 広げる場合は影がないほうが馴染みます */
+            
+            /* 親要素のパディング分（恐らく左右に設定されている分）を打ち消して広げる */
+            margin-left: -24px;  /* style.cssのパディングに合わせて調整 */
+            margin-right: -24px;
+            padding-left: 24px;  /* 中のコンテンツが端に寄らないようにパディングで戻す */
+            padding-right: 24px;
+            
+            width: auto;         /* 幅を自動計算にする */
+            border-radius: 0;    /* 横に広げる場合は角丸をなくすと自然です */
+        }
+
+        /* 2. 「時間割変更」バッジ */
+        .change-badge {
+            display: inline-block;
+            background-color: #fbc02d;
+            color: #444;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -84,7 +111,7 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
     <main class="main-content" id="schedule-container">
         <div class="schedule-list">
             <?php
-            for ($period = 1; $period <= 4; $period++) {
+            for ($period = 1; $period <= 5; $period++) {
                 $item = $schedule_by_period[$period] ?? null;
                 $subject_name = htmlspecialchars($item["subject_name"] ?? '');
                 $class_detail = htmlspecialchars($item["class_detail"] ?? '詳細情報はありません。');
@@ -95,10 +122,15 @@ $subject_sql_second = $status['subject_sql_second'] ?? '';
                 $item_list = preg_split('/[、,，\s\x{3000}]+/u', $bring_object, -1, PREG_SPLIT_NO_EMPTY);
             ?>
             
-            <section class="card">
+            <section class="card <?php echo ($item['is_changed'] ?? false) ? 'is-changed' : ''; ?>">
                 <div class="info">
                     <div class="subject-details">
-                        <h2 class="subject"><?php echo $display_title; ?></h2>
+                        <h2 class="subject">
+                            <?php echo $display_title; ?>
+                            <?php if ($item['is_changed'] ?? false): ?>
+                                <span class="change-badge">時間割変更</span>
+                            <?php endif; ?>
+                        </h2>
                         <p class="room-name">教室: <?php echo $room; ?></p>
                     </div>
                     <div class="period-details">
