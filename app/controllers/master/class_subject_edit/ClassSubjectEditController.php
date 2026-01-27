@@ -26,6 +26,10 @@ class ClassSubjectEditController {
         $roomList = $this->service->getRoomList();
         $courseInfo = $this->service->getCourseInfoMaster();
 
+        // ユーザーアイコン表示用
+        $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+        extract($data);
+        
         // 1. 学年・コースでフィルタリングされた生リストを取得
         $classSubjectList = $this->service->getFilteredClassSubjects($search_grade, $search_course);
 
@@ -43,6 +47,7 @@ class ClassSubjectEditController {
         extract($teacherList);
         extract($roomList);
         
+        
         require_once '../tuika.php';
     }
 
@@ -55,6 +60,7 @@ class ClassSubjectEditController {
         $courseList = $this->service->getCourseList();
         $teacherList = $this->service->getTeacherList();
         $roomList = $this->service->getRoomList();
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
         
         // --- 修正箇所：ハードコード版ではなく DB版を取得 ---
         $courseInfo = $this->service->getCourseInfoMaster(); 
@@ -72,6 +78,7 @@ class ClassSubjectEditController {
         extract($courseList);
         extract($teacherList);
         extract($roomList);
+        extract($user_picture);
         
         require_once '../sakuzyo.php';
     }
