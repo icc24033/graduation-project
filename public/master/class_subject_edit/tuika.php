@@ -1,18 +1,3 @@
-<?php
-// tuika.php
-// セッション開始（必要に応じて）
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// SecurityHelperの読み込みとヘッダー適用
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-
-// 元のロジック（コントローラーから渡される変数）はそのまま維持されます
-// $subjects, $grade_val, $courseInfo, $data, $teacherList, $roomList, $search_grade, $search_course, $smartcampus_picture など
-?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>

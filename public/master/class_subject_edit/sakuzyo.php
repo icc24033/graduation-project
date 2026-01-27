@@ -1,9 +1,3 @@
-<?php
-// sakuzyo.php 
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
