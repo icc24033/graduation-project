@@ -1,10 +1,6 @@
 <?php
 // backend_edit_info.php
 
-// エラー表示設定（開発用）
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 // 必要なファイルの読み込み
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';

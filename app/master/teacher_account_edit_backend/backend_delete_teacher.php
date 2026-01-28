@@ -1,11 +1,6 @@
 <?php
 // backend_delete_teacher.php
 
-// --- デバッグ用：エラーを表示させる設定（本番公開時は削除または 0 にしてください） ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // SecurityHelperとRepositoryFactoryの読み込み（パスは環境に合わせて調整してください）
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
