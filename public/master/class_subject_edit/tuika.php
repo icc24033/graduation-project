@@ -12,9 +12,6 @@
     <link rel="stylesheet" type="text/css" href="../css/add_style.css">
     <link rel="stylesheet" type="text/css" href="../css/style.css">
     <link rel="stylesheet" type="text/css" href="css/common.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/header.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/user_menu.css">
 </head>
 <body>
     <header class="header">
