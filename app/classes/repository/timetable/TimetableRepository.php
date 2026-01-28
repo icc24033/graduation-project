@@ -429,4 +429,74 @@ class TimetableRepository extends BaseRepository {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * 指定されたコースの「基本時間割（曜日・時限・科目）」を取得する
+     * 期間内で有効な時間割定義を取得します。
+     * @param array $courseIds
+     * @return array
+     */
+    public function getBasicTimetablesByCourseIds(array $courseIds) {
+        if (empty($courseIds)) return [];
+        
+        $inQuery = implode(',', array_fill(0, count($courseIds), '?'));
+        
+        $sql = "
+            SELECT 
+                t.course_id,
+                t.start_date,
+                t.end_date,
+                td.day_of_week,
+                td.period,
+                td.subject_id
+            FROM timetables t
+            JOIN timetable_details td ON t.timetable_id = td.timetable_id
+            WHERE t.course_id IN ($inQuery)
+            ORDER BY t.start_date ASC
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($courseIds as $k => $id) {
+            $stmt->bindValue($k + 1, $id, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * 指定された期間・コースの「時間割変更情報」を取得する
+     * @param array $courseIds
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    public function getTimetableChangesByPeriod(array $courseIds, $startDate, $endDate) {
+        if (empty($courseIds)) return [];
+
+        $inQuery = implode(',', array_fill(0, count($courseIds), '?'));
+        
+        $sql = "
+            SELECT 
+                t.course_id,
+                tc.change_date,
+                tc.period,
+                tc.subject_id  -- 変更後の科目ID (休講などの場合はNULLまたは特定のIDが入る想定)
+            FROM timetable_changes tc
+            JOIN timetables t ON tc.timetable_id = t.timetable_id
+            WHERE t.course_id IN ($inQuery)
+            AND tc.change_date BETWEEN ? AND ?
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $index = 1;
+        foreach ($courseIds as $id) {
+            $stmt->bindValue($index++, $id, PDO::PARAM_INT);
+        }
+        $stmt->bindValue($index++, $startDate);
+        $stmt->bindValue($index++, $endDate);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

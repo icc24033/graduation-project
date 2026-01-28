@@ -1,10 +1,3 @@
-<?php
-// sakuzyo.php 
-// 冒頭のループ処理は削除されました。
-// すでに Controller から $subjects, $courseInfo, $search_grade 等が渡されています。
-?>
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -31,7 +24,9 @@
                     <select class="sidebar-select" name="search_course" onchange="this.form.submit()">
                         <option value="all" <?= $search_course === 'all' ? 'selected' : '' ?>>すべて</option>
                         <?php foreach ($courseInfo as $key => $info): ?>
-                            <option value="<?= $key ?>" <?= $search_course === $key ? 'selected' : '' ?>><?= $info['name'] ?></option>
+                            <option value="<?= SecurityHelper::escapeHtml((string)$key) ?>" <?= $search_course === $key ? 'selected' : '' ?>>
+                                <?= SecurityHelper::escapeHtml((string)$info['name']) ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -47,9 +42,9 @@
         <section class="subject-list">
             <?php foreach ($subjects as $row): ?>
                 <div class="subject-card" onclick='openDeleteModal(<?= json_encode($row) ?>)'>
-                    <div class="card-header"><?= $row['grade'] ?>年生</div>
-                    <div class="card-body"><h3 class="card-title"><?= htmlspecialchars($row['title']) ?></h3></div>
-                    <div class="card-footer"><?= implode(' / ', $row['courses']) ?></div>
+                    <div class="card-header"><?= SecurityHelper::escapeHtml((string)$row['grade']) ?>年生</div>
+                    <div class="card-body"><h3 class="card-title"><?= SecurityHelper::escapeHtml((string)$row['title']) ?></h3></div>
+                    <div class="card-footer"><?= SecurityHelper::escapeHtml(implode(' / ', $row['courses'])) ?></div>
                 </div>
             <?php endforeach; ?>
         </section>
@@ -68,7 +63,7 @@
                 <input type="hidden" name="grade" id="f-grade">
                 <input type="hidden" name="action" id="f-action" value="delete_single">
                 
-                <input type="hidden" name="query_string" value="<?= htmlspecialchars($_SERVER['QUERY_STRING'] ?? '') ?>">
+                <input type="hidden" name="query_string" value="<?= SecurityHelper::escapeHtml((string)($_SERVER['QUERY_STRING'] ?? '')) ?>">
 
                 <div id="single-delete-area">
                     <p style="font-size: 12px; color: #666;">削除するコースを選択してください：</p>

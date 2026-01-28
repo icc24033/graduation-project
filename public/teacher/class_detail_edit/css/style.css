@@ -99,7 +99,7 @@
  .is-group-label {
      pointer-events: none; 
      border-bottom: none;
-     padding: 15px 0;
+     padding: 12px 0;
  }
  
  /* 次回以降" の見出しのスタイル調整 */
@@ -127,6 +127,11 @@
      /* 通常時にも角丸を設定し、ホバー時のちらつきを防止 */
      border-top-left-radius: 10px;
      border-bottom-left-radius: 10px;
+ }
+
+ button#subjectSelectorToggle {
+    background-color: #cfd5df91;
+    margin: 0 0 15px 0;
  }
  
  /* 現在の値の表示（年度、コース） */
@@ -912,4 +917,45 @@ button.status-button.not-created {
 #deleteIcon.is-active ~ .item-tags .item-tag-container:hover {
     border: 1px solid red;
     background-color: #fff0f0;
+}
+
+.date-num {
+    /* 既存の共通スタイル */
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* 青丸 */
+.date-num.circle-blue {
+    background-color: #C0DEFF; 
+    color: #000;
+}
+
+/* 赤丸 */
+.date-num.circle-red {
+    background-color: #FF5F5F;
+    color: #fff;
+}
+
+/* カレンダー内の授業ボタンコンテナ */
+.slots-container {
+    display: flex;
+    flex-direction: column; /* 縦並び */
+    gap: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+/* カレンダー内の極小ボタン */
+.date-cell .status-button {
+    font-size: 10px;
+    padding: 2px 4px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    border-radius: 3px;
+    border: none;
 }

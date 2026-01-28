@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. 変数・要素の定義
     // ============================================================
     
-    // API設定
-    const API_BASE_URL = 'class_detail_edit_control.php'; 
+    // API設定　現在地を表すパスと、相対パスによる文字列結合を利用
+    const API_BASE_URL = '../../api/class_detail_edit/class_detail_api.php'; 
 
     // ドロップダウン用要素（IDを修正後のHTMLに合わせて取得）
     const gradeToggle = document.getElementById('gradeFilterToggle');
@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const monthElement = document.querySelector('.month');
     const leftArrowButton = document.querySelector('.left-arrow')?.closest('button');
     const rightArrowButton = document.querySelector('.right-arrow')?.closest('button');
-    const calendarGrid = document.getElementById('calendarGrid'); 
+    const calendarGrid = document.getElementById('calendarGrid');
+    if (!calendarGrid) {
+        console.error("【重要エラー】HTML内に id='calendarGrid' の要素が見つかりません。HTMLを確認してください。");
+    }
     const lessonModal = document.getElementById('lessonModal');
     
     // ボタン類
@@ -39,6 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentMonth = new Date().getMonth() + 1;
     let selectedDateKey = null; // "YYYY-MM-DD"
     let lessonData = {}; // サーバーから取得した授業詳細データ
+    let selectedSlotKey = null; // "YYYY-MM-DD_1限" など、現在編集中のスロット識別子
+    let currentEditingSlot = null; // 現在編集中のスロットオブジェクト
     
     // ドロップダウン用状態
     let currentFilters = { grade: "", course: "" }; // フィルタ状態
@@ -50,9 +55,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // PHPからのデータチェック
     if (typeof assignedClassesData === 'undefined') {
-        console.error("assignedClassesData is not defined. PHP側でデータを出力してください。");
-        // エラー回避のため空配列を入れておく
+        console.error("assignedClassesData is not defined. PHP側を確認してください。");
         window.assignedClassesData = [];
+    } else if (!Array.isArray(assignedClassesData)) {
+        // PHPの連想配列がJSオブジェクトとして渡ってきた場合の対応
+        if (assignedClassesData && typeof assignedClassesData === 'object') {
+            console.warn("assignedClassesDataが配列ではありません。オブジェクトを配列に変換します。");
+            window.assignedClassesData = Object.values(assignedClassesData);
+        } else {
+            window.assignedClassesData = [];
+        }
     }
 
     // ============================================================
@@ -272,6 +284,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error('Network response was not ok');
             
             const data = await response.json();
+
+            // 【修正】PHPが空の結果を [] (配列) として返す場合の対策
+            // JS側は連想配列(オブジェクト)を期待しているため、空配列なら空オブジェクトに変換
+            if (Array.isArray(data) && data.length === 0) {
+                data = {};
+            }
+
             lessonData = data || {}; 
 
             renderCalendar(year, month);
@@ -289,89 +308,92 @@ document.addEventListener('DOMContentLoaded', function() {
      * データの保存 (POST)
      */
     async function saveLessonDataToServer(status, statusText) {
-        if (!selectedDateKey || !currentSubject) return;
+    if (!selectedDateKey || !currentSubject) return;
 
-        const lessonVal = document.querySelector('.lesson-details-textarea').value;
-        const belongingsVal = document.getElementById('detailsTextarea').value;
-        // const [year, month, day] = selectedDateKey.split('-').map(Number); // 不要なら削除
+    const lessonVal = document.querySelector('.lesson-details-textarea').value;
+    const belongingsVal = document.getElementById('detailsTextarea').value;
+    
+    const courseIds = currentSubject.courses.map(c => c.id);
+    const slotData = selectedSlotKey; // "1限" などの文字列
 
-        const courseIds = currentSubject.courses.map(c => c.id);
-        const slotData = lessonData[selectedDateKey]?.slot || "1限"; 
+    const postData = {
+        action: 'save',
+        date: selectedDateKey,
+        subject_id: currentSubject.subject_id,
+        course_ids: courseIds,
+        slot: slotData,
+        content: lessonVal,
+        belongings: belongingsVal,
+        status: status
+    };
 
-        // JSONで送信する
-        const postData = {
-            action: 'save',
-            date: selectedDateKey,
-            subject_id: currentSubject.subject_id,
-            course_ids: courseIds, // ★配列で送る
-            slot: slotData,
-            content: lessonVal,
-            belongings: belongingsVal,
-            status: status
-        };
+    try {
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: 'POST',
-                body: JSON.stringify(postData),
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                updateAllViews(selectedDateKey, slotData, status, statusText);
-                lessonModal.style.display = 'none';
-                alert("一括保存しました"); // 文言変更
-            } else {
-                alert("保存に失敗しました: " + (result.message || "不明なエラー"));
-            }
-        } catch (error) {
-            console.error(error);
-            alert("通信エラーが発生しました");
+        const result = await response.json();
+        if (result.success) {
+            // 修正: 引数に content(lessonVal) と belongings(belongingsVal) を追加
+            updateAllViews(selectedDateKey, slotData, status, statusText, lessonVal, belongingsVal, false);
+            
+            lessonModal.style.display = 'none';
+            alert("一括保存しました");
+        } else {
+            alert("保存に失敗しました: " + (result.message || "不明なエラー"));
         }
+    } catch (error) {
+        console.error(error);
+        alert("通信エラーが発生しました");
     }
+}
 
     /**
      * データの削除 (POST)
      */
     async function deleteLessonDataOnServer() {
-        if (!selectedDateKey || !currentSubject) return;
-        
-        const slotData = lessonData[selectedDateKey]?.slot || "1限";
-        const courseIds = currentSubject.courses.map(c => c.id);
+    if (!selectedDateKey || !currentSubject) return;
+    
+    const slotData = selectedSlotKey; // "1限" などの文字列
+    const courseIds = currentSubject.courses.map(c => c.id);
 
-        const postData = {
-            action: 'delete',
-            date: selectedDateKey,
-            slot: slotData,
-            subject_id: currentSubject.subject_id,
-            course_ids: courseIds // ★配列で送る
-        };
+    const postData = {
+        action: 'delete',
+        date: selectedDateKey,
+        slot: slotData,
+        subject_id: currentSubject.subject_id,
+        course_ids: courseIds
+    };
 
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: 'POST',
-                body: JSON.stringify(postData),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const result = await response.json();
+    try {
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
 
-            if (result.success) {
-                updateAllViews(selectedDateKey, null, null, null, true);
-                lessonModal.style.display = 'none';
-                
-                document.querySelector('.lesson-details-textarea').value = '';
-                document.getElementById('detailsTextarea').value = '';
-                itemInput.value = '';
-                alert("一括削除しました");
-            } else {
-                alert("削除できませんでした");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("通信エラー");
+        if (result.success) {
+            // 修正: 引数を合わせる (content, belongings は空文字、isDelete = true)
+            updateAllViews(selectedDateKey, slotData, null, null, "", "", true);
+            
+            lessonModal.style.display = 'none';
+            
+            document.querySelector('.lesson-details-textarea').value = '';
+            document.getElementById('detailsTextarea').value = '';
+            if (itemInput) itemInput.value = '';
+            
+            alert("一括削除しました");
+        } else {
+            alert("削除できませんでした");
         }
+    } catch (e) {
+        console.error(e);
+        alert("通信エラー");
     }
+}
 
 
     // ============================================================
@@ -379,66 +401,132 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================================
 
     function refreshSidebar() {
-        // 日付順にソート
-        const sortedDates = Object.keys(lessonData).sort((a, b) => new Date(a) - new Date(b));
-        const sidebarItems = document.querySelectorAll('.sidebar .lesson-status-wrapper');
+        // 今日の日付 (時分秒リセット)
+        const today = new Date();
+        today.setHours(0,0,0,0);
 
-        // サイドバーの項目を一度クリア・非表示にするロジックが必要だが
-        // ここでは既存のHTML枠に合わせて埋めていく簡易実装
-        sidebarItems.forEach((targetWrapper, index) => {
-            const dateDisplay = targetWrapper.querySelector('.lesson-date-item');
-            const statusBtn = targetWrapper.querySelector('.status-button');
+        // 日付キーをソート
+        const sortedKeys = Object.keys(lessonData).sort();
+        
+        const sidebarWrappers = document.querySelectorAll('.sidebar .lesson-status-wrapper');
+        
+        // 全てのサイドバー項目を一旦非表示にする
+        sidebarWrappers.forEach(el => el.style.display = 'none');
 
-            if (index < sortedDates.length) {
-                const key = sortedDates[index];
-                const data = lessonData[key];
-                
-                // クリックでモーダルを開く
-                targetWrapper.style.cursor = 'pointer';
-                targetWrapper.style.display = 'flex'; // 表示
-                targetWrapper.onclick = function() {
-                    openModalWithDate(key);
-                };
+        // 未来の日付のデータを抽出して表示
+        let displayCount = 0;
+        
+        for (const key of sortedKeys) {
+            const targetDate = new Date(key);
+            // 今日以降を表示対象とする
+            if (targetDate >= today) {
+                const dayData = lessonData[key];
+                if (!dayData || !dayData.slots) continue;
 
-                const dateObj = new Date(key);
-                const m = dateObj.getMonth() + 1;
-                const d = dateObj.getDate();
-                const dayOfWeek = dateObj.toLocaleDateString('ja-JP', { weekday: 'short' });
+                // その日のスロットすべてを表示
+                for (const slot of dayData.slots) {
+                    if (displayCount < sidebarWrappers.length) {
+                        const wrapper = sidebarWrappers[displayCount];
+                        const dateDisplay = wrapper.querySelector('.lesson-date-item');
+                        const statusBtn = wrapper.querySelector('.status-button');
 
-                if (dateDisplay) {
-                    const slotInfo = data.slot ? ` ${data.slot}` : '';
-                    dateDisplay.textContent = `${m}月${d}日(${dayOfWeek})${slotInfo}`;
+                        // 日付フォーマット
+                        const m = targetDate.getMonth() + 1;
+                        const d = targetDate.getDate();
+                        const w = ['日','月','火','水','木','金','土'][targetDate.getDay()];
+
+                        if (dateDisplay) {
+                            dateDisplay.textContent = `${m}月${d}日(${w}) ${slot.slot}`;
+                        }
+                        if (statusBtn) {
+                            statusBtn.className = `status-button ${slot.status}`;
+                            statusBtn.textContent = slot.statusText;
+                            
+                            // サイドバーのボタンクリックイベント
+                            // (古いイベントリスナーが残らないよう onclick プロパティを使用)
+                            const clickHandler = (e) => {
+                                if(e) e.stopPropagation();
+                                openModalWithSlot(key, slot);
+                            };
+                            statusBtn.onclick = clickHandler;
+                            wrapper.onclick = clickHandler;
+                        }
+
+                        wrapper.style.display = 'flex';
+                        displayCount++;
+                    }
                 }
-                if (statusBtn) {
-                    statusBtn.textContent = data.statusText || "未作成";
-                    statusBtn.className = `status-button ${data.status || 'not-created'}`;
-                }
-            } else {
-                // データがない枠は非表示にする
-                targetWrapper.style.display = 'none';
             }
-        });
-    }
-
-    function updateAllViews(dateKey, slot, status, text, isDelete = false) {
-        if (isDelete) {
-            if (lessonData[dateKey]) {
-                lessonData[dateKey].status = "not-created";
-                lessonData[dateKey].statusText = "未作成";
-                lessonData[dateKey].content = "";
-                lessonData[dateKey].belongings = "";
-            }
-        } else {
-            if (!lessonData[dateKey]) lessonData[dateKey] = {};
-            lessonData[dateKey].slot = slot;
-            lessonData[dateKey].status = status;
-            lessonData[dateKey].statusText = text;
+            if (displayCount >= sidebarWrappers.length) break;
         }
-        refreshSidebar();
-        renderCalendar(currentYear, currentMonth);
     }
+
+    /**
+ * ローカルデータの更新と再描画
+ * @param {string} dateKey YYYY-MM-DD
+ * @param {string} targetSlotKey "1限" など
+ * @param {string} status "in-progress" 等
+ * @param {string} text "作成済" 等
+ * @param {string} content 授業詳細
+ * @param {string} belongings 持ち物
+ * @param {boolean} isDelete 削除フラグ
+ */
+function updateAllViews(dateKey, targetSlotKey, status, text, content, belongings, isDelete = false) {
+    // データが存在しない場合のガード
+    if (!lessonData[dateKey]) {
+        lessonData[dateKey] = { slots: [], circle_type: 'blue' };
+    }
+    
+    const dayData = lessonData[dateKey];
+
+    // 既存のスロット配列から、対象のスロット(targetSlotKey)を探す
+    // もし配列になければ（新規作成など）、新しいオブジェクトとして追加する必要があるが、
+    // 通常はカレンダー表示時点でスロット枠はあるはずなので、既存更新を優先する
+    let targetSlotObj = dayData.slots.find(s => s.slot === targetSlotKey);
+
+    if (isDelete) {
+        // 削除の場合: ステータスを未作成に戻し、内容をクリア
+        if (targetSlotObj) {
+            targetSlotObj.status = "not-created";
+            targetSlotObj.statusText = "未作成";
+            targetSlotObj.content = "";
+            targetSlotObj.belongings = "";
+            targetSlotObj.is_change = false; // 必要であれば
+        }
+        // 赤丸・青丸の判定ロジックが必要ならここで再計算する（今回は簡易的にblueへ戻す例）
+        // dayData.circle_type = 'blue'; 
+    } else {
+        // 保存の場合
+        if (targetSlotObj) {
+            // 既存スロットの更新
+            targetSlotObj.status = status;
+            targetSlotObj.statusText = text;
+            targetSlotObj.content = content;
+            targetSlotObj.belongings = belongings;
+        } else {
+            // 万が一スロットが見つからない場合（レアケース）は新規追加
+            // periodの数値化などは簡易処理
+            dayData.slots.push({
+                slot: targetSlotKey,
+                period: parseInt(targetSlotKey) || 0, 
+                status: status,
+                statusText: text,
+                content: content,
+                belongings: belongings
+            });
+            // 時限順にソート
+            dayData.slots.sort((a, b) => a.period - b.period);
+        }
+    }
+
+    // サイドバーとカレンダーの再描画
+    refreshSidebar();
+    renderCalendar(currentYear, currentMonth);
+}
 
     function renderCalendar(year, month) {
+        if (!calendarGrid) return;
+
         const oldCells = calendarGrid.querySelectorAll('.date-cell');
         oldCells.forEach(cell => cell.remove());
         
@@ -466,34 +554,94 @@ document.addEventListener('DOMContentLoaded', function() {
         monthElement.textContent = `${month}月`;
     }
 
-    function createDateCell(dayNum, isOutOfMonth, year, month) {
+function createDateCell(dayNum, isOutOfMonth, year, month) {
         const cell = document.createElement('div');
         cell.className = 'date-cell';
-        if (isOutOfMonth) cell.classList.add('is-out-of-month');
-        cell.innerHTML = `<span class="date-num">${dayNum}</span>`;
-        
-        // 日付キー (YYYY-M-D形式。PHP側と合わせる必要あり。ここではゼロ埋めなしと仮定)
-        const dateKey = `${year}-${month}-${dayNum}`;
-
-        if (!isOutOfMonth && lessonData[dateKey]) {
-            cell.classList.add('has-data');
-            const data = lessonData[dateKey];
-            if (data.slot) {
-                cell.innerHTML += `
-                    <span class="lesson-slot">${data.slot}</span>
-                    <span class="status-button ${data.status || 'not-created'}">${data.statusText || '未作成'}</span>
-                `;
-            }
+        if (isOutOfMonth) {
+            cell.classList.add('is-out-of-month');
+            cell.style.opacity = '0.5';
         }
 
-        cell.addEventListener('click', function() {
-            if (isOutOfMonth) return;
-            // データが存在する（授業がある）場合のみ開く
-            if (lessonData[dateKey]) {
-                openModalWithDate(dateKey);
+        // 日付キー生成 (YYYY-MM-DD) ※ゼロ埋めあり
+        const mStr = String(month).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const dateKey = `${year}-${mStr}-${dStr}`;
+
+        // データ取得
+        const dayData = lessonData[dateKey]; // { circle_type: 'red'|'blue', slots: [...] }
+
+        // --- 丸の表示判定 ---
+        let dateNumClass = "date-num";
+        if (!isOutOfMonth && dayData) {
+            cell.classList.add('has-data');
+            
+            if (dayData.circle_type === 'red') {
+                dateNumClass += " circle-red"; // 赤丸クラス
+            } else {
+                dateNumClass += " circle-blue"; // 青丸クラス
             }
-        });
+        }
+        
+        cell.innerHTML = `<span class="${dateNumClass}">${dayNum}</span>`;
+
+        // --- 授業ラベル（ボタン）の生成 ---
+        if (!isOutOfMonth && dayData && dayData.slots) {
+            // スロットを格納するコンテナ
+            const slotsContainer = document.createElement('div');
+            slotsContainer.className = 'slots-container'; // CSSで縦並びにする
+
+            dayData.slots.forEach(slot => {
+                const btn = document.createElement('button');
+                // クラス: status-button + 状態(creatingなど)
+                btn.className = `status-button ${slot.status}`;
+                btn.textContent = `${slot.slot} ${slot.statusText}`;
+                
+                // ボタンクリックでモーダルを開く
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // セルのクリックを無効化
+                    openModalWithSlot(dateKey, slot);
+                });
+
+                slotsContainer.appendChild(btn);
+            });
+            cell.appendChild(slotsContainer);
+        }
+        
         return cell;
+    }
+    /**
+     * 特定の授業スロットでモーダルを開く
+     * @param {string} dateKey YYYY-MM-DD
+     * @param {object} slotData slotオブジェクト
+     */
+    function openModalWithSlot(dateKey, slotData) {
+        selectedDateKey = dateKey;
+        selectedSlotKey = slotData.slot;
+        
+        // ※重要: 保存処理のために「現在どのスロットを編集しているか」を記録する
+        // グローバル変数 currentEditingSlot を定義するか、lessonDataに一時保存する等の工夫が必要ですが
+        // とりあえずフォームに値をセットします
+        
+        // DOM要素
+        const lessonDetailsText = document.querySelector('.lesson-details-textarea');
+        const belongingsText = document.getElementById('detailsTextarea');
+        
+        // 値をセット
+        lessonDetailsText.value = slotData.content || "";
+        belongingsText.value = slotData.belongings || "";
+        
+        // タイトル更新
+        const [y, m, d] = dateKey.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        const w = ['日','月','火','水','木','金','土'][dateObj.getDay()];
+        
+        const modalTitle = document.querySelector('.modal-date');
+        if(modalTitle) {
+            modalTitle.textContent = `${m}月${d}日(${w}) ${slotData.slot}`;
+        }
+
+        const modal = document.getElementById('lessonModal');
+        if(modal) modal.style.display = 'flex';
     }
 
     function openModalWithDate(dateKey) {

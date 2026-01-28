@@ -1,14 +1,5 @@
 <?php
-// --- デバッグ用：エラーを表示させる設定 ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
-
-// セッション開始
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 $status = $basic_data ?? null;
 
@@ -37,7 +28,6 @@ else {
     unset($gradeList[3]); // 卒業生を表示させない         
 }
 
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
 if (!empty($courseList)) {

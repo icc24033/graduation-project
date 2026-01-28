@@ -1,5 +1,6 @@
 <?php
 // ClassSubjectEditService.php
+// 授業科目編集に関するサービスクラス
 
 // RepositoryFactoryの読み込み
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';

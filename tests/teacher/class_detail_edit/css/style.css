@@ -915,3 +915,32 @@ button.status-button.not-created {
     background-color: #e6f2ff !important;
 }
 
+/* 青丸 (通常) */
+.date-num.circle-blue {
+    background-color: #C0DEFF; /* 薄い青 */
+    color: #000;
+}
+
+/* 赤丸 (変更あり) */
+.date-num.circle-red {
+    background-color: #FF5F5F; /* 薄い赤 */
+    color: #fff;
+}
+
+/* ラベルボタンの配置 */
+.slots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+}
+.slots-container .status-button {
+    font-size: 10px;
+    padding: 2px 4px;
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+

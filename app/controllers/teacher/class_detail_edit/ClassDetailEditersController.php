@@ -77,7 +77,7 @@ class ClassDetailEditorsController
         extract($viewData);
 
         // Viewの読み込み
-        require_once __DIR__ . '/../../../../tests/teacher/class_detail_edit/class_detail_edit.php';
+        require_once __DIR__ . '/../../../../public/teacher/class_detail_edit/class_detail_edit.php';
     }
 
     /**
