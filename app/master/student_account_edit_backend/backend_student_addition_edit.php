@@ -1,4 +1,10 @@
 <?php
+// addition_control.php
+
+// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 session_start();
 
@@ -72,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //データ件数を取得する変数
     $insert_count = 0;
     $error_count = 0;
+    $total_login_users = 0;
 
     // 現在の年を取得
     $current_year = date('Y');
