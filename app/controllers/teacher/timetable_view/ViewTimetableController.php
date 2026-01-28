@@ -41,3 +41,8 @@ class ViewTimetableController extends HomeRepository
         require_once __DIR__ . '/../../../../public/teacher/timetable_view/timetable_view.php';
     }
 }
+ // ユーザーアイコン表示用
+ $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+ extract($data);
+
+ $smartcampus_picture = '../images/smartcampus.png';

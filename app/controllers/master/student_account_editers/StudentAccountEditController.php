@@ -27,6 +27,13 @@ class StudentAccountEditController {
         extract($basic_data);
         extract($gradeData);
         require_once '../student_addition.php';
+
+        // ユーザーアイコン表示用
+        $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+        extract($data);
+
+        $smartcampus_picture = '../images/smartcampus.png';
+
     }
     
     /*
@@ -49,6 +56,13 @@ class StudentAccountEditController {
         extract($basic_data);
         extract($gradeData);
         require_once '../student_edit_course.php';
+
+        // ユーザーアイコン表示用
+        $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+        extract($data);
+
+        $smartcampus_picture = '../images/smartcampus.png';
+
     }
 
     /**
@@ -65,6 +79,12 @@ class StudentAccountEditController {
         extract($basic_data);
         extract($gradeData);
         require_once '../student_grade_transfer.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }
 
     /**
@@ -81,5 +101,11 @@ class StudentAccountEditController {
         extract($basic_data);
         extract($gradeData);
         require_once '../student_delete.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }
 }

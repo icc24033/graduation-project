@@ -27,6 +27,12 @@ class TeacherAccountEditController {
         extract($viewData);
 
         require_once '../master.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }
 
     /**
@@ -43,6 +49,12 @@ class TeacherAccountEditController {
 
         extract($viewData);
         require_once '../teacher_delete.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }
 
     /**
@@ -58,6 +70,12 @@ class TeacherAccountEditController {
         extract($basicInfo);
 
         require_once '../teacher_addition.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }   
 
     /**
@@ -74,8 +92,11 @@ class TeacherAccountEditController {
         
         extract($viewData);
         require_once '../teacher_Information.php';
+
+         // ユーザーアイコン表示用
+         $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+         extract($data);
+ 
+         $smartcampus_picture = '../images/smartcampus.png';
     }
 }
-// ユーザーアイコン表示用
-$data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
-extract($data);
