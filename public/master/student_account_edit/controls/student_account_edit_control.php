@@ -1,4 +1,5 @@
 <?php
+
 require_once '../../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
 if (session_status() === PHP_SESSION_NONE) session_start();

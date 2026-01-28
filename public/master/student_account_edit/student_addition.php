@@ -1,13 +1,5 @@
 <?php
-
 // student_addition.php
-// セッション開始
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
 
 $status = $basic_data ?? null;
 
