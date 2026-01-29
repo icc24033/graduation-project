@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../../services/student/StudentHomeService.php';
 require_once __DIR__ . '/../../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../../classes/login/student_login_class.php';
+require_once __DIR__ . '/../../../classes/login/Teacher_login_class.php';
 require_once __DIR__ . '/../../../services/master/timetable_create/TimeTableService.php';
 
 class StudentHomeController {
@@ -17,14 +18,21 @@ class StudentHomeController {
 
         $this->service = new StudentHomeService();
         $this->serviceTimeTable = new TimeTableService();
-        
+
+
         if (isset($_SESSION['user_id'], $_SESSION['user_grade'], $_SESSION['user_course'])) {
             $this->studentCourseId = new StudentLogin(
                 (string)$_SESSION['user_id'],
                 (string)$_SESSION['user_grade'],
                 (string)$_SESSION['user_course']
             );
-        } else {
+        } 
+        else if (isset($_SESSION['user_id'], $_SESSION['user_grade'])) {
+            ///////////////////////////////
+            // 教員が生徒画面を閲覧する場合 //
+            ///////////////////////////////
+        }
+        else {
             header('Location: ../login/login.php'); 
             exit;
         }
@@ -32,8 +40,11 @@ class StudentHomeController {
 
     public function index() {
         // 1. パラメータの取得
-        $sessionCourseId = $this->studentCourseId->getCourseId();
-        $courseId = (int)($_POST['selected_course'] ?? $_GET['course_id'] ?? $sessionCourseId);
+        // $this->studentCourseId が null じゃないか確認してから呼ぶ
+        $sessionCourseId = ($this->studentCourseId) ? $this->studentCourseId->getCourseId() : null;
+        
+        // sessionCourseId が取れなかった時のデフォルト値を 1 に設定
+        $courseId = (int)($_POST['selected_course'] ?? $_GET['course_id'] ?? $sessionCourseId ?? 1);
         $date = $_POST['search_date'] ?? $_GET['date'] ?? date('Y-m-d');
 
         // 2. 基礎データの取得（日付の日本語名やコースラベルを取得）
@@ -114,9 +125,11 @@ class StudentHomeController {
         extract($viewData);
         require_once '../student_home.php';
     }
+    /*/*
      // ユーザーアイコン表示用
     $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
     extract($data);
 
     $smartcampus_picture = '../images/smartcampus.png';
+    */
 }

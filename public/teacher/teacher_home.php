@@ -44,6 +44,9 @@ SecurityHelper::applySecureHeaders();
                     <a href="../help/help_control.php?back_page=1" class="help-button">
                         <span class="icon-lightbulb"></span> ヘルプ
                     </a>
+                    <a href="../student/controls/home_control.php" class="help-button" target="_blank" rel="noopener noreferrer">
+                        <span class="icon-lightbulb"></span> 生徒ホーム
+                    </a>
                 </div>
             <!--  ICCスマートキャンパスロゴ -->
             <img src="<?= htmlspecialchars($smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">  
