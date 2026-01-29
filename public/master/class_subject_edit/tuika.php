@@ -19,7 +19,7 @@
                     <span class="icon-key"></span>
                         アプリからログアウト
                 </a>
-                <a href="" class="help-button">
+                <a href="../../../help/help_control.php?back_page=4" class="help-button">
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
