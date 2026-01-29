@@ -23,7 +23,7 @@
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
-        <a href="../../master_home_control.php" style="position: absolute; left: 20px; top: 5px;">
+        <a href="../../../login/redirect.php" style="position: absolute; left: 20px; top: 5px;">
             <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
         </a>
     </header>
