@@ -15,7 +15,7 @@
             <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
         </div>
             <div class="user-menu-popup" id="userMenuPopup">
-                <a href="../logout/logout.php" class="logout-button">
+                <a href="../../../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
                         アプリからログアウト
                 </a>
