@@ -23,7 +23,9 @@
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
-        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+        <a href="../../master_home_control.php" style="position: absolute; left: 20px; top: 5px;">
+            <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+        </a>
     </header>
     <div class="container">
         <nav class="sidebar">
