@@ -183,7 +183,6 @@
             </form>
         </div>
     </div>
-
     <script>
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
         let currentData = {};

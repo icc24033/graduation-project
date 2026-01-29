@@ -4,10 +4,27 @@
     <meta charset="UTF-8">
     <title>授業科目一覧 - 削除</title>
     <link rel="stylesheet" href="../css/delete_style.css"> 
+    <link rel="stylesheet" type="text/css" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
 </head>
 <body>
-    <header class="header"><h1>授業科目一覧 (削除)</h1></header>
-
+    <header class="header">
+        <h1>授業科目一覧 (削除)</h1>
+        <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+            <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+        </div>
+            <div class="user-menu-popup" id="userMenuPopup">
+                <a href="../logout/logout.php" class="logout-button">
+                    <span class="icon-key"></span>
+                        アプリからログアウト
+                </a>
+                <a href="" class="help-button">
+                    <span class="icon-lightbulb"></span> ヘルプ
+                </a>
+            </div>
+        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+    </header>
     <div class="container">
         <nav class="sidebar">
             <form action="delete_control.php" method="GET">
@@ -78,7 +95,26 @@
             </form>
         </div>
     </div>
+    <script>
+        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        let currentData = {};
 
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+    </script>
     <script src="../js/subject_delete.js"></script>
 </body>
 </html>

@@ -25,6 +25,8 @@ SecurityHelper::applySecureHeaders();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/timetable_change.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
     <script src="js/timetable_change.js" defer></script>
 </head>
 <body>
@@ -32,6 +34,19 @@ SecurityHelper::applySecureHeaders();
     <header class="app-header">
         <h1>授業変更</h1>
         <img class="header_icon" src="images/square-pen.png">
+        <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+            <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+        </div>
+            <div class="user-menu-popup" id="userMenuPopup">
+                <a href="../logout/logout.php" class="logout-button">
+                    <span class="icon-key"></span>
+                        アプリからログアウト
+                </a>
+                <a href="" class="help-button">
+                    <span class="icon-lightbulb"></span> ヘルプ
+                </a>
+            </div>
+        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
     </header>
 
     <div class="app-container">
@@ -190,6 +205,26 @@ SecurityHelper::applySecureHeaders();
             </div>
         </div>
     </div>
+    <script>
+        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        let currentData = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+    </script>
 
     <script>
         // コントローラーから渡されたPHP変数をJSON化してJS定数に格納
