@@ -117,7 +117,6 @@ if (isset($_GET['code'])) {
                 $pdo = new PDO($dsn, DB_USER, DB_PASS);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // ★★★ 変更点: ポリモーフィズム（多態性）を活用 ★★★
                 $authRepo = new AuthRepository($pdo);
                 $user = $authRepo->findUserByEmail($userEmail); // LoginUser オブジェクトが返る
                 

@@ -959,3 +959,54 @@ button.status-button.not-created {
     border-radius: 3px;
     border: none;
 }
+
+/*サイドバーのリスト領域にスクロール設定を追加 */
+.next-class-list,
+.future-class-list {
+    max-height: 300px; /* 表示領域の高さ制限（必要に応じて調整） */
+    overflow-y: auto;  /* 縦スクロールを有効化 */
+    padding-right: 5px;
+    border: 1px solid #eee; /* 領域がわかりやすいように薄い枠線（任意） */
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* スクロールバーのデザイン調整（Chrome/Safari等） */
+.next-class-list::-webkit-scrollbar,
+.future-class-list::-webkit-scrollbar {
+    width: 6px;
+}
+.next-class-list::-webkit-scrollbar-thumb,
+.future-class-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+
+/* ★修正：ここから追加・変更 */
+
+/* サイドバーのリスト部分にスクロール設定を追加 */
+.next-class-list,
+.future-class-list {
+    max-height: 300px;      /* ★修正：高さ制限（必要に応じて調整してください） */
+    overflow-y: auto;       /* ★修正：縦スクロールを有効化 */
+    padding-right: 5px;     /* スクロールバーとの余白 */
+    /* スクロールバーの見た目を少し調整（Webkit系） */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+/* スクロールバーのスタイル（Chrome/Safari用） */
+.next-class-list::-webkit-scrollbar,
+.future-class-list::-webkit-scrollbar {
+    width: 6px;
+}
+.next-class-list::-webkit-scrollbar-thumb,
+.future-class-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+.next-class-list::-webkit-scrollbar-track,
+.future-class-list::-webkit-scrollbar-track {
+    background: transparent;
+}

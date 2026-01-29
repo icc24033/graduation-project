@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ドロップダウン用要素（IDを修正後のHTMLに合わせて取得）
     const gradeToggle = document.getElementById('gradeFilterToggle');
     const gradeMenu = document.getElementById('gradeFilterMenu');
-    const courseToggle = document.getElementById('courseFilterToggle');
-    const courseMenu = document.getElementById('courseFilterMenu');
+    // const courseToggle = document.getElementById('courseFilterToggle');
+    // const courseMenu = document.getElementById('courseFilterMenu');
     const subjectToggle = document.getElementById('subjectSelectorToggle');
     const subjectMenu = document.getElementById('subjectSelectorMenu');
 
@@ -43,10 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedDateKey = null; // "YYYY-MM-DD"
     let lessonData = {}; // サーバーから取得した授業詳細データ
     let selectedSlotKey = null; // "YYYY-MM-DD_1限" など、現在編集中のスロット識別子
+    let sidebarData = {}; // サイドバー表示用データ
     let currentEditingSlot = null; // 現在編集中のスロットオブジェクト
     
     // ドロップダウン用状態
-    let currentFilters = { grade: "", course: "" }; // フィルタ状態
+    let currentFilters = { grade: ""}; // フィルタ状態
     let currentSubject = null; // 現在選択中の科目オブジェクト {subject_id, course_id, ...}
     
     // 持ち物削除モード
@@ -82,17 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const grades = [...new Set(assignedClassesData.map(d => d.grade))].sort();
         renderFilterList(gradeMenu, gradeToggle, grades, 'grade', '年生');
 
-        // 3-2. コースリストの生成（重複排除）
-        const courseMap = new Map();
-        assignedClassesData.forEach(d => courseMap.set(d.course_id, d.course_name));
-        renderCourseFilterList(courseMenu, courseToggle, courseMap);
+        // コースリスト生成処理を削除
+        // const courseMap = new Map();
+        // assignedClassesData.forEach(d => courseMap.set(d.course_id, d.course_name));
+        // renderCourseFilterList(courseMenu, courseToggle, courseMap);
 
         // 3-3. 科目リストの初期更新（全件表示 -> 先頭を選択）
         updateSubjectList();
 
         // 3-4. 開閉イベント設定
         setupDropdownToggle(gradeToggle, gradeMenu);
-        setupDropdownToggle(courseToggle, courseMenu);
+
+        // コースドロップダウンのイベント設定を削除
+        // setupDropdownToggle(courseToggle, courseMenu);
         setupDropdownToggle(subjectToggle, subjectMenu);
     }
 
@@ -103,8 +106,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // 1. まずフィルタリング（学年・コースで絞り込み）
         const filteredRaw = assignedClassesData.filter(item => {
             const matchGrade = (currentFilters.grade === "") || (String(item.grade) === String(currentFilters.grade));
-            const matchCourse = (currentFilters.course === "") || (String(item.course_id) === String(currentFilters.course));
-            return matchGrade && matchCourse;
+            
+            // コースでの絞り込みを削除（常にtrue扱いや削除で対応）
+            // const matchCourse = (currentFilters.course === "") || (String(item.course_id) === String(currentFilters.course));
+            
+            // 学年のみで判定
+            return matchGrade;
         });
 
         // 2. 科目IDでグルーピング
@@ -145,8 +152,8 @@ document.addEventListener('DOMContentLoaded', function() {
             a.href = "#";
             
             // 表示名: "C# (システムデザイン, Webクリエイタ)" のようにコースを併記
+            // ★ここは変更なし（コース名の表示は維持）
             const courseNames = group.courses.map(c => c.name).join(', ');
-            // 長すぎる場合は省略するなどの工夫も可能
             a.textContent = `${group.subject_name}`;
             
             // ホバー時にコース内訳を表示するなどしても親切
@@ -163,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             li.appendChild(a);
             li.addEventListener('click', (e) => {
                 e.preventDefault();
-                selectSubjectGroup(group); // ★新しい選択関数を呼ぶ
+                selectSubjectGroup(group); 
                 closeAllDropdowns();
             });
             subjectMenu.appendChild(li);
@@ -252,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('is-open'));
         document.querySelectorAll('.dropdown-toggle').forEach(t => t.setAttribute('aria-expanded', 'false'));
     }
+    // ★修正：不要になったコースメニュー操作を削除（汎用処理なので変更不要の場合もありますが、念のため確認）
     document.addEventListener('click', closeAllDropdowns);
 
 
