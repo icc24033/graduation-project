@@ -31,20 +31,22 @@ $subjectList = $subjectList ?? [];
                 <h1>授業詳細</h1>
                 <img class="user-icon" src="images/user-icon.png" alt="アイコン">
                 <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
-                <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
-            </div>
+                    <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+                </div>
                 <div class="user-menu-popup" id="userMenuPopup">
-                    <a href="../logout/logout.php" class="logout-button">
+                    <a href="../../logout/logout.php" class="logout-button">
                         <span class="icon-key"></span>
                             アプリからログアウト
                     </a>
-                    <a href="" class="help-button">
+                    <a href="../../help/help_control.php?back_page=5" class="help-button" target="_blank" rel="noopener noreferrer">
                         <span class="icon-lightbulb"></span> ヘルプ
                     </a>
                 </div>
-            <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
-
-            </div>
+            <a href="../../login/redirect.php" 
+                style="position: absolute; left: 20px; top: 5px;" 
+                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                    <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+            </a>
         </header>
         <main>
             <nav class="sidebar">

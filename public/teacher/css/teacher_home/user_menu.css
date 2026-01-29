@@ -31,12 +31,12 @@
     display: block;
 }
 
-/* ログアウトボタンのスタイル */
-.logout-button,.help-button {
-    display: flex; /* アイコンの垂直中央揃えを維持 */
+/* 修正後：3つのボタンすべてに共通スタイルを適用 */
+.logout-button, .help-button, .student-home-button {
+    display: flex; /* アイコンの垂直中央揃え */
     align-items: center;
-    width: 100%; /*  親要素の幅全体を使う */
-    box-sizing: border-box; /*  paddingを幅に含める */
+    width: 100%; 
+    box-sizing: border-box; 
     padding: 12px 20px;
     text-decoration: none;
     color: #222;
@@ -44,8 +44,9 @@
     transition: background-color 0.2s;
 }
 
-.logout-button:hover,.help-button:hover {
-    background-color: #CFD5DF; /* ホバー時の背景色 */
+/* ホバー時の背景色も3つ共通にする */
+.logout-button:hover, .help-button:hover, .student-home-button:hover {
+    background-color: #CFD5DF;
 }
 
 /* アイコン（Chromeからログアウトの左側の鍵アイコンを模す） */
@@ -72,6 +73,18 @@
     margin-right: 15px;
     /* 電球のSVGアイコンデータ */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-3-15a6 6 0 0 0-5.907 4.942A5 5 0 0 1 7.5 13.5v1a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1a5 5 0 0 1 2.407-3.558A6 6 0 0 0 12 3Z"/></svg>');
+    background-size: cover;
+    opacity: 0.6;
+}
+
+/* 生徒ホーム画面に飛ぶ際のアイコン(家の形をしたもの) */
+.student-home-button .icon-home {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 15px;
+    /* Lucide 'house' アイコンのSVGデータ */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>');
     background-size: cover;
     opacity: 0.6;
 }
