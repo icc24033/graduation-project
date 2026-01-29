@@ -23,9 +23,11 @@
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
-        <a href="../../../login/redirect.php" style="position: absolute; left: 20px; top: 5px;">
-            <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
-        </a>
+            <a href="../../../login/redirect.php" 
+                style="position: absolute; left: 20px; top: 5px;" 
+                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                    <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+            </a>
     </header>
     <div class="container">
         <nav class="sidebar">
