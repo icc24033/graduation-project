@@ -1,4 +1,5 @@
 <?php
+// addition_control.php
 
 session_start();
 
@@ -72,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //データ件数を取得する変数
     $insert_count = 0;
     $error_count = 0;
+    $total_login_users = 0;
 
     // 現在の年を取得
     $current_year = date('Y');

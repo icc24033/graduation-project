@@ -1,8 +1,5 @@
 <?php
 // SecurityHelperの読み込み（パスは環境に合わせて調整してください）
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-
 ?>
 
 <!DOCTYPE html>

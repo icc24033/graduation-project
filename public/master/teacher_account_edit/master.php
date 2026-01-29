@@ -1,10 +1,6 @@
 <?php
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
-// SecurityHelperの読み込み
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-
 ?>
 
 

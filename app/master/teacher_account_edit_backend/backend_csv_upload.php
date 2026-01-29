@@ -1,10 +1,5 @@
 <?php
 // 先生用のbackend_csv_upload.php
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-session_start();
-
 try {
     require_once __DIR__ . '/../../../app/classes/repository/RepositoryFactory.php';
     $pdo = RepositoryFactory::getPdo();
