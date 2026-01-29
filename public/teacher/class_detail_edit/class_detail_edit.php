@@ -61,14 +61,6 @@ $subjectList = $subjectList ?? [];
                             </ul>
                     </li>
 
-                    <li class="nav-item has-dropdown">
-                        <button class="dropdown-toggle" id="courseFilterToggle" aria-expanded="false">
-                            <span class="current-value">全コース</span>
-                        </button>
-                        <ul class="dropdown-menu" id="courseFilterMenu">
-                            </ul>
-                    </li>
-
                     <li style="border-top: 1px solid #ccc; margin: 15px 10px;"></li>
                     <li class="is-group-label" style="color: #0056b3; font-weight:bold;">編集対象の科目</li>
 
