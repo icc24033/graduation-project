@@ -67,22 +67,20 @@ $subjectList = $subjectList ?? [];
                             <span class="current-value">読込中...</span>
                         </button>
                         <ul class="dropdown-menu" id="subjectSelectorMenu">
-                            </ul>
+                        </ul>
                     </li>
-                    
-                    <div class="next-lesson-wrapper">
-                        <li class="is-group-label">次回の授業</li>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">--月--日(-) --限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    
-                    <li class="is-group-label">次回以降</li>
-                    
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">--月--日(-) --限</div>
-                        <button class="status-button not-created">未作成</button>
+
+                    <div class="sidebar-scroll-area" style="flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 20px;">
+                        <div class="next-lesson-wrapper">
+                            <li class="is-group-label">次回の授業</li>
+                            <div id="nextLessonList"></div>
+                        </div>
+                        <div style="height: 10px;"></div>
+
+                        <div class="future-lesson-wrapper">
+                            <li class="is-group-label">次回以降</li>
+                            <div id="futureLessonList"></div>
+                        </div>
                     </div>
                 </ul>
             </nav>

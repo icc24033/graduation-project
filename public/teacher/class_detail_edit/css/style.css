@@ -245,7 +245,7 @@
  
     /* 次の授業セクション */
  .next-lesson-wrapper {
-    display: flex;
+
  }
 
  /* next-lesson-wrapper内のliとpのスタイル調整 */
@@ -269,7 +269,6 @@
 
  /* 授業ステータスセクション */
  .lesson-status-wrapper {
-     display: flex;
      /* --- デフォルトの幅は290pxを維持 --- */
      width: 290px;
      padding: 10px 20px;
@@ -280,7 +279,6 @@
      cursor: pointer;
      transition: background-color 0.3s;
      position: relative;
-     display: flex;
      justify-content: space-between;
      align-items: center;
      border-top-left-radius: 10px;
@@ -290,13 +288,13 @@
  
     /* 授業ステータスボタンのスタイル */
  .status-button {
-     padding: 4px 8px;
+     padding: 6px 20px;
      border: none;
      border-top-left-radius: 5px;
      border-bottom-left-radius: 5px;
      font-weight: normal;
      cursor: pointer;
-     min-width: 70px;
+     /* min-width: 70px; */
      text-align: left;
  }
 
@@ -871,6 +869,8 @@ button.status-button.not-created {
 /* buttonタグかつstatus-buttonクラスかつnot-createdクラスの背景色を強制上書き */
 button.status-button.not-created {
     background-color: #C0DEFF !important;
+    position: absolute;
+    right: 0px;
 }
 
 /* 「未作成」ラベルをカレンダー内だけで非表示にする */
@@ -1010,3 +1010,4 @@ button.status-button.not-created {
 .future-class-list::-webkit-scrollbar-track {
     background: transparent;
 }
+
