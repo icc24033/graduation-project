@@ -44,7 +44,7 @@ $subjectList = $subjectList ?? [];
                 </div>
             <a href="../../login/redirect.php" 
                 style="position: absolute; left: 20px; top: 5px;" 
-                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                onclick="return confirm('ホーム画面に遷移しますか？');">
                     <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
             </a>
         </header>
@@ -61,7 +61,7 @@ $subjectList = $subjectList ?? [];
                             </ul>
                     </li>
 
-                    <li style="border-top: 1px solid #ccc; margin: 15px 10px;"></li>
+                    <li style="border-top: 1px solid #ccc; margin: 10px 10px;"></li>
                     <li class="is-group-label" style="color: #0056b3; font-weight:bold;">編集対象の科目</li>
 
                     <li class="nav-item has-dropdown subject-selector-wrapper">
@@ -72,7 +72,9 @@ $subjectList = $subjectList ?? [];
                         </ul>
                     </li>
 
-                    <div class="sidebar-scroll-area" style="flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 20px;">
+                    <li style="border-top: 1px solid #ccc; margin: 10px 10px;"></li>
+
+                    <div class="sidebar-scroll-area">
                         <div class="next-lesson-wrapper">
                             <li class="is-group-label">次回の授業</li>
                             <div id="nextLessonList"></div>
