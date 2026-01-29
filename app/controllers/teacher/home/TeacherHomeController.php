@@ -72,4 +72,9 @@ class TeacherHomeController extends HomeRepository {
             exit();
         }
     }
+     // ユーザーアイコン表示用
+    $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+    extract($data);
+
+    $smartcampus_picture = '../images/smartcampus.png';
 }

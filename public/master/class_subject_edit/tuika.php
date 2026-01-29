@@ -1,29 +1,12 @@
-<?php
-// tuika.php
-// セッション開始（必要に応じて）
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// SecurityHelperの読み込みとヘッダー適用
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-
-// 元のロジック（コントローラーから渡される変数）はそのまま維持されます
-// $subjects, $grade_val, $courseInfo, $data, $teacherList, $roomList, $search_grade, $search_course, $smartcampus_picture など
-?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>授業科目一覧</title>
     <link rel="stylesheet" type="text/css" href="../css/add_style.css">
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/common.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/header.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/style.css">
-    <link rel="stylesheet" type="text/css" href="css/teacher_home/user_menu.css">
+    <link rel="stylesheet" type="text/css" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
 </head>
 <body>
     <header class="header">
@@ -32,15 +15,19 @@ SecurityHelper::applySecureHeaders();
             <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
         </div>
             <div class="user-menu-popup" id="userMenuPopup">
-                <a href="../logout/logout.php" class="logout-button">
+                <a href="../../../logout/logout.php" class="logout-button">
                     <span class="icon-key"></span>
                         アプリからログアウト
                 </a>
-                <a href="" class="help-button">
+                <a href="../../../help/help_control.php?back_page=4" class="help-button" target="_blank" rel="noopener noreferrer">
                     <span class="icon-lightbulb"></span> ヘルプ
                 </a>
             </div>
-        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+        <a href="../../../login/redirect.php" 
+            style="position: absolute; left: 20px; top: 5px;" 
+            onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+        </a>
     </header>
     <div class="container">
         <nav class="sidebar">
@@ -200,7 +187,6 @@ SecurityHelper::applySecureHeaders();
             </form>
         </div>
     </div>
-
     <script>
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
         let currentData = {};

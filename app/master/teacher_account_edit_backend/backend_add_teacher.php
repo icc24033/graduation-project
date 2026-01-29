@@ -1,11 +1,6 @@
 <?php
 // backend_add_teacher.php
 
-// --- デバッグ用：エラーを表示させる設定 ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // SecurityHelperとRepositoryFactoryの読み込み（既存の階層に合わせて調整）
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';

@@ -1,0 +1,179 @@
+/* --- 既存のヘッダー・サイドバーの基本設定は維持 --- */
+
+/* メインコンテンツのレイアウト調整 */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー (授業科目一覧 タイトル部分) */
+.app-header {
+    /* 画面上部に固定 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF;
+    height: 70px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.hedder-icon {
+    font-size: 24px;
+}
+
+/* メインコンテンツ (サイドバーと科目一覧を包含) */
+.main-content {
+    padding-top: 70px;
+    display: block; /* FlexやGridを解除し、通常のブロック要素に */
+}
+
+/* --- サイドバー (ナビゲーション) --- */
+.sidebar {
+    /* 画面の左側に固定 */
+    position: fixed; 
+    left: 0;
+    bottom: 0;
+    top: 70px; 
+    /* 常に最前面に表示 */
+    z-index: 999;
+    width: 300px; 
+    background-color: #F3F8FF;
+    padding: 0 0 0 10px;
+    flex-shrink: 0; 
+    border-right: solid 1px #CFD5DF;
+}
+
+.sidebar ul { 
+    padding: 0;
+}
+
+.nav-item {
+    position: relative; /*CSSで要素を元の位置から相対的にずらして配置する*/
+    padding: 5px 0; 
+}
+
+.nav-item a {
+    display: block;
+    /* --- デフォルトの幅は290pxを維持 --- */
+    width: 290px;
+    padding: 10px 20px;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 通常時にも角丸を設定し、ホバー時のちらつきを防止 */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* グループラベルのスタイル（「編集」など） */
+.is-group-label {
+    pointer-events: none; 
+    border-bottom: none;
+    padding: 15px 0; 
+}
+
+.nav-item a.is-active {
+    /* ホバー時と同じ背景色を固定で適用 */
+    background-color: #CFD5DF; 
+}
+
+/* ホバー時のスタイル（非アクティブ時） */
+.nav-item a:hover {
+    background-color: #CFD5DF; /* ホバー時の背景色をグレーに */
+}
+
+/* ヘルプ表示エリア */
+/* ヘッダー内の電球アイコンのスタイル */
+.lightbulb-icon {
+    font-size: 24px;
+    margin-left: 10px;
+    /* アイコンの色を調整したい場合はここで指定 */
+}
+
+/* メインコンテンツ（説明文）のスタイル */
+.help-display {
+    margin-left: 300px; /* サイドバーの幅に合わせる */
+    padding-top: 60px;
+    padding-left: 100px;
+    line-height: 1.8;
+}
+
+.help-content h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.help-content p {
+    margin-bottom: 30px;
+}
+
+.come-text {
+    color: #FF5F5F; /* 赤色 */
+    font-weight: bold; /* 必要であれば太字に */
+}
+
+.app-header{
+    /* 画面上部に固定 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 常に最前面に表示 */
+    background-color: #C0DEFF;
+    height: 70px;
+    display: flex;
+    justify-content: center; /* 既存のflex-endを維持 */
+    align-items: center; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding-right: 20px;/* 右側に余白 */
+    gap: 10px; /* Header1とuser_iconの距離10pxを維持 */
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.header-icon {
+    width: 30px; /* アイコン画像の幅を24pxに設定 */
+    height: 30px; /* アイコン画像の高さを24pxに設定 */
+}
+
+.user-avatar {
+    width: 50px;           
+    height: 50px;          
+    border-radius: 50%;    
+    overflow: hidden;     
+    border: 2px solid #fff; 
+    z-index: 1001;          
+    cursor: pointer;       
+}
+
+/* アバター画像自体 */
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像の縦横比を維持しつつコンテナを埋める */
+}

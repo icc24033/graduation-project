@@ -1,0 +1,43 @@
+
+#hiddenDateInput { display: none; }
+.no-schedule, .error-msg { text-align: center; padding: 40px; color: #888; font-weight: bold; }
+.search { cursor: pointer; }
+.dropdown-content { display: none; width: 100%; padding: 15px; box-sizing: border-box; background-color: #f9f9f9; border-top: 1px solid #eee; margin-top: 10px; border-radius: 0 0 8px 8px; }
+.dropdown-content.show { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.item-list { list-style: none; padding: 0; margin: 0; }
+.item-list li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+.item-list li:last-child { border-bottom: none; }
+#dateTriggerBtn.date-btn { color: #ffffff !important; background-color: #495666; font-weight: bold !important; }
+.detail-box { display: flex; align-items: stretch; background-color: #d1e7ff; border-radius: 12px; overflow: hidden; margin: 5px 0; }
+.detail-title { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 60px; font-weight: bold; color: #333; font-size: 0.9em; border-right: 1px solid rgba(0, 0, 0, 0.1); }
+.detail-text { flex-grow: 1; padding: 15px; margin: 0; line-height: 1.6; font-size: 0.95em; color: #333; white-space: pre-wrap; text-align: left; }
+.dropdown-content.detail-content { background-color: #ffffff; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+/* 1. 時間割変更があるカード（左右いっぱいに広げる） */
+.card.is-changed {
+    background-color: #fff9c4; /* パステルイエロー */
+    border: none;
+    box-shadow: none;           /* 広げる場合は影がないほうが馴染みます */
+    
+    /* 親要素のパディング分（恐らく左右に設定されている分）を打ち消して広げる */
+    margin-left: -24px;  /* style.cssのパディングに合わせて調整 */
+    margin-right: -24px;
+    padding-left: 24px;  /* 中のコンテンツが端に寄らないようにパディングで戻す */
+    padding-right: 24px;
+    
+    width: auto;         /* 幅を自動計算にする */
+    border-radius: 0;    /* 横に広げる場合は角丸をなくすと自然です */
+}
+
+/* 2. 「時間割変更」バッジ */
+.change-badge {
+    display: inline-block;
+    background-color: #fbc02d;
+    color: #444;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: bold;
+}

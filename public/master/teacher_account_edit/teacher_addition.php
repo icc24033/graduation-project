@@ -1,8 +1,5 @@
 <?php
 // SecurityHelperの読み込み（パスは環境に合わせて調整してください）
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
-SecurityHelper::applySecureHeaders();
-
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +10,8 @@ SecurityHelper::applySecureHeaders();
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="teacher_addition">
@@ -20,6 +19,23 @@ SecurityHelper::applySecureHeaders();
         <header class="app-header">
             <h1>先生アカウント作成編集</h1>
             <img class="user-icon" src="../images/user-icon.png"alt="ユーザーアイコン">
+            <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+            </div>
+                <div class="user-menu-popup" id="userMenuPopup">
+                    <a href="../../../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                            アプリからログアウト
+                    </a>
+                    <a href="../../../help/help_control.php?back_page=3" class="help-button" target="_blank" rel="noopener noreferrer">
+                        <span class="icon-lightbulb"></span> ヘルプ
+                    </a>
+                </div>
+            <a href="../../../login/redirect.php" 
+                style="position: absolute; left: 20px; top: 5px;" 
+                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                    <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+            </a>
         </header>
 
         <main class="main-content">
@@ -200,6 +216,26 @@ SecurityHelper::applySecureHeaders();
         </form>
     </div>
     <?php endif; ?>
+    <script>
+        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        let currentData = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+    </script>
     <script src="../js/script.js"></script>
 </body>
 </html>

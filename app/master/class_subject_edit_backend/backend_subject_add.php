@@ -1,11 +1,6 @@
 <?php
 // backend_subject_add.php
 
-// --- デバッグ用設定 ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 

@@ -21,6 +21,8 @@ $subjectList = $subjectList ?? [];
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/reset.css">
         <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+        <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     </head>
     <body>
@@ -28,6 +30,20 @@ $subjectList = $subjectList ?? [];
             <div class="header">
                 <h1>授業詳細</h1>
                 <img class="user-icon" src="images/user-icon.png" alt="アイコン">
+                <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+            </div>
+                <div class="user-menu-popup" id="userMenuPopup">
+                    <a href="../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                            アプリからログアウト
+                    </a>
+                    <a href="" class="help-button">
+                        <span class="icon-lightbulb"></span> ヘルプ
+                    </a>
+                </div>
+            <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
+
             </div>
         </header>
         <main>
@@ -167,6 +183,24 @@ $subjectList = $subjectList ?? [];
         <script>
             // PHPの配列をJSON形式でJSオブジェクトとして受け取る
             const assignedClassesData = <?php echo json_encode($assignedClasses ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        </script>
+        <script>
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userMenuPopup = document.getElementById('userMenuPopup');
+
+                    userAvatar.addEventListener('click', function(event) {
+                        userMenuPopup.classList.toggle('is-visible');
+                        event.stopPropagation();
+                    });
+
+                    document.addEventListener('click', function(event) {
+                        if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                            userMenuPopup.classList.remove('is-visible');
+                        }
+                    });
+            });
         </script>
         <script src="js/class_detail_edit.js"></script>
     </body>

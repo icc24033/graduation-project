@@ -77,6 +77,8 @@ class MasterHomeController extends HomeRepository {
             $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
             extract($data);
 
+            $smartcampus_picture = '../images/smartcampus.png';
+
         
         } else {
             // 権限がない、またはユーザーが取得できない場合

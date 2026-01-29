@@ -46,6 +46,8 @@ class ClassSubjectEditController {
         extract($courseList);
         extract($teacherList);
         extract($roomList);
+
+        $smartcampus_picture = '../images/smartcampus.png';
         
         
         require_once '../tuika.php';
@@ -81,6 +83,8 @@ class ClassSubjectEditController {
         extract($courseList);
         extract($teacherList);
         extract($roomList);
+
+        $smartcampus_picture = '../images/smartcampus.png';
         
         require_once '../sakuzyo.php';
     }

@@ -41,8 +41,7 @@ SecurityHelper::applySecureHeaders();
                         <span class="icon-key"></span>
                         アプリからログアウト
                     </a>
-                    <!-- リンク先わかりません -->
-                    <a href="" class="help-button">
+                    <a href="../help/help_control.php?back_page=1" class="help-button">
                         <span class="icon-lightbulb"></span> ヘルプ
                     </a>
                 </div>
@@ -80,5 +79,25 @@ SecurityHelper::applySecureHeaders();
                 });
             });
         </script>
+        <script>
+                const allCourseInfo = <?= json_encode($courseInfo) ?>;
+                let currentData = {};
+
+                document.addEventListener('DOMContentLoaded', function() {
+                        const userAvatar = document.getElementById('userAvatar');
+                        const userMenuPopup = document.getElementById('userMenuPopup');
+
+                        userAvatar.addEventListener('click', function(event) {
+                            userMenuPopup.classList.toggle('is-visible');
+                            event.stopPropagation();
+                        });
+
+                        document.addEventListener('click', function(event) {
+                            if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                                userMenuPopup.classList.remove('is-visible');
+                            }
+                        });
+                    });
+            </script>
     </body>
 </html>

@@ -13,7 +13,7 @@ class TeacherLogin implements LoginUser {
         $this->gradeName = $gradeName;
 
         $month = date('n');
-        if ($month === '1') {
+        if ($month === '4') {
             // 4月は進級処理
             require_once __DIR__ . '/../../functions/master/grade_increment.php';
         } elseif ($month === '5') {

@@ -1,11 +1,6 @@
 <?php
 // require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
 
-// セッション開始
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $status = $basic_data ?? null;
 
 // コースIDの取得
@@ -33,7 +28,6 @@ else {
     unset($gradeList[3]); // 卒業生を表示させない         
 }
 
-require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // 現在のコース名の初期値を設定 (最初の要素の 'course_name' を使用)
 if (!empty($courseList)) {
@@ -58,6 +52,8 @@ $pdo = null;
     <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="grade_transfar">
@@ -65,6 +61,23 @@ $pdo = null;
         <header class="app-header">
             <h1>生徒アカウント作成編集</h1>
             <img class="user_icon" src="../images/user_icon.png"alt="ユーザーアイコン">
+            <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+                <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+            </div>
+                <div class="user-menu-popup" id="userMenuPopup">
+                    <a href="../../../logout/logout.php" class="logout-button">
+                        <span class="icon-key"></span>
+                            アプリからログアウト
+                    </a>
+                    <a href="../../../help/help_control.php?back_page=3" class="help-button" target="_blank" rel="noopener noreferrer">
+                        <span class="icon-lightbulb"></span> ヘルプ
+                    </a>
+                </div>
+            <a href="../../../login/redirect.php" 
+                style="position: absolute; left: 20px; top: 5px;" 
+                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                    <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
+            </a>
         </header>
 
         <main class="main-content">
@@ -226,6 +239,26 @@ $pdo = null;
             </div>
         </main>
     </div>
+    <script>
+        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        let currentData = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
+    </script>
     <script src="../js/script.js"></script>
 </body>
 </html>

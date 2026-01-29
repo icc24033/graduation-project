@@ -33,6 +33,24 @@
     font-size: 24px;
 }
 
+/* .user-avatar の定義を見直し */
+.user-avatar {
+    /* ... 既存のposition/top/right/transform設定 ... */
+    
+    width: 50px !important;    /* 幅を60pxに固定 */
+    height: 50px !important;   /* 高さを60pxに固定 */
+    
+    /* ... その他の設定 ... */
+}
+
+/* 画像自体も親要素のサイズに合わせる */
+.user-avatar .avatar-image {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+}
+
+
 /* --- メインコンテンツとサイドバーのレイアウト --- */
 .main-content {
     padding-top: 70px;

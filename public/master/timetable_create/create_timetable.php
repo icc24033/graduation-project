@@ -17,12 +17,27 @@ SecurityHelper::requireLogin();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
-
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
 </head>
 <body>
     <header class="app-header">
         <h1>時間割り作成</h1>
         <img class="header_icon" src="./images/calendar-plus.png">
+        <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
+            <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
+        </div>
+            <div class="user-menu-popup" id="userMenuPopup">
+                <a href="../logout/logout.php" class="logout-button">
+                    <span class="icon-key"></span>
+                        アプリからログアウト
+                </a>
+                <a href="" class="help-button">
+                    <span class="icon-lightbulb"></span> ヘルプ
+                </a>
+            </div>
+        <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60" style="position: absolute; left: 20px; top: 5px;">
     </header>
 
     <div class="app-container">
@@ -254,6 +269,26 @@ SecurityHelper::requireLogin();
         //マスタデータ（科目・教員・教室）
         // JS側では dbMasterData[コースID] でアクセスする
         const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    </script>
+    <script>
+        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        let currentData = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
+
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
+            });
     </script>
     <script src="js/timetable_create.js?v=<?php echo time(); ?>"></script>
 </body>
