@@ -186,19 +186,19 @@ $subjectList = $subjectList ?? [];
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                    const userAvatar = document.getElementById('userAvatar');
-                    const userMenuPopup = document.getElementById('userMenuPopup');
+                const userAvatar = document.getElementById('userAvatar');
+                const userMenuPopup = document.getElementById('userMenuPopup');
 
-                    userAvatar.addEventListener('click', function(event) {
-                        userMenuPopup.classList.toggle('is-visible');
-                        event.stopPropagation();
-                    });
+                userAvatar.addEventListener('click', function(event) {
+                    userMenuPopup.classList.toggle('is-visible');
+                    event.stopPropagation();
+                });
 
-                    document.addEventListener('click', function(event) {
-                        if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
-                            userMenuPopup.classList.remove('is-visible');
-                        }
-                    });
+                document.addEventListener('click', function(event) {
+                    if (!userMenuPopup.contains(event.target) && !userAvatar.contains(event.target)) {
+                        userMenuPopup.classList.remove('is-visible');
+                    }
+                });
             });
         </script>
         <script src="js/class_detail_edit.js"></script>
