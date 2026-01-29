@@ -25,7 +25,7 @@ class StudentHomeController {
                 (string)$_SESSION['user_course']
             );
         } else {
-            header('Location: ../login/login_control.php'); 
+            header('Location: ../login/login.php'); 
             exit;
         }
     }
