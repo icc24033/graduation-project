@@ -13,7 +13,7 @@ body{
         display: flex;
         justify-content: center;
         position: relative;
-        top: 100px;
+        top: 120px;
     }
 }
 @media (max-width:1400px){
@@ -21,7 +21,7 @@ body{
         display: flex;
         justify-content: center;
         position: relative;
-        top: 100px;
+        top: 120px;
     }
 }
 .message_history{
@@ -51,12 +51,11 @@ body{
 
 .background{
     display: flex;
-    gap: 25px 25px;
+    gap: 36px 28px;
     margin: 0 auto;
     flex-wrap:wrap;
     width: 60%;
     max-width: 800px;
-    min-width: 500px;
 }
 
 .card{
@@ -65,7 +64,7 @@ body{
     border-radius: 20px;
     text-align: center;
     width: 240px;
-    height: 220px;
+    height: 210px;
     border: solid 1px #CFD5DF;
 }
 
@@ -80,95 +79,95 @@ body{
 /* 時間割り作成 */
 .card_icon_calendar-plus{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #E0F7FA;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 /* 時間割り編集 */
 .card_icon_square-pen{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #FFFDE7;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 
 /* アカウント編集 */
 .card_icon_user-round{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #F3E8FF;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 授業科目編集 */
 .card_icon_book{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #F7FEE7;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 通知事項編集 */
 .card_icon_bell-dot{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #E0F2F1;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 授業詳細編集 */
 .card_icon_clipboard-list{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #E6FFEE;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 時間割り閲覧 */
 .card_icon_calendar-clock{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #EEF2FF;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 送信先設定 */
 .card_icon_mails{
     cursor: pointer;
-    padding: 8px 10px 8px 10px;
-    width: 28px;
+    padding: 10px 12px;
+    width: 30px;
     background-color: #FFE4E4;
     border-radius: 28px;
-    margin: 24px 82px 5px 82px;
+    margin: 26px 82px 6px 82px;
 }
 
 
 .card_main{
     cursor: pointer;
-    padding: 6px 10px 8px 10px;
-    font-size: 14px;
+    padding: 6px 10px;
+    font-size: 18px;
     font-weight: 700;
 }
 
 .card_sub{
     cursor: pointer;
-    padding: 3px 10px 6px 10px;
-    font-size: 10px;
+    padding: 8% 10px 0 10px;
+    font-size: 12px;
     font-weight: 500;
 }
 
