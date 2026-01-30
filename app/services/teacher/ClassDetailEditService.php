@@ -96,27 +96,20 @@ class ClassDetailEditService {
         $endDate = date('Y-m-t', strtotime($startDate));
 
         // 2. DBからデータ取得
-        // A. 基本時間割 (曜日ごとのルール)
         $basicTimetables = $timetableRepo->getBasicTimetablesByCourseIds($courseIds);
-        // B. 変更情報 (イレギュラー)
         $changes = $timetableRepo->getTimetableChangesByPeriod($courseIds, $startDate, $endDate);
-        // C. 保存済み情報 (ステータス)
-        // ※ course_ids は複数あるため、一旦すべて取得
-        // findByMonthAndSubject は array($year, $month, $subjectId, $courseId) を想定
-        // 今回は複数コース対応のため、ループまたはIN句対応のリポジトリ修正が望ましいが、
-        // 既存の findByMonthAndSubject をループで呼ぶ形で実装します。
+        
+        // 保存済み情報
         $savedInfos = [];
         foreach ($courseIds as $cId) {
             $infos = $dailyInfoRepo->findByMonthAndSubject($year, $month, $subjectId, $cId);
             foreach ($infos as $info) {
-                // 日付_時限_コースID をキーにして保存データを管理
                 $key = $info['date'] . '_' . $info['period'] . '_' . $info['course_id'];
                 $savedInfos[$key] = $info;
             }
         }
 
         // 3. 変更情報を検索しやすい形に整形
-        // Key: "YYYY-MM-DD_Period_CourseID" => Value: change_record
         $changesMap = [];
         foreach ($changes as $ch) {
             $key = $ch['change_date'] . '_' . $ch['period'] . '_' . $ch['course_id'];
@@ -130,34 +123,35 @@ class ClassDetailEditService {
 
         while ($currentDate <= $endDateTs) {
             $dateStr = date('Y-m-d', $currentDate);
-            $dayOfWeek = date('N', $currentDate); // 1(月)~7(日)
+            $dayOfWeek = date('N', $currentDate);
 
-            // その日のスロットリスト（授業リスト）
-            $daySlots = [];
-            $hasChangeClass = false; // その日に変更による授業があるか（赤丸フラグ）
+            // ここ（日付ごとのループの先頭）で初期化しないと、前のループのデータが残ったり、
+            // 内側のループで初期化すると最後の授業しか残らなくなります。
+            $daySlots = []; 
+            $hasChangeClass = false;
 
             // 各コースごとに判定
             foreach ($courseIds as $courseId) {
-                // 1限〜8限くらいまでをスキャン（あるいは基本時間割にある時限のみ）
-                // ここでは1-6限と仮定してループ、またはマスタから取得
+                // ★注意：ここで $daySlots = [] をしないこと！
+
+                // 1限〜6限をスキャン
                 for ($period = 1; $period <= 6; $period++) {
-                    
-                    // --- 判定ロジック ---
+                    // ★注意：ここで $daySlots = [] をしないこと！
+
                     $targetSubjectId = null;
-                    $isChange = false; // 変更によってこの授業になったか
+                    $isChange = false;
 
                     // キー生成
                     $changeKey = $dateStr . '_' . $period . '_' . $courseId;
 
                     if (isset($changesMap[$changeKey])) {
-                        // A. 変更情報がある場合（優先）
+                        // A. 変更情報がある場合
                         $ch = $changesMap[$changeKey];
-                        $targetSubjectId = $ch['subject_id']; // 変更後の科目ID（休講ならNULL等）
+                        $targetSubjectId = $ch['subject_id'];
                         $isChange = true;
                     } else {
-                        // B. 変更がない場合 -> 基本時間割を適用
+                        // B. 変更がない場合 -> 基本時間割
                         foreach ($basicTimetables as $bt) {
-                            // コース一致 AND 期間内 AND 曜日一致 AND 時限一致
                             if ($bt['course_id'] == $courseId &&
                                 $dateStr >= $bt['start_date'] && 
                                 $dateStr <= $bt['end_date'] &&
@@ -170,35 +164,33 @@ class ClassDetailEditService {
                         }
                     }
 
-                    // --- フィルタリング ---
-                    // 「現在選択中の科目 ($subjectId)」と一致する場合のみリストに追加
+                    // 対象科目のみリストに追加
                     if ($targetSubjectId == $subjectId) {
                         
-                        // 保存済みデータの確認
                         $saveKey = $dateStr . '_' . $period . '_' . $courseId;
                         $savedInfo = $savedInfos[$saveKey] ?? null;
 
-                        // ステータスの決定
-                        $status = 'not-created'; // デフォルト: 未作成
+                        $status = 'not-created';
                         $statusText = '未作成';
+                        
                         if ($savedInfo) {
                             if ($savedInfo['status_type'] == 1) {
-                                $status = 'creating'; // 作成中（黄色）
+                                $status = 'creating';
                                 $statusText = '作成中';
                             } elseif ($savedInfo['status_type'] == 2) {
-                                $status = 'in-progress'; // 作成済み（赤/完了）
+                                $status = 'in-progress';
                                 $statusText = '作成済';
                             }
                         }
 
+                        // ★修正：配列に追加（上書きではない）
                         $daySlots[] = [
                             'period' => $period,
                             'slot' => $period . '限',
                             'course_id' => $courseId,
                             'status' => $status,
                             'statusText' => $statusText,
-                            'is_change' => $isChange, // これがTrueなら赤丸対象
-                            // モーダル表示用データ（保存データがあればそれを使う）
+                            'is_change' => $isChange,
                             'content' => $savedInfo['content'] ?? '',
                             'belongings' => $savedInfo['belongings'] ?? ''
                         ];
@@ -219,7 +211,7 @@ class ClassDetailEditService {
 
                 $calendarData[$dateStr] = [
                     'slots' => $daySlots,
-                    'circle_type' => $hasChangeClass ? 'red' : 'blue' // 赤丸か青丸か
+                    'circle_type' => $hasChangeClass ? 'red' : 'blue'
                 ];
             }
 

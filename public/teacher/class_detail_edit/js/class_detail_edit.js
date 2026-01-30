@@ -624,90 +624,128 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderCalendar(year, month) {
-        if (!calendarGrid) return;
+        if (!calendarGrid) return;
 
-        const oldCells = calendarGrid.querySelectorAll('.date-cell');
-        oldCells.forEach(cell => cell.remove());
-        
-        const firstDay = new Date(year, month - 1, 1).getDay();
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const prevMonthLastDay = new Date(year, month - 1, 0).getDate();
+        // グリッドをクリア
+        calendarGrid.innerHTML = '';
+        
+        // ヘッダーの曜日行（日〜土）を再生成する必要がある場合はここで生成
+        // ※今回はHTMLに静的に書かれている前提ならそのままでOK
+        // ただし、中身を空にするとヘッダーも消える構造の場合は注意
+        // 今回のHTML構造では <div id="calendarGrid"> の中に .day-header が直書きされているので
+        // innerHTML = '' するとヘッダーが消えてしまいます。
+        // そのため、"date-cell" クラスを持つ要素だけを削除します。
+        const oldCells = calendarGrid.querySelectorAll('.date-cell');
+        oldCells.forEach(cell => cell.remove());
 
-        for (let i = 0; i < 35; i++) {
-            let dayNum, isOutOfMonth = false;
-            if (i < firstDay) {
-                dayNum = prevMonthLastDay - (firstDay - 1 - i);
-                isOutOfMonth = true;
-            } else if (i >= firstDay + daysInMonth) {
-                dayNum = i - (firstDay + daysInMonth) + 1;
-                isOutOfMonth = true;
-            } else {
-                dayNum = i - firstDay + 1;
-            }
+        // カレンダー計算
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const prevMonthLastDay = new Date(year, month - 1, 0).getDate();
 
-            const cell = createDateCell(dayNum, isOutOfMonth, year, month);
-            if (i % 7 === 0) cell.classList.add('is-sunday');
-            if (i % 7 === 6) cell.classList.add('is-saturday');
-            calendarGrid.appendChild(cell);
-        }
-        monthElement.textContent = `${month}月`;
-    }
+        // 35マス（5週間分）ループ
+        for (let i = 0; i < 35; i++) {
+            let dayNum, isOutOfMonth = false;
+            let currentY = year;
+            let currentM = month;
+
+            if (i < firstDay) {
+                // 先月
+                dayNum = prevMonthLastDay - (firstDay - 1 - i);
+                isOutOfMonth = true;
+                currentM = month - 1;
+                if(currentM < 1) { currentM = 12; currentY--; }
+            } else if (i >= firstDay + daysInMonth) {
+                // 来月
+                dayNum = i - (firstDay + daysInMonth) + 1;
+                isOutOfMonth = true;
+                currentM = month + 1;
+                if(currentM > 12) { currentM = 1; currentY++; }
+            } else {
+                // 今月
+                dayNum = i - firstDay + 1;
+            }
+
+            const cell = createDateCell(dayNum, isOutOfMonth, currentY, currentM);
+            
+            // 曜日ごとの色分け用クラス
+            if (i % 7 === 0) cell.classList.add('is-sunday');
+            if (i % 7 === 6) cell.classList.add('is-saturday');
+            
+            calendarGrid.appendChild(cell);
+        }
+        
+        // ヘッダータイトルの更新（西暦も表示）
+        if(monthElement) {
+            monthElement.textContent = `${year}年 ${month}月`;
+        }
+    }
 
     function createDateCell(dayNum, isOutOfMonth, year, month) {
-        const cell = document.createElement('div');
-        cell.className = 'date-cell';
-        if (isOutOfMonth) {
-            cell.classList.add('is-out-of-month');
-            cell.style.opacity = '0.5';
-        }
+        const cell = document.createElement('div');
+        cell.className = 'date-cell';
+        if (isOutOfMonth) {
+            cell.classList.add('is-out-of-month');
+            cell.style.opacity = '0.5';
+        }
 
-        // 日付キー生成 (YYYY-MM-DD) ※ゼロ埋めあり
-        const mStr = String(month).padStart(2, '0');
-        const dStr = String(dayNum).padStart(2, '0');
-        const dateKey = `${year}-${mStr}-${dStr}`;
+        // 日付キー生成
+        const mStr = String(month).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const dateKey = `${year}-${mStr}-${dStr}`;
 
-        // データ取得
-        const dayData = lessonData[dateKey]; // { circle_type: 'red'|'blue', slots: [...] }
+        const dayData = lessonData[dateKey] || null;
 
-        // --- 丸の表示判定 ---
-        let dateNumClass = "date-num";
-        if (!isOutOfMonth && dayData) {
-            cell.classList.add('has-data');
-            
-            if (dayData.circle_type === 'red') {
-                dateNumClass += " circle-red"; // 赤丸クラス
-            } else {
-                dateNumClass += " circle-blue"; // 青丸クラス
-            }
-        }
-        
-        cell.innerHTML = `<span class="${dateNumClass}">${dayNum}</span>`;
+        // --- 丸の表示判定 ---
+        const dateNumSpan = document.createElement('span');
+        dateNumSpan.className = 'date-num';
+        dateNumSpan.textContent = dayNum;
 
-        // --- 授業ラベル（ボタン）の生成 ---
-        if (!isOutOfMonth && dayData && dayData.slots) {
-            // スロットを格納するコンテナ
-            const slotsContainer = document.createElement('div');
-            slotsContainer.className = 'slots-container'; // CSSで縦並びにする
+        let hasLesson = false;
+        if (!isOutOfMonth && dayData && dayData.slots && dayData.slots.length > 0) {
+            hasLesson = true;
+            cell.classList.add('has-data');
+            
+            if (dayData.circle_type === 'red') {
+                dateNumSpan.classList.add('circle-red');
+            } else {
+                dateNumSpan.classList.add('circle-blue');
+            }
+        }
+        cell.appendChild(dateNumSpan);
 
-            dayData.slots.forEach(slot => {
-                const btn = document.createElement('button');
-                // クラス: status-button + 状態(creatingなど)
-                btn.className = `status-button ${slot.status}`;
-                btn.textContent = `${slot.slot} ${slot.statusText}`;
-                
-                // ボタンクリックでモーダルを開く
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // セルのクリックを無効化
-                    openModalWithSlot(dateKey, slot);
-                });
+        // --- 授業ラベル（ボタン）の生成 ---
+        if (hasLesson) {
+            const slotsContainer = document.createElement('div');
+            slotsContainer.className = 'slots-container';
 
-                slotsContainer.appendChild(btn);
-            });
-            cell.appendChild(slotsContainer);
-        }
-        
-        return cell;
-    }
+            dayData.slots.forEach(slot => {
+                const btn = document.createElement('button');
+                btn.className = `status-button ${slot.status}`;
+                
+                // ★修正：単純なテキスト結合ではなく、spanで囲んで構造化
+                // これによりCSSのflex gapで間隔を調整可能にします
+                btn.innerHTML = `
+                    <span class="slot-label">${slot.slot}</span>
+                    <span class="status-label">${slot.statusText}</span>
+                `;
+                
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openModalWithSlot(dateKey, slot);
+                });
+
+                slotsContainer.appendChild(btn);
+            });
+            cell.appendChild(slotsContainer);
+        }
+        
+        // セル自体のクリックは無効化（ラベルクリックのみ有効）
+        cell.onclick = () => { return false; };
+
+        return cell;
+    }
+
     /**
      * 特定の授業スロットでモーダルを開く
      * @param {string} dateKey YYYY-MM-DD
