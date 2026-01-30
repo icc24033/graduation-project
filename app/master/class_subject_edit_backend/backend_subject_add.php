@@ -1,8 +1,20 @@
 <?php
 // backend_subject_add.php
+// セッション開始
+if (session_status() === PHP_SESSION_NONE) session_start();
 
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// ★ CSRFトークンの検証
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    die('CSRFトークンが無効です。');
+}
 
 try {
     $pdo = RepositoryFactory::getPdo();

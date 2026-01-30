@@ -208,8 +208,9 @@ if (!empty($courseList)) {
                                 <button class="modal-button modal-cancel-button" id="cancelDeleteButton">キャンセル</button>
 
                                 <form method="POST" action="../../../../app/master/student_account_edit_backend/backend_student_delete_edit.php" id="deleteForm">
-                                    <div id="hiddenInputsContainer" style="display: none;"></div>
+                                    <input type="hidden" name="csrf_token" value="<?php echo SecurityHelper::generateCsrfToken(); ?>">
                                     
+                                    <div id="hiddenInputsContainer" style="display: none;"></div>
                                     <button type="submit" class="modal-button modal-delete-button" id="confirmDeleteButton">削除</button>
                                 </form>
                             </div>

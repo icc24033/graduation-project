@@ -1,6 +1,24 @@
 <?php
+// --- デバッグ用設定 ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // セッション開始
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+// SecurityHelperの読み込み（パスは各ファイルから適切に合わせてください）
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+
+// ★ CSRFトークンの検証
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    // セッション切れなどの場合に備え、エラーメッセージを出して終了
+    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+}
 
 // 現在の年度の取得
 $current_year = date("Y");
@@ -31,9 +49,9 @@ $insert_student_sql = ("INSERT IGNORE INTO student (student_id, student_mail, st
 
 //csv_tableから取得した学生情報をstudent_login_tableに格納するSQLクエリ
 $insert_student_login_sql = ("INSERT INTO 
-                                student_login_table (id, student_id, user_grade) 
+                                student_login_table (student_id, user_grade) 
                               SELECT 
-                                ?, ?, 'student@icc_ac.jp' 
+                                ?, 'student@icc_ac.jp' 
                               WHERE NOT EXISTS 
                                 (SELECT 1 FROM student_login_table WHERE student_id = ?);");
 
@@ -60,8 +78,6 @@ try {
     $stmt_login_count->execute();
     $login_count_result = $stmt_login_count->fetch();
 
-    $total_login_users = $login_count_result['COUNT(*)'] + 1; // 新しいIDの開始点のために1を加算
-
     //csv_tableから取得した学生情報を1行ずつ処理
     while ($row = $stmt_select->fetch()) {
         //studentテーブルに学生情報を挿入
@@ -77,12 +93,9 @@ try {
         //student_login_tableに学生情報を挿入
         $stmt_insert_login = $pdo->prepare($insert_student_login_sql);
         $stmt_insert_login->execute([
-            $total_login_users,
             $row['student_id'],
             $row['student_id']
         ]);
-
-        $total_login_users++; // 次のユーザーIDにインクリメント
         
         //csv_tableから取得した学生情報を1行ずつ削除
         $stmt_delete = $pdo->prepare($delete_csv_table_sql);

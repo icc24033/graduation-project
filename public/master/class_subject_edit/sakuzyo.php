@@ -80,6 +80,7 @@
             </div>
 
             <form id="deleteForm" method="POST" action="..\..\..\..\app\master\class_subject_edit_backend\backend_subject_delete.php">
+                <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                 <input type="hidden" name="subject_name" id="f-title">
                 <input type="hidden" name="grade" id="f-grade">
                 <input type="hidden" name="action" id="f-action" value="delete_single">

@@ -5,8 +5,8 @@
     <title>授業科目一覧</title>
     <link rel="stylesheet" type="text/css" href="../css/add_style.css">
     <link rel="stylesheet" type="text/css" href="../css/reset.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken\graduation-project\public\master\css\common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
 </head>
 <body>
     <header class="header">
@@ -161,7 +161,8 @@
         <div class="modal-content">
             <h2 class="modal-title">新規科目追加</h2>
             <form action="..\..\..\..\app\master\class_subject_edit_backend\backend_subject_add.php" method="POST">
-                <input type="hidden" name="action" value="insert_new">
+            <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">    
+            <input type="hidden" name="action" value="insert_new">
                 <div class="info-box">
                     <label class="sidebar-title">学年</label>
                     <select name="grade" id="add_grade" class="sidebar-select" onchange="updateAddModalCourses()">
@@ -188,6 +189,7 @@
         </div>
     </div>
     <script>
+        const CSRF_TOKEN = "<?= SecurityHelper::generateCsrfToken() ?>";
         const allCourseInfo = <?= json_encode($courseInfo) ?>;
         let currentData = {};
 

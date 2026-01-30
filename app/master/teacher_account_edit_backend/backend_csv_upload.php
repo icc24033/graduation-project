@@ -1,5 +1,17 @@
 <?php
-// 先生用のbackend_csv_upload.php
+// backend_csv_upload.php
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php'; // 追加
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// CSRF検証を追加
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    die('CSRFトークンが無効です。');
+}
+
 try {
     require_once __DIR__ . '/../../../app/classes/repository/RepositoryFactory.php';
     $pdo = RepositoryFactory::getPdo();
@@ -74,13 +86,7 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
         'success' => $pdo->query("SELECT COUNT(*) FROM temp_teacher_csv")->fetchColumn(),
         'error' => $pdo->query("SELECT COUNT(*) FROM error_teacher_table")->fetchColumn()
     ];
-
-    // デバッグ用：件数を表示して停止
-    echo "処理行数: " . $loop_count . "<br>";
-    echo "成功数: " . $_SESSION['upload_result']['success'] . "<br>";
-    echo "エラー数: " . $_SESSION['upload_result']['error'] . "<br>";
-    echo "完了しました。DBを確認してください。";
-
+    
 } else {
     echo "ファイルが正しくアップロードされていません。";
 }
