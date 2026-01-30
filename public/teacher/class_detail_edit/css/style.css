@@ -203,8 +203,9 @@
      display: block; 
      width: 250px;
      border: 1px solid #CFD5DF;
-     top: auto; 
-     left: auto;
+     position: absolute;
+     top: 0;
+     left: 120px;
  }
  
  /* コースのドロップダウンメニューに高さとスクロールを適用 */
@@ -229,11 +230,19 @@
      cursor: pointer;
      transition: background-color 0.3s;
      position: relative;
-     display: flex;
+     /* display: flex; */
      justify-content: space-between;
      align-items: center;
      /* 左右に10pxの余白を設定 */
      margin: 0 0 0 10px; 
+ }
+
+ #subjectSelectorMenu {
+    width: 400px;
+ }
+ #subjectSelectorMenu li a {
+    width: 380px;
+    font-weight: 500;
  }
  
     /* ドロップダウンメニュー項目のホバー効果 */
@@ -242,11 +251,7 @@
      border-top-left-radius: 10px;
      border-bottom-left-radius: 10px;
  }
- 
-    /* 次の授業セクション */
- .next-lesson-wrapper {
-    display: flex;
- }
+
 
  /* next-lesson-wrapper内のliとpのスタイル調整 */
  .next-lesson-wrapper li {
@@ -269,7 +274,6 @@
 
  /* 授業ステータスセクション */
  .lesson-status-wrapper {
-     display: flex;
      /* --- デフォルトの幅は290pxを維持 --- */
      width: 290px;
      padding: 10px 20px;
@@ -280,7 +284,6 @@
      cursor: pointer;
      transition: background-color 0.3s;
      position: relative;
-     display: flex;
      justify-content: space-between;
      align-items: center;
      border-top-left-radius: 10px;
@@ -290,14 +293,15 @@
  
     /* 授業ステータスボタンのスタイル */
  .status-button {
-     padding: 4px 8px;
+     padding: 6px 20px;
      border: none;
-     border-top-left-radius: 5px;
-     border-bottom-left-radius: 5px;
+     /* border-top-left-radius: 5px;
+     border-bottom-left-radius: 5px; */
      font-weight: normal;
      cursor: pointer;
-     min-width: 70px;
+     /* min-width: 70px; */
      text-align: left;
+     border-radius: 5px;
  }
 
     /* グループラベルのスタイル（「フィルター」など） */
@@ -871,6 +875,8 @@ button.status-button.not-created {
 /* buttonタグかつstatus-buttonクラスかつnot-createdクラスの背景色を強制上書き */
 button.status-button.not-created {
     background-color: #C0DEFF !important;
+    position: absolute;
+    right: 20px;
 }
 
 /* 「未作成」ラベルをカレンダー内だけで非表示にする */
@@ -960,53 +966,20 @@ button.status-button.not-created {
     border: none;
 }
 
-/*サイドバーのリスト領域にスクロール設定を追加 */
-.next-class-list,
-.future-class-list {
-    max-height: 300px; /* 表示領域の高さ制限（必要に応じて調整） */
-    overflow-y: auto;  /* 縦スクロールを有効化 */
-    padding-right: 5px;
-    border: 1px solid #eee; /* 領域がわかりやすいように薄い枠線（任意） */
-    border-radius: 4px;
-    margin-bottom: 10px;
+.sidebar-scroll-area {
+    height: 550px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.sidebar-scroll-area::-webkit-scrollbar {
+    width: 8px;
 }
 
-/* スクロールバーのデザイン調整（Chrome/Safari等） */
-.next-class-list::-webkit-scrollbar,
-.future-class-list::-webkit-scrollbar {
-    width: 6px;
-}
-.next-class-list::-webkit-scrollbar-thumb,
-.future-class-list::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 4px;
-}
-
-
-/* ★修正：ここから追加・変更 */
-
-/* サイドバーのリスト部分にスクロール設定を追加 */
-.next-class-list,
-.future-class-list {
-    max-height: 300px;      /* ★修正：高さ制限（必要に応じて調整してください） */
-    overflow-y: auto;       /* ★修正：縦スクロールを有効化 */
-    padding-right: 5px;     /* スクロールバーとの余白 */
-    /* スクロールバーの見た目を少し調整（Webkit系） */
-    scrollbar-width: thin;
-    scrollbar-color: #ccc transparent;
-}
-
-/* スクロールバーのスタイル（Chrome/Safari用） */
-.next-class-list::-webkit-scrollbar,
-.future-class-list::-webkit-scrollbar {
-    width: 6px;
-}
-.next-class-list::-webkit-scrollbar-thumb,
-.future-class-list::-webkit-scrollbar-thumb {
+.sidebar-scroll-area::-webkit-scrollbar-thumb {
     background-color: #ccc;
     border-radius: 3px;
 }
-.next-class-list::-webkit-scrollbar-track,
-.future-class-list::-webkit-scrollbar-track {
+
+.sidebar-scroll-area::-webkit-scrollbar-track {
     background: transparent;
 }

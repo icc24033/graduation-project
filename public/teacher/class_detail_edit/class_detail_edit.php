@@ -44,7 +44,7 @@ $subjectList = $subjectList ?? [];
                 </div>
             <a href="../../login/redirect.php" 
                 style="position: absolute; left: 20px; top: 5px;" 
-                onclick="return confirm('ホーム画面に遷移しますか？ ※編集中の内容が消える恐れがあります');">
+                onclick="return confirm('ホーム画面に遷移しますか？');">
                     <img src="<?= SecurityHelper::escapeHtml((string)$smartcampus_picture) ?>" alt="Webアプリアイコン" width="200" height="60">
             </a>
         </header>
@@ -61,7 +61,7 @@ $subjectList = $subjectList ?? [];
                             </ul>
                     </li>
 
-                    <li style="border-top: 1px solid #ccc; margin: 15px 10px;"></li>
+                    <li style="border-top: 1px solid #ccc; margin: 10px 10px;"></li>
                     <li class="is-group-label" style="color: #0056b3; font-weight:bold;">編集対象の科目</li>
 
                     <li class="nav-item has-dropdown subject-selector-wrapper">
@@ -69,22 +69,22 @@ $subjectList = $subjectList ?? [];
                             <span class="current-value">読込中...</span>
                         </button>
                         <ul class="dropdown-menu" id="subjectSelectorMenu">
-                            </ul>
+                        </ul>
                     </li>
-                    
-                    <div class="next-lesson-wrapper">
-                        <li class="is-group-label">次回の授業</li>
-                    </div>
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">--月--日(-) --限</div>
-                        <button class="status-button not-created">未作成</button>
-                    </div>
-                    
-                    <li class="is-group-label">次回以降</li>
-                    
-                    <div class="lesson-status-wrapper">
-                        <div class="lesson-date-item">--月--日(-) --限</div>
-                        <button class="status-button not-created">未作成</button>
+
+                    <li style="border-top: 1px solid #ccc; margin: 10px 10px;"></li>
+
+                    <div class="sidebar-scroll-area">
+                        <div class="next-lesson-wrapper">
+                            <li class="is-group-label">次回の授業</li>
+                            <div id="nextLessonList"></div>
+                        </div>
+                        <div style="height: 10px;"></div>
+
+                        <div class="future-lesson-wrapper">
+                            <li class="is-group-label">次回以降</li>
+                            <div id="futureLessonList"></div>
+                        </div>
                     </div>
                 </ul>
             </nav>
