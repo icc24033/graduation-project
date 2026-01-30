@@ -8,18 +8,21 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // ★ CSRFトークンの検証
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 try {
     $pdo = RepositoryFactory::getPdo();
 } catch (Exception $e) {
-    die("DB接続失敗: " . $e->getMessage());
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $service = new ClassSubjectEditService();
@@ -94,6 +97,7 @@ if ($action === 'insert_new' && !empty($title)) {
 
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
-        die("登録エラー: " . $e->getMessage());
+        header("Location: ../../../public/login/connection_error.html");
+        exit;
     }
 }
