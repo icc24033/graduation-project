@@ -215,7 +215,10 @@ function updateCourse(action) {
 function ajax(data) {
     const fd = new FormData();
     for(let k in data) fd.append(k, data[k]);
+    
     fd.append('subject_name', currentData.title);
+    // ★ CSRFトークンをFormDataに追加
+    fd.append('csrf_token', CSRF_TOKEN);
     
     fetch('..\\..\\..\\..\\app\\master\\class_subject_edit_backend\\json_process.php', {method: 'POST', body: fd})
     .then(res => res.json())

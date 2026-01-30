@@ -1,8 +1,23 @@
 <?php
 // backend_subject_delete.php
 
+// ★ セッション開始
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+// ★ SecurityHelperの読み込み（パスを適切に設定してください）
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
+
+// ★ POSTリクエスト以外のアクセスを拒否
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// ★ CSRFトークンの検証
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+}
 
 $service = new ClassSubjectEditService();
 $courseInfo = $service->getCourseInfoMaster(); 
