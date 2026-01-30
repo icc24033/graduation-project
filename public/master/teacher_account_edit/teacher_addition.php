@@ -1,5 +1,5 @@
 <?php
-// SecurityHelperの読み込み（パスは環境に合わせて調整してください）
+// teacher_addition.php
 ?>
 
 <!DOCTYPE html>
@@ -48,13 +48,12 @@
                     <li class="nav-item"><a href="master_edit_control.php">マスタの付与</a></li>
                 </ul>
                 <form action="../../../../app/master/teacher_account_edit_backend/backend_csv_upload.php" method="POST" enctype="multipart/form-data">
-    
-                    <input type="file" id="csvFile" name="csvFile" accept=".csv" required style="display: none;" onchange="this.form.submit();">
+                    <input type="hidden" name="csrf_token" value="<?php echo SecurityHelper::generateCsrfToken(); ?>">
                     
+                    <input type="file" id="csvFile" name="csvFile" accept=".csv" required style="display: none;" onchange="this.form.submit();">
                     <label for="csvFile" class="download-button">
                         <span class="material-symbols-outlined download-icon">download</span> 名簿アップロード
                     </label>
-
                 </form>
             </nav>
             

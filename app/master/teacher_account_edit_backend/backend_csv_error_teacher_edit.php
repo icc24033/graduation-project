@@ -1,7 +1,16 @@
 <?php
-// 先生用のbackend_csv_error_teacher_edit.php
+// backend_csv_error_teacher_edit.php
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php'; // 追加
 
-session_start();
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// CSRF検証を追加
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    die('CSRFトークンが無効です。');
+}
 
 // 正常データ用テーブル (temp_teacher_csv) に挿入するSQL
 $sql_insert_temp_table = "INSERT INTO temp_teacher_csv (name, email) VALUES (?, ?);";

@@ -1,5 +1,5 @@
 <?php
-// require_once __DIR__ . '/../session/session_config.php'; // セッション設定を読み込む
+// teacher_Information.php
 
 ?>
 
