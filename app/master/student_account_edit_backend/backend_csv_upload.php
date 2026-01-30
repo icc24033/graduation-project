@@ -1,7 +1,20 @@
 <?php
 // 生徒用のbackend_csv_upload.php
+// セッション開始
+if (session_status() === PHP_SESSION_NONE) session_start();
 
-session_start();
+// SecurityHelperの読み込み（パスは各ファイルから適切に合わせてください）
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+
+// ★ CSRFトークンの検証
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    // セッション切れなどの場合に備え、エラーメッセージを出して終了
+    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+}
 
 /////////////////////////////////////
 //CSVデータ保存用テーブル作成

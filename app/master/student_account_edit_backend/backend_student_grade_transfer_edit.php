@@ -1,4 +1,19 @@
 <?php
+// student_grade_transfer_edit.php
+
+// ★ セッション開始とSecurityHelperの読み込み
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
+
+// ★ POSTリクエストの検証
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// ★ CSRFトークンの検証
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    die('CSRFトークンが無効です。');
+}
 
 $grade_changes = $_POST['grade_changes'] ?? [];
 
