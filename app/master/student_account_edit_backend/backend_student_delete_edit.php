@@ -1,9 +1,17 @@
 <?php
+// backend_student_delete_edit.php
+if (session_status() === PHP_SESSION_NONE) session_start();
+// 1. セキュリティヘルパーの読み込み
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // 1. 削除対象の学生IDの配列 (JavaScriptで 'delete_student_id[]' と定義)
-    $delete_student_id = $_POST['delete_student_id'] ?? []; 
+    // ★ 2. CSRFトークンの検証
+    if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('CSRFトークンが無効です。');
+    }
+
+    $delete_student_id = $_POST['delete_student_id'] ?? [];
 
     // POSTで受け取った受け取ったdelete_student_idｗも元にテーブル内の学生情報を削除するSQLクエリ
     try {

@@ -1,8 +1,4 @@
 <?php
-// --- デバッグ用：エラーを表示させる設定（解決したら削除してください） ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 // master_home_control.php
 // ブラウザがアクセスする際のコントローラーを呼び出すファイル

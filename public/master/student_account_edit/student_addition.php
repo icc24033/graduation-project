@@ -75,6 +75,7 @@ if ($status['backend'] === 'student_addition') {
                 </ul>
                 
                 <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
+                <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
                         <label for="csvFile" class="download-button">
@@ -89,6 +90,7 @@ if ($status['backend'] === 'student_addition') {
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
             <div class="content-area">
                 <form action="..\..\..\..\app\master\student_account_edit_backend\backend_student_addition_edit.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <div class="account-table-container">
                         <div class="table-header">
                             <div class="column-check"></div> <div class="column-student-id">学生番号</div>
@@ -177,6 +179,7 @@ if ($status['backend'] === 'student_addition') {
                 
                 <?php if ($status['error_csv'] === false): ?>
                 <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csvdata_upload.php" method="post">
+                <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <button class="complete-button">追加完了</button>
                 </form>
                 <?php endif; ?>
@@ -204,6 +207,7 @@ if ($status['backend'] === 'student_addition') {
         <h3>エラーデータ編集</h3>
         <div>
         <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
         <div class="account-table-container">
             <div class="table-header">
                 <div class="column-check"></div> 
@@ -258,6 +262,7 @@ if ($status['backend'] === 'student_addition') {
         <h3>エラーデータ編集</h3>
         <div>
         <form action="..\..\..\..\app\master\student_account_edit_backend\backend_error_addition_edit.php" method="post">
+        <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
         <div class="account-table-container">
             <div class="table-header">
                 <div class="column-check"></div> 

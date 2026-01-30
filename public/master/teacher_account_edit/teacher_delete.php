@@ -1,5 +1,5 @@
 <?php
-// SecurityHelperの読み込み（パスは環境に合わせて調整してください）
+// teacher_delete.php
 ?>
 
 <!DOCTYPE html>

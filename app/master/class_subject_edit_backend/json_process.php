@@ -1,10 +1,23 @@
 <?php
 // json_process.php
+// セッション開始
+if (session_status() === PHP_SESSION_NONE) session_start();
 
+require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
 header('Content-Type: application/json; charset=UTF-8');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
+// ★ CSRFトークンの検証
+if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    echo json_encode(['success' => false, 'error' => 'セッションがタイムアウトしました。画面を再読み込みしてください。']);
+    exit;
+}
 
 try {
     $pdo = RepositoryFactory::getPdo();

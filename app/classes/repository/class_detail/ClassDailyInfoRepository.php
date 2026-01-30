@@ -6,6 +6,43 @@ require_once __DIR__ . '/../BaseRepository.php';
 class ClassDailyInfoRepository extends BaseRepository {
 
     /**
+     * getSubstituteClassesByTeacherId
+     * 概要：授業変更により代理で担当することになった科目・クラスを取得する
+     * * @param int $teacherId 教員ID
+     * @return array
+     */
+    public function getSubstituteClassesByTeacherId($teacherId) {
+        try {
+            // 修正: timetable_changes は timetable_id を持っており、course_id は timetables テーブルにあるため結合を追加
+            $sql = "
+                SELECT DISTINCT
+                    t.course_id,
+                    c.course_name,
+                    c.grade,
+                    tc.subject_id,
+                    s.subject_name
+                FROM timetable_change_teachers tct
+                INNER JOIN timetable_changes tc ON tct.change_id = tc.change_id
+                INNER JOIN timetables t ON tc.timetable_id = t.timetable_id
+                INNER JOIN course c ON t.course_id = c.course_id
+                INNER JOIN subjects s ON tc.subject_id = s.subject_id
+                WHERE tct.teacher_id = :teacherId
+                ORDER BY c.grade ASC, t.course_id ASC, tc.subject_id ASC
+            ";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':teacherId', $teacherId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            // エラーログ等が必要であれば記述
+            return [];
+        }
+    }
+    
+    /**
      * findByDateAndSlot
      * 概要：指定した条件の授業詳細データを取得する
      * (日付、時限、コースIDで特定)

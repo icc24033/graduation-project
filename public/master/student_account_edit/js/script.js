@@ -509,12 +509,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 削除確認ボタン（モーダル内の「削除」）が押された時の処理
         if (confirmDeleteButton && modal) {
-            confirmDeleteButton.addEventListener('click', () => {
-                console.log('--- 削除を実行しました。 (※実際にはこの後にサーバー処理が必要です) ---');
+            confirmDeleteButton.addEventListener('click', (e) => {
+                // デフォルトのsubmit動作を一旦止める（必要に応じて）
+                e.preventDefault();
+
+                console.log('--- 削除を実行します ---');
                 
-                // 成功時の処理: モーダルを閉じる
+                // 1. フォームを特定
+                const deleteForm = document.getElementById('deleteForm');
+                
+                // 2. モーダルを閉じる
                 modal.style.display = 'none';
-                showCustomAlert('削除リクエストをサーバーに送信しました。');
+
+                // 3. フォームを送信
+                // これにより、HTMLに埋め込まれた csrf_token も一緒に送信されます
+                deleteForm.submit();
             });
         }
     } // end student_delete.html 固有の処理

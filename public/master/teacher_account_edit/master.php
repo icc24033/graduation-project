@@ -12,8 +12,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/teacher_home/user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="teacher_addition">
@@ -51,7 +51,7 @@
             </nav>
             
             <div class="content-area">
-                <form action="..\..\..\..\app\master\teacher_account_edit_backend\backend_update_master.php" method="post">
+                <form action="../../../../app/master/teacher_account_edit_backend/backend_update_master.php" method="post">
                     
                     <input type="hidden" name="csrf_token" value="<?php echo SecurityHelper::generateCsrfToken(); ?>">
 
