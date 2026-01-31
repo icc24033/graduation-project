@@ -24,14 +24,6 @@ body{
         top: 120px;
     }
 }
-.message_history{
-    display: flex;
-    height: 140px;
-    justify-content: center;
-    position: relative;
-    margin-right: 50%;
-    top: 80px;
-}
 
 /* 機能（アイコン） */
 .title_icon{
@@ -82,17 +74,18 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #E0F7FA;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
+    
 }
-/* 時間割り編集 */
+/* 時間割り変更 */
 .card_icon_square-pen{
     cursor: pointer;
     padding: 10px 12px;
     width: 30px;
     background-color: #FFFDE7;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 
@@ -101,9 +94,9 @@ body{
     cursor: pointer;
     padding: 10px 12px;
     width: 30px;
-    background-color: #F3E8FF;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    background-color: #f6eeff;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 授業科目編集 */
@@ -112,8 +105,8 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #F7FEE7;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 通知事項編集 */
@@ -122,8 +115,8 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #E0F2F1;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 授業詳細編集 */
@@ -132,8 +125,8 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #E6FFEE;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 時間割り閲覧 */
@@ -142,8 +135,8 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #EEF2FF;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 /* 送信先設定 */
@@ -152,8 +145,8 @@ body{
     padding: 10px 12px;
     width: 30px;
     background-color: #FFE4E4;
-    border-radius: 28px;
-    margin: 24px 82px 6px 82px;
+    border-radius: 24px;
+    margin: 26px 82px 6px 82px;
 }
 
 
@@ -166,9 +159,10 @@ body{
 
 .card_sub{
     cursor: pointer;
-    padding: 8px 10px 0 10px;
+    padding: 6px 10px 0 10px;
     font-size: 12px;
     font-weight: 500;
+    line-height: 175%;
 }
 
 

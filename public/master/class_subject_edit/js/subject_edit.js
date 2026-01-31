@@ -217,13 +217,27 @@ function ajax(data) {
     for(let k in data) fd.append(k, data[k]);
     
     fd.append('subject_name', currentData.title);
-    // ★ CSRFトークンをFormDataに追加
     fd.append('csrf_token', CSRF_TOKEN);
     
     fetch('..\\..\\..\\..\\app\\master\\class_subject_edit_backend\\json_process.php', {method: 'POST', body: fd})
     .then(res => res.json())
-    .then(res => { if(res.success) location.reload(); })
-    .catch(err => alert("通信エラーが発生しました"));
+    .then(res => {
+        // ★ ここを追加：リダイレクトの指示があれば飛ばす
+        if (res.redirect) {
+            window.location.href = "../../../login/" + res.redirect; 
+            return;
+        }
+
+        if(res.success) {
+            location.reload();
+        } else {
+            alert(res.error || "エラーが発生しました");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("通信エラーが発生しました");
+    });
 }
 
 window.onclick = (e) => { if(e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; }

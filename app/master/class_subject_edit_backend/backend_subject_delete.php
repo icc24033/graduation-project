@@ -11,12 +11,14 @@ require_once __DIR__ . '/../../services/master/ClassSubjectEditService.php';
 
 // ★ POSTリクエスト以外のアクセスを拒否
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // ★ CSRFトークンの検証
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $service = new ClassSubjectEditService();
@@ -25,7 +27,8 @@ $courseInfo = $service->getCourseInfoMaster();
 try {
     $pdo = RepositoryFactory::getPdo();
 } catch (Exception $e) {
-    die("DB接続失敗: " . $e->getMessage());
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $action       = $_POST['action'] ?? '';
@@ -70,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($subject_name)) {
 
     } catch (Exception $e) {
         $pdo->rollBack();
-        die("削除エラー: " . $e->getMessage());
+        header("Location: ../../../public/login/connection_error.html");
+        exit;
     }
 }
