@@ -1301,11 +1301,6 @@ document.getElementById('saveChangesBtn').addEventListener('click', async () => 
         return;
     }
 
-    if (!currentRecord.changes || currentRecord.changes.length === 0) {
-        alert('変更内容がありません。');
-        return;
-    }
-
     if (!confirm('変更内容を保存しますか？')) {
         return;
     }

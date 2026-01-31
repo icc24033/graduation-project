@@ -6,6 +6,99 @@ require_once __DIR__ . '/../BaseRepository.php';
 class ClassDailyInfoRepository extends BaseRepository {
 
     /**
+     * updateOrCreate
+     * 概要：授業詳細情報の登録または更新（Upsert）
+     */
+    public function updateOrCreate($data) {
+        try {
+            // 1. 既にデータが存在するか確認
+            $sqlCheck = "SELECT daily_info_id FROM class_daily_infos 
+                         WHERE date = :date 
+                         AND period = :period 
+                         AND course_id = :course_id
+                         AND subject_id = :subject_id";
+            
+            $stmtCheck = $this->pdo->prepare($sqlCheck);
+            $stmtCheck->execute([
+                ':date' => $data['date'],
+                ':period' => $data['period'],
+                ':course_id' => $data['course_id'],
+                ':subject_id' => $data['subject_id']
+            ]);
+            
+            $exists = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+            if ($exists) {
+                // 2. 更新 (UPDATE)
+                $sqlUpdate = "UPDATE class_daily_infos SET 
+                                content = :content,
+                                belongings = :belongings,
+                                status_type = :status_type,
+                                teacher_id = :teacher_id,
+                                updated_at = NOW()
+                              WHERE daily_info_id = :id";
+                
+                $stmt = $this->pdo->prepare($sqlUpdate);
+                return $stmt->execute([
+                    ':content' => $data['content'],
+                    ':belongings' => $data['belongings'],
+                    ':status_type' => $data['status_type'],
+                    ':teacher_id' => $data['teacher_id'],
+                    ':id' => $exists['daily_info_id']
+                ]);
+            } else {
+                // 3. 新規登録 (INSERT)
+                $sqlInsert = "INSERT INTO class_daily_infos 
+                                (date, period, course_id, subject_id, teacher_id, content, belongings, status_type, updated_at)
+                              VALUES 
+                                (:date, :period, :course_id, :subject_id, :teacher_id, :content, :belongings, :status_type, NOW())";
+                
+                $stmt = $this->pdo->prepare($sqlInsert);
+                return $stmt->execute([
+                    ':date' => $data['date'],
+                    ':period' => $data['period'],
+                    ':course_id' => $data['course_id'],
+                    ':subject_id' => $data['subject_id'],
+                    ':teacher_id' => $data['teacher_id'],
+                    ':content' => $data['content'],
+                    ':belongings' => $data['belongings'],
+                    ':status_type' => $data['status_type']
+                ]);
+            }
+        } catch (PDOException $e) {
+            // エラーハンドリング・ユーザーへは情報を与えないように設計する
+            error_log("ClassDailyInfoRepository Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * deleteDailyInfo
+     * 概要：授業詳細情報の削除（物理削除）
+     * ※要件により論理削除にする場合はUPDATEでflagを立てる処理に変更してください
+     * * @param string $date
+     * @param int $period
+     * @param int $courseId
+     * @param int $subjectId
+     * @return bool
+     */
+    public function deleteDailyInfo($date, $period, $courseId, $subjectId) {
+        $sql = "DELETE FROM class_daily_infos 
+                WHERE date = :date 
+                AND period = :period 
+                AND course_id = :course_id
+                AND subject_id = :subject_id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            ':date' => $date,
+            ':period' => $period,
+            ':course_id' => $courseId,
+            ':subject_id' => $subjectId
+        ]);
+    }
+
+    /**
      * getSubstituteClassesByTeacherId
      * 概要：授業変更により代理で担当することになった科目・クラスを取得する
      * * @param int $teacherId 教員ID
@@ -38,10 +131,11 @@ class ClassDailyInfoRepository extends BaseRepository {
 
         } catch (PDOException $e) {
             // エラーログ等が必要であれば記述
+            error_log("ClassDailyInfoRepository Error: " . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
      * findByDateAndSlot
      * 概要：指定した条件の授業詳細データを取得する

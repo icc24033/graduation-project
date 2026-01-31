@@ -10,7 +10,7 @@ SecurityHelper::applySecureHeaders();
 SecurityHelper::requireLogin();
 
 // ログインユーザーIDの取得
-$currentTeacherId = $_SESSION['teacher_id'] ?? null;
+$currentTeacherId = $_SESSION['user_id'] ?? null;
 
 // 2. リクエストの取得
 $method = $_SERVER['REQUEST_METHOD'];
@@ -52,30 +52,47 @@ try {
         // ---------------------------------------------------
         // 保存・削除処理
         // ---------------------------------------------------
-        // JSON入力の取得
         $input = json_decode(file_get_contents('php://input'), true);
         $action = $input['action'] ?? '';
 
         if ($action === 'save') {
+            // セッションから先生IDを取得
             $input['teacher_id'] = $currentTeacherId;
+            
             $result = $service->saveClassDetail($input);
-            echo json_encode(['success' => $result, 'message' => $result ? 'Saved' : 'Failed']);
+            
+            echo json_encode([
+                'success' => $result, 
+                'message' => $result ? 'Saved successfully' : 'Failed to save'
+            ]);
             exit;
         }
         
         if ($action === 'delete') {
             $date = $input['date'];
             $slot = $input['slot'];
-            $courseIds = $input['course_ids'] ?? [];
             
-            $result = $service->deleteClassDetail($date, $slot, $courseIds);
-            echo json_encode(['success' => $result]);
+            // JSから送られてくるキー(course_id, subject_id)に合わせて取得
+            $courseId = $input['course_id']; 
+            $subjectId = $input['subject_id'];
+            
+            // 引数を4つ渡す
+            $result = $service->deleteClassDetail($date, $slot, $courseId, $subjectId);
+            
+            if ($result === false) {
+                throw new Exception("削除処理に失敗しました");
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Deleted successfully']);
             exit;
         }
     }
 
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
-    exit;
+    // エラーハンドリング・ユーザーへは情報を与えないように設計する
+    error_log("ClassDetailEditAPI Error: " . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'message' => 'An error occurred while processing your request.'
+    ]);
 }
