@@ -730,32 +730,33 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
 
 		// --- 授業ラベル（ボタン）の生成 ---
 		if (hasLesson) {
-			const slotsContainer = document.createElement('div');
-			slotsContainer.className = 'slots-container';
+                const slotsContainer = document.createElement('div');
+                slotsContainer.className = 'slots-container';
 
-			dayData.slots.forEach(slot => {
-				const btn = document.createElement('button');
-				// ステータスに応じたクラス（completed, creating, not-created 等）を付与
-				// ※ status-button クラスに CSSで display: flex が適用される
-				btn.className = `status-button ${slot.status}`;
-				
-				// ★修正：CSS Flexbox用に span で区切って構造化
-				// これにより、「1限」と「ステータス」の間に gap が生まれます
-				btn.innerHTML = `
-					<span class="slot-label">${slot.slot}</span>
-					<span class="status-label">${slot.statusText}</span>
-				`;
-				
-				// ボタンクリック時のみモーダルを開く
-				btn.addEventListener('click', (e) => {
-					e.stopPropagation(); // 親セルへの伝播を止める
-					openModalWithSlot(dateKey, slot);
-				});
+                dayData.slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    
+                    // ★変更点1: ボタン自体には色のクラス(not-created等)を付けない
+                    // 常に白背景のラッパーとして機能させるため 'status-button' のみにする
+                    btn.className = 'status-button'; 
+                    
+                    // ★変更点2: HTML構造を変更
+                    // 左に時限、右にステータスバッジ(ここに色クラスを付与)
+                    btn.innerHTML = `
+                        <span class="slot-label">${slot.slot}</span>
+                        <span class="status-badge ${slot.status}">${slot.statusText}</span>
+                    `;
+                    
+                    // ボタンクリック時のみモーダルを開く
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // 親セルへの伝播を止める
+                        openModalWithSlot(dateKey, slot);
+                    });
 
-				slotsContainer.appendChild(btn);
-			});
-			cell.appendChild(slotsContainer);
-		}
+                    slotsContainer.appendChild(btn);
+                });
+                cell.appendChild(slotsContainer);
+            }
 		
 		// ★要件：セル自体のクリックは何もしない（ボタンのみ有効）
 		// ただし、もし「新規作成」などをセルクリックで行いたい場合はここを変更します

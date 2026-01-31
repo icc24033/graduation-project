@@ -1201,73 +1201,73 @@ button.status-button.not-created {
 /* サイドバーのデザインを再現するスタイル 
    ボタン全体を「白い外枠 (lesson-status-wrapper風)」に見立てる
 */
+/* =========================================
+   カレンダーセル内 ラベルデザイン修正
+   (サイドバーの lesson-status-wrapper 風にする)
+   ========================================= */
+
+/* 1. ボタン全体を「白いカード」にする */
 .date-cell .status-button {
-    /* 配置リセット */
-    position: static !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between; /* 左右に配置 */
-    
+    /* コンテナとしてのスタイル */
     width: 100%;
-    min-height: 32px; /* 少し高さを確保 */
-    padding: 3px 6px;
-    margin: 0;
+    background-color: #FFF !important; /* 背景は白固定 */
+    border: 1px solid #CFD5DF;         /* サイドバーと同じ枠線色 */
+    border-radius: 5px;                /* 角丸 */
+    padding: 6px 8px;                  /* 内側の余白 */
+    /* margin-bottom: 4px;                ボタン同士の間隔 */
     
-    /* サイドバーの wrapper と同じ白背景・枠線・角丸 */
-    background-color: #FFF !important; 
-    border: 1px solid #CFD5DF;
-    border-radius: 5px; /* 角丸を少し大きめに */
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    /* 内部の配置 (Flexbox) */
+    display: flex !important;
+    justify-content: space-between;    /* 左の時限と右のバッジを離す */
+    align-items: center;
     
-    color: #495666;
+    /* テキスト設定 */
+    text-align: left;
     cursor: pointer;
-    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* 僅かな影 */
+    transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 /* ホバー時の挙動 */
 .date-cell .status-button:hover {
-    background-color: #F9FAFB !important; /* ホバー時はごく薄いグレー */
+    background-color: #F9FAFB !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* 右側のステータス表示部分 (サイドバーの絶対配置ボタン風)
-   HTML側で <span class="status-badge"> を追加することを想定
-*/
+/* 2. 左側のテキスト (〇限) */
+.date-cell .status-button .slot-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #495666;
+}
+
+/* 3. 右側のステータスバッジ (サイドバーの絶対配置ボタン風) */
 .date-cell .status-button .status-badge {
     font-size: 10px;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 5px;
     font-weight: normal;
     white-space: nowrap;
-    color: #000;
-    
-    /* 右寄せ配置の補強 */
-    margin-left: 4px;
+    line-height: 1;
 }
 
-/* --- ステータスバッジごとの色設定 --- */
+/* --- バッジの色設定 (サイドバーのクラスと連動) --- */
 
 /* 未作成 (青) */
-.date-cell .status-button .status-badge.not-created {
+.status-badge.not-created {
     background-color: #C0DEFF;
-    color: #495666;
+    color: #000;
 }
 
 /* 作成中 (黄) */
-.date-cell .status-button .status-badge.creating {
+.status-badge.creating {
     background-color: #F8FF99;
-    color: #495666;
+    color: #000;
 }
 
-/* 作成済み (赤) */
-.date-cell .status-button .status-badge.in-progress {
-    background-color: #ff5e5e;
+/* 作成済 (赤) */
+.status-badge.in-progress {
+    background-color: #FF5F5F;
     color: #FFF;
-}
-
-/* 左側の時限テキスト */
-.date-cell .status-button .slot-label {
-    font-weight: bold;
-    font-size: 12px;
-    color: #495666;
 }
 
