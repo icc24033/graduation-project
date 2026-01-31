@@ -707,7 +707,7 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
 			calendarGrid.appendChild(cell);
 		}
 		
-		// ★追加：ヘッダータイトルの更新（西暦を表示）
+		// ヘッダータイトルの更新（西暦を表示）
 		if(monthElement) {
 			monthElement.textContent = `${year}年 ${month}月`;
 		}
@@ -757,11 +757,11 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
                 dayData.slots.forEach(slot => {
                     const btn = document.createElement('button');
                     
-                    // ★変更点1: ボタン自体には色のクラス(not-created等)を付けない
+                    // ボタン自体には色のクラス(not-created等)を付けない
                     // 常に白背景のラッパーとして機能させるため 'status-button' のみにする
                     btn.className = 'status-button'; 
                     
-                    // ★変更点2: HTML構造を変更
+                    // HTML構造を変更
                     // 左に時限、右にステータスバッジ(ここに色クラスを付与)
                     btn.innerHTML = `
                         <span class="slot-label">${slot.slot}</span>
@@ -779,7 +779,7 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
                 cell.appendChild(slotsContainer);
             }
 		
-		// ★要件：セル自体のクリックは何もしない（ボタンのみ有効）
+		// セル自体のクリックは何もしない（ボタンのみ有効）
 		// ただし、もし「新規作成」などをセルクリックで行いたい場合はここを変更します
 		cell.onclick = () => { return false; };
 
@@ -792,44 +792,51 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
      * @param {object} slotData slotオブジェクト
      */
     function openModalWithSlot(dateKey, slotData) {
-    selectedDateKey = dateKey;
-    selectedSlotKey = slotData.slot;
-    
-    // ★追加: DB保存用にIDを保持しておく
-    selectedCourseId = slotData.course_id;
-    // slotDataには subject_id が含まれていない場合があるため、
-    // 必要ならAPI(fetchLessonData)が返すJSONのslotsにsubject_idを含めるよう
-    // ClassDetailEditService.php の getCalendarData メソッドを確認してください。
-    // ※ここでは slotData に subject_id が入っている前提で進めます。
-    selectedSubjectId = slotData.subject_id || currentSubjectId; 
+        selectedDateKey = dateKey;
+        selectedSlotKey = slotData.slot;
+        
+        // DB保存用にIDを保持しておく
+        selectedCourseId = slotData.course_id;
+        selectedSubjectId = slotData.subject_id || (currentSubject ? currentSubject.subject_id : null); 
 
-    // DOM要素
-    const lessonDetailsText = document.querySelector('.lesson-details-textarea');
-    const belongingsText = document.getElementById('detailsTextarea');
-    
-    // 値をセット
-    lessonDetailsText.value = slotData.content || "";
-    belongingsText.value = slotData.belongings || "";
-    
-    // タイトル更新
-    const [y, m, d] = dateKey.split('-').map(Number);
-    const dateObj = new Date(y, m - 1, d);
-    const w = ['日','月','火','水','木','金','土'][dateObj.getDay()];
-    
-    const modalTitle = document.querySelector('.modal-date');
-    if(modalTitle) {
-        modalTitle.textContent = `${m}月${d}日(${w}) ${slotData.slot}`;
+        // DOM要素
+        const lessonDetailsText = document.querySelector('.lesson-details-textarea');
+        const belongingsText = document.getElementById('detailsTextarea');
+        
+        // 値をセット
+        lessonDetailsText.value = slotData.content || "";
+        belongingsText.value = slotData.belongings || "";
+        
+        // タイトル更新
+        const [y, m, d] = dateKey.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        const w = ['日','月','火','水','木','金','土'][dateObj.getDay()];
+        
+        const modalTitle = document.querySelector('.modal-date');
+        if(modalTitle) {
+            modalTitle.textContent = `${m}月${d}日(${w}) ${slotData.slot}`;
+        }
+
+        // アイテムタグ（削除モード解除など）の初期化
+        if(typeof isDeleteMode !== 'undefined') {
+            isDeleteMode = false;
+            if(deleteIcon) deleteIcon.classList.remove('is-active');
+            if(addBtn) {
+                addBtn.textContent = '追加';
+                addBtn.classList.remove('is-delete-mode');
+            }
+            // 既存のタグ選択状態を解除
+            document.querySelectorAll('.item-tag-container').forEach(tag => tag.classList.remove('is-selected'));
+        }
+
+        const modal = document.getElementById('lessonModal');
+        if(modal) {
+            modal.style.display = 'flex';
+            
+            // ★追加: この科目のテンプレートを読み込む
+            loadTemplates(selectedSubjectId);
+        }
     }
-
-    // アイテムタグ（削除モード解除など）の初期化
-    if(typeof isDeleteMode !== 'undefined') {
-        isDeleteMode = false;
-        // ...必要なUIリセット処理...
-    }
-
-    const modal = document.getElementById('lessonModal');
-    if(modal) modal.style.display = 'flex';
-}
 
     function openModalWithDate(dateKey) {
         selectedDateKey = dateKey;
@@ -852,6 +859,147 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
 
         lessonModal.style.display = 'flex';
     }
+
+    /**
+     * テンプレート一覧の読み込み
+     */
+    async function loadTemplates(subjectId) {
+        if (!subjectId) return;
+
+        try {
+            const params = new URLSearchParams();
+            params.append('action', 'fetch_templates');
+            params.append('subject_id', subjectId);
+
+            const res = await fetch(`${API_BASE_URL}?${params.toString()}`);
+            if (res.ok) {
+                const templates = await res.json();
+                renderTemplates(templates);
+            }
+        } catch (e) {
+            console.error("テンプレート取得エラー", e);
+        }
+    }
+
+    /**
+     * テンプレート一覧の描画
+     */
+    function renderTemplates(templates) {
+        const list = document.getElementById('templateList');
+        if (!list) return; // HTML側に要素がない場合はスキップ
+
+        list.innerHTML = ''; // クリア
+
+        if (!Array.isArray(templates) || templates.length === 0) {
+            return;
+        }
+
+        templates.forEach(tpl => {
+            // チップ（コンテナ）
+            const chip = document.createElement('div');
+            // スタイルはCSSで定義するか、ここで直接指定
+            chip.style.cssText = "background: #e0e0e0; padding: 4px 10px; border-radius: 15px; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-bottom: 4px;";
+
+            // 1. テキスト部分（クリックで反映）
+            const span = document.createElement('span');
+            span.textContent = tpl.item_name;
+            span.style.cursor = 'pointer';
+            span.title = 'クリックして入力欄に追加';
+            
+            span.onclick = () => {
+                const area = document.getElementById('detailsTextarea');
+                if (area) {
+                    // 既存のテキストがあれば改行して追加、なければそのまま
+                    const currentVal = area.value;
+                    area.value = currentVal ? (currentVal + '\n' + tpl.item_name) : tpl.item_name;
+                }
+            };
+
+            // 2. 削除ボタン（×）
+            const delBtn = document.createElement('span');
+            delBtn.textContent = '×';
+            delBtn.style.cssText = "cursor: pointer; color: #888; font-weight: bold; margin-left: 4px; padding: 0 4px;";
+            
+            delBtn.onmouseover = () => delBtn.style.color = '#ff4444';
+            delBtn.onmouseout = () => delBtn.style.color = '#888';
+            
+            delBtn.onclick = async (e) => {
+                e.stopPropagation(); // 親のクリックイベント（テキスト反映）を阻止
+                if (confirm(`テンプレート「${tpl.item_name}」を削除しますか？`)) {
+                    await deleteTemplate(tpl.template_id);
+                }
+            };
+
+            chip.appendChild(span);
+            chip.appendChild(delBtn);
+            list.appendChild(chip);
+        });
+    }
+
+    /**
+     * テンプレートの新規登録
+     */
+    async function addTemplate() {
+        const input = document.getElementById('newTemplateInput');
+        const name = input ? input.value.trim() : '';
+        
+        // 現在選択中の科目IDを使用
+        const subjId = selectedSubjectId || (currentSubject ? currentSubject.subject_id : null);
+
+        if (!name || !subjId) {
+            if(!name) alert("テンプレート名を入力してください");
+            return;
+        }
+
+        try {
+            const res = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_template',
+                    subject_id: subjId,
+                    item_name: name
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if(input) input.value = ''; // 入力欄クリア
+                loadTemplates(subjId); // 再読み込み
+            } else {
+                alert('登録に失敗しました');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('通信エラーが発生しました');
+        }
+    }
+
+    /**
+     * テンプレートの削除
+     */
+    async function deleteTemplate(templateId) {
+        const subjId = selectedSubjectId || (currentSubject ? currentSubject.subject_id : null);
+
+        try {
+            const res = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'delete_template',
+                    template_id: templateId
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadTemplates(subjId); // 再読み込み
+            } else {
+                alert('削除に失敗しました');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('通信エラーが発生しました');
+        }
+    }
 
 
     // ============================================================
@@ -982,6 +1130,11 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
         lessonTextArea.addEventListener('input', () => {
             charCountDisplay.textContent = `${lessonTextArea.value.length}/200文字`;
         });
+    }
+
+    const templateAddBtn = document.getElementById('addTemplateBtn');
+    if (templateAddBtn) {
+        templateAddBtn.addEventListener('click', addTemplate);
     }
 });
 

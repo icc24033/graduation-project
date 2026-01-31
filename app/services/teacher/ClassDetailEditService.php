@@ -303,4 +303,25 @@ public function getCalendarData($teacherId, $subjectId, array $courseIds, $year,
 
         return $calendarData;
     }
+
+    public function getBelongingTemplates($teacherId, $subjectId) {
+        $repo = RepositoryFactory::getTeacherItemTemplateRepository();
+
+        return $repo->getTemplates($teacherId, $subjectId);
+    }
+
+    // テンプレート保存
+    public function saveBelongingTemplate($teacherId, $subjectId, $itemName) {
+        $repo = RepositoryFactory::getTeacherItemTemplateRepository();
+
+        if (empty($itemName)) return false;
+        return $repo->createTemplate($teacherId, $subjectId, $itemName);
+    }
+
+    // テンプレート削除
+    public function deleteBelongingTemplate($teacherId, $templateId) {
+        $repo = RepositoryFactory::getTeacherItemTemplateRepository();
+
+        return $repo->deleteTemplate($templateId, $teacherId);
+    }
 }

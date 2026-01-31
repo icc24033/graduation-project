@@ -48,6 +48,19 @@ try {
             exit;
         }
 
+        if ($action === 'fetch_templates') {
+            $subjectId = $_GET['subject_id'] ?? null;
+            
+            if (!$subjectId || !$currentTeacherId) {
+                echo json_encode([]);
+                exit;
+            }
+
+            $templates = $service->getBelongingTemplates($currentTeacherId, $subjectId);
+            echo json_encode($templates);
+            exit;
+        }
+
     } elseif ($method === 'POST') {
         // ---------------------------------------------------
         // 保存・削除処理
@@ -84,6 +97,32 @@ try {
             }
 
             echo json_encode(['success' => true, 'message' => 'Deleted successfully']);
+            exit;
+        }
+
+        if ($action === 'save_template') {
+            $subjectId = $input['subject_id'];
+            $itemName = $input['item_name'];
+
+            if ($currentTeacherId && $subjectId && $itemName) {
+                $res = $service->saveBelongingTemplate($currentTeacherId, $subjectId, $itemName);
+                echo json_encode(['success' => $res]);
+            } else {
+                echo json_encode(['success' => false]);
+            }
+            exit;
+        }
+
+        // テンプレート削除
+        if ($action === 'delete_template') {
+            $templateId = $input['template_id'];
+
+            if ($currentTeacherId && $templateId) {
+                $res = $service->deleteBelongingTemplate($currentTeacherId, $templateId);
+                echo json_encode(['success' => $res]);
+            } else {
+                echo json_encode(['success' => false]);
+            }
             exit;
         }
     }
