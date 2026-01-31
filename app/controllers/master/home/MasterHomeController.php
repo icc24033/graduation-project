@@ -43,6 +43,7 @@ class MasterHomeController extends HomeRepository {
     public function index() {
         // 1. ログインチェック
         SecurityHelper::requireLogin();
+        SecurityHelper::applySecureHeaders();
 
         // 2. データの取得
         $user_data = $this->getHomeDataByUserdate();
@@ -62,6 +63,13 @@ class MasterHomeController extends HomeRepository {
             // リンク情報の取得
             $links = $this->html_links();
 
+            
+            // ユーザーアイコン表示用
+            $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+            extract($data);
+
+            $smartcampus_picture = '../images/smartcampus.png';
+
             // 関数カード（HTMLパーツ）の生成
             $function_cards_html = $this->generate_function_cards_html($user_instance, $links);
 
@@ -69,17 +77,12 @@ class MasterHomeController extends HomeRepository {
             extract($links);
             extract($user_data);
 
+            SecurityHelper::setTransitionToken('from_home_to_create_timetable');
+
             // 5. Viewの読み込み
             // パスはコントローラーからの相対パスになるので注意
             require_once __DIR__ . '/../../../../public/master/master_home.php';
 
-            // ユーザーアイコン表示用
-            $data['user_picture'] = $_SESSION['user_picture'] ?? 'images/default_icon.png';
-            extract($data);
-
-            $smartcampus_picture = '../images/smartcampus.png';
-
-        
         } else {
             // 権限がない、またはユーザーが取得できない場合
             // ログインエラー画面などへ

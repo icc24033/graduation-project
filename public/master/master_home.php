@@ -4,9 +4,6 @@
 
 require_once __DIR__ . '/../../app/classes/security/SecurityHelper.php';
 
-// セキュリティヘッダーの適用
-SecurityHelper::applySecureHeaders();
-
 // セッション開始とログイン判定を一括で行う
 SecurityHelper::requireLogin();
 
@@ -59,7 +56,16 @@ SecurityHelper::applySecureHeaders();
             </div>
             </section>
         </div>
-        <!-- ここから仮置きのコード -->
+        <script>
+            window.addEventListener('pageshow', (event) => {
+                // キャッシュから表示された場合（ブラウザバック等）
+                if (event.persisted || (performance.getEntriesByType('navigation')[0].type === 'back_forward')) {
+                    // ページをリロードして、PHP側の SecurityHelper::setTransitionToken を再実行させる
+                    // これにより、再度「時間割り作成」へ遷移するための有効な手形が発行されます
+                    window.location.reload();
+                }
+            });
+        </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const userAvatar = document.getElementById('userAvatar');

@@ -8,6 +8,9 @@
 // セキュリティヘッダー
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
+
+SecurityHelper::requireTransitionToken('from_home_to_create_timetable', false);
 
 // 作成したコントローラーを読み込み
 require_once __DIR__ . '/../../../app/controllers/master/timetable_create/CreateTimetableController.php';

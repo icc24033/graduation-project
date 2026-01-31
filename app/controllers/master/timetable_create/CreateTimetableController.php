@@ -13,7 +13,7 @@ class CreateTimetableController extends HomeRepository
         parent::session_resetting();
         SecurityHelper::requireLogin();
         
-        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png';
+        $user_picture = $_SESSION['user_picture'] ?? 'images/default_icon.png'; // ユーザーアイコン表示用
         
         // Serviceを使って時間割データを一括取得
         $timetableService = new TimetableService();

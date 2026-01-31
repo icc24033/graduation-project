@@ -106,14 +106,16 @@ class SecurityHelper {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         if (!isset($_SESSION['transition_tokens'][$key])) {
-            // 手形がない場合、不正な遷移とみなしてログイン画面またはエラー画面へ
+            // トークンがない場合は弾く
             header('Location: ' . LOGIN_PAGE_URL);
             exit();
         }
 
-        // $keepToken が false の場合は、一度使ったら手形を破棄する
+        // $keepToken が false の場合、使用済みとして削除
         if (!$keepToken) {
             unset($_SESSION['transition_tokens'][$key]);
+            // セッションの変更を即座に確定させる
+            session_write_close(); 
         }
     }
 

@@ -5,6 +5,8 @@
 // 1. セキュリティ設定
 require_once '../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
+
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
