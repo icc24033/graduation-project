@@ -1058,7 +1058,7 @@ button.status-button.not-created {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 16px;
     margin-bottom: 2px;
 }
 
@@ -1075,32 +1075,199 @@ button.status-button.not-created {
 }
 
 .date-cell .status-button {
-    /* 既存のスタイル */
-    display: block; /* または flex に変更してもOKですが、下でflex指定します */
-    width: 100%;
-    margin: 0 auto;
-    padding: 4px 10px; /* 横パディングを少し広げる */
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+	position: static !important; /* absoluteを強制解除 */
+	width: 95%; /* セルからはみ出さないように調整 */
+	margin: 2px auto; /* 上下左右のマージン */
+	
+	/* 内部レイアウト（gap用） */
+	display: flex !important;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px; /* ★ここで隙間を作る */
+	
+	/* 見た目の調整 */
+	padding: 4px 8px;
+	border-radius: 4px;
+	border: none;
+	cursor: pointer;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+	z-index: 10; /* 日付数字より上に */
+}
+
+/* ホバー時の挙動 */
+.date-cell .status-button:hover {
+	opacity: 0.9;
+	transform: translateY(-1px);
+}
+
+/* 時限（左側） */
+.slot-label {
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+/* ステータス（右側） */
+.status-label {
+	font-size: 0.8em;
+	opacity: 0.9;
+}
+
+/* 親コンテナのスクロール設定を再確認 */
+.date-cell {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	height: 120px;
+	overflow-y: auto; /* スクロールバー有効化 */
+	overflow-x: hidden;
+	position: relative;
+	padding-top: 25px; /* 日付数字(absolute)と被らないように余白確保 */
+}
+
+/* 日付数字の配置（セル内での固定位置） */
+.date-cell .date-num {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	z-index: 1;
+}
+
+/* ボタンコンテナ */
+.slots-container {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	/* margin-topは .date-cell の padding-top で担保するので不要 */
+}
+
+/* =========================================
+   カレンダー・ラベル表示 統合修正版
+   (サイドバーデザイン完全統一)
+   ========================================= */
+
+/* 1. 日付セルの枠組み */
+.date-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 120px;       
+    position: relative;  
+    padding-top: 25px;   
+    padding-bottom: 2px;
+    overflow: hidden; /* セル自体のスクロールは禁止 */
+    border-right: 1px solid #CFD5DF;
+    border-bottom: 1px solid #CFD5DF;
+    box-sizing: border-box;
+}
+
+/* 2. 日付数字 */
+.date-cell .date-num {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 1;
+    pointer-events: none;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
-    position: absolute;
-    left: 10px;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 500;
+}
+.date-num.circle-blue { background-color: #C0DEFF; color: #000; }
+.date-num.circle-red { background-color: #FF5F5F; color: #fff; }
+
+/* 3. ボタンが入るコンテナ（スクロール領域） */
+.slots-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto; 
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 4px 4px 4px;
+    box-sizing: border-box;
 }
 
-/* 時限部分（左側） */
+/* スクロールバー装飾 */
+.slots-container::-webkit-scrollbar { width: 4px; }
+.slots-container::-webkit-scrollbar-track { background: transparent; }
+.slots-container::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+
+/* サイドバーのデザインを再現するスタイル 
+   ボタン全体を「白い外枠 (lesson-status-wrapper風)」に見立てる
+*/
+.date-cell .status-button {
+    /* 配置リセット */
+    position: static !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between; /* 左右に配置 */
+    
+    width: 100%;
+    min-height: 32px; /* 少し高さを確保 */
+    padding: 3px 6px;
+    margin: 0;
+    
+    /* サイドバーの wrapper と同じ白背景・枠線・角丸 */
+    background-color: #FFF !important; 
+    border: 1px solid #CFD5DF;
+    border-radius: 5px; /* 角丸を少し大きめに */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    
+    color: #495666;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* ホバー時の挙動 */
+.date-cell .status-button:hover {
+    background-color: #F9FAFB !important; /* ホバー時はごく薄いグレー */
+}
+
+/* 右側のステータス表示部分 (サイドバーの絶対配置ボタン風)
+   HTML側で <span class="status-badge"> を追加することを想定
+*/
+.date-cell .status-button .status-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: normal;
+    white-space: nowrap;
+    color: #000;
+    
+    /* 右寄せ配置の補強 */
+    margin-left: 4px;
+}
+
+/* --- ステータスバッジごとの色設定 --- */
+
+/* 未作成 (青) */
+.date-cell .status-button .status-badge.not-created {
+    background-color: #C0DEFF;
+    color: #495666;
+}
+
+/* 作成中 (黄) */
+.date-cell .status-button .status-badge.creating {
+    background-color: #F8FF99;
+    color: #495666;
+}
+
+/* 作成済み (赤) */
+.date-cell .status-button .status-badge.in-progress {
+    background-color: #ff5e5e;
+    color: #FFF;
+}
+
+/* 左側の時限テキスト */
 .date-cell .status-button .slot-label {
     font-weight: bold;
-    margin-right: 30px; /* ステータスラベルとの間隔 */
-    flex-shrink: 0;
-    /* 必要なら固定幅にして縦を揃えることも可能 */
-    /* width: 24px; */ 
+    font-size: 12px;
+    color: #495666;
 }
 
-/* ステータス部分（右側） */
-.date-cell .status-button .status-label {
-    /* 必要なら文字色などを調整 */
-    margin-left: auto; /* 右端に寄せる */
-}
