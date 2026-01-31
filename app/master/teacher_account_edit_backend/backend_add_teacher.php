@@ -7,11 +7,13 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 
 // 1. POSTリクエストとCSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 2. 登録対象データの取得
@@ -75,11 +77,6 @@ try {
     exit;
 
 } catch (Exception $e) {
-    if (isset($pdo) && $pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    // エラーメッセージを付与してリダイレクト
-    $msg = urlencode($e->getMessage());
-    header("Location: {$redirectUrl}?error_msg={$msg}");
+    header("Location: ../../../public/login/connection_error.html");
     exit;
 }

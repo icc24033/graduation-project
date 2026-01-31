@@ -8,7 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // ★ 2. CSRFトークンの検証
     if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        die('CSRFトークンが無効です。');
+        header("Location: ../../../public/login/connection_error.html");
+        exit;
     }
 
     $delete_student_id = $_POST['delete_student_id'] ?? [];
@@ -36,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$student_id]);
         }
     } catch (PDOException $e) {
-        throw new PDOException($e->getMessage(), (int)$e->getCode());
+        header("Location: ../../../public/login/connection_error.html");
+        exit();
     }
 
     if (isset($_POST['course_id']) && isset($_POST['current_year'])) {
@@ -59,9 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit(); // リダイレクト後は必ず処理を終了
 }
 else {
-
-    // ★ student_account_delete_control.php にリダイレクトして処理を終了
-    header("Location: ../../../public/master/student_account_edit/controls/student_account_delete_control.php");
-    exit(); // リダイレクト後は必ず処理を終了
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 ?>

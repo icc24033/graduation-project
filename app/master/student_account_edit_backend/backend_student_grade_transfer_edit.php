@@ -7,12 +7,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ POSTリクエストの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // ★ CSRFトークンの検証
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $grade_changes = $_POST['grade_changes'] ?? [];
@@ -55,7 +57,8 @@ try {
 
 } 
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 // ★ student_account_transfer_control.php にリダイレクトして処理を終了

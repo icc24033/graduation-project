@@ -7,11 +7,13 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 
 // 1. リクエスト検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 2. データの取得
@@ -70,7 +72,6 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    // ログを出力してエラー表示
-    error_log("Update Error: " . $e->getMessage());
-    die("データベースエラーが発生しました。");
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }

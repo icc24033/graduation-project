@@ -4,11 +4,13 @@
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $submittedIds = isset($_POST['teacher_ids']) ? array_map('intval', $_POST['teacher_ids']) : [];
@@ -62,5 +64,6 @@ try {
     if (isset($pdo)) {
         $pdo->rollBack();
     }
-    die("データベースエラーが発生しました。");
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
