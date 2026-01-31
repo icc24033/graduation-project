@@ -410,7 +410,7 @@ class TimetableRepository extends BaseRepository {
         $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
         $stmt->execute();
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);getDailyInfo
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
