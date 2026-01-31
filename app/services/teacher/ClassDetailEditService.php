@@ -6,25 +6,58 @@ require_once __DIR__ . '/../../classes/repository/class_detail/ClassDailyInfoRep
 
 class ClassDetailEditService {
 
-    /**
-     * getAssignedSubjects
-     * 概要：先生が担当している科目リスト（ドロップダウン用）を取得
-     * 引数：
-     * @param int $teacherId
-     * 戻り値：
-     * @return array
-     */
-    public function getAssignedSubjects($teacherId) {
-        $repo = RepositoryFactory::getSubjectInChargesRepository();
-        // ※SubjectInChargesRepositoryに findSubjectsByTeacherId のようなメソッドが必要です
-        // 既存になければ追加実装が必要ですが、ここではある前提で進めます
-        // return $repo->findSubjectsByTeacherId($teacherId);
-        
-        // 仮の実装（動作確認用ダミー）
-        return [
-            ['subject_id' => 1, 'subject_name' => '数学Ⅰ', 'course_id' => 1, 'course_name' => '1年A組'],
-            ['subject_id' => 2, 'subject_name' => '物理', 'course_id' => 1, 'course_name' => '1年A組'],
-        ];
+    public function getSubjectsArayMarge($assignedClasses, $substituteClasses) {
+        // もしassignedClassesで取得していない科目があれば '代理' を追加
+            foreach ($substituteClasses as &$subClass) {
+                $isAlreadyAssigned = false;
+                foreach ($assignedClasses as $assignClass) {
+                    if ($assignClass['subject_id'] === $subClass['subject_id']) {
+                        $isAlreadyAssigned = true;
+                        break;
+                    }
+                }
+                if (!$isAlreadyAssigned) {
+                    $subClass['subject_name'] .= ' (代理)';
+                }
+            }
+
+            // 配列を結合
+            $mergedClasses = array_merge($assignedClasses, $substituteClasses);
+
+            // 重複を削除 (course_id と subject_id の組み合わせでユニークにする)
+            $uniqueMap = [];
+            foreach ($mergedClasses as $class) {
+                // 一意なキーを作成
+                $key = $class['course_id'] . '-' . $class['subject_id'];
+                // まだ登録されていなければ追加（上書きしないことで正規担当を優先、といってもデータは同じなのでどちらでも良い）
+                if (!isset($uniqueMap[$key])) {
+                    $uniqueMap[$key] = $class;
+                }
+            }
+            
+            // インデックス付き配列に戻し、学年・クラス・科目順などでソートし直す
+            $assignedClasses = array_values($uniqueMap);
+            
+            // 表示順序を整える（学年昇順 > コースID昇順 > 科目ID昇順）
+            // SQLのORDER BYで取得していますが、マージしたため念のため再ソート
+            // ただし、'代理'は必ず最後に来るようにする
+            usort($assignedClasses, function ($a, $b) {
+                if ($a['grade'] !== $b['grade']) {
+                    return $a['grade'] <=> $b['grade'];
+                }
+                if ($a['course_id'] !== $b['course_id']) {
+                    return $a['course_id'] <=> $b['course_id'];
+                }
+                if (strpos($a['subject_name'], '代理') !== false && strpos($b['subject_name'], '代理') === false) {
+                    return 1; // aが代理なら後ろ
+                }
+                if (strpos($a['subject_name'], '代理') === false && strpos($b['subject_name'], '代理') !== false) {
+                    return -1; // bが代理なら前
+                }
+                return $a['subject_id'] <=> $b['subject_id'];
+            });
+
+        return $assignedClasses;
     }
 
     /**

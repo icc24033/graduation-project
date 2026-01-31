@@ -494,7 +494,7 @@
 
 /* 翌月・前月の日付の色 */
 .is-out-of-month {
-    background-color: #F3F8FF; /* 薄い青/白 */
+    background-color: #ccc; /* 薄い青/白 #F3F8FF*/
     color: #aaa; /* グレーアウト */
 }
 
@@ -1213,7 +1213,7 @@ button.status-button.not-created {
     background-color: #FFF !important; /* 背景は白固定 */
     border: 1px solid #CFD5DF;         /* サイドバーと同じ枠線色 */
     border-radius: 5px;                /* 角丸 */
-    padding: 6px 8px;                  /* 内側の余白 */
+    padding: 5px 8px;                  /* 内側の余白 */
     /* margin-bottom: 4px;                ボタン同士の間隔 */
     
     /* 内部の配置 (Flexbox) */
@@ -1249,6 +1249,10 @@ button.status-button.not-created {
     font-weight: normal;
     white-space: nowrap;
     line-height: 1;
+    /*画面サイズが小さくなってもdate-cell .status-buttonの枠内からはみ出ないようにする*/
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* --- バッジの色設定 (サイドバーのクラスと連動) --- */
@@ -1269,5 +1273,11 @@ button.status-button.not-created {
 .status-badge.in-progress {
     background-color: #FF5F5F;
     color: #FFF;
+}
+
+.no-data-msg {
+    font-size: 14px;
+    color: #A5ADBC;
+    margin-top: 10px;
 }
 

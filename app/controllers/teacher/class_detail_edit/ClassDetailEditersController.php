@@ -36,34 +36,13 @@ class ClassDetailEditorsController
             $dailyRepo = RepositoryFactory::getClassDailyInfoRepository();
             $substituteClasses = $dailyRepo->getSubstituteClassesByTeacherId($teacherId);
 
-            // 配列を結合
-            $mergedClasses = array_merge($assignedClasses, $substituteClasses);
-
-            // 重複を削除 (course_id と subject_id の組み合わせでユニークにする)
-            $uniqueMap = [];
-            foreach ($mergedClasses as $class) {
-                // 一意なキーを作成
-                $key = $class['course_id'] . '-' . $class['subject_id'];
-                // まだ登録されていなければ追加（上書きしないことで正規担当を優先、といってもデータは同じなのでどちらでも良い）
-                if (!isset($uniqueMap[$key])) {
-                    $uniqueMap[$key] = $class;
-                }
-            }
-            
-            // インデックス付き配列に戻し、学年・クラス・科目順などでソートし直す
-            $assignedClasses = array_values($uniqueMap);
-            
-            // 表示順序を整える（学年昇順 > コースID昇順 > 科目ID昇順）
-            // SQLのORDER BYで取得していますが、マージしたため念のため再ソート
-            usort($assignedClasses, function ($a, $b) {
-                if ($a['grade'] !== $b['grade']) {
-                    return $a['grade'] <=> $b['grade'];
-                }
-                if ($a['course_id'] !== $b['course_id']) {
-                    return $a['course_id'] <=> $b['course_id'];
-                }
-                return $a['subject_id'] <=> $b['subject_id'];
-            });
+            /* subject_name に '代理' を追加（代理担当の場合のみ）
+            * SubjectInChargesでは、その先生が正規担当している科目しか取得しない
+            * そのため、ここで追加された科目はすべて正規担当であるとみなす。
+            * getSubstituteClassesByTeacherIdで取得した科目のうち、まだキーとして登録されていない科目に対して '代理' を追加する。
+            * その処理を記述する。
+            */
+            $assignedClasses = $this->service->getSubjectsArayMarge($assignedClasses, $substituteClasses);   
         }
 
         // --- ビュー（class_detail_edit.php）に合わせてデータを整形 ---
