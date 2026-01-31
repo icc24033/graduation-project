@@ -49,6 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // ドロップダウン用状態
     let currentFilters = { grade: ""}; // フィルタ状態
     let currentSubject = null; // 現在選択中の科目オブジェクト {subject_id, course_id, ...}
+
+    let selectedCourseId = null;  // モーダルで編集中などのコースID
+    let selectedSubjectId = null; // モーダルで編集中などの科目ID
     
     // 持ち物削除モード
     let isDeleteMode = false;
@@ -388,93 +391,111 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * データの保存 (POST)
+     * サーバーへデータを保存
+     * @param {string} statusCode "creating" or "in-progress"
+     * @param {string} statusText "作成中" or "作成済み"
      */
-    async function saveLessonDataToServer(status, statusText) {
-        if (!selectedDateKey || !currentSubject) return;
+    async function saveLessonDataToServer(statusCode, statusText) {
+        const content = document.querySelector('.lesson-details-textarea').value;
+        const belongings = document.getElementById('detailsTextarea').value;
 
-        const lessonVal = document.querySelector('.lesson-details-textarea').value;
-        const belongingsVal = document.getElementById('detailsTextarea').value;
-        
-        const courseIds = currentSubject.courses.map(c => c.id);
-        const slotData = selectedSlotKey; // "1限" などの文字列
+        // バリデーション
+        if (!selectedDateKey || !selectedSlotKey || !selectedCourseId) {
+            console.error("Missing IDs:", {selectedDateKey, selectedSlotKey, selectedCourseId});
+            alert("保存に必要な情報が不足しています。");
+            return;
+        }
 
-        const postData = {
+        const subjId = selectedSubjectId || (currentSubject ? currentSubject.subject_id : null);
+
+        const payload = {
             action: 'save',
             date: selectedDateKey,
-            subject_id: currentSubject.subject_id,
-            course_ids: courseIds,
-            slot: slotData,
-            content: lessonVal,
-            belongings: belongingsVal,
-            status: status
+            slot: selectedSlotKey,
+            course_id: selectedCourseId,
+            subject_id: subjId,
+            content: content,
+            belongings: belongings,
+            status_code: statusCode
         };
 
         try {
-            const response = await fetch(API_BASE_URL, {
+            const res = await fetch(API_BASE_URL, {
                 method: 'POST',
-                body: JSON.stringify(postData),
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-
-            const result = await response.json();
-            if (result.success) {
-                // 修正: 引数に content(lessonVal) と belongings(belongingsVal) を追加
-                updateAllViews(selectedDateKey, slotData, status, statusText, lessonVal, belongingsVal, false);
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                // 成功したら画面（カレンダーとサイドバー）を更新
+                // updateAllViews は JS内でデータを更新して再描画する関数
+                updateAllViews(
+                    selectedDateKey, 
+                    selectedSlotKey, 
+                    statusCode === 'in-progress' ? 'in-progress' : 'creating', // CSSクラス名
+                    statusText, 
+                    content, 
+                    belongings,
+                    false // 削除フラグ
+                );
                 
-                lessonModal.style.display = 'none';
-                alert("一括保存しました");
+                // モーダルを閉じる
+                document.getElementById('lessonModal').style.display = 'none';
             } else {
-                alert("保存に失敗しました: " + (result.message || "不明なエラー"));
+                alert('保存に失敗しました: ' + (data.message || 'Unknown error'));
             }
-        } catch (error) {
-            console.error(error);
-            alert("通信エラーが発生しました");
+
+        } catch (e) {
+            console.error('Error:', e);
+            alert('通信エラーが発生しました。');
         }
     }
 
     /**
-     * データの削除 (POST)
+     * サーバーからデータを削除
      */
     async function deleteLessonDataOnServer() {
-        if (!selectedDateKey || !currentSubject) return;
-        
-        const slotData = selectedSlotKey; // "1限" などの文字列
-        const courseIds = currentSubject.courses.map(c => c.id);
+        if (!selectedDateKey || !selectedSlotKey || !selectedCourseId) return;
 
-        const postData = {
+        const payload = {
             action: 'delete',
             date: selectedDateKey,
-            slot: slotData,
-            subject_id: currentSubject.subject_id,
-            course_ids: courseIds
+            slot: selectedSlotKey,
+            course_id: selectedCourseId,
+            subject_id: selectedSubjectId || (currentSubject ? currentSubject.subject_id : null)
         };
 
         try {
-            const response = await fetch(API_BASE_URL, {
+            const res = await fetch(API_BASE_URL, {
                 method: 'POST',
-                body: JSON.stringify(postData),
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-            const result = await response.json();
-
-            if (result.success) {
-                // 修正: 引数を合わせる (content, belongings は空文字、isDelete = true)
-                updateAllViews(selectedDateKey, slotData, null, null, "", "", true);
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                // 成功したら画面を更新（未作成状態に戻す）
+                updateAllViews(
+                    selectedDateKey,
+                    selectedSlotKey,
+                    'not-created', // CSSクラス
+                    '未作成',      // テキスト
+                    '',            // content
+                    '',            // belongings
+                    true           // 削除フラグ
+                );
                 
-                lessonModal.style.display = 'none';
-                
-                document.querySelector('.lesson-details-textarea').value = '';
-                document.getElementById('detailsTextarea').value = '';
-                if (itemInput) itemInput.value = '';
-                
-                alert("一括削除しました");
+                // モーダルを閉じる
+                document.getElementById('lessonModal').style.display = 'none';
             } else {
-                alert("削除できませんでした");
+                alert('削除に失敗しました: ' + (data.message || ''));
             }
         } catch (e) {
-            console.error(e);
-            alert("通信エラー");
+            console.error('Error:', e);
+            alert('通信エラーが発生しました。');
         }
     }
 
@@ -771,30 +792,44 @@ function updateAllViews(dateKey, targetSlotKey, status, text, content, belonging
      * @param {object} slotData slotオブジェクト
      */
     function openModalWithSlot(dateKey, slotData) {
-        selectedDateKey = dateKey;
-        selectedSlotKey = slotData.slot;
-        
-        // DOM要素
-        const lessonDetailsText = document.querySelector('.lesson-details-textarea');
-        const belongingsText = document.getElementById('detailsTextarea');
-        
-        // 値をセット
-        lessonDetailsText.value = slotData.content || "";
-        belongingsText.value = slotData.belongings || "";
-        
-        // タイトル更新
-        const [y, m, d] = dateKey.split('-').map(Number);
-        const dateObj = new Date(y, m - 1, d);
-        const w = ['日','月','火','水','木','金','土'][dateObj.getDay()];
-        
-        const modalTitle = document.querySelector('.modal-date');
-        if(modalTitle) {
-            modalTitle.textContent = `${m}月${d}日(${w}) ${slotData.slot}`;
-        }
+    selectedDateKey = dateKey;
+    selectedSlotKey = slotData.slot;
+    
+    // ★追加: DB保存用にIDを保持しておく
+    selectedCourseId = slotData.course_id;
+    // slotDataには subject_id が含まれていない場合があるため、
+    // 必要ならAPI(fetchLessonData)が返すJSONのslotsにsubject_idを含めるよう
+    // ClassDetailEditService.php の getCalendarData メソッドを確認してください。
+    // ※ここでは slotData に subject_id が入っている前提で進めます。
+    selectedSubjectId = slotData.subject_id || currentSubjectId; 
 
-        const modal = document.getElementById('lessonModal');
-        if(modal) modal.style.display = 'flex';
-    }
+    // DOM要素
+    const lessonDetailsText = document.querySelector('.lesson-details-textarea');
+    const belongingsText = document.getElementById('detailsTextarea');
+    
+    // 値をセット
+    lessonDetailsText.value = slotData.content || "";
+    belongingsText.value = slotData.belongings || "";
+    
+    // タイトル更新
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const w = ['日','月','火','水','木','金','土'][dateObj.getDay()];
+    
+    const modalTitle = document.querySelector('.modal-date');
+    if(modalTitle) {
+        modalTitle.textContent = `${m}月${d}日(${w}) ${slotData.slot}`;
+    }
+
+    // アイテムタグ（削除モード解除など）の初期化
+    if(typeof isDeleteMode !== 'undefined') {
+        isDeleteMode = false;
+        // ...必要なUIリセット処理...
+    }
+
+    const modal = document.getElementById('lessonModal');
+    if(modal) modal.style.display = 'flex';
+}
 
     function openModalWithDate(dateKey) {
         selectedDateKey = dateKey;

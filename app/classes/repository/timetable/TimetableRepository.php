@@ -499,4 +499,47 @@ class TimetableRepository extends BaseRepository {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * getCooccurringCourses
+     * 概要：指定された日時・科目・教員において、合同授業（同時開催）されているコースIDを全て取得する
+     * * @param string $date 対象日 (YYYY-MM-DD)
+     * @param int $period 時限
+     * @param int $subjectId 科目ID
+     * @param int $teacherId 教員ID
+     * @return array コースIDの配列 (例: [4, 5])
+     */
+    public function getCooccurringCourses($date, $period, $subjectId, $teacherId) {
+        // 日付から曜日番号を取得 (0:日曜, 1:月曜, ... 6:土曜)
+        // ※DBの day_of_week の仕様に合わせて調整してください（通常 1=月曜〜5=金曜, 6=土曜 が多いです）
+        $timestamp = strtotime($date);
+        $dayOfWeek = date('w', $timestamp); // PHPの標準 (0=Sun, 6=Sat)
+        
+        // もしDBが 1=Mon, 7=Sun などの形式ならここで変換が必要ですが、
+        // 一般的なシステムに合わせて PHPのw (0-6) とDB定義を合わせる前提で書きます。
+        // もしDBの day_of_week が「月曜=1」なら、日曜(=0)の扱い以外はそのまま使えます。
+        
+        $sql = "
+            SELECT DISTINCT t.course_id
+            FROM timetables t
+            INNER JOIN timetable_details td ON t.timetable_id = td.timetable_id
+            INNER JOIN timetable_detail_teachers tdt ON td.detail_id = tdt.detail_id
+            WHERE tdt.teacher_id = :teacher_id
+              AND td.subject_id = :subject_id
+              AND td.period = :period
+              AND td.day_of_week = :day_of_week
+              AND :date_chk BETWEEN t.start_date AND t.end_date
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':teacher_id' => $teacherId,
+            ':subject_id' => $subjectId,
+            ':period'     => $period,
+            ':day_of_week'=> $dayOfWeek,
+            ':date_chk'   => $date
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 }
