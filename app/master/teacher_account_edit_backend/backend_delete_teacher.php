@@ -7,11 +7,13 @@ require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
 
 // 1. POSTリクエストとCSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 2. 削除対象のIDリストを取得
@@ -57,5 +59,6 @@ try {
     
 } catch (PDOException $e) {
     // ログ出力などを行うのが望ましい
-    die("データベースエラーが発生しました。");
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }

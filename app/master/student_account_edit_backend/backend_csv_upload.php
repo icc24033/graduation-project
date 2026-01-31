@@ -8,12 +8,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ CSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
     // セッション切れなどの場合に備え、エラーメッセージを出して終了
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 /////////////////////////////////////
@@ -55,7 +57,8 @@ try {
     $stmt_create->execute();
 } 
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 
@@ -101,7 +104,8 @@ try {
     $stmt_foreign_key->execute();
 } 
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 
@@ -176,7 +180,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     }
                     catch (PDOException $e) {
                         //エラー処理
-                        echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                        header("Location: ../../../public/login/connection_error.html");
+                        exit();
                     }
                     continue;
                 }
@@ -192,7 +197,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 }
                 catch (PDOException $e) {
                     //エラー処理
-                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit();
                 }
                 continue;
             }
@@ -212,7 +218,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 }
                 catch (PDOException $e) {
                     //エラー処理
-                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit();
                 }
                 continue;
             }
@@ -233,7 +240,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                     }
                     catch (PDOException $e) {
                         //エラー処理
-                        echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                        header("Location: ../../../public/login/connection_error.html");
+                        exit();
                     }
                     continue;
                 }
@@ -248,7 +256,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 }
                 catch (PDOException $e) {
                     //エラー処理
-                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit();
                 }
                 continue;
             }
@@ -264,8 +273,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
             }
             catch (PDOException $e) {
                 //エラー処理
-                echo "エラーが発生しました: " . $e->getMessage();
-                continue;
+                header("Location: ../../../public/login/connection_error.html");
+                exit();
             }
         }
         //ファイルを閉じる
@@ -286,7 +295,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
                 $success_count = $success_result['success_count'];
             }
             catch (PDOException $e) {
-                echo "エラー件数の取得に失敗しました: " . $e->getMessage();
+                header("Location: ../../../public/login/connection_error.html");
+                exit();
             }
             // DB接続を閉じる
             $pdo = null;
@@ -299,6 +309,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
     }
     else {
         //echo "CSVファイルを開くことができませんでした。";
+        header("Location: ../../../public/login/connection_error.html");
+        exit();
     }
 
 }

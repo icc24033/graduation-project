@@ -4,12 +4,14 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php'; // 追加
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // CSRF検証を追加
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 try {
@@ -23,7 +25,8 @@ try {
     $pdo->exec("CREATE TABLE error_teacher_table (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100), error_msg VARCHAR(255));");
 
 } catch (PDOException $e) {
-    die("テーブル準備エラー: " . $e->getMessage());
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) {
@@ -88,7 +91,8 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] === UPLOAD_ERR_OK) 
     ];
     
 } else {
-    echo "ファイルが正しくアップロードされていません。";
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 header("Location: ../../../public/master/teacher_account_edit/controls/teacher_addition_control.php?backend=csv_upload");

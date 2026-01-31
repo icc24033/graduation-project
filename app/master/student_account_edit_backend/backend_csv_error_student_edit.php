@@ -7,12 +7,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ CSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
     // セッション切れなどの場合に備え、エラーメッセージを出して終了
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 //error_student_tableの情報を更新するためのSQL文
@@ -86,7 +88,8 @@ try {
                     }
                     catch (PDOException $e) {
                         //エラー処理
-                        echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                        header("Location: ../../../public/login/connection_error.html");
+                        exit;
                     }
                     continue;
                 }
@@ -102,7 +105,8 @@ try {
                 }
                 catch (PDOException $e) {
                     //エラー処理
-                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit;
                 }
                 continue;
             }
@@ -123,7 +127,8 @@ try {
                 }
                 catch (PDOException $e) {
                     //エラー処理
-                    echo "error_student_tableに格納できませんでした： " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit;
                 }
                 continue;
             }
@@ -138,7 +143,8 @@ try {
             }
             catch (PDOException $e) {
                 //エラー処理
-                echo "csv_tableに格納できませんでした： " . $e->getMessage();
+                header("Location: ../../../public/login/connection_error.html");
+                exit;
             }
         }
         // エラー件数を取得 (error_student_tableのレコード数を数える)
@@ -149,7 +155,8 @@ try {
             $error_count = $error_result['error_count'];
         }
         catch (PDOException $e) {
-            echo "エラー件数の取得に失敗しました: " . $e->getMessage();
+            header("Location: ../../../public/login/connection_error.html");
+            exit;
         }
         // DB接続を閉じる
         $pdo = null;
@@ -167,7 +174,8 @@ header("Location: ../../../public/master/student_account_edit/controls/student_a
 exit(); // リダイレクト後は必ず処理を終了
 } 
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 ?>

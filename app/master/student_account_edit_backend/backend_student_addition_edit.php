@@ -8,12 +8,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ CSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
     // セッション切れなどの場合に備え、エラーメッセージを出して終了
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // POSTから取得した学生情報を格納するSQLクエリ
@@ -80,7 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_foreign_key->execute();
     } 
     catch (PDOException $e) {
-        throw new PDOException($e->getMessage(), (int)$e->getCode());
+        header("Location: ../../../public/login/connection_error.html");
+        exit();
     }
 
     //データ件数を取得する変数
@@ -146,7 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_count++;
                 } 
                 catch (PDOException $e) {
-                    throw new PDOException($e->getMessage(), (int)$e->getCode());
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit();
                 }
                 continue; // 次のループへ
             }
@@ -177,7 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_count++;
                 } 
                 catch (PDOException $e) {
-                    throw new PDOException($e->getMessage(), (int)$e->getCode());
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit();
                 }
                 continue; // 次のループへ
             }
@@ -202,7 +207,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error_count++;
             } 
             catch (PDOException $e) {
-                throw new PDOException($e->getMessage(), (int)$e->getCode());
+                header("Location: ../../../public/login/connection_error.html");
+                exit();
             }
             continue; // 次のループへ
         }
@@ -237,7 +243,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $total_login_users++;
         }
         catch (PDOException $e) {
-            throw new PDOException($e->getMessage(), (int)$e->getCode());
+            header("Location: ../../../public/login/connection_error.html");
+            exit();
         }
     }
     // データベース接続を閉じる

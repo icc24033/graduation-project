@@ -9,11 +9,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 // 1. POSTリクエストとCSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。セッション切れの可能性があります。再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 $received_course_id = null;
@@ -61,7 +63,8 @@ try {
 
 }
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 // ★ student_account_course_control.php にリダイレクトして処理を終了

@@ -4,12 +4,14 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php'; // 追加
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // CSRF検証を追加
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    die('CSRFトークンが無効です。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 正常データ用テーブル (temp_teacher_csv) に挿入するSQL
@@ -48,13 +50,15 @@ try {
                     $pdo->commit();
                 } catch (Exception $e) {
                     $pdo->rollBack();
-                    echo "修正データの反映に失敗しました: " . $e->getMessage();
+                    header("Location: ../../../public/login/connection_error.html");
+                    exit;
                 }
             }
         }
     }
 } catch (PDOException $e) {
-    die("DBエラー: " . $e->getMessage());
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 処理が終わったら元の画面に戻る

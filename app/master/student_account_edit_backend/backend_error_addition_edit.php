@@ -7,12 +7,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ CSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
     // セッション切れなどの場合に備え、エラーメッセージを出して終了
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 require_once __DIR__ . '/../../classes/repository/RepositoryFactory.php';
@@ -121,5 +123,6 @@ if (isset($_POST['students']) && is_array($_POST['students'])) {
     exit();
 
 } else {
-    echo "<p>学生データが送信されていません。</p>";
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }

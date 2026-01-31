@@ -12,12 +12,14 @@ require_once __DIR__ . '/../../../app/classes/security/SecurityHelper.php';
 
 // ★ CSRFトークンの検証
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('不正なアクセスです。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 if (!SecurityHelper::validateCsrfToken($_POST['csrf_token'] ?? '')) {
     // セッション切れなどの場合に備え、エラーメッセージを出して終了
-    die('CSRFトークンが無効です。画面を更新して再度お試しください。');
+    header("Location: ../../../public/login/connection_error.html");
+    exit;
 }
 
 // 現在の年度の取得
@@ -110,7 +112,8 @@ try {
 
 } 
 catch (PDOException $e) {
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    header("Location: ../../../public/login/connection_error.html");
+    exit();
 }
 
 if ($count_result['count'] == 0) {
