@@ -410,7 +410,7 @@ class TimetableRepository extends BaseRepository {
         $stmt->bindValue(':tId', $timetableId, PDO::PARAM_INT);
         $stmt->execute();
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);getDailyInfo
     }
 
     /**
@@ -420,7 +420,7 @@ class TimetableRepository extends BaseRepository {
     public function getDailyInfo($courseId, $date) {
         $sql = "SELECT period, content, belongings 
                 FROM class_daily_infos 
-                WHERE course_id = :cId AND date = :dVal";
+                WHERE course_id = :cId AND date = :dVal AND status_type = 2";
         
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':cId', $courseId, PDO::PARAM_INT);
