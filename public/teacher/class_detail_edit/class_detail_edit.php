@@ -101,7 +101,7 @@ $subjectList = $subjectList ?? [];
                         </button>
                     </div>
                     <div class="month-wrapper">
-                        <span class="course-name-title">学年</span>
+                        <span class="course-name-title" id="displayCourse">コース</span>
                         <span class="course-name-title" id="displayCourseName">授業名</span>
                     </div>
                 </div>
@@ -140,12 +140,6 @@ $subjectList = $subjectList ?? [];
                                 <h3 class="sub-title" id="template-title">よく使う持ち物テンプレート</h3>
                                 <div class="item-list-wrapper">
                                     <div class="item-tags">
-                                        <div class="item-tag-container">
-                                            <span class="item-tag">ノートパソコン</span>
-                                        </div>
-                                        <div class="item-tag-container">
-                                            <span class="item-tag">教科書1</span>
-                                        </div>
                                     </div>
                                     <div class="item-delete-icon-wrapper">
                                         <img class="delete-icon" src="images/Vector.png" alt="削除">

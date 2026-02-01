@@ -375,7 +375,7 @@
     flex-direction: column; /* 子要素を縦に並べる */
     align-items: flex-end;  /* 右側に寄せる */
     position: absolute;     /* 親要素に対して位置を固定 */
-    top: 90px;              /* ヘッダー(70px) + 余白(20px) */
+    top: 100px;              /* ヘッダー(70px) + 余白(20px) */
     right: 20px;            /* 右からの距離 */
     text-align: right;
 }
@@ -385,6 +385,10 @@
     margin-left: auto; 
     font-size: 35px;
     font-weight: 700;
+}
+
+#displayCourse {
+    font-size: 12px;
 }
 
 /* カレンダーコンテナの幅と配置調整 */

@@ -14,7 +14,7 @@ require_once __DIR__ . '/timetable/TimetableRepository.php';
 require_once __DIR__ . '/TempTeacherCsvRepository.php';
 require_once __DIR__ . '/ErrorTeacherTableRepository.php';
 require_once __DIR__ . '/class_subject_edit/SubjectInChargesRepository.php';
-require_once __DIR__ . '/class_subject_edit/TeacherItemTemplateRepository.php';
+require_once __DIR__ . '/class_detail/TeacherItemTemplateRepository.php';
 require_once __DIR__ . '/RoomRepository.php';
 require_once __DIR__ . '/timetable_details/TimeTableDetailsRepository.php';
 require_once __DIR__ . '/class_detail/ClassDailyInfoRepository.php';

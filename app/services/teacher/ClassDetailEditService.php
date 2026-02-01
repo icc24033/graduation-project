@@ -275,7 +275,7 @@ public function getCalendarData($teacherId, $subjectId, array $courseIds, $year,
                             'belongings' => $savedInfo['belongings'] ?? ''
                         ];
 
-                        // ★修正ポイント3: この時限を「処理済み」としてマーク
+                        // この時限を「処理済み」としてマーク
                         $processedPeriods[] = $period;
 
                         if ($isChange) {
