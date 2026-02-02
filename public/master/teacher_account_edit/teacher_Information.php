@@ -1,6 +1,7 @@
 <?php
 // teacher_Information.php
-
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 ?>
 
 

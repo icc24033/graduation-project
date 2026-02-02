@@ -1,5 +1,7 @@
 <?php
 // teacher_delete.php
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 ?>
 
 <!DOCTYPE html>

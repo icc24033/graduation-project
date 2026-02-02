@@ -9,11 +9,6 @@ SecurityHelper::applySecureHeaders();
 // セッション開始とログイン判定を一括で行う
 SecurityHelper::requireLogin();
 
-// セキュリティヘッダーを適用
-SecurityHelper::applySecureHeaders();
-
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 require_once '../../../../app/controllers/master/teacher_account_editers/TeacherAccountEditController.php';
 
 $controller = new TeacherAccountEditController();
