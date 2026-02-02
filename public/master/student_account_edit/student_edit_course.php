@@ -45,8 +45,8 @@ if (!empty($courseList)) {
     <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/style.css"> 
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/teacher_home/user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="student_addition">

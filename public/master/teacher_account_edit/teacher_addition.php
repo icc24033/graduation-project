@@ -12,15 +12,14 @@ SecurityHelper::requireLogin();
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/teacher_home/user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="teacher_addition">
     <div class="app-container">
         <header class="app-header">
             <h1>先生アカウント作成編集</h1>
-            <img class="user-icon" src="../images/user-icon.png"alt="ユーザーアイコン">
             <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
                 <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
             </div>
@@ -199,12 +198,12 @@ SecurityHelper::requireLogin();
                     <div class="table-row"> 
                         <div class="column-name">
                             <input type="text" 
-                                name="teachers[<?php echo $teacher['id']; ?>][name]" 
+                                name="teachers[<?= SecurityHelper::escapeHtml($teacher['id']) ?>][name]"
                                 value="<?php echo SecurityHelper::escapeHtml($teacher['name']); ?>">
                         </div>
                         <div class="column-mail">
                             <input type="email" 
-                                name="teachers[<?php echo $teacher['id']; ?>][email]" 
+                                name="teachers[<?= SecurityHelper::escapeHtml($teacher['id']) ?>][email]"
                                 value="<?php echo SecurityHelper::escapeHtml($teacher['email']); ?>">
                         </div>
                         <div class="column-action">
@@ -218,7 +217,7 @@ SecurityHelper::requireLogin();
     </div>
     <?php endif; ?>
     <script>
-        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        const allCourseInfo = <?= json_encode($courseInfo, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         let currentData = {};
 
         document.addEventListener('DOMContentLoaded', function() {

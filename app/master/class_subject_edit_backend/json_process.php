@@ -195,7 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        // メッセージ内のHTML特殊文字を無効化して返す
+        $safeError = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        echo json_encode(['success' => false, 'error' => $safeError]);
         exit;
     }
 }

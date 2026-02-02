@@ -196,7 +196,8 @@ SecurityHelper::applySecureHeaders();
     </div>
     <script>
         const CSRF_TOKEN = "<?= SecurityHelper::generateCsrfToken() ?>";
-        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        // htmlspecialcharsを通すことで、HTML属性内などでの安全性を高めます
+const allCourseInfo = <?= json_encode($courseInfo, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         let currentData = {};
 
         document.addEventListener('DOMContentLoaded', function() {

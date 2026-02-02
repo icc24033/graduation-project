@@ -23,8 +23,8 @@ if ($status['backend'] === 'student_addition') {
     <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/style.css"> 
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/teacher_home/user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="student_addition">
@@ -76,7 +76,7 @@ if ($status['backend'] === 'student_addition') {
                     <li class="nav-item"><a href="student_account_course_control.php">コースの編集</a></li>
                 </ul>
                 
-                <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
+                <form action="../../../../app/master/student_account_edit_backend/backend_csv_upload.php" method="post" enctype="multipart/form-data" class="download-form" id="uploadForm">
                 <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <div class="file-upload-wrapper">
                         <input type="file" id="csvFile" name="csvFile" accept=".csv" required class="download-button" onchange="this.form.submit();">
@@ -91,7 +91,7 @@ if ($status['backend'] === 'student_addition') {
             <?php if ($status['backend'] === 'student_addition'): ?>
             <?php $i = 0; // IDを管理するためのカウンタを初期化 ?>
             <div class="content-area">
-                <form action="..\..\..\..\app\master\student_account_edit_backend\backend_student_addition_edit.php" method="POST">
+                <form action="../../../../app/master/student_account_edit_backend/backend_student_addition_edit.php" method="POST">
                 <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <div class="account-table-container">
                         <div class="table-header">
@@ -180,7 +180,7 @@ if ($status['backend'] === 'student_addition') {
                 </div>
                 
                 <?php if ($status['error_csv'] === false): ?>
-                <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csvdata_upload.php" method="post">
+                <form action="../../../../app/master/student_account_edit_backend/backend_csvdata_upload.php" method="post">
                 <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
                     <button class="complete-button">追加完了</button>
                 </form>
@@ -208,7 +208,7 @@ if ($status['backend'] === 'student_addition') {
         <div class="error-edit-container">
         <h3>エラーデータ編集</h3>
         <div>
-        <form action="..\..\..\..\app\master\student_account_edit_backend\backend_csv_error_student_edit.php" method="post">
+        <form action="../../../../app/master/student_account_edit_backend/backend_csv_error_student_edit.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
         <div class="account-table-container">
             <div class="table-header">
@@ -263,7 +263,7 @@ if ($status['backend'] === 'student_addition') {
         <div class="error-edit-container">
         <h3>エラーデータ編集</h3>
         <div>
-        <form action="..\..\..\..\app\master\student_account_edit_backend\backend_error_addition_edit.php" method="post">
+        <form action="../../../../app/master/student_account_edit_backend/backend_error_addition_edit.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= SecurityHelper::generateCsrfToken() ?>">
         <div class="account-table-container">
             <div class="table-header">
@@ -329,7 +329,7 @@ if ($status['backend'] === 'student_addition') {
         </div>
     </div>
     <script>
-        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        const allCourseInfo = <?= json_encode($courseInfo, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         let currentData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
