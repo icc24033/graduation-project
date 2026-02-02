@@ -1,3 +1,9 @@
+<?php
+// user_round.php
+// アカウント編集選択画面のビュー
+SecurityHelper::requireLogin();
+SecurityHelper::applySecureHeaders();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
