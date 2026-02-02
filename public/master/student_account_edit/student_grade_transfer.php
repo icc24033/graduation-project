@@ -36,9 +36,6 @@ if (!empty($courseList)) {
 } else {
     $current_course_name = 'コース情報が見つかりません';
 }
-
-// データべース接続切断
-$pdo = null;
 ?>
 
 
@@ -52,8 +49,8 @@ $pdo = null;
     <meta name="robots" content="noindex,nofollow">
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\common.css">
-    <link rel="stylesheet" type="text/css" href="/2025\sotsuken\graduation-project\public\master\css\teacher_home\user_menu.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/2025/sotsuken/graduation-project/public/master/css/teacher_home/user_menu.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body id="grade_transfar">
