@@ -1,3 +1,8 @@
+<?php
+// tuika.php - 科目追加画面
+SecurityHelper::requireLogin();
+SecurityHelper::applySecureHeaders();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
