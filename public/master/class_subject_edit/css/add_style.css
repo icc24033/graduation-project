@@ -11,18 +11,21 @@ body {
 /* --- ヘッダー --- */
 .header {
     background-color: #c6e2ff;
-    height: 60px;
+    height: 70px;
     display: flex;
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid #adcdec;
     flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    gap: 10px;
 }
 
 .header h1 {
     font-size: 20px;
     color: #333;
     margin: 0;
+    font-weight: bold;
 }
 
 /* --- メインコンテンツエリア --- */

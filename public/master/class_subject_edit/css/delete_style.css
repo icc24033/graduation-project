@@ -4,14 +4,21 @@ body { background-color: #f7f9fb; font-family: sans-serif; display: flex; flex-d
 
 .header { 
     background-color: #ffc6c6; 
-    height: 60px; 
+    height: 70px; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
     border-bottom: 1px solid #e9d0d0; 
     flex-shrink: 0; /* 高さを固定 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    gap: 10px;
 }
-.header h1 { font-size: 20px; color: #333; margin: 0; }
+.header h1 {
+    font-size: 20px;
+    color: #333;
+    margin: 0; 
+    font-weight: bold;
+}
 
 .container { 
     display: flex; 

@@ -21,6 +21,7 @@ SecurityHelper::applySecureHeaders();
     <div class="app-container">
         <header class="app-header">
             <h1>先生アカウント作成編集</h1>
+            <img class="user-icon" src="../images/user-icon.png"alt="ユーザーアイコン">
             <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
                 <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
             </div>

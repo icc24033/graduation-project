@@ -16,6 +16,7 @@ SecurityHelper::applySecureHeaders();
 <body>
     <header class="header">
         <h1>授業科目一覧</h1>
+        <img class="header-icon" src="../images/icon-book.png"alt="ユーザーアイコン">
         <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
             <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
         </div>

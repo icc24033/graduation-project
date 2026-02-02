@@ -29,7 +29,7 @@ $subjectList = $subjectList ?? [];
         <header>
             <div class="header">
                 <h1>授業詳細</h1>
-                <img class="user-icon" src="images/user-icon.png" alt="アイコン">
+                <img class="header-icon" src="../images/clipboard-list.png"alt="ユーザーアイコン">
                 <div class="user-avatar" id="userAvatar" style="position: absolute; right: 20px; top: 5px;">
                     <img src="<?= SecurityHelper::escapeHtml((string)$data['user_picture']) ?>" alt="ユーザーアイコン" class="avatar-image">   
                 </div>
