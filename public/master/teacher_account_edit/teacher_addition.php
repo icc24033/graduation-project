@@ -1,5 +1,7 @@
 <?php
 // teacher_addition.php
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 ?>
 
 <!DOCTYPE html>

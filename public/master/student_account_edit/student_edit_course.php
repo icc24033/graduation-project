@@ -1,5 +1,7 @@
 <?php
 // student_edit_course.php
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 
 $status = $basic_data ?? null;
 

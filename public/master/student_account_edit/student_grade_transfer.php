@@ -1,5 +1,7 @@
 <?php
 // student_grade_transfer.php
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 
 $status = $basic_data ?? null;
 
