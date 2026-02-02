@@ -275,7 +275,7 @@ SecurityHelper::requireLogin();
         const dbMasterData = <?php echo json_encode($masterSubjectData ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     </script>
     <script>
-        const allCourseInfo = <?= json_encode($courseInfo) ?>;
+        const allCourseInfo = <?= json_encode($courseInfo ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         let currentData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
