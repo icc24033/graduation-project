@@ -26,6 +26,22 @@ let isCreatingMode = false;    // 新規作成モードかどうか
 let isTestMode = false;        // テスト時間割モードかどうか（trueならオートフィル無効）
 let tempCreatingData = {};     // 作成中の時間割データを保持する { "月_1": { subjectId:..., teacherIds:[...], ... } }
 
+/**
+ * 安全に要素を作成するヘルパー関数
+ * @param {string} tag - タグ名 (div, span, i など)
+ * @param {string} className - クラス名
+ * @param {string} text - 中に入れるテキスト (任意)
+ */
+function createEl(tag, className, text = '', children = []) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text) el.textContent = text;
+    // 子要素があれば順番に追加する
+    children.forEach(child => {
+        if (child) el.appendChild(child);
+    });
+    return el;
+}
 
 // --- マスタデータ操作用ヘルパー ---
 // ※dbMasterData は PHP 側で生成されたマスタデータオブジェクト
@@ -191,15 +207,37 @@ document.getElementById('creatingItemCard').addEventListener('click', () => {
         tempCreatingData.gridData.forEach(item => {
             const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
             if (targetCell) {
-                // HTML復元
-                let teacherHtml = item.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${item.teacherName}</span></div>` : '';
-                let roomHtml = item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : '';
-                
-                targetCell.innerHTML = `
-                <div class="class-content">
-                    <div class="class-name">${item.className}</div>
-                    <div class="class-detail">${teacherHtml}${roomHtml}</div>
-                </div>`;
+                const classContent = createEl('div', 'class-content');
+            
+                // クラス名
+                classContent.appendChild(createEl('div', 'class-name', item.className));
+            
+                // 詳細コンテナ
+                const classDetail = createEl('div', 'class-detail');
+            
+                // 講師情報
+                if (item.teacherName) {
+                    const teacherDiv = createEl('div', 'teacher-name');
+                    teacherDiv.appendChild(createEl('i', 'fa-solid fa-user icon'));
+                    teacherDiv.appendChild(createEl('span', '', item.teacherName));
+                    classDetail.appendChild(teacherDiv);
+                }
+            
+                // 教室情報
+                if (item.roomName) {
+                    const roomDiv = createEl('div', 'room-name');
+                    roomDiv.appendChild(createEl('i', 'fa-solid fa-location-dot icon'));
+                    roomDiv.appendChild(createEl('span', '', item.roomName));
+                    classDetail.appendChild(roomDiv);
+                }
+            
+                classContent.appendChild(classDetail);
+            
+                // セルへの反映
+                targetCell.innerHTML = '';
+                targetCell.appendChild(classContent);
+            
+                // データ属性の設定（ここは以前と同じ）
                 targetCell.classList.add('is-filled');
                 targetCell.dataset.subjectId = item.subjectId;
 
@@ -221,7 +259,9 @@ document.getElementById('creatingItemCard').addEventListener('click', () => {
             }
         });
         
-        document.getElementById('mainCourseDisplay').innerHTML = tempCreatingData.courseName + '<span class="active-badge creating">現在作成中</span>';
+        const mainDisplay = document.getElementById('mainCourseDisplay');
+        mainDisplay.textContent = tempCreatingData.courseName; // 文字列として安全に代入
+        mainDisplay.appendChild(createEl('span', 'active-badge creating', '現在作成中')); // バッジを追加
         mainStartDate.value = tempCreatingData.startDate;
         mainEndDate.value = tempCreatingData.endDate;
     }
@@ -360,7 +400,8 @@ mainCreateNewBtn.addEventListener('click', () => {
         startDate: mainStartDate.value,
         endDate: mainEndDate.value,
         gridData: getTimetableData(),
-        courseDisplayText: document.getElementById('mainCourseDisplay').innerHTML,
+        // HTMLではなく「コース名」そのものを保存
+        courseName: currentCourseName, 
         selectedItemId: document.querySelector('.saved-item.active')?.getAttribute('data-id')
     };
     
@@ -388,13 +429,25 @@ mainCreateNewBtn.addEventListener('click', () => {
         cell.innerHTML = '';
         cell.classList.remove('is-filled');
         cell.classList.remove('is-edited');
+        // データ属性もクリアしておくとより安全
+        delete cell.dataset.subjectId;
+        delete cell.dataset.teacherIds;
+        delete cell.dataset.roomIds;
     });
-    document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
-    
+
+    // 表示をクリア（innerHTMLではなくtextContent）
+    document.getElementById('mainCourseDisplay').textContent = "（未選択）";
+
+    // モーダル表示
     createModal.classList.remove('hidden');
     document.body.classList.add('modal-open');
     createGradeSelect.value = "";
-    createCourseSelect.innerHTML = '<option value="">先に学年を選択してください</option>';
+
+    // ここは固定文字列なので innerHTML でも無害ですが、一貫性のために textContent 推奨
+    createCourseSelect.textContent = '';
+    createCourseSelect.appendChild(createEl('option', '', '先に学年を選択してください'));
+    createCourseSelect.querySelector('option').value = "";
+    
     createCourseSelect.disabled = true;
     checkCsv.checked = false;
     csvInputArea.classList.remove('active');
@@ -423,7 +476,7 @@ createCancelBtn.addEventListener('click', (e) => {
     editingCourseId = null;
 
     // UIクリア
-    document.getElementById('mainCourseDisplay').innerHTML = "（読み込み中...）";
+    document.getElementById('mainCourseDisplay').textContent = "（読み込み中...）";
     mainStartDate.value = '';
     mainEndDate.value = '';
     mainStartDate.disabled = false;
@@ -457,8 +510,10 @@ createCancelBtn.addEventListener('click', (e) => {
 createGradeSelect.addEventListener('change', function() {
     const selectedGrade = this.value; // "1", "2", "all" または ""
     
-    // コース選択肢をリセット
-    createCourseSelect.innerHTML = '<option value="">コースを選択してください</option>';
+    // コース選択肢を完全にリセット
+    createCourseSelect.textContent = ''; 
+    createCourseSelect.appendChild(createEl('option', '', 'コースを選択してください'));
+    createCourseSelect.querySelector('option').value = "";
     createCourseSelect.disabled = true;
     
     // バリデーションチェック（ボタン制御）
@@ -466,17 +521,15 @@ createGradeSelect.addEventListener('change', function() {
 
     // 学年が未選択ならここで終了
     if (!selectedGrade) {
-        createCourseSelect.innerHTML = '<option value="">先に学年を選択してください</option>';
+        createCourseSelect.textContent = '';
+        createCourseSelect.appendChild(createEl('option', '', '先に学年を選択してください'));
+        createCourseSelect.querySelector('option').value = "";
         return;
     }
 
     // PHPから渡された dbCourseList を使ってフィルタリング
-    // dbCourseList は [{course_id: 1, course_name: "...", grade: 1}, ...] の配列
     const filteredCourses = dbCourseList.filter(course => {
-        if (selectedGrade === 'all') {
-            return true; // "全体"なら全コース表示
-        }
-        // DBのgradeは数値、selectedGradeは文字列の可能性があるため、== (緩い比較)を使用
+        if (selectedGrade === 'all') return true;
         return course.grade == selectedGrade;
     });
 
@@ -484,15 +537,13 @@ createGradeSelect.addEventListener('change', function() {
     if (filteredCourses.length > 0) {
         filteredCourses.forEach(course => {
             const option = document.createElement('option');
-            option.value = course.course_id;   // DBのIDをvalueに設定
-            option.textContent = course.course_name; // コース名を表示
+            option.value = course.course_id;
+            option.textContent = course.course_name; // 安全！
             createCourseSelect.appendChild(option);
         });
-        createCourseSelect.disabled = false; // 有効化
+        createCourseSelect.disabled = false;
     } else {
-        const option = document.createElement('option');
-        option.textContent = "該当するコースがありません";
-        createCourseSelect.appendChild(option);
+        createCourseSelect.appendChild(createEl('option', '', '該当するコースがありません'));
     }
 });
 
@@ -520,12 +571,13 @@ checkCsv.addEventListener('change', () => {
 });
 document.getElementById('csvFile').addEventListener('change', checkCreateValidation);
 
-/*
-    * 概要: 作成モードの切替を行う（UI の表示/非表示や入力可否の制御）。
-    * 使用方法: 新規作成開始/終了やキャンセル時に呼び出して UI を同期させてください。
-    */
+/**
+ * 概要: 作成モードの切替を行う（UI の表示/非表示や入力可否の制御）。
+ */
 function toggleCreatingMode(isCreating, courseName = '', sDate = '', eDate = '') {
     isCreatingMode = isCreating;
+    const mainDisplay = document.getElementById('mainCourseDisplay');
+
     if (isCreating) {
         isViewOnly = false; 
         resetViewBtn.classList.add('hidden'); 
@@ -535,13 +587,12 @@ function toggleCreatingMode(isCreating, courseName = '', sDate = '', eDate = '')
         
         creatingCourseName.textContent = courseName;
         
-        // 作成開始時に「現在作成中」バッチを表示
-        document.getElementById('mainCourseDisplay').innerHTML = courseName + '<span class="active-badge creating">現在作成中</span>';
+        // --- 修正箇所: 安全な描画に変更 ---
+        mainDisplay.textContent = courseName; 
+        mainDisplay.appendChild(createEl('span', 'active-badge creating', '現在作成中'));
         
-        // ヘッダーを「時間割り作成」に戻す
         document.querySelector('.app-header h1').textContent = '時間割り作成';
         
-        // 作成中は適用期間を編集可能にする
         mainStartDate.disabled = false;
         mainEndDate.disabled = false;
         
@@ -555,21 +606,24 @@ function toggleCreatingMode(isCreating, courseName = '', sDate = '', eDate = '')
         defaultNewBtnArea.classList.remove('hidden');
         creatingItemArea.classList.add('hidden');
         
-        // 作成モード終了時は期間フィールドをクリア
         mainStartDate.disabled = false;
         mainEndDate.disabled = false;
         mainStartDate.value = '';
         mainEndDate.value = '';
         
-        // グリッドもクリア
         document.querySelectorAll('.timetable-cell').forEach(cell => {
-            cell.innerHTML = '';
+            cell.innerHTML = ''; // ここは空にするだけなのでOK
             cell.classList.remove('is-filled');
             cell.classList.remove('is-edited');
+            // データ属性のクリアも念のため追加
+            delete cell.dataset.subjectId;
+            delete cell.dataset.teacherIds;
+            delete cell.dataset.roomIds;
         });
-        document.getElementById('mainCourseDisplay').innerHTML = "（未選択）";
+
+        // --- 修正箇所: textContent に統一 ---
+        mainDisplay.textContent = "（未選択）";
         
-        // ヘッダーを「時間割り作成」に戻す
         document.querySelector('.app-header h1').textContent = '時間割り作成';
         
         tempCreatingData = null;
@@ -618,20 +672,6 @@ createSubmitBtn.addEventListener('click', () => {
     
     // 作成モード開始
     toggleCreatingMode(true, selectedCourseName, sDate, eDate);
-
-    // メイン画面のヘッダー表示を更新
-    document.getElementById('mainCourseDisplay').innerHTML = selectedCourseName;
-
-    // ---------------------------------------------------------
-    // サイドバーのドロップダウン表示を更新する処理
-    // ---------------------------------------------------------
-    const toggleText = document.querySelector('#courseDropdownToggle .current-value');
-    if (toggleText) {
-        toggleText.textContent = selectedCourseName;
-    }
-    // 表示モードを「選択(select)」に戻し、リストを再描画
-    const selectRadio = document.querySelector('input[value="select"]');
-    if (selectRadio) selectRadio.checked = true;
 
     renderSavedList('select'); 
     // ---------------------------------------------------------
@@ -740,7 +780,9 @@ function updateHeaderDisplay(record) {
         badgeHtml = '<span class="active-badge next">次回反映</span>';
     }
     
-    displayEl.innerHTML = record.course + badgeHtml;
+    // コース名はテキストとして安全に挿入し、バッジ(固定HTML)を隣に追加する
+    displayEl.textContent = record.course; 
+    displayEl.insertAdjacentHTML('beforeend', badgeHtml);
 }
 
 /*
@@ -843,35 +885,38 @@ function renderSavedList(mode) {
             statusText = "不明：";
         }
 
-        const newItem = document.createElement('li');
-        newItem.className = 'nav-item saved-item';
+        // 1. 最下層のスパン要素
+        const courseSpan = createEl('span', 'truncate font-bold text-sm text-gray-900', record.course);
+        const statusSpan = createEl('span', `text-xs truncate ${statusClass}`, `${statusText}${dateLabel}`);
+
+        // 2. テキストコンテナ
+        const textCol = createEl('div', 'flex flex-col min-w-0 flex-1', '', [courseSpan, statusSpan]);
+
+        // 3. アイコンと中身を横並びにする
+        const flexBox = createEl('div', 'flex items-start', '', [
+            createEl('i', 'fa-regular fa-file-lines text-blue-500 flex-shrink-0 mt-1 mr-2'),
+            textCol
+        ]);
+
+        // 4. リンク (aタグ)
+        const anchor = createEl('a', 'block p-2 hover:bg-gray-100', '', [flexBox]);
+        anchor.href = '#';
+        anchor.onclick = () => false; // onclickの代わり
+
+        // 5. リストアイテム (li)
+        const newItem = createEl('li', 'nav-item saved-item', '', [anchor]);
         newItem.setAttribute('data-id', record.id);
+        newItem.style.cursor = 'pointer';
         
-        // アクティブ状態の復元（再描画前の選択状態を維持する）
         if (currentRecord && currentRecord.id == record.id) {
             newItem.classList.add('active');
         }
-        
-        newItem.style.cursor = 'pointer';
-        
-        newItem.innerHTML = `
-            <a href="#" onclick="return false;" class="block p-2 hover:bg-gray-100">
-                <div class="flex items-start">
-                    <i class="fa-regular fa-file-lines text-blue-500 flex-shrink-0 mt-1 mr-2"></i>
-                    <div class="flex flex-col min-w-0 flex-1">
-                        <span class="truncate font-bold text-sm text-gray-900">${record.course}</span>
-                        <span class="text-xs truncate ${statusClass}">
-                            ${statusText}${dateLabel}
-                        </span>
-                    </div>
-                </div>
-            </a>
-        `;
-        
+
+        // イベントリスナー
         newItem.addEventListener('click', (e) => {
             handleSavedItemClick(e);
         });
-        
+
         container.appendChild(newItem);
     });
 }
@@ -909,7 +954,9 @@ function setupDropdown(toggleId, menuId, onChangeCallback) {
         menu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const selectedValue = e.target.textContent;
+                // e.target ではなく e.currentTarget (イベントを設定した <a> 自体) を見る
+                const selectedValue = e.currentTarget.textContent; 
+                
                 toggle.querySelector('.current-value').textContent = selectedValue;
                 toggle.setAttribute('aria-expanded', 'false');
                 menu.classList.remove('is-open');
@@ -1036,82 +1083,127 @@ inputClassName.addEventListener('change', function() {
     }
 });
 
-/*
+/**
  * addTeacherRow
- * 概要: 先生入力欄を追加する処理（動的データ対応版）
+ * 概要: 先生入力欄を安全に動的追加する
  * 使用方法: 追加ボタンのクリックイベント、またはデータ復元時に呼び出してください。
  * 引数 selectedValue: 初期選択状態にしたい先生ID（省略可）
  */
 function addTeacherRow(selectedValue = null) {
+    // 1. 最大数のチェック
     const currentCount = getTeacherInputs().length;
     if (currentCount >= 5) {
         alert('最大5個まで追加できます。');
         return;
     }
     
+    // 2. 外枠 (Row) の生成
     const rowDiv = document.createElement('div');
     rowDiv.className = 'teacher-input-row';
-    rowDiv.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;';
+    // スタイルの一括設定（一貫性のため JS で制御）
+    rowDiv.style.display = 'flex';
+    rowDiv.style.gap = '8px';
+    rowDiv.style.alignItems = 'center';
+    rowDiv.style.marginBottom = '8px';
     
+    // 3. セレクトボックスの生成
     const select = document.createElement('select');
     select.className = 'teacher-input modal-select';
     select.style.flex = '1';
 
+    // 変更時に重複チェックなどのロジックを走らせる
     select.addEventListener('change', () => updateDropdownOptions('teacher-input'));
     
-    // マスタデータから動的にoptionを生成
-    let html = '<option value="">(選択してください)</option>';
-    const teachers = getAvailableTeachers(); // マスタから取得 [{id: 1, name: "佐藤"}, ...]
-    
+    // 4. オプションの生成（安全な textContent 方式）
+    // デフォルトオプション
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = "";
+    defaultOpt.textContent = "(選択してください)";
+    select.appendChild(defaultOpt);
+
+    // マスタデータから先生リストを取得してループ
+    const teachers = getAvailableTeachers(); 
     teachers.forEach(t => {
-        // IDで比較してselected属性を付与（数値と文字列の違いを吸収するため == を使用）
-        const isSelected = (selectedValue == t.id) ? 'selected' : '';
-        html += `<option value="${t.id}" ${isSelected}>${t.name}</option>`;
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        // 【重要】innerHTML ではなく textContent を使うことで XSS を完全に防ぐ
+        opt.textContent = t.name;
+        
+        // ID で比較して選択状態にする（型揺れ吸収のため == を使用）
+        if (selectedValue == t.id) {
+            opt.selected = true;
+        }
+        select.appendChild(opt);
     });
-    select.innerHTML = html;
     
+    // 5. デザイン用の矢印アイコン（ここは固定文字なので innerHTML でも OK ですが、一貫性のため span で作成）
     const arrowDiv = document.createElement('div');
     arrowDiv.className = 'select-arrow';
-    arrowDiv.style.cssText = 'flex-shrink: 0;';
-    arrowDiv.innerHTML = '<i class="fa-solid fa-chevron-down text-xs"></i>';
+    arrowDiv.style.flexShrink = '0';
+    const icon = document.createElement('i');
+    icon.className = 'fa-solid fa-chevron-down text-xs';
+    arrowDiv.appendChild(icon);
     
+    // 6. 削除ボタンの生成
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-teacher-btn';
-    removeBtn.style.cssText = 'padding: 4px 8px; background-color: #f87171; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; flex-shrink: 0;';
+    removeBtn.style.padding = '4px 8px';
+    removeBtn.style.backgroundColor = '#f87171'; // Tailwind: red-400
+    removeBtn.style.color = 'white';
+    removeBtn.style.border = 'none';
+    removeBtn.style.borderRadius = '4px';
+    removeBtn.style.cursor = 'pointer';
+    removeBtn.style.fontSize = '14px';
+    removeBtn.style.flexShrink = '0';
     removeBtn.textContent = '×';
+    
     removeBtn.addEventListener('click', (e) => {
         e.preventDefault();
         rowDiv.remove();
+        // 削除後にボタンの表示/非表示（1つだけの時は消す等）を更新
         updateTeacherRemoveButtons();
+        // 重複チェック表示も更新
+        updateDropdownOptions('teacher-input');
     });
     
+    // 7. 組み立てと配置
     rowDiv.appendChild(select);
     rowDiv.appendChild(arrowDiv);
     rowDiv.appendChild(removeBtn);
+    
+    // モーダル内の先生選択エリアに追加
     teacherSelectionArea.appendChild(rowDiv);
 
+    // 8. 事後処理
+    // 他のセレクトボックスとの整合性を更新
     updateDropdownOptions('teacher-input');
-    
+    // 削除ボタンの有効・無効状態を更新
     updateTeacherRemoveButtons();
 }
 
-/*
+/**
  * addRoomRow
- * 概要: 教室入力欄を追加する処理（動的データ対応版）
+ * 概要: 教室入力欄を安全に動的追加する
  * 使用方法: 追加ボタンのクリックイベント、またはデータ復元時に呼び出してください。
  * 引数 selectedValue: 初期選択状態にしたい教室ID（省略可）
  */
 function addRoomRow(selectedValue = null) {
+    // 1. 最大数のチェック
     const currentCount = getRoomInputs().length;
     if (currentCount >= 5) {
         alert('最大5個まで追加できます。');
         return;
     }
     
+    // 2. 外枠 (Row) の生成
     const rowDiv = document.createElement('div');
     rowDiv.className = 'room-input-row';
-    rowDiv.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;';
+    rowDiv.style.display = 'flex';
+    rowDiv.style.gap = '8px';
+    rowDiv.style.alignItems = 'center';
+    rowDiv.style.marginBottom = '8px';
     
+    // 3. セレクトボックスの生成
     const select = document.createElement('select');
     select.className = 'room-input modal-select';
     select.style.flex = '1';
@@ -1119,39 +1211,67 @@ function addRoomRow(selectedValue = null) {
     // 変更時に重複チェックを実行
     select.addEventListener('change', () => updateDropdownOptions('room-input'));
 
-    // マスタデータから動的にoptionを生成
-    let html = '<option value="">(選択してください)</option>';
+    // 4. オプションの生成（安全な textContent 方式）
+    // デフォルトオプション
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = "";
+    defaultOpt.textContent = "(選択してください)";
+    select.appendChild(defaultOpt);
+
+    // マスタデータから教室リストを取得
     const rooms = getAvailableRooms(); 
-    
     rooms.forEach(r => {
-        // IDで比較してselected属性を付与
-        const isSelected = (selectedValue == r.id) ? 'selected' : '';
-        html += `<option value="${r.id}" ${isSelected}>${r.name}</option>`;
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        // XSS対策：教室名をテキストとして安全に挿入
+        opt.textContent = r.name;
+        
+        // IDで比較して選択状態にする
+        if (selectedValue == r.id) {
+            opt.selected = true;
+        }
+        select.appendChild(opt);
     });
-    select.innerHTML = html;
     
+    // 5. デザイン用の矢印アイコン
     const arrowDiv = document.createElement('div');
     arrowDiv.className = 'select-arrow';
-    arrowDiv.style.cssText = 'flex-shrink: 0;';
-    arrowDiv.innerHTML = '<i class="fa-solid fa-chevron-down text-xs"></i>';
+    arrowDiv.style.flexShrink = '0';
+    const icon = document.createElement('i');
+    icon.className = 'fa-solid fa-chevron-down text-xs';
+    arrowDiv.appendChild(icon);
     
+    // 6. 削除ボタンの生成
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-room-btn';
-    removeBtn.style.cssText = 'padding: 4px 8px; background-color: #f87171; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; flex-shrink: 0;';
+    removeBtn.style.padding = '4px 8px';
+    removeBtn.style.backgroundColor = '#f87171'; // red-400
+    removeBtn.style.color = 'white';
+    removeBtn.style.border = 'none';
+    removeBtn.style.borderRadius = '4px';
+    removeBtn.style.cursor = 'pointer';
+    removeBtn.style.fontSize = '14px';
+    removeBtn.style.flexShrink = '0';
     removeBtn.textContent = '×';
+    
     removeBtn.addEventListener('click', (e) => {
         e.preventDefault();
         rowDiv.remove();
+        // 削除後のUI更新
         updateRoomRemoveButtons();
-        //　削除時も選択肢を更新
+        // 削除されたことにより、他のセレクトボックスで選べるように更新
         updateDropdownOptions('room-input');
     });
     
+    // 7. 組み立てと配置
     rowDiv.appendChild(select);
     rowDiv.appendChild(arrowDiv);
     rowDiv.appendChild(removeBtn);
+    
+    // モーダル内の教室選択エリアに追加
     roomSelectionArea.appendChild(rowDiv);
     
+    // 8. 事後処理
     updateRoomRemoveButtons();
     updateDropdownOptions('room-input');
 }
@@ -1189,11 +1309,6 @@ document.getElementById('addRoomBtn').addEventListener('click', (e) => {
 updateTeacherRemoveButtons();
 updateRoomRemoveButtons();
 
-/**
- * timetable-cell click event
- * 概要: 時間割セルがクリックされたときの処理。
- * 使用方法: 各時間割セルのクリックイベントにこの関数をセットしてください。
- */
 /**
  * timetable-cell click event (修正版)
  * 概要: 時間割セルがクリックされたときの処理。
@@ -1323,31 +1438,54 @@ btnCancel.addEventListener('click', () => {
 btnRevert.addEventListener('click', () => {
     if (!currentCell || !currentRecord || !originalRecordData) return;
     
-    // 現在のセル位置の元データを検索
     const day = currentCell.dataset.day;
     const period = currentCell.dataset.period;
     const originalItem = originalRecordData.data.find(item => item.day === day && item.period === period);
     
-    // 元データがあればそれを復元、なければ空にする
+    // 表示のリセット（中身を空にする）
+    currentCell.innerHTML = '';
+
     if (originalItem) {
-        currentCell.innerHTML = `
-            <div class="class-content">
-                <div class="class-name">${originalItem.className}</div>
-                <div class="class-detail">
-                    ${originalItem.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${originalItem.teacherName}</span></div>` : ''}
-                    ${originalItem.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${originalItem.roomName}</span></div>` : ''}
-                </div>
-            </div>`;
+        // 1. 講師情報と教室情報の組み立て
+        const details = [];
+        
+        if (originalItem.teacherName) {
+            details.push(createEl('div', 'teacher-name', '', [
+                createEl('i', 'fa-solid fa-user icon'),
+                createEl('span', '', originalItem.teacherName)
+            ]));
+        }
+        
+        if (originalItem.roomName) {
+            details.push(createEl('div', 'room-name', '', [
+                createEl('i', 'fa-solid fa-location-dot icon'),
+                createEl('span', '', originalItem.roomName)
+            ]));
+        }
+
+        // 2. 全体の組み立て
+        const classContent = createEl('div', 'class-content', '', [
+            createEl('div', 'class-name', originalItem.className),
+            createEl('div', 'class-detail', '', details)
+        ]);
+
+        // 3. dataset (データ属性) も元に戻す
+        currentCell.dataset.subjectId = originalItem.subjectId || '';
+        currentCell.dataset.teacherIds = JSON.stringify(originalItem.teacherIds || []);
+        currentCell.dataset.roomIds = JSON.stringify(originalItem.roomIds || []);
+        
+        currentCell.appendChild(classContent);
         currentCell.classList.add('is-filled');
     } else {
-        currentCell.innerHTML = '';
+        // データがない（元々空だった）場合
+        currentCell.dataset.subjectId = '';
+        currentCell.dataset.teacherIds = '[]';
+        currentCell.dataset.roomIds = '[]';
         currentCell.classList.remove('is-filled');
     }
     
-    // 編集ハイライトを削除
+    // 状態の更新
     currentCell.classList.remove('is-edited');
-    
-    // モーダルを閉じる
     editModal.classList.add('hidden');
     document.body.classList.remove('modal-open');
     currentCell = null;
@@ -1381,18 +1519,34 @@ btnSave.addEventListener('click', function() {
     const hasContent = subjectId || teacherIds.length > 0 || roomIds.length > 0;
 
     if (hasContent) {
-        // 表示用HTML生成
-        let teacherHtml = teacherNames.map(name => `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${name}</span></div>`).join('');
-        let roomHtml = roomNames.map(name => `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${name}</span></div>`).join('');
-        
-        currentCell.innerHTML = `
-            <div class="class-content">
-                <div class="class-name">${displaySubjectName}</div>
-                <div class="class-detail">
-                    ${teacherHtml}
-                    ${roomHtml}
-                </div>
-            </div>`;
+        // 1. 講師要素のリストを作成 (複数対応)
+        const teacherElements = teacherNames.map(name => 
+            createEl('div', 'teacher-name', '', [
+                createEl('i', 'fa-solid fa-user icon'),
+                createEl('span', '', name)
+            ])
+        );
+    
+        // 2. 教室要素のリストを作成 (複数対応)
+        const roomElements = roomNames.map(name => 
+            createEl('div', 'room-name', '', [
+                createEl('i', 'fa-solid fa-location-dot icon'),
+                createEl('span', '', name)
+            ])
+        );
+    
+        // 3. 全体の構造を組み立て
+        const classContent = createEl('div', 'class-content', '', [
+            createEl('div', 'class-name', displaySubjectName),
+            createEl('div', 'class-detail', '', [
+                ...teacherElements, // 配列を展開して追加
+                ...roomElements    // 配列を展開して追加
+            ])
+        ]);
+    
+        // セルをクリアして反映
+        currentCell.innerHTML = '';
+        currentCell.appendChild(classContent);
         currentCell.classList.add('is-filled');
         
         // IDをデータ属性に保存
@@ -1400,7 +1554,7 @@ btnSave.addEventListener('click', function() {
         currentCell.dataset.teacherIds = JSON.stringify(teacherIds);
         currentCell.dataset.roomIds = JSON.stringify(roomIds);
         
-        // 編集ハイライト（既存編集モード時）
+        // 編集ハイライト
         if (!isCreatingMode && currentRecord) {
             currentCell.classList.add('is-edited');
         }
@@ -1712,24 +1866,43 @@ function handleSavedItemClick(e, forceSelect = false) {
         });
         record.data.forEach(item => {
             const targetCell = document.querySelector(`.timetable-cell[data-day="${item.day}"][data-period="${item.period}"]`);
+            
             if (targetCell) {
-                targetCell.innerHTML = `
-                <div class="class-content">
-                    <div class="class-name">${item.className}</div>
-                    <div class="class-detail">
-                        ${item.teacherName ? `<div class="teacher-name"><i class="fa-solid fa-user icon"></i><span>${item.teacherName}</span></div>` : ''}
-                        ${item.roomName ? `<div class="room-name"><i class="fa-solid fa-location-dot icon"></i><span>${item.roomName}</span></div>` : ''}
-                    </div>
-                </div>`;
+                // --- 1. 詳細部分（講師・教室）の組み立て ---
+                const details = [];
+        
+                if (item.teacherName) {
+                    details.push(createEl('div', 'teacher-name', '', [
+                        createEl('i', 'fa-solid fa-user icon'),
+                        createEl('span', '', item.teacherName)
+                    ]));
+                }
+        
+                if (item.roomName) {
+                    details.push(createEl('div', 'room-name', '', [
+                        createEl('i', 'fa-solid fa-location-dot icon'),
+                        createEl('span', '', item.roomName)
+                    ]));
+                }
+        
+                // --- 2. メインコンテンツの組み立て ---
+                const classContent = createEl('div', 'class-content', '', [
+                    createEl('div', 'class-name', item.className),
+                    createEl('div', 'class-detail', '', details)
+                ]);
+        
+                // --- 3. セルへの反映 ---
+                targetCell.innerHTML = ''; // 既存の内容をクリア
+                targetCell.appendChild(classContent);
                 targetCell.classList.add('is-filled');
-
-                targetCell.dataset.subjectId = item.subjectId || ''; // IDがない場合は空文字
-
+        
+                // --- 4. データ属性の設定 ---
+                targetCell.dataset.subjectId = item.subjectId || '';
+        
                 // 配列データの復元
-                // item.teacherIds があればそれを使い、なければ単体ID(item.teacherId)を配列化して使う
                 let tIds = item.teacherIds || (item.teacherId ? [item.teacherId] : []);
                 targetCell.dataset.teacherIds = JSON.stringify(tIds);
-
+        
                 let rIds = item.roomIds || (item.roomId ? [item.roomId] : []);
                 targetCell.dataset.roomIds = JSON.stringify(rIds);
             }
