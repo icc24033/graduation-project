@@ -10,8 +10,6 @@ SecurityHelper::applySecureHeaders();
 // セッション開始とログイン判定を一括で行う
 SecurityHelper::requireLogin();
 
-// セキュリティヘッダーを適用
-SecurityHelper::applySecureHeaders();
 
 ?>
 <!DOCTYPE html>

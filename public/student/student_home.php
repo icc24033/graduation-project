@@ -1,5 +1,8 @@
 <?php
 // student_home.php
+// 学生ホーム画面のビュー
+SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 ?>
 
 <!DOCTYPE html>

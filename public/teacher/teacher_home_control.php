@@ -6,6 +6,7 @@
 // 1. セキュリティ設定
 require_once '../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
+SecurityHelper::requireLogin();
 
 // 2. コントローラーとヘルパーの読み込み
 require_once '../../app/controllers/teacher/home/TeacherHomeController.php';

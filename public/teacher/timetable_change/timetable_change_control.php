@@ -7,11 +7,6 @@ require_once '../../../app/classes/security/SecurityHelper.php';
 SecurityHelper::applySecureHeaders();
 SecurityHelper::requireLogin();
 
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // 2. コントローラーとヘルパーの読み込み
 require_once '../../../app/controllers/teacher/timetable_change/TimetableChangeController.php';
 // ViewHelperはビューで使用する

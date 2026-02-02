@@ -24,7 +24,7 @@ class MasterHomeController extends HomeRepository {
             // 時間割り変更へのリンク
             'link_time_table_edit'   => "../teacher/timetable_change/timetable_change_control.php",
             // アカウント編集へのリンク
-            'link_account_edit'      => "../master/user-round/user-round.html",
+            'link_account_edit'      => "../master/user_round/user_round_control.php",
             // 授業科目編集へのリンク
             'link_notification_edit' => "../master/class_subject_edit/controls/addition_control.php",
             // 授業詳細編集へのリンク
