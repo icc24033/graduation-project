@@ -206,7 +206,14 @@
      position: absolute;
      top: 0;
      left: 120px;
+     overflow-x: hidden;
+     overflow-y: scroll;
  }
+
+ /* スクロールバー装飾 */
+.slotmenus-container.is-open::-webkit-scrollbar { width: 4px; }
+.slotmenus-container.is-open::-webkit-scrollbar-track { background: transparent; }
+.slotmenus-container.is-open::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; }
  
  /* コースのドロップダウンメニューに高さとスクロールを適用 */
  #courseDropdownMenu {
@@ -239,6 +246,7 @@
 
  #subjectSelectorMenu {
     width: 400px;
+    max-height: 300px;
  }
  #subjectSelectorMenu li a {
     width: 380px;
