@@ -181,6 +181,16 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
         // 生徒クラスをインスタンス化
         $loginUser = new StudentLogin($userId, $grade, $courseId);
     } else if ($grade === 'teacher@icc_ac.jp' || $grade === 'master@icc_ac.jp') {
+        try {
+            // GoogleアイコンURLをDBに保存
+            $pdo = new PDO($dsn, DB_USER, DB_PASS);
+            $authRepo = new AuthRepository($pdo);
+            $authRepo->saveUserIconUrl($userId, $_SESSION['user_picture'], 'teacher');
+
+        }
+        catch (Exception $e) {
+            handle_login_error();
+        }
         // 先生クラスをインスタンス化
         $loginUser = new TeacherLogin($userId, $grade);
     } 

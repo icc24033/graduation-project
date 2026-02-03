@@ -72,4 +72,17 @@ class AuthRepository {
 
         return null;
     }
+
+    // Googleから受け取ったアイコンのURLを、ログインしたユーザーの情報に保存する
+    public function saveUserIconUrl(string $userId, string $iconUrl, string $userType): void {
+
+        if ($userType === 'teacher') {
+            $sql = "UPDATE teacher SET user_icon_url = :iconUrl WHERE teacher_id = :userId";
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':iconUrl', $iconUrl, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
+        $stmt->execute();
+    }
 }

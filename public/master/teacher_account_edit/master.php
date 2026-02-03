@@ -66,7 +66,7 @@ SecurityHelper::applySecureHeaders();
 
                         <?php foreach ($teacherList as $teacher): ?>
                             <div class="table-row">
-                            <img class="teacher-avatar" src="../images/test_icon.png" alt="講師アイコン">
+                            <img class="teacher-avatar" src="<?= SecurityHelper::escapeHtml((string)$teacher['user_icon_url']) ?? '../images/test_icon.png' ?>" alt="講師アイコン">
                                 <div class="column-name">
                                     <span><?php echo SecurityHelper::escapeHtml((string)$teacher['teacher_name']); ?></span>
                                 </div>

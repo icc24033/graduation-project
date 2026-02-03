@@ -77,7 +77,7 @@ class MasterHomeController extends HomeRepository {
             extract($links);
             extract($user_data);
 
-            SecurityHelper::setTransitionToken('from_home_to_create_timetable');
+            //SecurityHelper::setTransitionToken('from_home_to_create_timetable');
 
             // 5. Viewの読み込み
             // パスはコントローラーからの相対パスになるので注意
